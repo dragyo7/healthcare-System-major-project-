@@ -1,0 +1,74 @@
+"""
+Implement retrieval using FAISS.
+
+Steps:
+- Load FAISS index and metadata
+- Encode query using same embedding model
+- Retrieve top-k results (k=3–5)
+- Filter using similarity threshold
+- Return:
+    - relevant text chunks
+    - source list
+
+Function:
+- retrieve(query: str)
+
+Constraints:
+- Fast retrieval
+- Deterministic output
+"""
+import faiss
+import pickle
+import numpy as np
+from sentence_transformers import SentenceTransformer
+
+# Load model ONCE
+model = SentenceTransformer("BAAI/bge-small-en")
+
+
+def load_index():
+    index = faiss.read_index("data/faiss_index/index.bin")
+
+    with open("data/faiss_index/meta.pkl", "rb") as f:
+        metadata = pickle.load(f)
+
+    return index, metadata
+
+
+def retrieve(query, k=5):
+    index, metadata = load_index()
+
+    # Encode query
+    query_embedding = model.encode([query])
+    query_embedding = np.array(query_embedding).astype("float32")
+
+    # Search
+    distances, indices = index.search(query_embedding, k)   
+    
+    
+    results = []
+    sources = []
+
+    for i, idx in enumerate(indices[0]):
+        if idx < len(metadata):
+            text = metadata[idx]["text"]
+
+        # keep reasonable chunks
+        if len(text.split()) >= 8:
+            results.append(text)
+            sources.append(metadata[idx]["source"])
+
+    combined_context = " ".join(results)
+    if not results:
+        return "No relevant information found.", []
+
+    return " ".join(results[:2]), sources[:2]
+
+if __name__ == "__main__":
+    result, sources = retrieve("What is diabetes?")
+
+    print("\nResult:")
+    print(result[:300])
+
+    if sources:
+        print("Source:", sources[0])
