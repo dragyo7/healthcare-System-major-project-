@@ -1,0 +1,19 @@
+drug,side_effect
+aspirin,nausea
+aspirin,bleeding
+aspirin,stomach ulcer
+ibuprofen,stomach pain
+ibuprofen,heartburn
+ibuprofen,kidney damage
+paracetamol,liver damage
+paracetamol,nausea
+warfarin,bleeding
+warfarin,bruising
+amoxicillin,diarrhea
+amoxicillin,rash
+metformin,diarrhea
+metformin,lactic acidosis
+lisinopril,dizziness
+lisinopril,cough
+atorvastatin,muscle pain
+atorvastatin,liver enzyme elevation
