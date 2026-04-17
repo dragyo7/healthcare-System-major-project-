@@ -40,7 +40,7 @@ Context:
 Question:
 {query}
 
-Give a short medical answer (1-3 sentences).
+Give a short medical answer (1-2 sentences).
 Use only the context.
 
 Answer:

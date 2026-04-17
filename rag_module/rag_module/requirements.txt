@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+sentence-transformers
+faiss-cpu
+transformers
+torch
+tqdm
+beautifulsoup4
+lxml
+numpy
+pydantic

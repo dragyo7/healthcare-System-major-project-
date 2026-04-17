@@ -1,0 +1,16 @@
+fastapi==0.111.0
+uvicorn==0.30.1
+spacy==3.7.5
+pydantic==2.7.4
+python-multipart==0.0.9
+requests==2.32.3
+# Optional (upgrade later)
+# scispacy
+
+
+'''
+pip install -r requirements.txt
+python -m spacy download en_core_web_sm
+python drug_fetcher.py
+uvicorn api:app --reload
+'''

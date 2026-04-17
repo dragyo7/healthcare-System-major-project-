@@ -1,0 +1,9 @@
+drugA,drugB,severity,description
+aspirin,ibuprofen,high,Increased risk of gastrointestinal bleeding when combined
+aspirin,warfarin,high,Severe bleeding risk due to anticoagulant interaction
+ibuprofen,warfarin,high,Increased risk of bleeding complications
+paracetamol,alcohol,medium,Liver toxicity risk increases with chronic alcohol use
+amoxicillin,methotrexate,high,Reduced clearance of methotrexate leading to toxicity
+metformin,contrast dye,high,Risk of lactic acidosis increases
+lisinopril,potassium,medium,May lead to hyperkalemia
+atorvastatin,grapefruit,medium,Increases statin concentration leading to muscle toxicity

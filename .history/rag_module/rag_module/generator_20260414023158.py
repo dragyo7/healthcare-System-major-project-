@@ -40,7 +40,7 @@ Context:
 Question:
 {query}
 
-Give a short medical answer (1-3 sentences).
+Give a short medical answer (1-2 sentences).
 Use only the context.
 
 Answer:
@@ -52,8 +52,8 @@ Answer:
         outputs = model.generate(
     **inputs,
     max_new_tokens=80,
-    do_sample=False,
-    eos_token_id=tokenizer.eos_token_id,
+    do_sample=False,git commit -m "Initial commit: Healthcare RAG module"
+    eos_token_id=tokenizer.eos_token_id
 )
 
     response = tokenizer.decode(outputs[0], skip_special_tokens=True)
