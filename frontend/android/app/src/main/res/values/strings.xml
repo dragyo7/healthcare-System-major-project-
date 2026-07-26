@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">MedAI</string>
+    <string name="title_activity_main">MedAI</string>
+    <string name="package_name">com.abhyudaya.medai</string>
+    <string name="custom_url_scheme">com.abhyudaya.medai</string>
+</resources>
