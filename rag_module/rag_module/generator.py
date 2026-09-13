@@ -1,85 +1,92 @@
-"""
-Generate medical response using retrieved context.
-
-Steps:
-- Load HuggingFace model (TinyLlama or Gemma)
-- Create prompt:
-
-Context:
-{context}
-
-Question:
-{query}
-
-Instructions:
-- Use ONLY context
-- Do NOT guess
-- If insufficient:
-  "I am not fully confident. Please consult a qualified doctor."
-
-Safety:
-- No diagnosis
-- No dosage unless explicitly in context
-
-Function:
-- generate_answer(query, context)
-"""
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
-model_name = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+MODEL_NAME = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
 
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForCausalLM.from_pretrained(model_name)
+print("Loading TinyLlama...")
+
+tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+
+model = AutoModelForCausalLM.from_pretrained(MODEL_NAME)
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
+model.to(device)
+model.eval()
+
 
 def generate_answer(query, context):
-    prompt = f"""
-Context:
+
+    messages = [
+        {
+            "role": "system",
+            "content":
+            """
+You are a medical AI assistant.
+
+Rules:
+
+1. Answer ONLY using the provided medical context.
+
+2. Never invent medical information.
+
+3. Summarize naturally.
+
+4. Use complete sentences.
+
+5. Maximum 4 sentences.
+
+6. If context is insufficient say:
+
+'I am not fully confident. Please consult a qualified doctor.'
+"""
+        },
+        {
+            "role":"user",
+            "content":f"""
+Medical Context:
+
 {context}
 
 Question:
+
 {query}
-
-Give a short medical answer (1-3 sentences).
-Use only the context.
-
-Answer:
 """
+        }
+    ]
 
-    inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=512)
+    prompt = tokenizer.apply_chat_template(
+        messages,
+        tokenize=False,
+        add_generation_prompt=True
+    )
+
+    inputs = tokenizer(
+        prompt,
+        return_tensors="pt",
+        truncation=True,
+        max_length=2048
+    )
+
+    inputs = {k:v.to(device) for k,v in inputs.items()}
 
     with torch.no_grad():
+
         outputs = model.generate(
-    **inputs,
-    max_new_tokens=80,
-    do_sample=False,
-    eos_token_id=tokenizer.eos_token_id,
-)
+            **inputs,
+            max_new_tokens=180,
+            do_sample=True,
+            temperature=0.3,
+            top_p=0.9,
+            repetition_penalty=1.15,
+            pad_token_id=tokenizer.eos_token_id
+        )
 
-    response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    generated = outputs[0][inputs["input_ids"].shape[1]:]
 
-    # Extract only answer part
-    if "Answer:" in response:
-      answer = response.split("Answer:")[-1].strip()
-    else:
-      answer = response.strip()
-
-    # remove prompt leakage
-    answer = answer.replace("You are a medical assistant.", "").strip()
-
-    # remove extra lines if model adds more
-    answer = answer.split("\n")[0]
+    answer = tokenizer.decode(
+        generated,
+        skip_special_tokens=True
+    ).strip()
 
     return answer
-
-
-if __name__ == "__main__":
-    context = "diabetes is a chronic disease affecting blood sugar levels."
-    query = "What is diabetes?"
-
-    answer = generate_answer(query, context)
-
-    print("\nGenerated Answer:")
-    print(answer)
-    
-    

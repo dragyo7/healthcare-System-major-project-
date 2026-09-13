@@ -1,60 +1,42 @@
 """
-FastAPI interface for RAG module.
-
-Endpoint:
-POST /chat
-
-Input:
-{
-  "query": "string"
-}
-
-Flow:
-- Retrieve relevant context
-- Generate answer
-
-Output:
-{
-  "answer": "...",
-  "sources": ["..."]
-}
-
-Constraints:
-- Load models once at startup
-- Fast response (<3 seconds)
-- Handle errors properly
+Backward-Compatible FastAPI Endpoint Wrapper.
+Exposes /chat routed to the modern RAG V2 pipeline.
 """
-
-from fastapi import FastAPI, HTTPException
+import sys
+from pathlib import Path
+from fastapi import FastAPI
 from pydantic import BaseModel
 
-from retriever import retrieve
-from generator import generate_answer
+# Ensure root is in sys.path
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
-app = FastAPI(title="Healthcare RAG API")
+from rag_module.rag_pipeline import MedicalRAGPipeline
+
+app = FastAPI(title="Medical RAG API (Legacy Compatibility Layer)")
+_pipeline = None
+
+
+def get_pipeline():
+    global _pipeline
+    if _pipeline is None:
+        _pipeline = MedicalRAGPipeline()
+    return _pipeline
+
 
 class QueryRequest(BaseModel):
     query: str
-    
-    
+
+
 @app.post("/chat")
 def chat(request: QueryRequest):
-    try:
-        query = request.query.strip()
-
-        if not query:
-            raise HTTPException(status_code=400, detail="Query cannot be empty")
-
-        # 🔍 Retrieve context
-        context, sources = retrieve(query)
-
-        # 🧠 Generate answer
-        answer = generate_answer(query, context)
-
-        return {
-            "answer": answer,
-            "sources": sources
-        }
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    pipeline = get_pipeline()
+    result = pipeline.query(request.query, mode="hybrid", generate_answer=True)
+    return {
+        "question": request.query,
+        "answer": result["answer"],
+        "is_emergency": result.get("is_emergency", False),
+        "abstained": result.get("abstained", False),
+        "sources": [s["source_name"] for s in result.get("sources", [])]
+    }

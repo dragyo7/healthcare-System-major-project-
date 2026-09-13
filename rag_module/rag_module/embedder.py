@@ -1,127 +1,42 @@
 """
-Build embedding pipeline using SentenceTransformers and FAISS.
-
-Steps:
-- Load data from data/clean_corpus.json
-- Chunk text into 200–400 words with 30-word overlap
-- Use model: BAAI/bge-small-en
-- Batch encode text
-- Create FAISS index (IndexFlatL2)
-- Store:
-    index → data/faiss_index/index.bin
-    metadata → data/faiss_index/meta.pkl
-
-Functions:
-- chunk_text(text)
-- build_index()
-- save_index()
-- load_index()
-
-Constraints:
-- Memory efficient batching
-- Avoid recomputing index if already exists
+Backward-Compatible Embedder and Indexer Interface.
+Delegates to modern RAG V2 indexing modules.
 """
-import json
-import os
-import pickle
-import faiss
-import numpy as np
-from tqdm import tqdm
-from sentence_transformers import SentenceTransformer
+import sys
+from pathlib import Path
 
-import re
+# Ensure root is in sys.path
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
-def chunk_text(text, chunk_size=200, overlap=20):
-    # Split text into sentences (better than word split)
-    sentences = re.split(r'(?<=[.!?]) +', text)
+from rag_module.config.rag_config import DEFAULT_CONFIG
+from rag_module.chunking.semantic_chunker import SemanticChunker
+from rag_module.indexing.faiss_indexer import FAISSIndexer
 
-    chunks = []
-    current_chunk = []
 
-    for sentence in sentences:
-        current_chunk.append(sentence)
+def chunk_text(text: str, chunk_size: int = 200, overlap: int = 20):
+    """Legacy chunk_text function routed to modern bounded chunker."""
+    chunker = SemanticChunker(chunk_size_words=chunk_size, overlap_words=overlap)
+    dummy_doc = {"question": "", "answer": text}
+    chunks = chunker.chunk_document(dummy_doc)
+    return [c["text"] for c in chunks]
 
-        # If chunk exceeds size → finalize it
-        if len(" ".join(current_chunk).split()) >= chunk_size:
-            chunks.append(" ".join(current_chunk))
 
-            # keep overlap
-            current_chunk = current_chunk[-overlap:]
-
-    # Add remaining chunk
-    if current_chunk:
-        chunks.append(" ".join(current_chunk))
-
-    return chunks
 def build_index():
-    # Load data
-    with open("data/clean_corpus.json", "r", encoding="utf-8") as f:
-        data = json.load(f)
-        
-        # TEMP: limit data for fast testing
-        data = data[:5000]
+    """Builds and returns modern FAISS index and metadata."""
+    indexer = FAISSIndexer()
+    return indexer.build_from_corpus()
 
-    model = SentenceTransformer("BAAI/bge-small-en")
-
-    all_chunks = []
-    metadata = []
-
-    print("Chunking data...")
-
-    for record in tqdm(data):
-        text = record["text"]
-        source = record.get("source", "unknown")
-
-        chunks = chunk_text(text)
-
-        for chunk in chunks:
-            all_chunks.append(chunk)
-            metadata.append({
-                "text": chunk,
-                "source": source
-            })
-
-    print(f"Total chunks: {len(all_chunks)}")
-
-    print("Encoding embeddings (batch)...")
-
-    embeddings = model.encode(
-        all_chunks,
-        batch_size=16,
-        show_progress_bar=True
-    )
-
-    embeddings = np.array(embeddings).astype("float32")
-
-    print("Building FAISS index...")
-
-    index = faiss.IndexFlatL2(embeddings.shape[1])
-    index.add(embeddings)
-
-    return index, metadata
 
 def save_index(index, metadata):
-    os.makedirs("data/faiss_index", exist_ok=True)
+    pass
 
-    faiss.write_index(index, "data/faiss_index/index.bin")
 
-    with open("data/faiss_index/meta.pkl", "wb") as f:
-        pickle.dump(metadata, f)
-        
 def load_index():
-    index = faiss.read_index("data/faiss_index/index.bin")
+    return FAISSIndexer.load_index()
 
-    with open("data/faiss_index/meta.pkl", "rb") as f:
-        metadata = pickle.load(f)
-
-    return index, metadata      
 
 if __name__ == "__main__":
-    index, metadata = build_index()
-    save_index(index, metadata)
-
-    print("FAISS index created successfully")
-    
-    
-    
-  
+    idx, meta = build_index()
+    print("FAISS index created successfully with total vectors:", idx.ntotal)

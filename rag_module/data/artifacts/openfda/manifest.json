@@ -1,0 +1,38 @@
+{
+  "source_id": "openFDA",
+  "source_display_name": "FDA Drug Product Labeling API",
+  "publisher": "U.S. Food and Drug Administration",
+  "authority_level": "tier_1_regulatory",
+  "ingestion_timestamp": "2026-09-13T09:22:09.681735+00:00",
+  "duration_seconds": 0.001,
+  "corpus_version": "2.3",
+  "code_version": "rag_v2.4",
+  "document_count": 0,
+  "chunk_count": 0,
+  "embedding_model": "BAAI/bge-small-en",
+  "embedding_dimension": 384,
+  "chunking_config": {
+    "chunk_size_words": 250,
+    "overlap_words": 35,
+    "min_chunk_char_len": 40
+  },
+  "retrieval_config": {
+    "hybrid_rrf_k": 60,
+    "dense_k": 20,
+    "bm25_k": 20,
+    "reranker_model": "BAAI/bge-reranker-small"
+  },
+  "stats": {
+    "source_id": "openFDA",
+    "source_name": "FDA Drug Product Labeling API",
+    "documents_seen": 0,
+    "documents_valid": 0,
+    "documents_rejected": 0,
+    "duplicates_removed": 0,
+    "documents_ingested": 0
+  },
+  "corpus_file": "corpus.json",
+  "chunks_file": "chunks.json",
+  "content_hash_summary": "",
+  "provenance_sample": []
+}

@@ -1,0 +1,63 @@
+{
+  "source_id": "combined",
+  "source_display_name": "Multi-Source Unified Knowledge Base",
+  "timestamp": "2026-09-13T09:22:10.847724+00:00",
+  "corpus_version": "2.6",
+  "document_count": 18534,
+  "chunk_count": 26143,
+  "sources": [
+    "MedQuAD",
+    "DailyMed",
+    "openFDA"
+  ],
+  "source_breakdown": {
+    "MedQuAD": {
+      "document_count": 16358,
+      "chunk_count": 23967,
+      "stats": {
+        "source_id": "MedQuAD",
+        "source_name": "MedQuAD Medical Knowledge Base",
+        "documents_seen": 16406,
+        "documents_valid": 16406,
+        "documents_rejected": 0,
+        "duplicates_removed": 48,
+        "documents_ingested": 16358
+      }
+    },
+    "DailyMed": {
+      "document_count": 2176,
+      "chunk_count": 2176,
+      "stats": {
+        "source_id": "DailyMed",
+        "source_name": "National Library of Medicine DailyMed",
+        "documents_seen": 2176,
+        "documents_valid": 2176,
+        "documents_rejected": 0,
+        "duplicates_removed": 0,
+        "documents_ingested": 2176
+      }
+    },
+    "openFDA": {
+      "document_count": 0,
+      "chunk_count": 0,
+      "stats": {
+        "source_id": "openFDA",
+        "source_name": "FDA Drug Product Labeling API",
+        "documents_seen": 0,
+        "documents_valid": 0,
+        "documents_rejected": 0,
+        "duplicates_removed": 0,
+        "documents_ingested": 0
+      }
+    }
+  },
+  "embedding_model": "BAAI/bge-small-en",
+  "embedding_dimension": 384,
+  "chunking_config": {
+    "chunk_size_words": 250,
+    "overlap_words": 35,
+    "min_chunk_char_len": 40
+  },
+  "corpus_file": "corpus.json",
+  "chunks_file": "chunks.json"
+}

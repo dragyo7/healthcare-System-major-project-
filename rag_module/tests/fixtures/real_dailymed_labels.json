@@ -1,0 +1,100 @@
+[
+  {
+    "set_id": "4b2c1256-42d4-4a4b-8e2a-0a8870fb381b",
+    "drug_name": "Lisinopril",
+    "brand_name": "Zestril",
+    "active_ingredient": "lisinopril",
+    "dosage_form": "Tablet",
+    "strength": "10 mg, 20 mg, 40 mg",
+    "ndc_code": "0310-0130-10",
+    "labeler": "AstraZeneca Pharmaceuticals LP",
+    "sections": {
+      "boxed_warning": "WARNING: FETAL TOXICITY - When pregnancy is detected, discontinue Lisinopril as soon as possible. Drugs that act directly on the renin-angiotensin system can cause injury and death to the developing fetus.",
+      "indications_and_usage": "Lisinopril is an ACE inhibitor indicated for the treatment of hypertension in adult patients and pediatric patients 6 years of age and older, adjunctive therapy in systolic heart failure, and reduction of mortality in acute myocardial infarction.",
+      "dosage_and_administration": "Hypertension: Initial adult dose is 10 mg once daily. Dosage may be titrated up to 40 mg once daily based on blood pressure response. Heart failure: Initial dose 5 mg once daily with diuretics. Target maintenance dose is 20 to 40 mg daily.",
+      "contraindications": "Lisinopril is contraindicated in patients with a history of angioedema related to previous ACE inhibitor treatment, hereditary or idiopathic angioedema, and concomitant use with aliskiren in patients with diabetes mellitus.",
+      "warnings_and_precautions": "Head and Neck Angioedema: Discontinue immediately and treat with epinephrine. Hypotension: May occur especially in volume-depleted patients. Renal Function Deterioration: Monitor BUN and serum creatinine. Hyperkalemia: Monitor serum potassium periodically.",
+      "adverse_reactions": "Most common adverse reactions (incidence >=2%) are headache, dizziness, dry cough, hypotension, postural effects, and diarrhea.",
+      "drug_interactions": "Dual inhibition of renin-angiotensin system with ARBs or aliskiren increases hypotension and hyperkalemia risk. NSAIDs may diminish antihypertensive effect. Lithium toxicity may increase with concomitant ACE inhibitor use."
+    },
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=4b2c1256-42d4-4a4b-8e2a-0a8870fb381b"
+  },
+  {
+    "set_id": "c07a3f4e-2bf4-4f11-8e01-d57be76f2f98",
+    "drug_name": "Amoxicillin",
+    "brand_name": "Amoxil",
+    "active_ingredient": "amoxicillin trihydrate",
+    "dosage_form": "Capsule",
+    "strength": "250 mg, 500 mg",
+    "ndc_code": "0029-6047-12",
+    "labeler": "GlaxoSmithKline",
+    "sections": {
+      "indications_and_usage": "Amoxicillin is indicated in the treatment of infections due to susceptible isolates of Streptococcus species, Streptococcus pneumoniae, Staphylococcus spp., Haemophilus influenzae, and Escherichia coli in ear, nose, throat, and lower respiratory tract infections.",
+      "dosage_and_administration": "Adults: 500 mg every 12 hours or 250 mg every 8 hours for mild to moderate infections. Severe infections: 875 mg every 12 hours or 500 mg every 8 hours for 10 to 14 days.",
+      "contraindications": "Amoxicillin is contraindicated in patients with a history of serious hypersensitivity reactions (e.g., anaphylaxis or Stevens-Johnson syndrome) to amoxicillin or other beta-lactam antibacterial drugs (e.g., penicillins and cephalosporins).",
+      "warnings_and_precautions": "Serious and occasionally fatal hypersensitivity (anaphylactic) reactions have been reported in patients on penicillin therapy. Clostridioides difficile-associated diarrhea (CDAD) has been reported with use of nearly all antibacterial agents.",
+      "adverse_reactions": "The most common adverse reactions (>1%) are nausea, vomiting, diarrhea, and maculopapular rash.",
+      "drug_interactions": "Probenecid decreases renal tubular secretion of amoxicillin. Concomitant use with oral anticoagulants may prolong prothrombin time."
+    },
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=c07a3f4e-2bf4-4f11-8e01-d57be76f2f98"
+  },
+  {
+    "set_id": "9a3e2b1c-8f4d-4e2a-9c3b-1d7e5f8a0b2c",
+    "drug_name": "Metformin Hydrochloride",
+    "brand_name": "Glucophage",
+    "active_ingredient": "metformin hydrochloride",
+    "dosage_form": "Tablet, Extended Release",
+    "strength": "500 mg, 850 mg, 1000 mg",
+    "ndc_code": "0087-6060-05",
+    "labeler": "Bristol-Myers Squibb",
+    "sections": {
+      "boxed_warning": "WARNING: LACTIC ACIDOSIS - Post-marketing cases of metformin-associated lactic acidosis have resulted in death, hypothermia, hypotension, and resistant bradyarrhythmias. Risk factors include renal impairment, concomitant use of certain drugs (e.g., carbonic anhydrase inhibitors), age 65 years or older, radiological study with contrast, surgery, hypoxic states, and excessive alcohol intake.",
+      "indications_and_usage": "Metformin hydrochloride is indicated as an adjunct to diet and exercise to improve glycemic control in adults and pediatric patients 10 years of age and older with type 2 diabetes mellitus.",
+      "dosage_and_administration": "Initial dose is 500 mg orally twice daily or 850 mg once daily with meals. Increase dosage in increments of 500 mg weekly or 850 mg every 2 weeks up to maximum recommended daily dose of 2550 mg per day in divided doses.",
+      "contraindications": "Severe renal impairment (eGFR below 30 mL/min/1.73 m2). Known hypersensitivity to metformin hydrochloride. Acute or chronic metabolic acidosis, including diabetic ketoacidosis.",
+      "warnings_and_precautions": "Lactic acidosis: Promptly assess patients with metabolic acidosis for metformin-associated lactic acidosis. Vitamin B12 deficiency: Metformin may lower vitamin B12 levels; monitor hematologic parameters annually.",
+      "adverse_reactions": "Most common adverse reactions (>5%) are diarrhea, nausea, vomiting, abdominal bloating, flatulence, and anorexia.",
+      "drug_interactions": "Carbonic anhydrase inhibitors (topiramate, zonisamide) increase lactic acidosis risk. Cationic drugs (cimetidine, ranolazine) eliminate by renal tubular secretion and may increase metformin systemic exposure."
+    },
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=9a3e2b1c-8f4d-4e2a-9c3b-1d7e5f8a0b2c"
+  },
+  {
+    "set_id": "3f8a1c9e-4b2d-4e7a-8c1b-9a5d3f2e0b1c",
+    "drug_name": "Atorvastatin Calcium",
+    "brand_name": "Lipitor",
+    "active_ingredient": "atorvastatin calcium",
+    "dosage_form": "Tablet, Film Coated",
+    "strength": "10 mg, 20 mg, 40 mg, 80 mg",
+    "ndc_code": "0071-0155-23",
+    "labeler": "Pfizer Laboratories Div Pfizer Inc",
+    "sections": {
+      "indications_and_usage": "Atorvastatin is an HMG-CoA reductase inhibitor indicated as an adjunct to diet to reduce elevated total cholesterol, LDL-C, apo B, and triglycerides in patients with primary hyperlipidemia and to reduce the risk of myocardial infarction and stroke in patients with cardiovascular disease.",
+      "dosage_and_administration": "Recommended starting dose is 10 to 20 mg once daily. Daily dose range is 10 to 80 mg once daily. Dosage should be individualized according to target lipid goals.",
+      "contraindications": "Active liver disease or unexplained persistent elevations of hepatic transaminases. Hypersensitivity to any component of this medication. Pregnancy and lactation.",
+      "warnings_and_precautions": "Myopathy and Rhabdomyolysis: Discontinue if markedly elevated CPK levels occur or myopathy is diagnosed or suspected. Immune-Mediated Necrotizing Myopathy (IMNM) has been reported rarely. Hepatic dysfunction: Monitor liver enzymes before initiating therapy.",
+      "adverse_reactions": "Most common adverse reactions (incidence >=2%) are nasopharyngitis, arthralgia, diarrhea, pain in extremity, and urinary tract infection.",
+      "drug_interactions": "Strong CYP3A4 inhibitors (clarithromycin, itraconazole, protease inhibitors) significantly increase atorvastatin plasma concentration and rhabdomyolysis risk. Fibrates and cyclosporine also increase myopathy risk."
+    },
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=3f8a1c9e-4b2d-4e7a-8c1b-9a5d3f2e0b1c"
+  },
+  {
+    "set_id": "7b1c4e9a-2d3f-4e8a-9c2b-1a5f8d3e0c4b",
+    "drug_name": "Levothyroxine Sodium",
+    "brand_name": "Synthroid",
+    "active_ingredient": "levothyroxine sodium",
+    "dosage_form": "Tablet",
+    "strength": "25 mcg, 50 mcg, 75 mcg, 100 mcg, 125 mcg, 150 mcg",
+    "ndc_code": "0074-4341-11",
+    "labeler": "AbbVie Inc.",
+    "sections": {
+      "boxed_warning": "WARNING: NOT FOR TREATMENT OF OBESITY OR FOR WEIGHT LOSS - Thyroid hormones, including levothyroxine, should not be used either alone or in combination with other therapeutic agents for the treatment of obesity or for weight loss.",
+      "indications_and_usage": "Levothyroxine sodium is indicated as a replacement therapy in primary, secondary, and tertiary hypothyroidism, and as an adjunct to surgery and radioiodine therapy in the management of thyrotropin-dependent well-differentiated thyroid cancer.",
+      "dosage_and_administration": "Administer as a single daily dose, on an empty stomach, one-half to one hour before breakfast. Start with 1.6 mcg/kg/day in young healthy adults. In elderly patients or patients with cardiovascular disease, start with 12.5 to 25 mcg/day and titrate every 6 to 8 weeks based on serum TSH.",
+      "contraindications": "Uncorrected subclinical or overt thyrotoxicosis. Acute myocardial infarction. Uncorrected adrenal insufficiency.",
+      "warnings_and_precautions": "Cardiac adverse reactions in the elderly and in patients with underlying cardiovascular disease: Use cautious starting dose. Myxedema coma requires intravenous thyroid therapy and glucocorticoid coverage.",
+      "adverse_reactions": "Adverse reactions associated with levothyroxine therapy are primarily those of hyperthyroidism due to therapeutic overdosage: palpitations, tachycardia, cardiac arrhythmias, nervousness, weight loss, tremor, and heat intolerance.",
+      "drug_interactions": "Calcium carbonate, ferrous sulfate, and proton pump inhibitors impair levothyroxine absorption; separate administration by at least 4 hours. Warfarin anticoagulation effect is increased by thyroid hormones."
+    },
+    "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=7b1c4e9a-2d3f-4e8a-9c2b-1a5f8d3e0c4b"
+  }
+]

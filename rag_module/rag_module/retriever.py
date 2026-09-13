@@ -1,74 +1,68 @@
 """
-Implement retrieval using FAISS.
-
-Steps:
-- Load FAISS index and metadata
-- Encode query using same embedding model
-- Retrieve top-k results (k=3–5)
-- Filter using similarity threshold
-- Return:
-    - relevant text chunks
-    - source list
-
-Function:
-- retrieve(query: str)
-
-Constraints:
-- Fast retrieval
-- Deterministic output
+Backward-Compatible Retriever Interface for Legacy Calls.
+Delegates to the modern RAG Module V2 pipeline while preserving legacy function signatures.
 """
-import faiss
-import pickle
-import numpy as np
-from sentence_transformers import SentenceTransformer
+import sys
+from pathlib import Path
+from typing import Tuple, List
 
-# Load model ONCE
-model = SentenceTransformer("BAAI/bge-small-en")
+# Ensure parent directory is on sys.path
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
+from rag_module.config.rag_config import DEFAULT_CONFIG
+from rag_module.rag_pipeline import MedicalRAGPipeline
 
-def load_index():
-    index = faiss.read_index("data/faiss_index/index.bin")
-
-    with open("data/faiss_index/meta.pkl", "rb") as f:
-        metadata = pickle.load(f)
-
-    return index, metadata
+_legacy_pipeline = None
 
 
-def retrieve(query, k=5):
-    index, metadata = load_index()
+def _get_pipeline():
+    global _legacy_pipeline
+    if _legacy_pipeline is None:
+        _legacy_pipeline = MedicalRAGPipeline()
+    return _legacy_pipeline
 
-    # Encode query
-    query_embedding = model.encode([query])
-    query_embedding = np.array(query_embedding).astype("float32")
 
-    # Search
-    distances, indices = index.search(query_embedding, k)   
+def clean_text(text: str) -> str:
+    text = text.replace("\n", " ")
+    text = " ".join(text.split())
+    return text
+
+
+def retrieve(query: str, k: int = 8) -> Tuple[str, List[str]]:
+    """
+    Legacy retrieval wrapper returning (context_str, source_names_list).
+    """
+    pipeline = _get_pipeline()
+    result = pipeline.query(query, mode="hybrid", generate_answer=False)
     
-    
-    results = []
+    if result.get("abstained", False) or not result.get("sources"):
+        return "No relevant medical information found.", []
+
+    contexts = []
     sources = []
+    
+    # Format context from sources
+    for src in result["sources"]:
+        title = src.get("title", "")
+        src_name = src.get("source_name", "medquad")
+        url = src.get("url", "")
+        sources.append(src_name)
 
-    for i, idx in enumerate(indices[0]):
-        if idx < len(metadata):
-            text = metadata[idx]["text"]
+    if pipeline.dense_retriever and result.get("sources"):
+        # Extract passage text for top chunks
+        chunks = pipeline.hybrid_retriever.search(query, final_k=min(k, DEFAULT_CONFIG.FINAL_TOP_K)) if pipeline.hybrid_retriever else []
+        for c in chunks:
+            contexts.append(clean_text(c["text"]))
 
-        # keep reasonable chunks
-        if len(text.split()) >= 8:
-            results.append(text)
-            sources.append(metadata[idx]["source"])
+    if not contexts:
+        return "No relevant medical information found.", []
 
-    combined_context = " ".join(results)
-    if not results:
-        return "No relevant information found.", []
+    return "\n\n".join(contexts[:3]), list(set(sources))
 
-    return " ".join(results[:2]), sources[:2]
 
 if __name__ == "__main__":
-    result, sources = retrieve("What is diabetes?")
-
-    print("\nResult:")
-    print(result[:300])
-
-    if sources:
-        print("Source:", sources[0])
+    ctx, srcs = retrieve("What is leukemia?")
+    print("Context:", ctx[:200])
+    print("Sources:", srcs)

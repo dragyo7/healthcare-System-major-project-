@@ -1,0 +1,31 @@
+{
+  "source_id": "DailyMed",
+  "source_name": "National Library of Medicine DailyMed",
+  "publisher": "U.S. National Library of Medicine / FDA",
+  "pilot_name": "RAG V2.5 Controlled Pharmacology Pilot",
+  "labels_ingested": 25,
+  "therapeutic_classes_count": 10,
+  "documents_count": 159,
+  "chunks_count": 159,
+  "embedding_model": "BAAI/bge-small-en",
+  "embedding_dimension": 384,
+  "chunking_config": {
+    "chunk_size_words": 250,
+    "overlap_words": 35
+  },
+  "retrieval_config": {
+    "dense_k": 20,
+    "bm25_k": 20,
+    "rrf_k": 60,
+    "final_k": 5
+  },
+  "section_distribution": {
+    "Indications & Usage": 25,
+    "Dosage & Administration": 25,
+    "Contraindications": 25,
+    "Warnings & Precautions": 25,
+    "Adverse Reactions": 25,
+    "Drug Interactions": 25,
+    "Boxed Warning": 9
+  }
+}

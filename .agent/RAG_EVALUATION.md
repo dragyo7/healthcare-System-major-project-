@@ -23,6 +23,9 @@ RAG V2.5 (DailyMed Controlled Pilot)
 RAG V2.5.1 (Forensic Hardening & Reproducibility Audit)
  └── Verified chunking distributions, verified 0.0% leakage, independently cross-checked metrics, profiled latency,
      enforced 42/42 passing tests, and confirmed CrossEncoder fallback status.
+RAG V2.6-A (Multi-Source Pipeline & DailyMed Expansion)
+ └── Scaled DailyMed to 231 full monographs (2,176 section chunks across 14 therapeutic classes), built isolated DailyMed indexes
+     and unified production indexes (26,143 total chunks), verified source filtering isolation and dynamic extensibility.
 ```
 
 ---
