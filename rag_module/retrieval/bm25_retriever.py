@@ -88,15 +88,20 @@ class BM25Retriever:
 
         scores = [0.0] * self.corpus_size
 
+        if not hasattr(self, "_inverted_index") or self._inverted_index is None:
+            self._inverted_index: Dict[str, List[Tuple[int, int]]] = {}
+            for doc_idx, tf_map in enumerate(self.doc_term_freqs):
+                for term, tf in tf_map.items():
+                    if term not in self._inverted_index:
+                        self._inverted_index[term] = []
+                    self._inverted_index[term].append((doc_idx, tf))
+
         for term in query_tokens:
-            if term not in self.idf:
+            if term not in self.idf or term not in self._inverted_index:
                 continue
             idf_val = self.idf[term]
             
-            for doc_idx, tf_map in enumerate(self.doc_term_freqs):
-                if term not in tf_map:
-                    continue
-                tf = tf_map[term]
+            for doc_idx, tf in self._inverted_index[term]:
                 doc_len = self.doc_lengths[doc_idx]
                 
                 # BM25 Okapi term score

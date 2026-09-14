@@ -1,0 +1,29 @@
+{
+  "modes": {
+    "dense": {
+      "mean_latency_ms": 55.74,
+      "median_latency_ms": 17.85,
+      "p95_latency_ms": 22.29
+    },
+    "bm25": {
+      "mean_latency_ms": 42.36,
+      "median_latency_ms": 35.17,
+      "p95_latency_ms": 63.9
+    },
+    "hybrid": {
+      "mean_latency_ms": 61.51,
+      "median_latency_ms": 59.23,
+      "p95_latency_ms": 91.2
+    },
+    "hybrid_rerank": {
+      "mean_latency_ms": 67.77,
+      "median_latency_ms": 61.1,
+      "p95_latency_ms": 91.87
+    }
+  },
+  "corpus_scaling": {
+    "total_documents": 26143,
+    "dailymed_chunks": 2176,
+    "medquad_chunks": 23967
+  }
+}

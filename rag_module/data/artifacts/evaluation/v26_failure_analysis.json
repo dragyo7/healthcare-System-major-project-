@@ -1,0 +1,2760 @@
+{
+  "mode": "hybrid",
+  "scope": "production",
+  "failure_distribution": {
+    "SUCCESS_RANK_1": {
+      "count": 93,
+      "percentage": 58.13
+    },
+    "RETRIEVED_RANK_GT_1": {
+      "count": 52,
+      "percentage": 32.5
+    },
+    "WRONG_SECTION_SAME_ENTITY": {
+      "count": 3,
+      "percentage": 1.88
+    },
+    "WRONG_ENTITY_SAME_SOURCE": {
+      "count": 4,
+      "percentage": 2.5
+    },
+    "WRONG_SOURCE": {
+      "count": 8,
+      "percentage": 5.0
+    },
+    "ABSENT_FROM_TOP_K": {
+      "count": 0,
+      "percentage": 0.0
+    },
+    "NOT_APPLICABLE": {
+      "count": 0,
+      "percentage": 0.0
+    },
+    "RETRIEVAL_ERROR": {
+      "count": 0,
+      "percentage": 0.0
+    }
+  },
+  "per_query_diagnostics": [
+    {
+      "query_id": "v26_query_001",
+      "category": "Boxed Warnings",
+      "diagnostic": {
+        "query_id": "v26_query_001",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_boxed_warning-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "boxed warning",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_002",
+      "category": "Boxed Warnings",
+      "diagnostic": {
+        "query_id": "v26_query_002",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_893c5d67-5511-477a-a43b-748956eb012a_boxed_warning-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "boxed warning",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_003",
+      "category": "Boxed Warnings",
+      "diagnostic": {
+        "query_id": "v26_query_003",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_6a38bf54-6815-4672-bd88-a400a4023730_boxed_warning-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "boxed warning",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_004",
+      "category": "Boxed Warnings",
+      "diagnostic": {
+        "query_id": "v26_query_004",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_fcb7a95f-9503-5081-91da-5f685c042117_boxed_warning-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "boxed warning",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_005",
+      "category": "Boxed Warnings",
+      "diagnostic": {
+        "query_id": "v26_query_005",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_47bee161-d384-57ce-b114-9a1fa2cf1c24_boxed_warning-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "boxed warning",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_006",
+      "category": "Boxed Warnings",
+      "diagnostic": {
+        "query_id": "v26_query_006",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_ff7a73b2-679a-50a5-b726-4eea78b8924f_boxed_warning-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "boxed warning",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_007",
+      "category": "Boxed Warnings",
+      "diagnostic": {
+        "query_id": "v26_query_007",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_c028120a-251f-500a-b983-ae31c2984097_boxed_warning-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "boxed warning",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_008",
+      "category": "Boxed Warnings",
+      "diagnostic": {
+        "query_id": "v26_query_008",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_bd69a8c6-a92f-5302-81e8-539b036ea1c7_boxed_warning-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "boxed warning",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_009",
+      "category": "Contraindications",
+      "diagnostic": {
+        "query_id": "v26_query_009",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_ef999f5b-13f8-5ca6-9b3e-9ce1601eac0a_contraindications-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "contraindications",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_010",
+      "category": "Contraindications",
+      "diagnostic": {
+        "query_id": "v26_query_010",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_d754a2a9-9ba8-568d-ae49-d3ccf04eb89f_contraindications-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "contraindications",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_011",
+      "category": "Contraindications",
+      "diagnostic": {
+        "query_id": "v26_query_011",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_7823f03b-18a8-48b6-9bb2-16a7f0521e29_contraindications-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "contraindications",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_012",
+      "category": "Contraindications",
+      "diagnostic": {
+        "query_id": "v26_query_012",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_97e93393-893d-5e20-affc-7375b8fd3fce_contraindications-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "contraindications",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_013",
+      "category": "Contraindications",
+      "diagnostic": {
+        "query_id": "v26_query_013",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 3 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 3,
+        "top_1_source": "DailyMed",
+        "top_1_section": "overdosage",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_014",
+      "category": "Contraindications",
+      "diagnostic": {
+        "query_id": "v26_query_014",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_277c87b3-bbe8-5770-9c3f-73f03a762254_contraindications-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "contraindications",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_015",
+      "category": "Contraindications",
+      "diagnostic": {
+        "query_id": "v26_query_015",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_184b29c5-8421-4192-bc91-2834b9fa8233_contraindications-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "contraindications",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_016",
+      "category": "Contraindications",
+      "diagnostic": {
+        "query_id": "v26_query_016",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_794e0243-391b-537e-b391-7f4780843a91_contraindications-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "contraindications",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_017",
+      "category": "Drug-Drug Interactions",
+      "diagnostic": {
+        "query_id": "v26_query_017",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_c1f7b8a2-9382-4112-9c1e-1284a7df1930_drug_interactions-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "drug interactions",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_018",
+      "category": "Drug-Drug Interactions",
+      "diagnostic": {
+        "query_id": "v26_query_018",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 3 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 3,
+        "top_1_source": "DailyMed",
+        "top_1_section": "drug interactions",
+        "top_1_entity_match": false,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_019",
+      "category": "Drug-Drug Interactions",
+      "diagnostic": {
+        "query_id": "v26_query_019",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 4 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 4,
+        "top_1_source": "DailyMed",
+        "top_1_section": "drug interactions",
+        "top_1_entity_match": false,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_020",
+      "category": "Drug-Drug Interactions",
+      "diagnostic": {
+        "query_id": "v26_query_020",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 5 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 5,
+        "top_1_source": "DailyMed",
+        "top_1_section": "drug interactions",
+        "top_1_entity_match": false,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_021",
+      "category": "Drug-Drug Interactions",
+      "diagnostic": {
+        "query_id": "v26_query_021",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_c1829a2b-3841-4820-94d3-7d84a1e948ce_drug_interactions-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "drug interactions",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_022",
+      "category": "Drug-Drug Interactions",
+      "diagnostic": {
+        "query_id": "v26_query_022",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 2 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 2,
+        "top_1_source": "DailyMed",
+        "top_1_section": "drug interactions",
+        "top_1_entity_match": false,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_023",
+      "category": "Drug-Drug Interactions",
+      "diagnostic": {
+        "query_id": "v26_query_023",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_f1a23890-83b4-4217-9102-1284a7df1944_drug_interactions-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "drug interactions",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_024",
+      "category": "Drug-Drug Interactions",
+      "diagnostic": {
+        "query_id": "v26_query_024",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_470ac844-f0d7-5821-bd58-dca667027b70_drug_interactions-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "drug interactions",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_025",
+      "category": "Dosing & Administration",
+      "diagnostic": {
+        "query_id": "v26_query_025",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 2 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 2,
+        "top_1_source": "DailyMed",
+        "top_1_section": "indications & usage",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_026",
+      "category": "Dosing & Administration",
+      "diagnostic": {
+        "query_id": "v26_query_026",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_7823f03b-18a8-48b6-9bb2-16a7f0521e88_dosage___administration-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "dosage & administration",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_027",
+      "category": "Dosing & Administration",
+      "diagnostic": {
+        "query_id": "v26_query_027",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_6a38bf54-6815-4672-bd88-a400a4023730_dosage___administration-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "dosage & administration",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_028",
+      "category": "Dosing & Administration",
+      "diagnostic": {
+        "query_id": "v26_query_028",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_902d1847-b284-47c3-8822-4217ea948123_dosage___administration-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "dosage & administration",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_029",
+      "category": "Dosing & Administration",
+      "diagnostic": {
+        "query_id": "v26_query_029",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 2 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 2,
+        "top_1_source": "DailyMed",
+        "top_1_section": "dosage & administration",
+        "top_1_entity_match": false,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_030",
+      "category": "Dosing & Administration",
+      "diagnostic": {
+        "query_id": "v26_query_030",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 3 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 3,
+        "top_1_source": "DailyMed",
+        "top_1_section": "clinical pharmacology",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_031",
+      "category": "Dosing & Administration",
+      "diagnostic": {
+        "query_id": "v26_query_031",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_81829a2b-3841-4820-94d3-7d84a1e948ca_dosage___administration-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "dosage & administration",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_032",
+      "category": "Dosing & Administration",
+      "diagnostic": {
+        "query_id": "v26_query_032",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_91829a2b-3841-4820-94d3-7d84a1e948cb_dosage___administration-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "dosage & administration",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_033",
+      "category": "Adverse Reactions",
+      "diagnostic": {
+        "query_id": "v26_query_033",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_d1829a2b-3841-4820-94d3-7d84a1e948cf_adverse_reactions-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "adverse reactions",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_034",
+      "category": "Adverse Reactions",
+      "diagnostic": {
+        "query_id": "v26_query_034",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_1dbf8223-fda0-5cf3-8996-0795914c4e33_adverse_reactions-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "adverse reactions",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_035",
+      "category": "Adverse Reactions",
+      "diagnostic": {
+        "query_id": "v26_query_035",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_0e1129d1-fc4a-5c3c-989a-009588d63c4e_adverse_reactions-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "adverse reactions",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_036",
+      "category": "Adverse Reactions",
+      "diagnostic": {
+        "query_id": "v26_query_036",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_71829a2b-3841-4820-94d3-7d84a1e948c5_adverse_reactions-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "adverse reactions",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_037",
+      "category": "Adverse Reactions",
+      "diagnostic": {
+        "query_id": "v26_query_037",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_e5bd9d10-db98-56a2-a291-6db103ef6819_adverse_reactions-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "adverse reactions",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_038",
+      "category": "Adverse Reactions",
+      "diagnostic": {
+        "query_id": "v26_query_038",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_a3612cd5-5327-565d-b94e-710142e4562b_adverse_reactions-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "adverse reactions",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_039",
+      "category": "Adverse Reactions",
+      "diagnostic": {
+        "query_id": "v26_query_039",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_52b05085-ee5a-54c2-a1b5-4520afeacc26_adverse_reactions-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "adverse reactions",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_040",
+      "category": "Adverse Reactions",
+      "diagnostic": {
+        "query_id": "v26_query_040",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_b1829a2b-3841-4820-94d3-7d84a1e948cd_adverse_reactions-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "adverse reactions",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_041",
+      "category": "Organ Impairment (Renal/Hepatic)",
+      "diagnostic": {
+        "query_id": "v26_query_041",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 2 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 2,
+        "top_1_source": "DailyMed",
+        "top_1_section": "clinical pharmacology",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_042",
+      "category": "Organ Impairment (Renal/Hepatic)",
+      "diagnostic": {
+        "query_id": "v26_query_042",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 3 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 3,
+        "top_1_source": "DailyMed",
+        "top_1_section": "use in specific populations",
+        "top_1_entity_match": false,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_043",
+      "category": "Organ Impairment (Renal/Hepatic)",
+      "diagnostic": {
+        "query_id": "v26_query_043",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_e938bf11-7392-4112-9844-32b8a7df1942_use_in_specific_populations-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "use in specific populations",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_044",
+      "category": "Organ Impairment (Renal/Hepatic)",
+      "diagnostic": {
+        "query_id": "v26_query_044",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 2 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 2,
+        "top_1_source": "DailyMed",
+        "top_1_section": "use in specific populations",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_045",
+      "category": "Organ Impairment (Renal/Hepatic)",
+      "diagnostic": {
+        "query_id": "v26_query_045",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_fb3f2c70-ce31-5b28-9674-9bcb34e84ce9_dosage___administration-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "dosage & administration",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_046",
+      "category": "Organ Impairment (Renal/Hepatic)",
+      "diagnostic": {
+        "query_id": "v26_query_046",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 2 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 2,
+        "top_1_source": "DailyMed",
+        "top_1_section": "dosage & administration",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_047",
+      "category": "Organ Impairment (Renal/Hepatic)",
+      "diagnostic": {
+        "query_id": "v26_query_047",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_0374a3d2-7ff1-54e3-b0c3-8f917bb6302d_dosage___administration-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "dosage & administration",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_048",
+      "category": "Organ Impairment (Renal/Hepatic)",
+      "diagnostic": {
+        "query_id": "v26_query_048",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_51829a2b-3841-4820-94d3-7d84a1e948c7_dosage___administration-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "dosage & administration",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_049",
+      "category": "Pregnancy & Lactation",
+      "diagnostic": {
+        "query_id": "v26_query_049",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_use_in_specific_populations-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "use in specific populations",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_050",
+      "category": "Pregnancy & Lactation",
+      "diagnostic": {
+        "query_id": "v26_query_050",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 3 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 3,
+        "top_1_source": "DailyMed",
+        "top_1_section": "boxed warning",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_051",
+      "category": "Pregnancy & Lactation",
+      "diagnostic": {
+        "query_id": "v26_query_051",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_ff7a73b2-679a-50a5-b726-4eea78b8924f_use_in_specific_populations-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "use in specific populations",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_052",
+      "category": "Pregnancy & Lactation",
+      "diagnostic": {
+        "query_id": "v26_query_052",
+        "category": "WRONG_SECTION_SAME_ENTITY",
+        "explanation": "Top-1 matched entity 'methotrexate (oral)' but retrieved section 'boxed warning' instead of 'use in specific populations'.",
+        "top_1_rank_hit": false,
+        "top_k_hit": false,
+        "hit_rank": null,
+        "top_1_source": "DailyMed",
+        "top_1_section": "boxed warning",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_053",
+      "category": "Pregnancy & Lactation",
+      "diagnostic": {
+        "query_id": "v26_query_053",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_0374a3d2-7ff1-54e3-b0c3-8f917bb6302d_use_in_specific_populations-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "use in specific populations",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_054",
+      "category": "Pregnancy & Lactation",
+      "diagnostic": {
+        "query_id": "v26_query_054",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_91c9d03c-d546-5090-8c94-06c88bc3812c_use_in_specific_populations-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "use in specific populations",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_055",
+      "category": "Pregnancy & Lactation",
+      "diagnostic": {
+        "query_id": "v26_query_055",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_e30e74a6-2ddf-530d-8629-92ef8d96e764_use_in_specific_populations-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "use in specific populations",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_056",
+      "category": "Pregnancy & Lactation",
+      "diagnostic": {
+        "query_id": "v26_query_056",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_d2533408-ba8c-5a97-98a3-b5d065eeaaa5_use_in_specific_populations-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "use in specific populations",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_057",
+      "category": "Geriatric / Pediatric Dosing",
+      "diagnostic": {
+        "query_id": "v26_query_057",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 2 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 2,
+        "top_1_source": "DailyMed",
+        "top_1_section": "warnings & precautions",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_058",
+      "category": "Geriatric / Pediatric Dosing",
+      "diagnostic": {
+        "query_id": "v26_query_058",
+        "category": "WRONG_SECTION_SAME_ENTITY",
+        "explanation": "Top-1 matched entity 'alprazolam' but retrieved section 'warnings & precautions' instead of 'use in specific populations'.",
+        "top_1_rank_hit": false,
+        "top_k_hit": false,
+        "hit_rank": null,
+        "top_1_source": "DailyMed",
+        "top_1_section": "warnings & precautions",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_059",
+      "category": "Geriatric / Pediatric Dosing",
+      "diagnostic": {
+        "query_id": "v26_query_059",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_f1c4d16c-255f-51f1-988b-7e7a5fd921b8_dosage___administration-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "dosage & administration",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_060",
+      "category": "Geriatric / Pediatric Dosing",
+      "diagnostic": {
+        "query_id": "v26_query_060",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 6 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 6,
+        "top_1_source": "DailyMed",
+        "top_1_section": "warnings & precautions",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_061",
+      "category": "Geriatric / Pediatric Dosing",
+      "diagnostic": {
+        "query_id": "v26_query_061",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 4 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 4,
+        "top_1_source": "DailyMed",
+        "top_1_section": "dosage & administration",
+        "top_1_entity_match": false,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_062",
+      "category": "Geriatric / Pediatric Dosing",
+      "diagnostic": {
+        "query_id": "v26_query_062",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 7 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 7,
+        "top_1_source": "DailyMed",
+        "top_1_section": "use in specific populations",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_063",
+      "category": "Geriatric / Pediatric Dosing",
+      "diagnostic": {
+        "query_id": "v26_query_063",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 3 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 3,
+        "top_1_source": "DailyMed",
+        "top_1_section": "boxed warning",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_064",
+      "category": "Geriatric / Pediatric Dosing",
+      "diagnostic": {
+        "query_id": "v26_query_064",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 4 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 4,
+        "top_1_source": "DailyMed",
+        "top_1_section": "use in specific populations",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_065",
+      "category": "Overdosage & Toxicity",
+      "diagnostic": {
+        "query_id": "v26_query_065",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_9e0e6194-fdaa-5a13-a9d2-b06c67439e6d_overdosage-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "overdosage",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_066",
+      "category": "Overdosage & Toxicity",
+      "diagnostic": {
+        "query_id": "v26_query_066",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_470ac844-f0d7-5821-bd58-dca667027b70_overdosage-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "overdosage",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_067",
+      "category": "Overdosage & Toxicity",
+      "diagnostic": {
+        "query_id": "v26_query_067",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_efae005e-a5d2-5f0a-af6c-56f63ab3174d_overdosage-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "overdosage",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_068",
+      "category": "Overdosage & Toxicity",
+      "diagnostic": {
+        "query_id": "v26_query_068",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_1fed9547-3600-547f-a029-9129e9929acc_overdosage-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "overdosage",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_069",
+      "category": "Overdosage & Toxicity",
+      "diagnostic": {
+        "query_id": "v26_query_069",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_4f869c47-93ba-59f5-ae40-f4f2a558a468_overdosage-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "overdosage",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_070",
+      "category": "Overdosage & Toxicity",
+      "diagnostic": {
+        "query_id": "v26_query_070",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_7a7978d9-1011-58ec-9139-191e3e2ba463_overdosage-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "overdosage",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_071",
+      "category": "Overdosage & Toxicity",
+      "diagnostic": {
+        "query_id": "v26_query_071",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 3 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 3,
+        "top_1_source": "DailyMed",
+        "top_1_section": "adverse reactions",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_072",
+      "category": "Overdosage & Toxicity",
+      "diagnostic": {
+        "query_id": "v26_query_072",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 2 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 2,
+        "top_1_source": "DailyMed",
+        "top_1_section": "overdosage",
+        "top_1_entity_match": false,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_073",
+      "category": "Mechanism of Action / Pharmacokinetics",
+      "diagnostic": {
+        "query_id": "v26_query_073",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 2 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 2,
+        "top_1_source": "DailyMed",
+        "top_1_section": "indications & usage",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_074",
+      "category": "Mechanism of Action / Pharmacokinetics",
+      "diagnostic": {
+        "query_id": "v26_query_074",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 2 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 2,
+        "top_1_source": "DailyMed",
+        "top_1_section": "indications & usage",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_075",
+      "category": "Mechanism of Action / Pharmacokinetics",
+      "diagnostic": {
+        "query_id": "v26_query_075",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_6a38bf54-6815-4672-bd88-a400a4023730_clinical_pharmacology-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "clinical pharmacology",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_076",
+      "category": "Mechanism of Action / Pharmacokinetics",
+      "diagnostic": {
+        "query_id": "v26_query_076",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_c1f7b8a2-9382-4112-9c1e-1284a7df1930_clinical_pharmacology-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "clinical pharmacology",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_077",
+      "category": "Mechanism of Action / Pharmacokinetics",
+      "diagnostic": {
+        "query_id": "v26_query_077",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_a3612cd5-5327-565d-b94e-710142e4562b_clinical_pharmacology-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "clinical pharmacology",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_078",
+      "category": "Mechanism of Action / Pharmacokinetics",
+      "diagnostic": {
+        "query_id": "v26_query_078",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 2 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 2,
+        "top_1_source": "DailyMed",
+        "top_1_section": "indications & usage",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_079",
+      "category": "Mechanism of Action / Pharmacokinetics",
+      "diagnostic": {
+        "query_id": "v26_query_079",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_91829a2b-3841-4820-94d3-7d84a1e948cb_clinical_pharmacology-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "clinical pharmacology",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_080",
+      "category": "Mechanism of Action / Pharmacokinetics",
+      "diagnostic": {
+        "query_id": "v26_query_080",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (dailymed_fcb7a95f-9503-5081-91da-5f685c042117_clinical_pharmacology-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "DailyMed",
+        "top_1_section": "clinical pharmacology",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_081",
+      "category": "Disease / Condition Overview",
+      "diagnostic": {
+        "query_id": "v26_query_081",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000001_1-1-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "CancerGov",
+        "top_1_section": "information",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_082",
+      "category": "Disease / Condition Overview",
+      "diagnostic": {
+        "query_id": "v26_query_082",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000037-1-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "GHR",
+        "top_1_section": "information",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_083",
+      "category": "Disease / Condition Overview",
+      "diagnostic": {
+        "query_id": "v26_query_083",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 5 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 5,
+        "top_1_source": "medquad_generic",
+        "top_1_section": "research",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_084",
+      "category": "Disease / Condition Overview",
+      "diagnostic": {
+        "query_id": "v26_query_084",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 5 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 5,
+        "top_1_source": "NHLBI",
+        "top_1_section": "causes",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_085",
+      "category": "Disease / Condition Overview",
+      "diagnostic": {
+        "query_id": "v26_query_085",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 6 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 6,
+        "top_1_source": "GARD",
+        "top_1_section": "information",
+        "top_1_entity_match": false,
+        "top_1_source_match": false,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_086",
+      "category": "Disease / Condition Overview",
+      "diagnostic": {
+        "query_id": "v26_query_086",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000163-1-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "GHR",
+        "top_1_section": "information",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_087",
+      "category": "Disease / Condition Overview",
+      "diagnostic": {
+        "query_id": "v26_query_087",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000489-1-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "GHR",
+        "top_1_section": "information",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_088",
+      "category": "Disease / Condition Overview",
+      "diagnostic": {
+        "query_id": "v26_query_088",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000262-1-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "GHR",
+        "top_1_section": "information",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_089",
+      "category": "Disease / Condition Overview",
+      "diagnostic": {
+        "query_id": "v26_query_089",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000911-1-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "GHR",
+        "top_1_section": "information",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_090",
+      "category": "Disease / Condition Overview",
+      "diagnostic": {
+        "query_id": "v26_query_090",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000582-1-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "medquad_generic",
+        "top_1_section": "information",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_091",
+      "category": "Signs & Symptoms",
+      "diagnostic": {
+        "query_id": "v26_query_091",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 3 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 3,
+        "top_1_source": "GARD",
+        "top_1_section": "symptoms",
+        "top_1_entity_match": false,
+        "top_1_source_match": false,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_092",
+      "category": "Signs & Symptoms",
+      "diagnostic": {
+        "query_id": "v26_query_092",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 2 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 2,
+        "top_1_source": "DailyMed",
+        "top_1_section": "warnings & precautions",
+        "top_1_entity_match": false,
+        "top_1_source_match": false,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_093",
+      "category": "Signs & Symptoms",
+      "diagnostic": {
+        "query_id": "v26_query_093",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000028-3-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "medquad_generic",
+        "top_1_section": "symptoms",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_094",
+      "category": "Signs & Symptoms",
+      "diagnostic": {
+        "query_id": "v26_query_094",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 3 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 3,
+        "top_1_source": "GARD",
+        "top_1_section": "symptoms",
+        "top_1_entity_match": false,
+        "top_1_source_match": false,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_095",
+      "category": "Signs & Symptoms",
+      "diagnostic": {
+        "query_id": "v26_query_095",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 2 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 2,
+        "top_1_source": "GARD",
+        "top_1_section": "exams and tests",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_096",
+      "category": "Signs & Symptoms",
+      "diagnostic": {
+        "query_id": "v26_query_096",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 4 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 4,
+        "top_1_source": "GARD",
+        "top_1_section": "symptoms",
+        "top_1_entity_match": false,
+        "top_1_source_match": false,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_097",
+      "category": "Signs & Symptoms",
+      "diagnostic": {
+        "query_id": "v26_query_097",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 9 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 9,
+        "top_1_source": "GHR",
+        "top_1_section": "information",
+        "top_1_entity_match": true,
+        "top_1_source_match": false,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_098",
+      "category": "Signs & Symptoms",
+      "diagnostic": {
+        "query_id": "v26_query_098",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0002944-2-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "GARD",
+        "top_1_section": "symptoms",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_099",
+      "category": "Signs & Symptoms",
+      "diagnostic": {
+        "query_id": "v26_query_099",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000117-5-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "NHLBI",
+        "top_1_section": "symptoms",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_100",
+      "category": "Signs & Symptoms",
+      "diagnostic": {
+        "query_id": "v26_query_100",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 3 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 3,
+        "top_1_source": "GHR",
+        "top_1_section": "information",
+        "top_1_entity_match": true,
+        "top_1_source_match": false,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_101",
+      "category": "Causes, Genetics & Risk Factors",
+      "diagnostic": {
+        "query_id": "v26_query_101",
+        "category": "WRONG_SOURCE",
+        "explanation": "Top-1 retrieved from unapproved source 'GARD'.",
+        "top_1_rank_hit": false,
+        "top_k_hit": false,
+        "hit_rank": null,
+        "top_1_source": "GARD",
+        "top_1_section": "information",
+        "top_1_entity_match": false,
+        "top_1_source_match": false,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_102",
+      "category": "Causes, Genetics & Risk Factors",
+      "diagnostic": {
+        "query_id": "v26_query_102",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000083-3-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "NIDDK",
+        "top_1_section": "causes",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_103",
+      "category": "Causes, Genetics & Risk Factors",
+      "diagnostic": {
+        "query_id": "v26_query_103",
+        "category": "WRONG_SOURCE",
+        "explanation": "Top-1 retrieved from unapproved source 'GHR'.",
+        "top_1_rank_hit": false,
+        "top_k_hit": false,
+        "hit_rank": null,
+        "top_1_source": "GHR",
+        "top_1_section": "genetic changes",
+        "top_1_entity_match": false,
+        "top_1_source_match": false,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_104",
+      "category": "Causes, Genetics & Risk Factors",
+      "diagnostic": {
+        "query_id": "v26_query_104",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000262-3-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "GHR",
+        "top_1_section": "genetic changes",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_105",
+      "category": "Causes, Genetics & Risk Factors",
+      "diagnostic": {
+        "query_id": "v26_query_105",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000489-3-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "GHR",
+        "top_1_section": "genetic changes",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_106",
+      "category": "Causes, Genetics & Risk Factors",
+      "diagnostic": {
+        "query_id": "v26_query_106",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 2 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 2,
+        "top_1_source": "NHLBI",
+        "top_1_section": "causes",
+        "top_1_entity_match": true,
+        "top_1_source_match": false,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_107",
+      "category": "Causes, Genetics & Risk Factors",
+      "diagnostic": {
+        "query_id": "v26_query_107",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000911-3-c1) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "GHR",
+        "top_1_section": "genetic changes",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_108",
+      "category": "Causes, Genetics & Risk Factors",
+      "diagnostic": {
+        "query_id": "v26_query_108",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000381-3-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "GHR",
+        "top_1_section": "genetic changes",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_109",
+      "category": "Causes, Genetics & Risk Factors",
+      "diagnostic": {
+        "query_id": "v26_query_109",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000792-3-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "GHR",
+        "top_1_section": "genetic changes",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_110",
+      "category": "Causes, Genetics & Risk Factors",
+      "diagnostic": {
+        "query_id": "v26_query_110",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 2 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 2,
+        "top_1_source": "GARD",
+        "top_1_section": "causes",
+        "top_1_entity_match": true,
+        "top_1_source_match": false,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_111",
+      "category": "Diagnostic Tests & Workup",
+      "diagnostic": {
+        "query_id": "v26_query_111",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000001_1-3-c1) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "CancerGov",
+        "top_1_section": "exams and tests",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_112",
+      "category": "Diagnostic Tests & Workup",
+      "diagnostic": {
+        "query_id": "v26_query_112",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000007-6-c1) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "NHLBI",
+        "top_1_section": "exams and tests",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_113",
+      "category": "Diagnostic Tests & Workup",
+      "diagnostic": {
+        "query_id": "v26_query_113",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 8 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 8,
+        "top_1_source": "NIDDK",
+        "top_1_section": "considerations",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_114",
+      "category": "Diagnostic Tests & Workup",
+      "diagnostic": {
+        "query_id": "v26_query_114",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 4 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 4,
+        "top_1_source": "GARD",
+        "top_1_section": "symptoms",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_115",
+      "category": "Diagnostic Tests & Workup",
+      "diagnostic": {
+        "query_id": "v26_query_115",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0004436-5-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "GARD",
+        "top_1_section": "exams and tests",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_116",
+      "category": "Diagnostic Tests & Workup",
+      "diagnostic": {
+        "query_id": "v26_query_116",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000037-4-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "GARD",
+        "top_1_section": "exams and tests",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_117",
+      "category": "Diagnostic Tests & Workup",
+      "diagnostic": {
+        "query_id": "v26_query_117",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 4 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 4,
+        "top_1_source": "GHR",
+        "top_1_section": "treatment",
+        "top_1_entity_match": false,
+        "top_1_source_match": false,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_118",
+      "category": "Diagnostic Tests & Workup",
+      "diagnostic": {
+        "query_id": "v26_query_118",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 3 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 3,
+        "top_1_source": "GHR",
+        "top_1_section": "inheritance",
+        "top_1_entity_match": true,
+        "top_1_source_match": false,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_119",
+      "category": "Diagnostic Tests & Workup",
+      "diagnostic": {
+        "query_id": "v26_query_119",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000117-5-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "GARD",
+        "top_1_section": "exams and tests",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_120",
+      "category": "Diagnostic Tests & Workup",
+      "diagnostic": {
+        "query_id": "v26_query_120",
+        "category": "WRONG_ENTITY_SAME_SOURCE",
+        "explanation": "Top-1 retrieved from correct source 'CancerGov' but matched wrong entity (title: 'Myelodysplastic Syndromes').",
+        "top_1_rank_hit": false,
+        "top_k_hit": false,
+        "hit_rank": null,
+        "top_1_source": "CancerGov",
+        "top_1_section": "information",
+        "top_1_entity_match": false,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_121",
+      "category": "Treatment & Management Procedures",
+      "diagnostic": {
+        "query_id": "v26_query_121",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000001_1-7-c1) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "CancerGov",
+        "top_1_section": "treatment",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_122",
+      "category": "Treatment & Management Procedures",
+      "diagnostic": {
+        "query_id": "v26_query_122",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000010-6-c4) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "NHLBI",
+        "top_1_section": "treatment",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_123",
+      "category": "Treatment & Management Procedures",
+      "diagnostic": {
+        "query_id": "v26_query_123",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 5 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 5,
+        "top_1_source": "DailyMed",
+        "top_1_section": "clinical pharmacology",
+        "top_1_entity_match": false,
+        "top_1_source_match": false,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_124",
+      "category": "Treatment & Management Procedures",
+      "diagnostic": {
+        "query_id": "v26_query_124",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000109-8-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "NHLBI",
+        "top_1_section": "treatment",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_125",
+      "category": "Treatment & Management Procedures",
+      "diagnostic": {
+        "query_id": "v26_query_125",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000001-6-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "NIDDK",
+        "top_1_section": "treatment",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_126",
+      "category": "Treatment & Management Procedures",
+      "diagnostic": {
+        "query_id": "v26_query_126",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 9 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 9,
+        "top_1_source": "NIDDK",
+        "top_1_section": "considerations",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_127",
+      "category": "Treatment & Management Procedures",
+      "diagnostic": {
+        "query_id": "v26_query_127",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 2 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 2,
+        "top_1_source": "GHR",
+        "top_1_section": "genetic changes",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_128",
+      "category": "Treatment & Management Procedures",
+      "diagnostic": {
+        "query_id": "v26_query_128",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 2 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 2,
+        "top_1_source": "NINDS",
+        "top_1_section": "treatment",
+        "top_1_entity_match": false,
+        "top_1_source_match": false,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_129",
+      "category": "Treatment & Management Procedures",
+      "diagnostic": {
+        "query_id": "v26_query_129",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000117-7-c13) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "NHLBI",
+        "top_1_section": "treatment",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_130",
+      "category": "Treatment & Management Procedures",
+      "diagnostic": {
+        "query_id": "v26_query_130",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000037-5-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "GARD",
+        "top_1_section": "treatment",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_131",
+      "category": "Complications & Prognosis",
+      "diagnostic": {
+        "query_id": "v26_query_131",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 4 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 4,
+        "top_1_source": "CancerGov",
+        "top_1_section": "treatment",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_132",
+      "category": "Complications & Prognosis",
+      "diagnostic": {
+        "query_id": "v26_query_132",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000001_2-5-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "CancerGov",
+        "top_1_section": "outlook",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_133",
+      "category": "Complications & Prognosis",
+      "diagnostic": {
+        "query_id": "v26_query_133",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 5 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 5,
+        "top_1_source": "CancerGov",
+        "top_1_section": "treatment",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_134",
+      "category": "Complications & Prognosis",
+      "diagnostic": {
+        "query_id": "v26_query_134",
+        "category": "WRONG_ENTITY_SAME_SOURCE",
+        "explanation": "Top-1 retrieved from correct source 'CancerGov' but matched wrong entity (title: 'AIDS-Related Lymphoma').",
+        "top_1_rank_hit": false,
+        "top_k_hit": false,
+        "hit_rank": null,
+        "top_1_source": "CancerGov",
+        "top_1_section": "outlook",
+        "top_1_entity_match": false,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_135",
+      "category": "Complications & Prognosis",
+      "diagnostic": {
+        "query_id": "v26_query_135",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 6 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 6,
+        "top_1_source": "CancerGov",
+        "top_1_section": "treatment",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_136",
+      "category": "Complications & Prognosis",
+      "diagnostic": {
+        "query_id": "v26_query_136",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000005-3-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "NINDS",
+        "top_1_section": "outlook",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_137",
+      "category": "Complications & Prognosis",
+      "diagnostic": {
+        "query_id": "v26_query_137",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 6 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 6,
+        "top_1_source": "NINDS",
+        "top_1_section": "information",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_138",
+      "category": "Complications & Prognosis",
+      "diagnostic": {
+        "query_id": "v26_query_138",
+        "category": "WRONG_SOURCE",
+        "explanation": "Top-1 retrieved from unapproved source 'GHR'.",
+        "top_1_rank_hit": false,
+        "top_k_hit": false,
+        "hit_rank": null,
+        "top_1_source": "GHR",
+        "top_1_section": "information",
+        "top_1_entity_match": false,
+        "top_1_source_match": false,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_139",
+      "category": "Complications & Prognosis",
+      "diagnostic": {
+        "query_id": "v26_query_139",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 2 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 2,
+        "top_1_source": "CancerGov",
+        "top_1_section": "information",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_140",
+      "category": "Complications & Prognosis",
+      "diagnostic": {
+        "query_id": "v26_query_140",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 10 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 10,
+        "top_1_source": "GARD",
+        "top_1_section": "symptoms",
+        "top_1_entity_match": false,
+        "top_1_source_match": false,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_141",
+      "category": "Prevention & Lifestyle Guidance",
+      "diagnostic": {
+        "query_id": "v26_query_141",
+        "category": "WRONG_ENTITY_SAME_SOURCE",
+        "explanation": "Top-1 retrieved from correct source 'medquad_generic' but matched wrong entity (title: 'Macular Degeneration').",
+        "top_1_rank_hit": false,
+        "top_k_hit": false,
+        "hit_rank": null,
+        "top_1_source": "medquad_generic",
+        "top_1_section": "information",
+        "top_1_entity_match": false,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_142",
+      "category": "Prevention & Lifestyle Guidance",
+      "diagnostic": {
+        "query_id": "v26_query_142",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000005_2-1-c2) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "CancerGov",
+        "top_1_section": "prevention",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_143",
+      "category": "Prevention & Lifestyle Guidance",
+      "diagnostic": {
+        "query_id": "v26_query_143",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000083-10-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "NIDDK",
+        "top_1_section": "prevention",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_144",
+      "category": "Prevention & Lifestyle Guidance",
+      "diagnostic": {
+        "query_id": "v26_query_144",
+        "category": "WRONG_SOURCE",
+        "explanation": "Top-1 retrieved from unapproved source 'GARD'.",
+        "top_1_rank_hit": false,
+        "top_k_hit": false,
+        "hit_rank": null,
+        "top_1_source": "GARD",
+        "top_1_section": "treatment",
+        "top_1_entity_match": true,
+        "top_1_source_match": false,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_145",
+      "category": "Prevention & Lifestyle Guidance",
+      "diagnostic": {
+        "query_id": "v26_query_145",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 2 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 2,
+        "top_1_source": "GARD",
+        "top_1_section": "causes",
+        "top_1_entity_match": false,
+        "top_1_source_match": false,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_146",
+      "category": "Prevention & Lifestyle Guidance",
+      "diagnostic": {
+        "query_id": "v26_query_146",
+        "category": "WRONG_ENTITY_SAME_SOURCE",
+        "explanation": "Top-1 retrieved from correct source 'CancerGov' but matched wrong entity (title: 'Langerhans Cell Histiocytosis').",
+        "top_1_rank_hit": false,
+        "top_k_hit": false,
+        "hit_rank": null,
+        "top_1_source": "CancerGov",
+        "top_1_section": "treatment",
+        "top_1_entity_match": false,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_147",
+      "category": "Prevention & Lifestyle Guidance",
+      "diagnostic": {
+        "query_id": "v26_query_147",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000001_2-2-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "CancerGov",
+        "top_1_section": "susceptibility",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_148",
+      "category": "Prevention & Lifestyle Guidance",
+      "diagnostic": {
+        "query_id": "v26_query_148",
+        "category": "WRONG_SOURCE",
+        "explanation": "Top-1 retrieved from unapproved source 'medquad_generic'.",
+        "top_1_rank_hit": false,
+        "top_k_hit": false,
+        "hit_rank": null,
+        "top_1_source": "medquad_generic",
+        "top_1_section": "information",
+        "top_1_entity_match": false,
+        "top_1_source_match": false,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_149",
+      "category": "Prevention & Lifestyle Guidance",
+      "diagnostic": {
+        "query_id": "v26_query_149",
+        "category": "WRONG_SOURCE",
+        "explanation": "Top-1 retrieved from unapproved source 'GARD'.",
+        "top_1_rank_hit": false,
+        "top_k_hit": false,
+        "hit_rank": null,
+        "top_1_source": "GARD",
+        "top_1_section": "causes",
+        "top_1_entity_match": false,
+        "top_1_source_match": false,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_150",
+      "category": "Prevention & Lifestyle Guidance",
+      "diagnostic": {
+        "query_id": "v26_query_150",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000006_1-2-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "CancerGov",
+        "top_1_section": "susceptibility",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_151",
+      "category": "Rare Genetic Diseases & Inheritance",
+      "diagnostic": {
+        "query_id": "v26_query_151",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000262-4-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "GHR",
+        "top_1_section": "inheritance",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_152",
+      "category": "Rare Genetic Diseases & Inheritance",
+      "diagnostic": {
+        "query_id": "v26_query_152",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000489-4-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "GHR",
+        "top_1_section": "inheritance",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_153",
+      "category": "Rare Genetic Diseases & Inheritance",
+      "diagnostic": {
+        "query_id": "v26_query_153",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0003801-3-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "GARD",
+        "top_1_section": "inheritance",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_154",
+      "category": "Rare Genetic Diseases & Inheritance",
+      "diagnostic": {
+        "query_id": "v26_query_154",
+        "category": "WRONG_SECTION_SAME_ENTITY",
+        "explanation": "Top-1 matched entity 'sickle cell disease' but retrieved section 'genetic changes' instead of 'inheritance'.",
+        "top_1_rank_hit": false,
+        "top_k_hit": false,
+        "hit_rank": null,
+        "top_1_source": "GHR",
+        "top_1_section": "genetic changes",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_155",
+      "category": "Rare Genetic Diseases & Inheritance",
+      "diagnostic": {
+        "query_id": "v26_query_155",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0002417-4-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "GARD",
+        "top_1_section": "inheritance",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_156",
+      "category": "Rare Genetic Diseases & Inheritance",
+      "diagnostic": {
+        "query_id": "v26_query_156",
+        "category": "RETRIEVED_RANK_GT_1",
+        "explanation": "Ground truth evidence retrieved at Rank 2 (within Top-10).",
+        "top_1_rank_hit": false,
+        "top_k_hit": true,
+        "hit_rank": 2,
+        "top_1_source": "GARD",
+        "top_1_section": "information",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": false
+      }
+    },
+    {
+      "query_id": "v26_query_157",
+      "category": "Rare Genetic Diseases & Inheritance",
+      "diagnostic": {
+        "query_id": "v26_query_157",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0006017-4-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "GARD",
+        "top_1_section": "inheritance",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_158",
+      "category": "Rare Genetic Diseases & Inheritance",
+      "diagnostic": {
+        "query_id": "v26_query_158",
+        "category": "WRONG_SOURCE",
+        "explanation": "Top-1 retrieved from unapproved source 'GARD'.",
+        "top_1_rank_hit": false,
+        "top_k_hit": false,
+        "hit_rank": null,
+        "top_1_source": "GARD",
+        "top_1_section": "inheritance",
+        "top_1_entity_match": false,
+        "top_1_source_match": false,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_159",
+      "category": "Rare Genetic Diseases & Inheritance",
+      "diagnostic": {
+        "query_id": "v26_query_159",
+        "category": "WRONG_SOURCE",
+        "explanation": "Top-1 retrieved from unapproved source 'GARD'.",
+        "top_1_rank_hit": false,
+        "top_k_hit": false,
+        "hit_rank": null,
+        "top_1_source": "GARD",
+        "top_1_section": "inheritance",
+        "top_1_entity_match": false,
+        "top_1_source_match": false,
+        "top_1_section_match": true
+      }
+    },
+    {
+      "query_id": "v26_query_160",
+      "category": "Rare Genetic Diseases & Inheritance",
+      "diagnostic": {
+        "query_id": "v26_query_160",
+        "category": "SUCCESS_RANK_1",
+        "explanation": "Ground truth chunk (medquad_0000450-4-c0) retrieved at Rank 1.",
+        "top_1_rank_hit": true,
+        "top_k_hit": true,
+        "hit_rank": 1,
+        "top_1_source": "GHR",
+        "top_1_section": "inheritance",
+        "top_1_entity_match": true,
+        "top_1_source_match": true,
+        "top_1_section_match": true
+      }
+    }
+  ]
+}

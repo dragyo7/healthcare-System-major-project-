@@ -1,0 +1,17 @@
+{
+  "total_queries": 160,
+  "unique_query_ids": 160,
+  "unique_query_texts": 160,
+  "duplicate_queries": [],
+  "invalid_ground_truth_chunks": [],
+  "invalid_ground_truth_docs": [],
+  "high_ngram_leakages": [],
+  "audit_passed": true,
+  "summary": {
+    "status": "PASS",
+    "duplicate_count": 0,
+    "invalid_chunk_count": 0,
+    "invalid_doc_count": 0,
+    "high_ngram_leakage_count": 0
+  }
+}

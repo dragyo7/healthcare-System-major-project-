@@ -149,7 +149,68 @@ WARNING: FETAL TOXICITY. When pregnancy is detected, discontinue Lisinopril...
 
 ---
 
-## 5. Extensibility: How to Add a New Knowledge Source
+## 5. RAG Service Layer & Backend Foundation (V2.7)
+
+### 5.1 Architectural Role & Service Boundary
+The `RAGService` (`rag_module/service.py`) encapsulates all retrieval logic, candidate filtering, context formatting, and latency measurement into a strictly typed boundary. Future modules (such as `prescription_module` or frontend APIs) interact solely through `RAGService` rather than directly referencing FAISS, BM25, or pipeline internals.
+
+```mermaid
+flowchart LR
+    Client["Client / API Route"] -->|"RAGQueryRequest"| Service["RAGService"]
+    Service -->|"Query Validation"| Validation["Pydantic Validators"]
+    Service -->|"Retrieval Dispatch"| Retrievers["Dense / BM25 / Hybrid"]
+    Service -->|"Candidate Post-Filtering"| Filters["Source / Domain / Section Filters"]
+    Service -->|"Pass-Through / Rerank"| Reranker["Cross-Encoder Reranker"]
+    Service -->|"Evidence Structuring"| Evidence["List[EvidenceItem] + ContextBuilder"]
+    Service -->|"RAGQueryResponse"| Client
+```
+
+### 5.2 Service Request & Response Contracts
+
+#### `RAGQueryRequest`
+* `query: str` (1-2000 chars, non-empty, stripped)
+* `mode: RetrievalMode` (`"dense"`, `"bm25"`, `"hybrid"`, `"hybrid_rerank"`)
+* `top_k: int` (1-100, default 5)
+* `source_filter: Optional[List[str]]` (e.g. `["DailyMed"]`)
+* `domain_filter: Optional[List[str]]` (e.g. `["pharmacology"]`)
+* `section_filter: Optional[List[str]]` (e.g. `["indications & usage", "boxed warning"]`)
+
+#### `EvidenceItem`
+Structured clinical evidence item with 100% provenance retention and zero internal index objects:
+* `rank: int`, `score: float`
+* `source_id: str`, `source_name: str`, `publisher: str`
+* `document_id: str`, `chunk_id: str`, `title: str`, `section: str`, `medical_domain: str`, `source_url: str`, `text: str`
+* `dense_score: Optional[float]`, `bm25_score: Optional[float]`, `fused_score: Optional[float]`
+
+#### `RAGQueryResponse`
+* `query: str`, `retrieval_mode: str`, `total_evidence: int`
+* `evidence: List[EvidenceItem]`
+* `context_text: str` (XML-delimited formatted context)
+* `latency_ms: float`, `reranker_status: str`, `filters_applied: Dict[str, Any]`
+
+#### `RAGServiceHealth`
+* `status: str` (`"healthy"`, `"degraded"`, `"unready"`), `version: str` (`"2.7.0"`)
+* `service_ready: bool`, `index_ready: bool`, `indexed_chunks_count: int`, `embedding_model: str`
+* `dense_ready: bool`, `bm25_ready: bool`, `hybrid_ready: bool`, `reranker_status: str`
+
+### 5.3 Error Hierarchy & Public Error Masking
+The service layer defines a clean exception hierarchy mapping directly to HTTP status codes without leaking internal tracebacks or filesystem paths:
+* `RAGServiceError`: Base service exception (HTTP 500 default)
+* `InvalidQueryError`: Empty, whitespace-only, or malformed queries (HTTP 400)
+* `UnsupportedModeError`: Unrecognized retrieval mode (HTTP 400)
+* `InvalidFilterError`: Malformed filter lists (HTTP 400)
+* `ServiceNotReadyError`: Missing or uninitialized indexes (HTTP 503)
+
+### 5.4 Production FastAPI Endpoints (`rag_module/api.py`)
+* `POST /rag/query`: Canonical V2.7 retrieval endpoint accepting `RAGQueryRequest` $\to$ `RAGQueryResponse`.
+* `GET /rag/health` & `GET /health`: Health status reporting chunk count and readiness.
+* `GET /rag/ready` & `GET /ready`: Lightweight readiness probe for orchestrators.
+* `POST /retrieve`: Backward-compatible evidence retrieval endpoint.
+* `POST /chat`: Backward-compatible end-to-end question answering endpoint.
+
+---
+
+## 6. Extensibility: How to Add a New Knowledge Source
 
 Adding a new medical knowledge source requires **zero modifications to retrieval or indexing core code**:
 1. Subclass `BaseSourceAdapter` in `rag_module/ingestion/adapters/<name>_adapter.py`.
@@ -161,7 +222,7 @@ Adding a new medical knowledge source requires **zero modifications to retrieval
 
 ---
 
-## 6. Directory Layout & Key Files
+## 7. Directory Layout & Key Files
 
 ```
 rag_module/
@@ -205,8 +266,13 @@ rag_module/
 │   └── guardrails.py             # Query validation & emergency filters
 ├── evaluation/
 │   ├── evaluator.py              # Quantitative benchmark runner
-│   └── pharmacology_benchmark.json # 45-query pharmacology benchmark
+│   ├── failure_analyzer.py       # 8-category retrieval failure analyzer
+│   ├── leakage_checker.py        # Contamination & leakage verifier
+│   ├── run_benchmark.py          # Formal 160-query benchmark runner
+│   └── v26_benchmark_dataset.json# 160-query multi-source benchmark dataset
+├── service.py                    # V2.7 RAGService, request/response models & error hierarchy
 ├── rag_pipeline.py               # Unified MedicalRAGPipeline
 ├── api.py                        # FastAPI REST service
-└── tests/                        # Comprehensive unit & integration tests
+└── tests/                        # 70 comprehensive unit & integration tests
 ```
+
