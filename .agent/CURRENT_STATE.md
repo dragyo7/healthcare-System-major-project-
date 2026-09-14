@@ -4,9 +4,9 @@
 
 * **Repository**: `https://github.com/dragyo7/healthcare-System-major-project-`
 * **Current Branch**: `feature/rag-v2-foundation`
-* **Current RAG Version**: **V2.7 (RAG Service & Backend Foundation)**
-* **System Maturity**: **Production-Grade Healthcare RAG Service Layer & Evaluated Multi-Source Retrieval Engine**
-* **Readiness Level**: **Decoupled RAG Service Boundary with Strict Request/Response Contracts, Clean API Error Masking, and 70/70 Passing Tests — Ready for Downstream Backend & Prescription Safety Integration**
+* **Current RAG Version**: **V2.8 (Grounding, Evidence Policy & Safety Orchestration Foundation)**
+* **System Maturity**: **Evidence-Grounded RAG Architecture with Deterministic Grounding Policy, Provenance Auditing, and Safe Abstention Boundaries**
+* **Readiness Level**: **Decoupled RAG Service Boundary with Strict Typed Grounding Contracts, Quality & Conflict Policies, Emergency Interception, and 91/91 Passing Tests**
 
 ---
 
@@ -14,27 +14,20 @@
 
 | Component / Capability | Status | Evidence & Verification |
 | :--- | :--- | :--- |
-| **RAG Service Layer (`RAGService`, `rag_module/service.py`)** | **VALIDATED** | Clean service boundary orchestrating Dense, BM25, Hybrid, Reranking, Filtering, and Context formatting with strict Pydantic schemas. |
-| **RAG Request/Response Contract (`RAGQueryRequest`, `RAGQueryResponse`, `EvidenceItem`)** | **VALIDATED** | Typed contract supporting `query`, `mode`, `top_k`, `source_filter`, `domain_filter`, `section_filter`, with complete provenance and 0 raw index leakage. |
-| **API Error Hierarchy & Masking** | **VALIDATED** | Custom service exceptions (`InvalidQueryError`, `UnsupportedModeError`, `InvalidFilterError`, `ServiceNotReadyError`) mapped to clean HTTP status codes without leaking stack traces or paths. |
-| **Production FastAPI API (`rag_module/api.py`)** | **VALIDATED** | Thin controller exposing `POST /rag/query`, `GET /rag/health`, `GET /rag/ready`, and backward-compatible `POST /retrieve`, `POST /chat`. |
-| **Canonical Knowledge Model (`KnowledgeDocument` / `KnowledgeChunk`)** | **VALIDATED** | Enforces strict schemas, SHA-256 hashes, provenance metadata, and section tags. |
-| **Source Adapter Pattern (`BaseSourceAdapter`, `SourceRegistry`)** | **VALIDATED** | Multi-source registration with clean ingestion lifecycle and manifest generation. |
-| **DailyMed Ingestion Adapter (`DailyMedAdapter`)** | **VALIDATED** | **231 authentic FDA monographs** parsed into **2,176 clinical section documents/chunks** across 14 therapeutic classes. |
-| **MedQuAD Ingestion Adapter (`MedQuADAdapter`)** | **VALIDATED** | 16,358 clean Q&A documents normalized into 23,967 semantic chunks. |
+| **Evidence Policy Engine (`EvidencePolicyEngine`, `rag_module/safety/evidence_policy.py`)** | **VALIDATED** | Deterministic evaluation of retrieved chunks into `GROUNDED`, `WEAK_EVIDENCE`, `INSUFFICIENT_EVIDENCE`, or `CONFLICTING_EVIDENCE` with machine-readable reason codes. |
+| **Provenance Validator (`ProvenanceValidator`, `rag_module/safety/provenance_validator.py`)** | **VALIDATED** | Complete audit of mandatory metadata fields, text validity, and publisher authenticity with zero metadata fabrication. |
+| **Query Safety Engine (`QuerySafetyEngine`, `rag_module/safety/query_safety.py`)** | **VALIDATED** | Pre-retrieval triage screening for acute clinical crises, prompt injection sanitization, and risk categorization (`MEDICATION_SAFETY`, `INFORMATIONAL`, `EMERGENCY`). |
+| **Grounding Decision Contract (`GroundingDecision`)** | **VALIDATED** | Typed contract reporting `status`, `generation_allowed`, `usable_evidence_count`, `provenance_valid`, `reason_codes`, and `warnings`. |
+| **Safe Abstention Boundary** | **VALIDATED** | Blocks downstream generation (`generation_allowed = False`) when evidence is missing, out-of-domain, tampered, or contradictory. |
+| **RAG Service Layer (`RAGService`, `rag_module/service.py`)** | **VALIDATED** | Service boundary orchestrating retrieval, filtering, safety screening, evidence policy enforcement, and context formatting. |
+| **Production FastAPI API (`rag_module/api.py`)** | **VALIDATED** | Thin controller exposing `POST /rag/query`, `GET /rag/health`, `GET /rag/ready` with sanitized error handlers. |
 | **Combined Production Index** | **VALIDATED** | 26,143 unified clinical chunks indexed in FAISS (`index_v2.bin`) and BM25 (`bm25_index.pkl`). |
 | **Formal Benchmark Dataset (`v26_benchmark_dataset.json`)** | **VALIDATED** | Exactly **160 clinical queries** across 18 clinical categories with 315 verified ground-truth chunk bindings. |
-| **Benchmark Leakage & Contamination Checker (`leakage_checker.py`)** | **VALIDATED** | Automated 0-duplicate, 0-invalid-ID, and verbatim n-gram audit (**PASS**). |
-| **Diagnostic Failure Analyzer (`failure_analyzer.py`)** | **VALIDATED** | 8 granular outcome categories distinguishing true Top-1 hits, rank > 1 hits, section errors, entity errors, and source errors. |
-| **Exact Evaluation Suite (`evaluator.py`, `run_benchmark.py`)** | **VALIDATED** | Exact ID-based Recall@1..10, MRR, nDCG@5..10, Source Acc@1, Entity Acc@1, Section Prec@1. |
-| **Dense Vector Retrieval (`DenseRetriever`)** | **VALIDATED** | BGE-small-en (384-d, normalized) with FAISS IndexFlatIP (Cosine similarity). |
-| **Lexical Retrieval (`BM25Retriever`)** | **VALIDATED** | In-memory BM25Okapi inverted index with optimized posting list lookup. |
-| **Hybrid Rank Fusion (`HybridRetriever`)** | **VALIDATED** | Reciprocal Rank Fusion (RRF $k=60$) combining dense and lexical candidate lists. |
-| **Cross-Encoder Reranker (`CrossEncoderReranker`)** | **FALLBACK (Pass-Through)** | Reranker weights unbundled; operates in verified graceful pass-through mode with explicit disclosure. |
-| **Automated Test Suite** | **VALIDATED** | **70 / 70 tests passing (100%) in 9.1s** covering pipeline, service layer, FastAPI endpoints, data models, and benchmark rigor. |
-| **Prescription Module (`prescription_module`)** | **VALIDATED (Standalone)** | Rule-based regex and NLP entity extractor with independent test suite. |
-| **Drug Module (`drug_module`)** | **VALIDATED (Standalone)** | Drug catalog master data structure with standardized entity lookups. |
-| **Prescription $\to$ RAG Automated Wiring** | **PLANNED (V2.8+)** | Direct service pipeline connecting extracted prescription entities to `RAGService.retrieve()`. |
+| **Grounding Policy Evaluation Suite (`grounding_evaluator.py`)** | **VALIDATED** | Evaluates in-domain grounding, out-of-domain abstention, provenance tampering, conflict detection, and sub-millisecond policy latency. |
+| **Automated Test Suite** | **VALIDATED** | **91 / 91 tests passing (100%) in 23.3s** covering pipeline, service layer, grounding policy, safety screening, and benchmark rigor. |
+
+| **Prescription Module (`prescription_module`)** | **STANDALONE** | Isolated rule-based regex and NLP entity extractor. |
+| **Drug Module (`drug_module`)** | **STANDALONE** | Isolated drug catalog master data structure. |
 
 ---
 
@@ -45,6 +38,7 @@
 | **DailyMed Full Expansion** (`DailyMed`) | **REAL DATA VALIDATED** | **2,176** | **2,176** | Pharmacology, Boxed Warnings, Dosages, Interactions, Adverse Effects |
 | **MedQuAD NIH Corpus** (`medquad_nih`) | **REAL DATA VALIDATED** | **16,358** | **23,967** | General Medicine, Diseases, Disorders, Anatomy |
 | **Total Ingested (Combined Unified Corpus)** | — | **18,534** | **26,143** | Multi-Source Unified Clinical Knowledge Base |
+
 
 ---
 

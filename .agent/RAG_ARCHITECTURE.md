@@ -10,27 +10,27 @@ flowchart TD
         RAW_DM["DailyMed SPL (231 Drugs, 14 Classes)"]
         RAW_MQ["MedQuAD NIH (16,358 Clean Docs)"]
         RAW_FDA["openFDA Regulatory Safety API"]
-        
+
         ADP_DM["DailyMedAdapter"]
         ADP_MQ["MedQuADAdapter"]
         ADP_FDA["OpenFDAAdapter"]
         ADP_FUT["Dynamic Source Adapters (Extensible)"]
-        
+
         REG["SourceRegistry (Metadata & Authority)"]
         ORCH["IngestionOrchestrator"]
-        
+
         DOCS["Canonical KnowledgeDocuments\n(18,534 Docs across 14 Clinical Domains)"]
         CHK["Semantic Chunker (SemanticChunker)\n(250 words, 35 overlap, Content Hash)"]
         CHKS["Canonical KnowledgeChunks (26,143 Chunks)"]
-        
+
         EMB["BGE-small-en Embedder\n(384-d float32, Unit Normalized)"]
-        
+
         subgraph ArtifactsStorage [Source-Isolated & Combined Artifacts]
             ART_DM["artifacts/dailymed/\n(2,176 Chunks, FAISS + BM25)"]
             ART_MQ["artifacts/medquad/\n(23,967 Chunks, Manifest)"]
             ART_COMB["artifacts/combined/\n(26,143 Chunks, FAISS + BM25)"]
         end
-        
+
         RAW_DM --> ADP_DM
         RAW_MQ --> ADP_MQ
         RAW_FDA --> ADP_FDA
@@ -45,14 +45,14 @@ flowchart TD
     subgraph RetrievalStage [Query & Multi-Source Hybrid Retrieval]
         Q["User / Clinical Query"]
         GUARD["Safety Guardrails\n(Emergency Intercept & Out-of-Domain Filter)"]
-        
+
         D_SRCH["Dense Search (FAISS IndexFlatIP)\nCosine Similarity Top-20"]
         L_SRCH["Lexical Search (BM25Okapi)\nKeyword Matching Top-20"]
         FILT["Source & Domain Isolation Filter\n(source_filter=['DailyMed'] / ['medquad_nih'])"]
-        
+
         RRF["Reciprocal Rank Fusion (RRF k=60)\nFused Score Formulation"]
         RERANK["Cross-Encoder Reranker\n(bge-reranker-small / Fallback Pass-Through)"]
-        
+
         Q --> GUARD --> D_SRCH & L_SRCH
         D_SRCH & L_SRCH --> FILT --> RRF --> RERANK
     end
@@ -61,7 +61,7 @@ flowchart TD
         CTX["Context Builder (ContextBuilder)\n(Formatted Provenance & Citations)"]
         LLM["Language Model Generation\n(TinyLlama-1.1B / Clinical Generator)"]
         OUT["Attributed Response with Source URLs & Sections"]
-        
+
         RERANK --> CTX --> LLM --> OUT
     end
 ```
@@ -149,20 +149,39 @@ WARNING: FETAL TOXICITY. When pregnancy is detected, discontinue Lisinopril...
 
 ---
 
-## 5. RAG Service Layer & Backend Foundation (V2.7)
+## 5. RAG Service & Grounding Layer (V2.8)
 
 ### 5.1 Architectural Role & Service Boundary
-The `RAGService` (`rag_module/service.py`) encapsulates all retrieval logic, candidate filtering, context formatting, and latency measurement into a strictly typed boundary. Future modules (such as `prescription_module` or frontend APIs) interact solely through `RAGService` rather than directly referencing FAISS, BM25, or pipeline internals.
+The `RAGService` (`rag_module/service.py`) encapsulates query safety triage, hybrid retrieval, post-filtering, deterministic evidence policy evaluation, 9-field provenance validation, context formatting, and latency measurement into a strictly typed boundary.
 
 ```mermaid
-flowchart LR
+flowchart TD
     Client["Client / API Route"] -->|"RAGQueryRequest"| Service["RAGService"]
-    Service -->|"Query Validation"| Validation["Pydantic Validators"]
-    Service -->|"Retrieval Dispatch"| Retrievers["Dense / BM25 / Hybrid"]
-    Service -->|"Candidate Post-Filtering"| Filters["Source / Domain / Section Filters"]
-    Service -->|"Pass-Through / Rerank"| Reranker["Cross-Encoder Reranker"]
-    Service -->|"Evidence Structuring"| Evidence["List[EvidenceItem] + ContextBuilder"]
-    Service -->|"RAGQueryResponse"| Client
+
+    subgraph SafetyTriage [Pre-Retrieval Safety]
+        Service -->|"1. Screen Query"| Safety["QuerySafetyEngine"]
+        Safety -->|"Emergency / Injection?"| Check1{"Is Emergency?"}
+        Check1 -->|Yes| FastFail["Return Emergency Guidance\ngeneration_allowed=False"]
+    end
+
+    subgraph RetrievalCore [Multi-Source Hybrid Retrieval]
+        Check1 -->|No| Retrievers["Dense / BM25 / Hybrid Search"]
+        Retrievers --> Filters["Post-Filtering (Source, Domain, Section)"]
+        Filters --> Reranker["Cross-Encoder Reranker / Fallback"]
+    end
+
+    subgraph GroundingPolicy [Deterministic Grounding & Evidence Policy]
+        Reranker -->|"Retrieved EvidenceItems"| Policy["EvidencePolicyEngine"]
+        Policy -->|"Verify 9 Fields"| Prov["ProvenanceValidator"]
+        Policy -->|"Pairwise Contradiction Check"| Conflict["Conflict Detection"]
+        Policy -->|"Evaluate Thresholds"| GroundCheck["GroundingStatus Decision"]
+    end
+
+    subgraph ContextAssembly [Context Construction & Output]
+        GroundCheck -->|"Grounded / Allowed"| Ctx["ContextBuilder (XML Formatted)"]
+        GroundCheck -->|"Abstain / Blocked"| EmptyCtx["Context Blocked / Empty"]
+        Ctx & EmptyCtx & FastFail -->|"RAGQueryResponse"| Resp["Structured Audit Response"]
+    end
 ```
 
 ### 5.2 Service Request & Response Contracts
@@ -175,6 +194,17 @@ flowchart LR
 * `domain_filter: Optional[List[str]]` (e.g. `["pharmacology"]`)
 * `section_filter: Optional[List[str]]` (e.g. `["indications & usage", "boxed warning"]`)
 
+#### `GroundingDecision`
+* `status: GroundingStatus` (`"GROUNDED"`, `"WEAK_EVIDENCE"`, `"INSUFFICIENT_EVIDENCE"`, `"CONFLICTING_EVIDENCE"`)
+* `generation_allowed: bool` (Explicit machine-readable boolean gate for downstream generators)
+* `reason_codes: List[GroundingReasonCode]` (e.g., `["OK_GROUNDED"]`, `["OUT_OF_DOMAIN", "LOW_RETRIEVAL_SCORES"]`, `["CONTRADICTORY_EVIDENCE"]`)
+* `evidence_count: int`, `usable_evidence_count: int`
+* `provenance_valid: bool`, `provenance_status: ProvenanceStatus` (`"VALID"`, `"PARTIALLY_IDENTIFIED"`, `"INVALID"`)
+* `evidence_sources: List[str]`, `evidence_documents: List[str]`, `evidence_sections: List[str]`
+* `warnings: List[str]`
+* `contradiction_detected: bool`, `contradiction_details: Optional[str]`
+* `policy_latency_ms: float`
+
 #### `EvidenceItem`
 Structured clinical evidence item with 100% provenance retention and zero internal index objects:
 * `rank: int`, `score: float`
@@ -185,28 +215,27 @@ Structured clinical evidence item with 100% provenance retention and zero intern
 #### `RAGQueryResponse`
 * `query: str`, `retrieval_mode: str`, `total_evidence: int`
 * `evidence: List[EvidenceItem]`
-* `context_text: str` (XML-delimited formatted context)
+* `context_text: str` (XML-delimited formatted context if generation allowed, empty if abstained)
 * `latency_ms: float`, `reranker_status: str`, `filters_applied: Dict[str, Any]`
+* `grounding: Optional[GroundingDecision]`
+* `safety_assessment: Optional[QuerySafetyAssessment]`
 
 #### `RAGServiceHealth`
-* `status: str` (`"healthy"`, `"degraded"`, `"unready"`), `version: str` (`"2.7.0"`)
+* `status: str` (`"healthy"`, `"degraded"`, `"unready"`), `version: str` (`"2.8.0"`)
 * `service_ready: bool`, `index_ready: bool`, `indexed_chunks_count: int`, `embedding_model: str`
 * `dense_ready: bool`, `bm25_ready: bool`, `hybrid_ready: bool`, `reranker_status: str`
 
-### 5.3 Error Hierarchy & Public Error Masking
-The service layer defines a clean exception hierarchy mapping directly to HTTP status codes without leaking internal tracebacks or filesystem paths:
-* `RAGServiceError`: Base service exception (HTTP 500 default)
-* `InvalidQueryError`: Empty, whitespace-only, or malformed queries (HTTP 400)
-* `UnsupportedModeError`: Unrecognized retrieval mode (HTTP 400)
-* `InvalidFilterError`: Malformed filter lists (HTTP 400)
-* `ServiceNotReadyError`: Missing or uninitialized indexes (HTTP 503)
-
-### 5.4 Production FastAPI Endpoints (`rag_module/api.py`)
-* `POST /rag/query`: Canonical V2.7 retrieval endpoint accepting `RAGQueryRequest` $\to$ `RAGQueryResponse`.
-* `GET /rag/health` & `GET /health`: Health status reporting chunk count and readiness.
-* `GET /rag/ready` & `GET /ready`: Lightweight readiness probe for orchestrators.
-* `POST /retrieve`: Backward-compatible evidence retrieval endpoint.
-* `POST /chat`: Backward-compatible end-to-end question answering endpoint.
+### 5.3 Deterministic Evidence Policy & Safe Abstention Semantics
+1. **Out-of-Domain & Insufficient Retrieval**:
+   * If substantive query terms have $< 35\%$ overlap with retrieved chunks and BM25 score is 0, status is `INSUFFICIENT_EVIDENCE` (`OUT_OF_DOMAIN`) with `generation_allowed = False`.
+   * Distinguishes *"No relevant evidence was retrieved"* from *"The clinical statement is false."*
+2. **Provenance Verification**:
+   * Audits all 9 mandatory metadata fields (`source_id`, `source_name`, `publisher`, `document_id`, `chunk_id`, `title`, `section`, `medical_domain`, `source_url`).
+   * Missing required fields trigger `INVALID_PROVENANCE` and downgrade grounding status. Zero metadata is fabricated.
+3. **Contradiction Detection**:
+   * Scans retrieved chunks pairwise for mutually exclusive clinical terms (e.g. *contraindicated* vs *indicated*, *fetal toxicity* vs *safe*). If detected, status is `CONFLICTING_EVIDENCE` and generation is blocked.
+4. **Emergency Triage**:
+   * Acute crises (anaphylaxis, acute poisoning, severe chest pain) trigger immediate triage guidance and block unconstrained generation.
 
 ---
 
@@ -263,16 +292,21 @@ rag_module/
 ├── context/
 │   └── context_builder.py        # Citation-bearing context constructor
 ├── safety/
-│   └── guardrails.py             # Query validation & emergency filters
+│   ├── guardrails.py             # Legacy query validation & emergency filters
+│   ├── query_safety.py           # V2.8 QuerySafetyEngine (triage, risk categorization, sanitization)
+│   ├── provenance_validator.py   # V2.8 ProvenanceValidator (9-field audit & status)
+│   └── evidence_policy.py        # V2.8 EvidencePolicyEngine (grounding status, reason codes, contradiction)
 ├── evaluation/
 │   ├── evaluator.py              # Quantitative benchmark runner
 │   ├── failure_analyzer.py       # 8-category retrieval failure analyzer
 │   ├── leakage_checker.py        # Contamination & leakage verifier
 │   ├── run_benchmark.py          # Formal 160-query benchmark runner
+│   ├── grounding_evaluator.py    # V2.8 Grounding & policy evaluation suite
 │   └── v26_benchmark_dataset.json# 160-query multi-source benchmark dataset
-├── service.py                    # V2.7 RAGService, request/response models & error hierarchy
+├── service.py                    # V2.8 RAGService, request/response models & error hierarchy
 ├── rag_pipeline.py               # Unified MedicalRAGPipeline
-├── api.py                        # FastAPI REST service
-└── tests/                        # 70 comprehensive unit & integration tests
+├── api.py                        # FastAPI REST service (v2.8.0)
+└── tests/                        # 91 comprehensive unit & integration tests
+
 ```
 

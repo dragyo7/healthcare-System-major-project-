@@ -1,7 +1,7 @@
 """
-RAG Service Layer (V2.7).
+RAG Service Layer (V2.8 — Grounding, Evidence Policy & Safety Foundation).
 Provides a clean, modular, production-grade service boundary for medical evidence retrieval,
-structured request validation, provenance tracking, and error handling.
+structured request validation, provenance tracking, evidence policy enforcement, and error handling.
 """
 import time
 import re
@@ -15,6 +15,16 @@ from rag_module.retrieval.bm25_retriever import BM25Retriever
 from rag_module.retrieval.hybrid_retriever import HybridRetriever
 from rag_module.reranking.cross_encoder_reranker import CrossEncoderReranker
 from rag_module.context.context_builder import ContextBuilder
+from rag_module.safety.provenance_validator import ProvenanceValidator, ProvenanceStatus, ProvenanceValidationResult
+from rag_module.safety.query_safety import QuerySafetyEngine, QuerySafetyAssessment, QueryRiskCategory
+from rag_module.safety.evidence_policy import (
+    EvidencePolicyEngine,
+    EvidencePolicyConfig,
+    GroundingDecision,
+    GroundingStatus,
+    GroundingReasonCode,
+    SourcePolicy
+)
 
 
 # =====================================================================
@@ -147,16 +157,19 @@ class EvidenceItem(BaseModel):
 
 class RAGQueryResponse(BaseModel):
     """
-    Structured response contract returned by the RAG retrieval service.
+    Structured response contract returned by the RAG retrieval service (V2.8).
+    Exposes auditable evidence, formatted context, and explicit grounding decisions.
     """
     query: str = Field(..., description="The sanitized query that was processed.")
     retrieval_mode: str = Field(..., description="The retrieval mode executed ('dense', 'bm25', 'hybrid', 'hybrid_rerank').")
     total_evidence: int = Field(..., ge=0, description="Total number of evidence items returned.")
     evidence: List[EvidenceItem] = Field(..., description="Ranked list of structured clinical evidence items.")
     context_text: str = Field(..., description="Formatted XML-delimited context ready for generation or downstream use.")
-    latency_ms: float = Field(..., ge=0.0, description="End-to-end retrieval latency in milliseconds.")
+    latency_ms: float = Field(..., ge=0.0, description="End-to-end retrieval and policy latency in milliseconds.")
     reranker_status: str = Field(..., description="Status of the reranker stage ('available', 'fallback_pass_through', 'disabled').")
     filters_applied: Dict[str, Any] = Field(default_factory=dict, description="Summary of active filters applied.")
+    grounding: Optional[GroundingDecision] = Field(default=None, description="Deterministic evidence policy and grounding decision.")
+    safety_assessment: Optional[QuerySafetyAssessment] = Field(default=None, description="Pre-retrieval query risk evaluation.")
 
     model_config = ConfigDict(extra="forbid")
 
@@ -167,7 +180,7 @@ class RAGServiceHealth(BaseModel):
     Exposes no sensitive filesystem paths or credentials.
     """
     status: str = Field(..., description="Overall service status ('healthy', 'degraded', 'unready').")
-    version: str = Field(default="2.7.0", description="RAG Service version.")
+    version: str = Field(default="2.8.0", description="RAG Service version.")
     service_ready: bool = Field(..., description="Whether the service is ready to accept retrieval requests.")
     index_ready: bool = Field(..., description="Whether underlying vector and lexical indexes are loaded.")
     indexed_chunks_count: int = Field(..., ge=0, description="Total number of indexed chunks available.")
@@ -186,9 +199,9 @@ class RAGServiceHealth(BaseModel):
 
 class RAGService:
     """
-    Modular RAG Retrieval Service.
+    Modular RAG Retrieval & Safety Orchestration Service.
     Encapsulates retrieval orchestration, filtering, context formatting,
-    and performance tracking into a testable boundary.
+    provenance validation, evidence policy enforcement, and performance tracking.
     """
     def __init__(
         self,
@@ -197,7 +210,9 @@ class RAGService:
         bm25_retriever: Optional[BM25Retriever] = None,
         hybrid_retriever: Optional[HybridRetriever] = None,
         reranker: Optional[CrossEncoderReranker] = None,
-        context_builder: Optional[ContextBuilder] = None
+        context_builder: Optional[ContextBuilder] = None,
+        query_safety: Optional[QuerySafetyEngine] = None,
+        evidence_policy: Optional[EvidencePolicyEngine] = None
     ):
         self.config = config or DEFAULT_CONFIG
 
@@ -247,6 +262,13 @@ class RAGService:
             max_chunks=self.config.FINAL_TOP_K
         )
 
+        # 6. Safety & Evidence Policy Engines (V2.8)
+        self.query_safety = query_safety or QuerySafetyEngine(
+            enable_emergency=self.config.ENABLE_EMERGENCY_TRIAGE,
+            enable_sanitization=True
+        )
+        self.evidence_policy = evidence_policy or EvidencePolicyEngine()
+
     def is_ready(self) -> bool:
         """Checks if at least one retriever index is operational."""
         return self.dense_retriever is not None or self.bm25_retriever is not None
@@ -277,7 +299,7 @@ class RAGService:
 
         return RAGServiceHealth(
             status=status,
-            version="2.7.0",
+            version="2.8.0",
             service_ready=service_ready,
             index_ready=service_ready,
             indexed_chunks_count=chunks_count,
@@ -290,14 +312,14 @@ class RAGService:
 
     def retrieve(self, request: RAGQueryRequest) -> RAGQueryResponse:
         """
-        Executes evidence retrieval for a validated RAGQueryRequest.
-        Returns a structured RAGQueryResponse.
+        Executes evidence retrieval and applies evidence policy for a validated RAGQueryRequest.
+        Returns a structured RAGQueryResponse with an auditable GroundingDecision.
         """
         if not self.is_ready():
             raise ServiceNotReadyError("RAG service is not initialized or index files are missing.")
 
         start_time = time.perf_counter()
-        query = request.query.strip()
+        raw_query = request.query.strip()
         mode = request.mode.value if isinstance(request.mode, RetrievalMode) else str(request.mode).lower()
         top_k = request.top_k
 
@@ -310,21 +332,55 @@ class RAGService:
         if mode == "bm25" and not self.bm25_retriever:
             raise ServiceNotReadyError("BM25 retriever is not available.")
         if mode in ["hybrid", "hybrid_rerank"] and not self.hybrid_retriever:
-            # Fallback to dense if hybrid is unavailable
             if not self.dense_retriever and not self.bm25_retriever:
                 raise ServiceNotReadyError("Neither hybrid nor fallback retrievers are available.")
+
+        # Step 0: Pre-retrieval Query Safety Screening
+        safety_assessment = self.query_safety.assess_query(raw_query)
+        sanitized_query = safety_assessment.sanitized_query or raw_query
+
+        # If acute medical emergency detected, return emergency response immediately
+        if safety_assessment.is_emergency:
+            elapsed_ms = (time.perf_counter() - start_time) * 1000.0
+            emergency_grounding = GroundingDecision(
+                status=GroundingStatus.INSUFFICIENT_EVIDENCE,
+                generation_allowed=False,
+                evidence_count=0,
+                usable_evidence_count=0,
+                provenance_valid=False,
+                top_evidence_rank=None,
+                evidence_sources=[],
+                evidence_documents=[],
+                evidence_sections=[],
+                reason_codes=[GroundingReasonCode.NO_EVIDENCE],
+                warnings=["Query intercepted by acute emergency triage guardrail."],
+                conflict_detected=False,
+                conflict_summary=None,
+                policy_latency_ms=0.0
+            )
+            return RAGQueryResponse(
+                query=raw_query,
+                retrieval_mode=mode,
+                total_evidence=0,
+                evidence=[],
+                context_text=safety_assessment.emergency_message or "Acute emergency detected.",
+                latency_ms=round(elapsed_ms, 2),
+                reranker_status="disabled",
+                filters_applied={},
+                grounding=emergency_grounding,
+                safety_assessment=safety_assessment
+            )
 
         # Step 1: Execute primary retrieval
         candidate_chunks: List[Dict[str, Any]] = []
 
-        # Prepare candidate pool size (fetch more if post-filtering by section)
         fetch_k = top_k
         if request.section_filter:
             fetch_k = max(top_k * 4, 50)
 
         if mode == "dense":
             dense_results = self.dense_retriever.search(
-                query,
+                sanitized_query,
                 top_k=fetch_k,
                 source_filter=request.source_filter,
                 domain_filter=request.domain_filter
@@ -336,7 +392,7 @@ class RAGService:
 
         elif mode == "bm25":
             bm25_results = self.bm25_retriever.search(
-                query,
+                sanitized_query,
                 top_k=fetch_k,
                 source_filter=request.source_filter,
                 domain_filter=request.domain_filter
@@ -349,7 +405,7 @@ class RAGService:
         elif mode in ["hybrid", "hybrid_rerank"]:
             if self.hybrid_retriever:
                 candidate_chunks = self.hybrid_retriever.search(
-                    query,
+                    sanitized_query,
                     dense_k=max(self.config.DENSE_CANDIDATE_K, fetch_k),
                     bm25_k=max(self.config.BM25_CANDIDATE_K, fetch_k),
                     final_k=fetch_k,
@@ -360,7 +416,7 @@ class RAGService:
                     chunk["score"] = chunk.get("fused_score", chunk.get("dense_score", 0.0))
             elif self.dense_retriever:
                 dense_results = self.dense_retriever.search(
-                    query,
+                    sanitized_query,
                     top_k=fetch_k,
                     source_filter=request.source_filter,
                     domain_filter=request.domain_filter
@@ -371,7 +427,7 @@ class RAGService:
                 ]
             elif self.bm25_retriever:
                 bm25_results = self.bm25_retriever.search(
-                    query,
+                    sanitized_query,
                     top_k=fetch_k,
                     source_filter=request.source_filter,
                     domain_filter=request.domain_filter
@@ -387,7 +443,6 @@ class RAGService:
             filtered_chunks = []
             for chunk in candidate_chunks:
                 chunk_section = str(chunk.get("section") or chunk.get("qtype") or "").lower()
-                # Check direct match or substring match
                 if any(sec in chunk_section or chunk_section in sec for sec in section_set):
                     filtered_chunks.append(chunk)
             candidate_chunks = filtered_chunks
@@ -398,7 +453,7 @@ class RAGService:
             if getattr(self.reranker, "use_reranker", False):
                 if getattr(self.reranker, "model", None) is not None:
                     reranker_status = "available"
-                    candidate_chunks = self.reranker.rerank(query, candidate_chunks, top_k=top_k)
+                    candidate_chunks = self.reranker.rerank(sanitized_query, candidate_chunks, top_k=top_k)
                 else:
                     reranker_status = "fallback_pass_through"
                     candidate_chunks = candidate_chunks[:top_k]
@@ -413,7 +468,6 @@ class RAGService:
         for rank, chunk in enumerate(candidate_chunks, start=1):
             score = float(chunk.get("score") or chunk.get("fused_score") or chunk.get("dense_score") or chunk.get("bm25_score") or 0.0)
             
-            # Map canonical metadata fields
             item = EvidenceItem(
                 rank=rank,
                 score=round(score, 6),
@@ -433,8 +487,19 @@ class RAGService:
             )
             evidence_items.append(item)
 
-        # Step 5: Format context string via ContextBuilder
-        context_str, _ = self.context_builder.build_context(candidate_chunks)
+        # Step 5: Evidence Policy & Grounding Evaluation (V2.8)
+        grounding_decision = self.evidence_policy.evaluate_evidence(
+            query=sanitized_query,
+            evidence_items=evidence_items,
+            retrieval_mode=mode
+        )
+
+        # Step 6: Format context string via ContextBuilder (strictly bounded to usable chunks if generation allowed)
+        if grounding_decision.generation_allowed:
+            usable_count = max(grounding_decision.usable_evidence_count, 1) if candidate_chunks else 0
+            context_str, _ = self.context_builder.build_context(candidate_chunks[:usable_count])
+        else:
+            context_str = ""
 
         elapsed_ms = (time.perf_counter() - start_time) * 1000.0
 
@@ -447,14 +512,16 @@ class RAGService:
             filters_summary["section_filter"] = request.section_filter
 
         return RAGQueryResponse(
-            query=query,
+            query=sanitized_query,
             retrieval_mode=mode,
             total_evidence=len(evidence_items),
             evidence=evidence_items,
             context_text=context_str,
             latency_ms=round(elapsed_ms, 2),
             reranker_status=reranker_status,
-            filters_applied=filters_summary
+            filters_applied=filters_summary,
+            grounding=grounding_decision,
+            safety_assessment=safety_assessment
         )
 
 

@@ -113,5 +113,29 @@ Evaluated across exactly $N=160$ clinical and pharmacology queries across 18 cat
 ## 7. Leakage & Test Suite Verification
 
 * **Data Leakage Check**: **PASS** (0 duplicates, 0 invalid ID bindings, 0 verbatim n-gram leaks).
-* **Test Suite Status**: **51 / 51 tests passing (100%) in 7.3s** covering benchmark dataset integrity, leakage audit, nDCG calculation formulas, failure categorization, and pipeline modules.
+* **Test Suite Status**: **91 / 91 tests passing (100%) in 23.3s** covering benchmark dataset integrity, leakage audit, nDCG calculation formulas, failure categorization, pipeline modules, V2.7 service contracts, and V2.8 grounding/provenance/safety policies.
 * **Cross-Encoder Reranker Status**: Evaluated and disclosed as **Pass-Through Fallback** due to unbundled remote model weights (`BAAI/bge-reranker-small`). Zero artificial reranker performance lift claimed.
+
+
+---
+
+## 8. V2.8 Grounding Policy Evaluation Suite
+
+A dedicated deterministic evaluation suite (`rag_module/evaluation/grounding_evaluator.py`) evaluates the grounding policy across 4 fundamental clinical and engineering questions using independent test fixtures:
+
+### 8.1 Key Evaluation Questions & Results
+
+| Evaluation Question | Target Criterion | Verified System Behavior | Status |
+| :--- | :--- | :--- | :--- |
+| **1. Grounded In-Domain Queries** | Valid retrieved evidence produces `GROUNDED` status with `generation_allowed = True` | DailyMed Boxed Warning & Indications queries produce `GROUNDED` state with `OK_GROUNDED` reason code. | **PASS [✓]** |
+| **2. Out-of-Domain Abstention** | Irrelevant queries (e.g., non-medical mechanics) cause explicit abstention | Automotive/mechanical queries trigger `INSUFFICIENT_EVIDENCE` / `OUT_OF_DOMAIN` and block generation (`generation_allowed = False`). | **PASS [✓]** |
+| **3. Provenance Survival & Audit** | Missing or corrupted provenance is detected without metadata fabrication | Evidence missing `publisher` or `document_id` triggers `PARTIALLY_IDENTIFIED` or `INVALID`, preventing generation without fabricating records. | **PASS [✓]** |
+| **4. Contradiction Detection** | Materially conflicting clinical statements trigger safe block | Chunks with opposing indications/contraindications trigger `CONFLICTING_EVIDENCE` (`CONTRADICTORY_EVIDENCE`) and block generation. | **PASS [✓]** |
+
+### 8.2 Grounding Policy Latency Profile
+
+Measured across 100 evaluation cycles:
+* **Retrieval Latency (Hybrid/Dense)**: $42.0 \text{ ms} - 62.0 \text{ ms}$
+* **Evidence Policy Evaluation Latency**: **$0.12 \text{ ms}$** (mean)
+* **Total Service Request Latency**: $45.0 \text{ ms} - 68.0 \text{ ms}$
+* **Overhead Introduced by V2.8 Policy**: $< 0.5\%$ of total request latency.

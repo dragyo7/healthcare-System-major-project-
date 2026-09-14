@@ -1,7 +1,7 @@
 """
-Production FastAPI Application for Healthcare RAG Module (V2.7).
+Production FastAPI Application for Healthcare RAG Module (V2.8).
 Exposes /rag/query, /rag/health, /ready, along with backward-compatible /retrieve and /chat endpoints.
-Delegates all retrieval operations to the RAGService boundary.
+Delegates all retrieval and evidence policy operations to the RAGService boundary.
 """
 import sys
 from pathlib import Path
@@ -33,9 +33,10 @@ from rag_module.service import (
 
 app = FastAPI(
     title="Healthcare Medical RAG Intelligence API",
-    description="Production-grade Medical Evidence Retrieval and Clinical Intelligence API with multi-source hybrid retrieval, provenance tracking, and safety guardrails.",
-    version="2.7.0"
+    description="Evidence-grounded Medical Evidence Retrieval & Safety Orchestration API with multi-source hybrid retrieval, provenance validation, and deterministic evidence policy.",
+    version="2.8.0"
 )
+
 
 
 # =====================================================================
