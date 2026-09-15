@@ -1,8 +1,8 @@
-# Data Provenance, Governance & Traceability
+# Data Provenance, Governance & Traceability (Phase 24)
 
 ## 1. Provenance Philosophy & Governance Model
 
-In a Clinical Decision Support (CDS) system, algorithmic confidence is meaningless without **verifiable source grounding**. The system enforces a strict 4-tier provenance hierarchy to eliminate hallucinations, prevent unverified web scrapers or toy datasets from reaching clinical workflows, and provide full auditability for regulatory and academic defense.
+In a Clinical Decision Support (CDS) system, algorithmic confidence is meaningless without **verifiable source grounding**. The system enforces a strict provenance hierarchy to eliminate hallucinations, prevent unverified web scrapers or toy datasets from reaching clinical workflows, and provide full auditability for regulatory and academic defense.
 
 ```
        ┌─────────────────────────────────────────────────────────┐
@@ -23,10 +23,10 @@ In a Clinical Decision Support (CDS) system, algorithmic confidence is meaningle
        │         Institutional SOPs, Hospital Formulary          │
        └────────────────────────────┬────────────────────────────┘
                                     │
-                                    ▼ [REJECTED FROM PROD CDS]
+                                    ▼ [REJECTED FROM PRODUCTION CDS]
        ┌─────────────────────────────────────────────────────────┐
        │             Tier 4: Synthetic / Unverified Data         │
-       │     Legacy toy CSVs (drugbank.csv, sider.csv)           │
+       │     Legacy toy CSVs, synthetic dialogues, unverified   │
        │     Status: QUARANTINED (Zero production ingestion)     │
        └─────────────────────────────────────────────────────────┘
 ```
@@ -35,69 +35,46 @@ In a Clinical Decision Support (CDS) system, algorithmic confidence is meaningle
 
 ## 2. Ingested Datasets & Verification Catalog
 
+### Frozen Golden Baseline (236 Chunks)
 | Source Key | Authority / Agency | Verification Level | Document Count | Total Chunks | Access / License |
 | :--- | :--- | :---: | :---: | :---: | :--- |
-| `DailyMed` | US Food & Drug Administration (FDA) / NLM | **Official Tier-1** | 25 monographs | 125 | US Public Domain |
-| `MedlinePlus` | National Library of Medicine (NIH) | **Official Tier-1** | 10 monographs | 30 | US Public Domain |
-| `ICMR` | Indian Council of Medical Research | **Official Tier-1** | 10 guidelines | 40 | Official Indian Guidelines |
-| `MoHFW_STG` | Ministry of Health & Family Welfare (India) | **Official Tier-1** | 8 guidelines | 24 | Official Indian Guidelines |
-| `RxNorm` | National Library of Medicine (NLM) | **Official Tier-1** | 17 concepts | 17 | NLM UMLS Terms |
-| **Total** | — | — | **70 Documents** | **236 Chunks** | **100% Verified** |
+| `DailyMed` | US Food & Drug Administration (FDA) / NLM | **Official Tier-1** | 25 monographs | 188 | US Public Domain |
+| `MedlinePlus` | National Library of Medicine (NIH) | **Official Tier-1** | 10 topics | 16 | US Public Domain |
+| `ICMR` | Indian Council of Medical Research | **Official Tier-1** | 8 guidelines | 8 | Official Indian Guidelines |
+| `MoHFW_STG` | Ministry of Health & Family Welfare (India) | **Official Tier-1** | 4 guidelines | 4 | Official Indian Guidelines |
+| `RxNorm` | National Library of Medicine (NLM) | **Official Tier-1** | 20 concepts | 20 | NLM UMLS Terms |
+| **Total** | — | — | **67 Documents** | **236 Chunks** | **100% Verified** |
+
+### Expanded Authoritative Corpus (2,204 Chunks)
+| Source Key | Authority / Agency | Verification Level | Document Count | Total Chunks | Valid Provenance |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| `DailyMed` | US Food & Drug Administration (FDA) / NLM | **Official Tier-1** | 231 full SPLs | 2,176 | 100.0% (2,176/2,176) |
+| `ICMR` | Indian Council of Medical Research | **Official Tier-1** | 8 guidelines | 8 | 100.0% (8/8) |
+| `MoHFW_STG` | Ministry of Health & Family Welfare (India) | **Official Tier-1** | 4 guidelines | 4 | 100.0% (4/4) |
+| `MedlinePlus` | National Library of Medicine (NIH) | **Official Tier-1** | 16 topics | 16 | 100.0% (16/16) |
+| **Total Expanded** | — | — | **259 Documents** | **2,204 Chunks** | **100.0% (0 Invalid)** |
 
 ---
 
-## 3. Provenance Metadata Model
+## 3. Provenance Verification Algorithm
 
-Every chunk ingested into FAISS and BM25 carries strict metadata validated by `rag_module/knowledge/document_model.py`:
+Every chunk ingested into FAISS and BM25 carries strict metadata validated by `rag_module/knowledge/document_model.py` and `rag_module/safety/provenance_validator.py`:
 
 ```python
-class ProvenanceStatus(str, Enum):
-    VERIFIED_OFFICIAL = "verified_official"    # Tier 1 (FDA SPL, NIH, ICMR, MoHFW)
-    VERIFIED_SECONDARY = "verified_secondary"  # Tier 2 (PubMed, openFDA)
-    EXPERIMENTAL = "experimental"              # Tier 3 (Local formulary)
-    UNVERIFIED = "unverified"                  # Tier 4 (Quarantined)
-
-class MedicalDocumentChunk:
-    chunk_id: str             # Deterministic hash: {source}_{doc_id}_{section_idx}
-    document_id: str          # Parent document identifier
-    source: str               # DailyMed | MedlinePlus | ICMR | MoHFW_STG | RxNorm
-    title: str                # e.g., "Lisinopril - FDA Label"
-    section: str              # Boxed Warning, Indications, Dosage, Contraindications
-    content: str              # Verbatim text snippet from official publication
-    url: str                  # Official URL (e.g., https://dailymed.nlm.nih.gov/...)
-    publication_date: str     # Official release or revision timestamp
-    provenance_status: str    # verified_official
-    checksum: str             # SHA-256 fingerprint of verbatim text
+class ProvenanceValidator:
+    @staticmethod
+    def validate_evidence_item(item: Dict[str, Any]) -> ProvenanceValidationResult:
+        """
+        Validates that a chunk contains:
+        1. Non-empty chunk ID and content
+        2. Recognized authoritative source_id
+        3. Authoritative publisher and source URL
+        4. Section name or LOINC code
+        5. Exact SHA-256 content hash
+        """
+        # Returns is_valid=True only if all fields meet strict criteria
 ```
 
----
-
-## 4. Full Claim-to-Citation-to-URL Tracing Graph
-
-When a doctor or clinical auditor reviews an output generated by the CDS system, every single claim is mapped deterministically to its source:
-
-```
-[Clinical Claim]
-"Lisinopril is contraindicated during pregnancy due to risk of fetal toxicity and death."
-       │
-       ▼
-[System Citation]
-"[1] Lisinopril - FDA Label (DailyMed SPL, Boxed Warning)"
-       │
-       ├── Chunk ID: DailyMed_Lisinopril_10mg_0
-       ├── Document ID: DailyMed_Lisinopril_10mg
-       ├── Section: WARNINGS: FETAL TOXICITY (Boxed Warning)
-       ├── SHA-256 Checksum: c07bbbe52aa66ad0f305fce91e52ef137f88461db1d4e7ef63bb63d5...
-       └── Direct Resolver URL: https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=lisinopril
-```
-
----
-
-## 5. Security & Safety Gates
-
-1. **Provenance Validator Gate** (`rag_module/safety/provenance_validator.py`):
-   Blocks any chunk with `provenance_status != "verified_official"` from being delivered to the generation context.
-2. **Contradiction Detection Engine** (`rag_module/safety/evidence_policy.py`):
-   Detects conflicting clinical statements within the retrieved set (e.g. if one source indicates a drug and another flags it as contraindicated for the same patient context) and alerts the clinician.
-3. **Out-of-Domain & Fictitious Drug Gate**:
-   Enforces a minimum confidence threshold and strict entity grounding. Non-medical queries ("How to fix car brakes?") or fictitious drugs ("Zephydrate") result in clean, deterministic abstentions rather than fabricated medical advice.
+### End-to-End Lineage Invariant
+Every production chunk satisfies the cryptographic invariant:
+$$\text{Source Document} \xrightarrow{\text{parse}} \text{Section} \xrightarrow{\text{chunk}} \text{Passage} \xrightarrow{\text{SHA-256}} \text{Hash} \xrightarrow{\text{BGE-small-en}} \mathbf{v} \in \mathbb{R}^{384} \xrightarrow{\text{FAISS}} \text{Index Position}$$

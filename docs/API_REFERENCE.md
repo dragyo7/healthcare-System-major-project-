@@ -18,19 +18,17 @@ Returns system status, index statistics, active models, and readiness.
   "status": "healthy",
   "version": "2.8.0",
   "service_ready": true,
-  "indexed_chunks_count": 236,
-  "vector_index_size": 236,
-  "bm25_corpus_size": 236,
-  "models": {
-    "embedding": "BAAI/bge-small-en",
-    "embedding_dim": 384,
-    "reranker": "cross-encoder/ms-marco-MiniLM-L-6-v2",
-    "generator": "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
-  },
-  "safety_guardrails_enabled": true,
-  "emergency_triage_enabled": true
+  "index_ready": true,
+  "indexed_chunks_count": 2204,
+  "embedding_model": "BAAI/bge-small-en",
+  "embedding_dim": 384,
+  "dense_ready": true,
+  "bm25_ready": true,
+  "hybrid_ready": true,
+  "reranker_status": "available"
 }
 ```
+
 
 ---
 
@@ -245,6 +243,20 @@ Forensic diagnostic pipeline tracer.
     "accepted_chunk_ids": ["dailymed_7823f03b-18a8-48b6-9bb2-16a7f0521e29_boxed_warning-c0"]
   },
   "final_answer": "...",
-  "citations": [...]
+  "citations": []
 }
 ```
+
+---
+
+## 4. Frontend Response States & Contract Matrix
+
+| UI State | HTTP Code | `is_emergency` | `abstained` | `generation_allowed` | Frontend UI Action |
+|---|---|---|---|---|---|
+| **SUCCESS** | `200 OK` | `false` | `false` | `true` | Render synthesized clinical guidance with interactive citation badges linking to `source_url`. |
+| **ABSTENTION** | `200 OK` | `false` | `true` | `false` | Render standard clinical disclaimer informing user that evidence is insufficient. |
+| **UNSUPPORTED ENTITY** | `200 OK` | `false` | `true` | `false` | Render explicit notice that requested drug/pathogen is not verified in clinical monographs. |
+| **EMERGENCY** | `200 OK` | `true` | `false` | `false` | Render prominent red emergency alert banner with emergency helplines (112 / 108 / 102). |
+| **NO EVIDENCE** | `200 OK` | `false` | `true` | `false` | Display "No relevant clinical evidence found in verified monographs." |
+| **VALIDATION ERROR** | `422 Unproc` | N/A | N/A | N/A | Highlight invalid input field with message from response body. |
+| **SERVER ERROR** | `500 Internal` | N/A | N/A | N/A | Display generic system error with retry action; no internal stack trace is exposed. |

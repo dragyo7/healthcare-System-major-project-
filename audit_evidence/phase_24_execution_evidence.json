@@ -1,0 +1,120 @@
+{
+  "execution_timestamp": "2026-09-15T09:33:25Z",
+  "total_execution_seconds": 29.38,
+  "baseline_verification": {
+    "status": "VERIFIED",
+    "total_baseline_chunks": 236,
+    "source_counts": {
+      "DailyMed": 188,
+      "MedlinePlus": 16,
+      "ICMR": 8,
+      "MoHFW_STG": 4,
+      "RxNorm": 20
+    },
+    "embedding_model": "BAAI/bge-small-en",
+    "embedding_dim": 384,
+    "hashes_match": true,
+    "actual_hashes": {
+      "meta_v2_json": "3d03b7652817cd470cac23a2fc777cbe29ca06c7677429e31bb7f482fdaa4606",
+      "index_v2_bin": "74dbf0d74aaffc46d0e5002c5bc03b2580545b74e72838756dacf37e75cf4eda",
+      "bm25_index_pkl": "52652c1106cae4229d7555717633604ae837fed5182f4aa8b3e9097273d95071"
+    }
+  },
+  "registry_summary": {
+    "total_registered_sources": 17,
+    "sources": [
+      "CancerGov",
+      "GARD",
+      "GHR",
+      "MPlus_Health_Topics",
+      "NIDDK",
+      "NINDS",
+      "SeniorHealth",
+      "NHLBI",
+      "CDC",
+      "MedQuAD",
+      "DailyMed",
+      "MedlinePlus",
+      "ICMR",
+      "MoHFW_STG",
+      "RxNorm",
+      "openFDA",
+      "ClinicalGuidelines"
+    ]
+  },
+  "corpus_summary": {
+    "total_documents": 2204,
+    "total_chunks": 2204,
+    "source_counts": {
+      "DailyMed": 2176,
+      "ICMR": 8,
+      "MoHFW_STG": 4,
+      "MedlinePlus": 16
+    },
+    "domain_counts": {
+      "pharmacology": 2176,
+      "endocrinology": 9,
+      "antimicrobial_stewardship": 3,
+      "cardiology": 8,
+      "pulmonology": 4,
+      "infectious_disease": 4
+    }
+  },
+  "provenance_audit": {
+    "total_chunks": 2204,
+    "valid_provenance_count": 2204,
+    "invalid_provenance_count": 0,
+    "provenance_pass_rate": 100.0,
+    "invalid_chunk_ids": [],
+    "word_count_stats": {
+      "mean": 35.75,
+      "median": 33.0,
+      "min": 11,
+      "max": 144,
+      "p95": 49.0
+    },
+    "sentence_fragmentation": "0% (All chunks preserve whole clinical sentences and headers)"
+  },
+  "incremental_indexing_demo": {
+    "scenario_initial": {
+      "total_chunks": 1000,
+      "re_encoded": 1000,
+      "reused": 0,
+      "elapsed_seconds": 20.898
+    },
+    "scenario_add_500": {
+      "total_chunks": 1500,
+      "re_encoded": 500,
+      "reused": 1000,
+      "elapsed_seconds": 7.787,
+      "reused_percentage": 66.67
+    },
+    "scenario_modify_10": {
+      "total_chunks": 1500,
+      "re_encoded": 10,
+      "reused": 1490,
+      "elapsed_seconds": 0.376,
+      "reused_percentage": 99.33
+    },
+    "scenario_delete_200": {
+      "total_chunks": 1300,
+      "re_encoded": 0,
+      "reused": 1300,
+      "elapsed_seconds": 0.17,
+      "reused_percentage": 100.0
+    }
+  },
+  "quality_audit": {
+    "total_chunks_audited": 2204,
+    "unique_texts_count": 2204,
+    "exact_duplicate_chunks": 0,
+    "empty_chunks": 0,
+    "missing_source_urls": 0,
+    "missing_publishers": 0,
+    "missing_sections": 0,
+    "synthetic_data_detected": 0,
+    "quarantined_data_leakage": 0,
+    "quality_health_score": 100.0,
+    "verdict": "PASSED_PRODUCTION_QUALITY"
+  }
+}

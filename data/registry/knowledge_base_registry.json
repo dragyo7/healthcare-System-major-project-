@@ -1,0 +1,412 @@
+{
+  "CancerGov": {
+    "source_id": "CancerGov",
+    "display_name": "National Cancer Institute (NCI)",
+    "publisher": "National Institutes of Health (NIH)",
+    "source_type": "federal_research_institute",
+    "authority_level": "tier_1_federal_research",
+    "document_types": [
+      "qa_pair",
+      "disease_summary"
+    ],
+    "domains": [
+      "oncology",
+      "cancer_biology",
+      "chemotherapy"
+    ],
+    "adapter_class": "MedQuADAdapter",
+    "license_notes": "US Government Public Domain / CC BY 4.0 (via MedQuAD)",
+    "authoritative_url": "https://www.cancer.gov",
+    "enabled": true,
+    "version": "2.3",
+    "evidence_role": "Reference / Terminology",
+    "provenance_status": "VERIFIED",
+    "description": "Comprehensive clinical and patient summaries on cancer biology, diagnosis, stages, and treatments."
+  },
+  "GARD": {
+    "source_id": "GARD",
+    "display_name": "Genetic and Rare Diseases Information Center (GARD)",
+    "publisher": "National Center for Advancing Translational Sciences (NCATS/NIH)",
+    "source_type": "federal_research_institute",
+    "authority_level": "tier_1_federal_research",
+    "document_types": [
+      "qa_pair",
+      "rare_disease_summary"
+    ],
+    "domains": [
+      "rare_diseases",
+      "genetics",
+      "phenotypes"
+    ],
+    "adapter_class": "MedQuADAdapter",
+    "license_notes": "US Government Public Domain / CC BY 4.0",
+    "authoritative_url": "https://rarediseases.info.nih.gov",
+    "enabled": true,
+    "version": "2.3",
+    "evidence_role": "Reference / Terminology",
+    "provenance_status": "VERIFIED",
+    "description": "Curated information on rare genetic disorders, inheritance patterns, diagnostic phenotypes, and clinical organizations."
+  },
+  "GHR": {
+    "source_id": "GHR",
+    "display_name": "Genetics Home Reference (MedlinePlus Genetics)",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "source_type": "federal_research_institute",
+    "authority_level": "tier_1_federal_research",
+    "document_types": [
+      "qa_pair",
+      "genetic_condition_overview"
+    ],
+    "domains": [
+      "genetics",
+      "genomic_medicine",
+      "hereditary_disorders"
+    ],
+    "adapter_class": "MedQuADAdapter",
+    "license_notes": "US Government Public Domain / CC BY 4.0",
+    "authoritative_url": "https://medlineplus.gov/genetics/",
+    "enabled": true,
+    "version": "2.3",
+    "evidence_role": "Reference / Terminology",
+    "provenance_status": "VERIFIED",
+    "description": "Descriptions of genetic conditions, responsible genes, chromosomes, and inheritance mechanisms."
+  },
+  "MPlus_Health_Topics": {
+    "source_id": "MPlus_Health_Topics",
+    "display_name": "MedlinePlus Health Topics",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "source_type": "federal_research_institute",
+    "authority_level": "tier_1_federal_research",
+    "document_types": [
+      "qa_pair",
+      "health_topic_summary"
+    ],
+    "domains": [
+      "general_medicine",
+      "internal_medicine",
+      "public_health"
+    ],
+    "adapter_class": "MedQuADAdapter",
+    "license_notes": "US Government Public Domain / CC BY 4.0",
+    "authoritative_url": "https://medlineplus.gov",
+    "enabled": true,
+    "version": "2.3",
+    "evidence_role": "Reference / Terminology",
+    "provenance_status": "VERIFIED",
+    "description": "Consumer health information on hundreds of diseases, conditions, wellness issues, and diagnostic tests."
+  },
+  "NIDDK": {
+    "source_id": "NIDDK",
+    "display_name": "National Institute of Diabetes and Digestive and Kidney Diseases",
+    "publisher": "National Institutes of Health (NIH)",
+    "source_type": "federal_research_institute",
+    "authority_level": "tier_1_federal_research",
+    "document_types": [
+      "qa_pair",
+      "chronic_disease_guide"
+    ],
+    "domains": [
+      "endocrinology",
+      "diabetes",
+      "nephrology",
+      "gastroenterology"
+    ],
+    "adapter_class": "MedQuADAdapter",
+    "license_notes": "US Government Public Domain / CC BY 4.0",
+    "authoritative_url": "https://www.niddk.nih.gov",
+    "enabled": true,
+    "version": "2.3",
+    "evidence_role": "Reference / Terminology",
+    "provenance_status": "VERIFIED",
+    "description": "Authoritative clinical guides on diabetes, kidney disease, urologic conditions, and digestive disorders."
+  },
+  "NINDS": {
+    "source_id": "NINDS",
+    "display_name": "National Institute of Neurological Disorders and Stroke",
+    "publisher": "National Institutes of Health (NIH)",
+    "source_type": "federal_research_institute",
+    "authority_level": "tier_1_federal_research",
+    "document_types": [
+      "qa_pair",
+      "neurology_summary"
+    ],
+    "domains": [
+      "neurology",
+      "neuroscience",
+      "stroke",
+      "brain_disorders"
+    ],
+    "adapter_class": "MedQuADAdapter",
+    "license_notes": "US Government Public Domain / CC BY 4.0",
+    "authoritative_url": "https://www.ninds.nih.gov",
+    "enabled": true,
+    "version": "2.3",
+    "evidence_role": "Reference / Terminology",
+    "provenance_status": "VERIFIED",
+    "description": "Clinical overviews of stroke, traumatic brain injury, neurodegenerative diseases, and neurological disorders."
+  },
+  "SeniorHealth": {
+    "source_id": "SeniorHealth",
+    "display_name": "NIHSeniorHealth (National Institute on Aging)",
+    "publisher": "National Institute on Aging (NIA/NIH)",
+    "source_type": "federal_research_institute",
+    "authority_level": "tier_1_federal_research",
+    "document_types": [
+      "qa_pair",
+      "geriatrics_guide"
+    ],
+    "domains": [
+      "geriatrics",
+      "aging_health",
+      "dementia"
+    ],
+    "adapter_class": "MedQuADAdapter",
+    "license_notes": "US Government Public Domain / CC BY 4.0",
+    "authoritative_url": "https://www.nia.nih.gov",
+    "enabled": true,
+    "version": "2.3",
+    "evidence_role": "Reference / Terminology",
+    "provenance_status": "VERIFIED",
+    "description": "Health and wellness information tailored for older adults, cognitive health, and age-related chronic conditions."
+  },
+  "NHLBI": {
+    "source_id": "NHLBI",
+    "display_name": "National Heart, Lung, and Blood Institute",
+    "publisher": "National Institutes of Health (NIH)",
+    "source_type": "federal_research_institute",
+    "authority_level": "tier_1_federal_research",
+    "document_types": [
+      "qa_pair",
+      "cardiopulmonary_summary"
+    ],
+    "domains": [
+      "cardiology",
+      "pulmonology",
+      "hematology"
+    ],
+    "adapter_class": "MedQuADAdapter",
+    "license_notes": "US Government Public Domain / CC BY 4.0",
+    "authoritative_url": "https://www.nhlbi.nih.gov",
+    "enabled": true,
+    "version": "2.3",
+    "evidence_role": "Reference / Terminology",
+    "provenance_status": "VERIFIED",
+    "description": "Information on cardiovascular disease, lung disorders (COPD, asthma), blood disorders, and sleep medicine."
+  },
+  "CDC": {
+    "source_id": "CDC",
+    "display_name": "Centers for Disease Control and Prevention",
+    "publisher": "U.S. Department of Health and Human Services (HHS)",
+    "source_type": "public_health_agency",
+    "authority_level": "tier_1_public_health",
+    "document_types": [
+      "qa_pair",
+      "public_health_advisory"
+    ],
+    "domains": [
+      "infectious_disease",
+      "immunization",
+      "epidemiology"
+    ],
+    "adapter_class": "MedQuADAdapter",
+    "license_notes": "US Government Public Domain / CC BY 4.0",
+    "authoritative_url": "https://www.cdc.gov",
+    "enabled": true,
+    "version": "2.3",
+    "evidence_role": "Reference / Terminology",
+    "provenance_status": "VERIFIED",
+    "description": "Public health guidelines on infectious diseases, prevention, outbreak response, and vaccinations."
+  },
+  "MedQuAD": {
+    "source_id": "MedQuAD",
+    "display_name": "MedQuAD Composite NIH Knowledge Base",
+    "publisher": "National Institutes of Health (NIH)",
+    "source_type": "federal_research_institute",
+    "authority_level": "tier_1_federal_research",
+    "document_types": [
+      "qa_pair"
+    ],
+    "domains": [
+      "comprehensive_pathology",
+      "disease_overviews"
+    ],
+    "adapter_class": "MedQuADAdapter",
+    "license_notes": "US Government Public Domain / CC BY 4.0",
+    "authoritative_url": "https://github.com/abachaa/MedQuAD",
+    "enabled": true,
+    "version": "2.3",
+    "evidence_role": "Reference / Terminology",
+    "provenance_status": "VERIFIED",
+    "description": "Unified 16,406-record dataset compiled from 9 NIH institutes covering diseases, symptoms, and genetics."
+  },
+  "DailyMed": {
+    "source_id": "DailyMed",
+    "display_name": "National Library of Medicine DailyMed (FDA SPL)",
+    "publisher": "U.S. National Library of Medicine / FDA",
+    "source_type": "regulatory_drug_repository",
+    "authority_level": "tier_1_regulatory",
+    "document_types": [
+      "drug_monograph",
+      "spl_package_insert"
+    ],
+    "domains": [
+      "pharmacology",
+      "dosage_titration",
+      "contraindications",
+      "warnings"
+    ],
+    "adapter_class": "DailyMedAdapter",
+    "license_notes": "US Government Public Domain / Open Data",
+    "authoritative_url": "https://dailymed.nlm.nih.gov",
+    "enabled": true,
+    "version": "2.9",
+    "evidence_role": "Primary Clinical Evidence",
+    "provenance_status": "VERIFIED",
+    "description": "Comprehensive FDA-approved drug package inserts with complete dosing schedules, black-box warnings, and interactions."
+  },
+  "MedlinePlus": {
+    "source_id": "MedlinePlus",
+    "display_name": "MedlinePlus Health Topics (NLM / NIH)",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "source_type": "federal_research_institute",
+    "authority_level": "tier_1_federal_research",
+    "document_types": [
+      "qa_pair",
+      "health_topic_summary",
+      "disease_summary"
+    ],
+    "domains": [
+      "general_medicine",
+      "internal_medicine",
+      "public_health"
+    ],
+    "adapter_class": "MedlinePlusAdapter",
+    "license_notes": "US Government Public Domain",
+    "authoritative_url": "https://medlineplus.gov",
+    "enabled": true,
+    "version": "2.9",
+    "evidence_role": "Reference / Terminology",
+    "provenance_status": "VERIFIED",
+    "description": "Official consumer health and clinical topic summaries on diseases, diagnostics, and prevention."
+  },
+  "ICMR": {
+    "source_id": "ICMR",
+    "display_name": "Indian Council of Medical Research Clinical Guidelines",
+    "publisher": "Indian Council of Medical Research (ICMR, Govt of India)",
+    "source_type": "guideline_clearinghouse",
+    "authority_level": "tier_1_public_health",
+    "document_types": [
+      "clinical_guideline",
+      "consensus_statement"
+    ],
+    "domains": [
+      "endocrinology",
+      "cardiology",
+      "infectious_disease",
+      "antimicrobial_stewardship"
+    ],
+    "adapter_class": "ICMRAdapter",
+    "license_notes": "Government of India Open Access / Public Health Guidance",
+    "authoritative_url": "https://main.icmr.nic.in",
+    "enabled": true,
+    "version": "2.9",
+    "evidence_role": "Primary Clinical Evidence",
+    "provenance_status": "VERIFIED",
+    "description": "Official national clinical practice guidelines, diagnostic thresholds, and treatment protocols for India."
+  },
+  "MoHFW_STG": {
+    "source_id": "MoHFW_STG",
+    "display_name": "Ministry of Health & Family Welfare Standard Treatment Guidelines",
+    "publisher": "Ministry of Health and Family Welfare (Govt of India)",
+    "source_type": "guideline_clearinghouse",
+    "authority_level": "tier_1_public_health",
+    "document_types": [
+      "clinical_guideline",
+      "standard_treatment_workflow"
+    ],
+    "domains": [
+      "primary_care",
+      "internal_medicine",
+      "hypertension",
+      "diabetes"
+    ],
+    "adapter_class": "MoHFWAdapter",
+    "license_notes": "Government of India Public Document",
+    "authoritative_url": "https://clinicalestablishments.gov.in",
+    "enabled": true,
+    "version": "2.9",
+    "evidence_role": "Primary Clinical Evidence",
+    "provenance_status": "VERIFIED",
+    "description": "Standardized treatment guidelines (STGs) for primary and secondary healthcare facilities under the Clinical Establishments Act."
+  },
+  "RxNorm": {
+    "source_id": "RxNorm",
+    "display_name": "RxNorm Normalized Prescribable Clinical Terminology",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "source_type": "regulatory_drug_repository",
+    "authority_level": "tier_1_regulatory",
+    "document_types": [
+      "terminology_concept"
+    ],
+    "domains": [
+      "pharmacology",
+      "terminology_mapping",
+      "clinical_drugs"
+    ],
+    "adapter_class": "RxNormAdapter",
+    "license_notes": "NLM / UMLS Open Terms (Prescribable subset)",
+    "authoritative_url": "https://www.nlm.nih.gov/research/umls/rxnorm/",
+    "enabled": true,
+    "version": "2026-02",
+    "evidence_role": "Primary Clinical Evidence",
+    "provenance_status": "VERIFIED",
+    "description": "Standardized nomenclature and relational identifiers (RxCUI, ingredient, strength, form) for clinical drugs."
+  },
+  "openFDA": {
+    "source_id": "openFDA",
+    "display_name": "FDA Drug Product Labeling API",
+    "publisher": "U.S. Food and Drug Administration",
+    "source_type": "regulatory_agency",
+    "authority_level": "tier_1_regulatory",
+    "document_types": [
+      "drug_monograph",
+      "adverse_event_record"
+    ],
+    "domains": [
+      "pharmacology",
+      "adverse_reactions",
+      "drug_safety"
+    ],
+    "adapter_class": "OpenFDAAdapter",
+    "license_notes": "Public Domain (CC0 Equivalent)",
+    "authoritative_url": "https://open.fda.gov",
+    "enabled": true,
+    "version": "2.9",
+    "evidence_role": "Primary Clinical Evidence",
+    "provenance_status": "VERIFIED",
+    "description": "Structured JSON API for FDA prescription and OTC drug labels, boxed warnings, and indications."
+  },
+  "ClinicalGuidelines": {
+    "source_id": "ClinicalGuidelines",
+    "display_name": "Clinical Practice Guidelines (PMC / WHO / Societies)",
+    "publisher": "Medical Professional Societies & WHO",
+    "source_type": "guideline_clearinghouse",
+    "authority_level": "tier_2_clinical_consensus",
+    "document_types": [
+      "clinical_guideline",
+      "consensus_statement"
+    ],
+    "domains": [
+      "evidence_based_medicine",
+      "clinical_protocols"
+    ],
+    "adapter_class": "GuidelineAdapter",
+    "license_notes": "Open Access / CC-BY",
+    "authoritative_url": "https://www.ncbi.nlm.nih.gov/pmc/",
+    "enabled": false,
+    "version": "2.3",
+    "evidence_role": "Primary Clinical Evidence",
+    "provenance_status": "VERIFIED",
+    "description": "Evidence-graded practice guidelines for disease management and treatment algorithms."
+  }
+}

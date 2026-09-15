@@ -120,15 +120,25 @@ GENERAL_CLINICAL_TERMS = {
     "dosage", "dose", "doses", "dosing", "contraindication", "contraindications", "contraindicated",
     "precaution", "precautions", "warning", "warnings", "interaction", "interactions", "interact",
     "side", "effect", "effects", "adverse", "reaction", "reactions", "treatment", "therapy",
-    "management", "guideline", "guidelines", "protocol", "recommendation", "recommendations",
-    "approved", "prescribe", "prescribed", "indication", "indications", "usage", "use",
+    "management", "guideline", "guidelines", "protocol", "protocols", "recommendation", "recommendations",
+    "recommended", "recommends", "recommend", "approved", "prescribe", "prescribed", "prescribing",
+    "indication", "indications", "usage", "use", "uses", "used", "using",
+    "standard", "initial", "start", "starting", "titration", "titrate", "maintenance",
     "population", "populations", "patient", "patients", "adult", "adults", "pediatric",
     "child", "children", "elderly", "acute", "chronic", "severe", "mild", "moderate",
     "failure", "heart", "renal", "kidney", "hepatic", "liver", "hypertension", "diabetes",
     "infection", "infections", "impairment", "disease", "condition", "blood", "pressure",
-    "taking", "give", "given", "administer", "administration", "safe", "safety", "concerning",
-    "harmful", "overview", "diagnosis", "symptoms", "causes", "prevention"
+    "taking", "give", "given", "administer", "administered", "administering", "administration",
+    "safe", "safety", "concerning", "harmful", "overview", "diagnosis", "symptoms", "causes",
+    "prevention", "clinical", "medical", "fever", "pain", "syndrome", "drug", "drugs",
+    "medicine", "medicines", "medication", "medications", "pill", "pills", "tablet", "tablets",
+    "capsule", "capsules", "test", "tests", "testing", "care", "health", "target", "targets",
+    "fasting", "level", "levels", "glucose", "icmr", "mohfw", "dailymed", "fda", "stg",
+    "pharmacology", "pharmacological", "pharmacokinetics", "pharmacodynamic", "pharmacodynamics",
+    "absorption", "kinetics", "metabolism", "excretion", "clearance", "plasma", "serum",
+    "concentration", "concentrations", "mg", "ml", "oral", "intravenous", "injection"
 }
+
 
 
 class EvidencePolicyEngine:
@@ -259,20 +269,19 @@ class EvidencePolicyEngine:
         is_unsupported_entity = False
         missing_entity = None
         if subject_tokens:
-            subject_found = False
+            unmatched_tokens = []
             for tok in subject_tokens:
-                # Check exact whole-word token match or standard singular/plural form
-                clean_tok = re.sub(r'(s|es|ing|ed)$', '', tok)
-                if re.search(r'\b' + re.escape(tok) + r'\b', combined_top_text):
-                    subject_found = True
-                    break
-                elif len(clean_tok) >= 3 and re.search(r'\b' + re.escape(clean_tok) + r'\b', combined_top_text):
-                    subject_found = True
-                    break
-            
-            if not subject_found:
+                clean_tok = re.sub(r'(s|es|ing|ed|al|ic|ical|in|ine)$', '', tok)
+                matched = (
+                    re.search(r'\b' + re.escape(tok) + r'\b', combined_top_text) is not None or
+                    (len(clean_tok) >= 4 and re.search(r'\b' + re.escape(clean_tok) + r'(?:s|es|ing|ed|al|ic|ical|in|ine)?\b', combined_top_text) is not None)
+                )
+                if not matched:
+                    unmatched_tokens.append(tok)
+
+            if unmatched_tokens:
                 is_unsupported_entity = True
-                missing_entity = subject_tokens[0]
+                missing_entity = unmatched_tokens[0]
 
         overlap_ratio = 1.0
         if query_words:

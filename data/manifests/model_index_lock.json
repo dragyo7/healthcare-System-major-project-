@@ -1,0 +1,53 @@
+{
+  "active_production_manifest": {
+    "corpus_name": "expanded_production_2204",
+    "description": "Expanded authentic 2,204-chunk clinical production knowledge base (DailyMed 2,176, ICMR 8, MoHFW 4, MedlinePlus 16).",
+    "vector_count": 2204,
+    "embedding_model": "BAAI/bge-small-en",
+    "embedding_dimension": 384,
+    "max_context_window_tokens": 512,
+    "query_prefix": "Represent this sentence for searching relevant passages: ",
+    "similarity_metric": "METRIC_INNER_PRODUCT (Cosine similarity with L2-normalized vectors)",
+    "source_distribution": {
+      "DailyMed": 2176,
+      "ICMR": 8,
+      "MoHFW_STG": 4,
+      "MedlinePlus": 16
+    },
+    "hashes": {
+      "index_v2.bin": "70c7b0f4ec73effe49a9478aa2c3d3748753e7379f92fe0578b3d82932a1c35f",
+      "meta_v2.json": "493a0f8310b247b787564950396b6549eb1558edab14af44a0d0708051b39f46",
+      "meta_v2.pkl": "8e309931b87f8c944409839e4e44a39d3d213a992dd7bc3feeb6df7363e50d3e",
+      "bm25_index.pkl": "26330911f65a40b17f5165f655a5a6cff83786bfc77cdb1a18843137394caeca"
+    },
+    "locked_at": "2026-09-15T13:42:27.164317+00:00"
+  },
+  "golden_regression_manifest": {
+    "corpus_name": "golden_236_regression_baseline",
+    "description": "Frozen 236-chunk golden baseline for backwards-compatible regression testing.",
+    "vector_count": 236,
+    "embedding_model": "BAAI/bge-small-en",
+    "embedding_dimension": 384,
+    "max_context_window_tokens": 512,
+    "query_prefix": "Represent this sentence for searching relevant passages: ",
+    "similarity_metric": "METRIC_INNER_PRODUCT (Cosine similarity with L2-normalized vectors)",
+    "hashes": {
+      "index_v2.bin": "74dbf0d74aaffc46d0e5002c5bc03b2580545b74e72838756dacf37e75cf4eda",
+      "meta_v2.json": "3d03b7652817cd470cac23a2fc777cbe29ca06c7677429e31bb7f482fdaa4606",
+      "meta_v2.pkl": "d9dd998d62da79c5d25a1f3bf895a1f18281a5ffb5d60062938e0f91432bf95a",
+      "bm25_index.pkl": "52652c1106cae4229d7555717633604ae837fed5182f4aa8b3e9097273d95071"
+    },
+    "locked_at": "2026-09-15T13:41:49.385625+00:00"
+  },
+  "specification": {
+    "dense_model": "BAAI/bge-small-en",
+    "dense_dimension": 384,
+    "transformer_max_seq_length_tokens": 512,
+    "dense_normalization": "L2 Unit Normalization",
+    "query_prefix": "Represent this sentence for searching relevant passages: ",
+    "similarity_metric": "METRIC_INNER_PRODUCT",
+    "cross_encoder_model": "cross-encoder/ms-marco-MiniLM-L-6-v2",
+    "lexical_algorithm": "BM25Okapi (rank_bm25)",
+    "hybrid_fusion": "Reciprocal Rank Fusion (RRF k=60)"
+  }
+}

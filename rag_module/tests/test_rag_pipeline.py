@@ -100,7 +100,19 @@ class TestRAGV2Pipeline(unittest.TestCase):
     def test_end_to_end_mock_pipeline(self):
         """Verify pipeline execution format with mock components."""
         mock_chunks = [
-            {"chunk_id": "c1", "text": "Hypertension is defined as high blood pressure exceeding 130/80 mmHg.", "focus": "Hypertension", "source_name": "NHLBI", "url": "https://nhlbi.nih.gov", "dense_score": 0.82}
+            {
+                "chunk_id": "c1",
+                "text": "Hypertension is defined as high blood pressure exceeding 130/80 mmHg.",
+                "title": "Hypertension",
+                "focus": "Hypertension",
+                "source_id": "NHLBI",
+                "source_name": "NHLBI",
+                "publisher": "National Heart, Lung, and Blood Institute",
+                "document_id": "nhlbi_hyp_01",
+                "section": "overview",
+                "url": "https://nhlbi.nih.gov",
+                "dense_score": 0.82
+            }
         ]
         bm25 = BM25Retriever()
         bm25.fit(mock_chunks)

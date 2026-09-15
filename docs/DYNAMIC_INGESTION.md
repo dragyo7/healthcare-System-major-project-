@@ -1,4 +1,4 @@
-# Dynamic Incremental Ingestion & Zero Re-Embedding Engine
+# Dynamic Incremental Ingestion & Zero Re-Embedding Engine (Phase 24)
 
 ## 1. System Overview & Objective
 In production clinical decision support systems, monographs, treatment guidelines, and drug labels are regularly revised. Re-embedding an entire knowledge base whenever a single document is added or edited is computationally wasteful and non-scalable.
@@ -20,52 +20,32 @@ The Clinical RAG system incorporates an **Incremental Indexer** that computes cr
   - New embeddings: $O(M)$ transformer forward passes on GPU/CPU only for modified/new chunks ($M \ll N$).
   - Storage: $O(N \times 384 \times 4\text{ bytes})$ uncompressed `.npz` vector archive.
 - **FAILURE**: If cache file is corrupt or missing, gracefully falls back to generating embeddings for all provided chunks and writing a fresh valid cache.
-- **EXAMPLE**: Ingesting 300 chunks with 295 existing chunks and 5 edited chunks reuses 295 cached vectors in 0.01s and encodes only the 5 modified chunks in 0.11s.
+- **EXAMPLE**: Ingesting 1,500 chunks with 1,490 existing chunks and 10 edited chunks reuses 1,490 cached vectors and encodes only 10 modified chunks in 0.376s.
 
 ---
 
-## 3. Dynamic Ingestion Lifecycle Scenarios (Empirically Verified)
+## 3. Dynamic Ingestion Benchmark on Expanded Corpus (Phase 24 Empirical Results)
 
-The following lifecycle scenarios were executed on the real runtime with full logging:
+Executed on live runtime with BAAI/bge-small-en dense embeddings (384 dimensions):
 
 ```
-Scenario A: Initial Ingestion (200 chunks)
-   │
-   ├── 200 chunks newly encoded
+Scenario 1: Initial Cold Ingestion (1,000 Chunks)
+   ├── 1,000 chunks newly encoded
    ├── 0 cached vectors reused
-   └── Total time: 2.697 s
+   └── Total elapsed time: 20.898 s
 
-Scenario B: Document Addition (300 total chunks, 100 new)
-   │
-   ├── 100 new chunks encoded
-   ├── 200 cached vectors reused (100% hit rate on existing)
-   └── Total time: 2.634 s
+Scenario 2: Add 500 New Chunks (1,500 Total Chunks)
+   ├── 500 new chunks encoded
+   ├── 1,000 cached vectors reused (66.67% reuse rate)
+   └── Total elapsed time: 7.787 s
 
-Scenario C: Document Modification (300 total chunks, 5 modified)
-   │
-   ├── 5 modified chunks re-encoded
-   ├── 295 unchanged chunks reused
-   └── Total time: 0.123 s (95.4% time reduction!)
+Scenario 3: Modify 10 Chunks (1,500 Total Chunks)
+   ├── 10 modified chunks re-encoded
+   ├── 1,490 unchanged chunks reused (99.33% reuse rate)
+   └── Total elapsed time: 0.376 s (98.2% time reduction!)
 
-Scenario D: Document Deletion (50 chunks removed, 250 remaining)
-   │
-   ├── 0 chunks encoded
-   ├── 250 retained chunks reused
-   └── Total time: 0.037 s (98.6% time reduction!)
-
-Scenario E: Cache Reload Sync (250 chunks re-indexed from scratch)
-   │
-   ├── 0 chunks encoded
-   ├── 250 cached vectors loaded from disk
-   └── Total time: 0.043 s
+Scenario 4: Delete 200 Chunks (1,300 Total Chunks)
+   ├── 0 chunks re-encoded
+   ├── 1,300 retained chunks reused (100.0% reuse rate)
+   └── Total elapsed time: 0.170 s (99.2% time reduction!)
 ```
-
----
-
-## 4. Deterministic Fingerprint Formula
-
-Each chunk is tracked via a composite SHA-256 fingerprint:
-
-$$\text{Fingerprint} = \text{Hash}\Big(\text{text} \parallel \text{source\_id} \parallel \text{doc\_id} \parallel \text{chunk\_id} \parallel \text{embedding\_model}\Big)$$
-
-If any property changes (e.g. clinical text updated, source version changed, embedding model upgraded), the fingerprint diverges, forcing a clean re-embedding for only that specific chunk while leaving all untouched chunks in cache.

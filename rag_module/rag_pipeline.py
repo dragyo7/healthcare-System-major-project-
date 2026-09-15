@@ -13,6 +13,7 @@ from rag_module.retrieval.hybrid_retriever import HybridRetriever
 from rag_module.reranking.cross_encoder_reranker import CrossEncoderReranker
 from rag_module.context.context_builder import ContextBuilder
 from rag_module.safety.guardrails import SafetyGuardrails
+from rag_module.safety.evidence_policy import EvidencePolicyEngine, GroundingReasonCode
 from rag_module.generation.generator_v2 import MedicalGenerator
 
 
@@ -26,12 +27,14 @@ class MedicalRAGPipeline:
         dense_retriever: Optional[DenseRetriever] = None,
         bm25_retriever: Optional[BM25Retriever] = None,
         reranker: Optional[CrossEncoderReranker] = None,
-        generator: Optional[MedicalGenerator] = None
+        generator: Optional[MedicalGenerator] = None,
+        evidence_policy: Optional[EvidencePolicyEngine] = None
     ):
         self.config = config or DEFAULT_CONFIG
         
-        # 1. Initialize Safety Layer
+        # 1. Initialize Safety Layer & Evidence Policy
         self.guardrails = SafetyGuardrails(self.config)
+        self.evidence_policy = evidence_policy or EvidencePolicyEngine()
         
         # 2. Initialize Retrievers
         self.dense_retriever = dense_retriever
@@ -147,12 +150,24 @@ class MedicalRAGPipeline:
         else:
             final_chunks = candidate_chunks[:self.config.FINAL_TOP_K]
 
-        # Step 5: Abstention Gate
+        # Step 5: Abstention Gate & Evidence Policy Evaluation
         should_abstain, abstention_msg = self.guardrails.check_abstention(final_chunks)
-        if should_abstain:
+        grounding_decision = self.evidence_policy.evaluate_evidence(sanitized_query, final_chunks, retrieval_mode=mode)
+
+        if should_abstain or not grounding_decision.generation_allowed:
+            if not grounding_decision.generation_allowed:
+                if GroundingReasonCode.UNSUPPORTED_ENTITY in grounding_decision.reason_codes:
+                    msg = "I am not able to find verified medical evidence regarding the requested subject in authoritative clinical guidelines."
+                elif GroundingReasonCode.OUT_OF_DOMAIN in grounding_decision.reason_codes:
+                    msg = "This query appears to be outside the supported medical domain. I cannot provide guidance."
+                else:
+                    msg = "I am not able to find sufficient verified medical evidence to answer this question."
+            else:
+                msg = abstention_msg
+
             return {
                 "question": sanitized_query,
-                "answer": self.guardrails.append_disclaimer(abstention_msg),
+                "answer": self.guardrails.append_disclaimer(msg),
                 "is_emergency": False,
                 "abstained": True,
                 "sources": [],
@@ -160,8 +175,11 @@ class MedicalRAGPipeline:
                 "pipeline_mode": mode
             }
 
+        # Filter to accepted chunks if any were rejected by policy
+        accepted_chunks = [c for c in final_chunks if c.get("chunk_id") in (grounding_decision.accepted_chunk_ids or set())] or final_chunks
+
         # Step 6: Context & Citation Construction
-        context_str, citations = self.context_builder.build_context(final_chunks)
+        context_str, citations = self.context_builder.build_context(accepted_chunks)
 
         # Step 7: Generation
         if generate_answer:
@@ -176,6 +194,6 @@ class MedicalRAGPipeline:
             "is_emergency": False,
             "abstained": False,
             "sources": citations,
-            "retrieved_chunks_count": len(final_chunks),
+            "retrieved_chunks_count": len(accepted_chunks),
             "pipeline_mode": mode
         }

@@ -1,0 +1,342 @@
+[
+  {
+    "id": "EXP_01",
+    "query": "What are the indications for Atorvastatin calcium?",
+    "expected_source": "DailyMed",
+    "expected_drug": "atorvastatin",
+    "category": "indication"
+  },
+  {
+    "id": "EXP_02",
+    "query": "Indications for Amlodipine besylate in hypertension",
+    "expected_source": "DailyMed",
+    "expected_drug": "amlodipine",
+    "category": "indication"
+  },
+  {
+    "id": "EXP_03",
+    "query": "What condition is Levothyroxine sodium prescribed for?",
+    "expected_source": "DailyMed",
+    "expected_drug": "levothyroxine",
+    "category": "indication"
+  },
+  {
+    "id": "EXP_04",
+    "query": "Indications for Omeprazole delayed-release capsules",
+    "expected_source": "DailyMed",
+    "expected_drug": "omeprazole",
+    "category": "indication"
+  },
+  {
+    "id": "EXP_05",
+    "query": "What is Ciprofloxacin indicated for in bacterial infections?",
+    "expected_source": "DailyMed",
+    "expected_drug": "ciprofloxacin",
+    "category": "indication"
+  },
+  {
+    "id": "EXP_06",
+    "query": "Contraindications for Metformin hydrochloride in metabolic acidosis",
+    "expected_source": "DailyMed",
+    "expected_drug": "metformin",
+    "category": "contraindication"
+  },
+  {
+    "id": "EXP_07",
+    "query": "When is Losartan potassium contraindicated in pregnancy?",
+    "expected_source": "DailyMed",
+    "expected_drug": "losartan",
+    "category": "contraindication"
+  },
+  {
+    "id": "EXP_08",
+    "query": "Contraindications for Sildenafil with organic nitrates",
+    "expected_source": "DailyMed",
+    "expected_drug": "sildenafil",
+    "category": "contraindication"
+  },
+  {
+    "id": "EXP_09",
+    "query": "Warfarin sodium contraindications in active bleeding",
+    "expected_source": "DailyMed",
+    "expected_drug": "warfarin",
+    "category": "contraindication"
+  },
+  {
+    "id": "EXP_10",
+    "query": "Methotrexate contraindications in nursing mothers",
+    "expected_source": "DailyMed",
+    "expected_drug": "methotrexate",
+    "category": "contraindication"
+  },
+  {
+    "id": "EXP_11",
+    "query": "Boxed warning for Lisinopril regarding fetal toxicity",
+    "expected_source": "DailyMed",
+    "expected_drug": "lisinopril",
+    "category": "boxed_warning"
+  },
+  {
+    "id": "EXP_12",
+    "query": "Black box warning for Fluoroquinolones tendon rupture",
+    "expected_source": "DailyMed",
+    "expected_drug": "ciprofloxacin",
+    "category": "boxed_warning"
+  },
+  {
+    "id": "EXP_13",
+    "query": "Boxed warning for Hydrocodone acetaminophen hepatotoxicity",
+    "expected_source": "DailyMed",
+    "expected_drug": "hydrocodone",
+    "category": "boxed_warning"
+  },
+  {
+    "id": "EXP_14",
+    "query": "Warning for Lactic acidosis with Metformin",
+    "expected_source": "DailyMed",
+    "expected_drug": "metformin",
+    "category": "warning"
+  },
+  {
+    "id": "EXP_15",
+    "query": "Warnings regarding Rhabdomyolysis with Rosuvastatin",
+    "expected_source": "DailyMed",
+    "expected_drug": "rosuvastatin",
+    "category": "warning"
+  },
+  {
+    "id": "EXP_16",
+    "query": "Drug interactions between Clopidogrel and Omeprazole",
+    "expected_source": "DailyMed",
+    "expected_drug": "clopidogrel",
+    "category": "interaction"
+  },
+  {
+    "id": "EXP_17",
+    "query": "Interaction between Simvastatin and strong CYP3A4 inhibitors",
+    "expected_source": "DailyMed",
+    "expected_drug": "simvastatin",
+    "category": "interaction"
+  },
+  {
+    "id": "EXP_18",
+    "query": "Warfarin interaction with NSAIDs and aspirin bleeding risk",
+    "expected_source": "DailyMed",
+    "expected_drug": "warfarin",
+    "category": "interaction"
+  },
+  {
+    "id": "EXP_19",
+    "query": "Digoxin interactions with Amiodarone and Verapamil",
+    "expected_source": "DailyMed",
+    "expected_drug": "digoxin",
+    "category": "interaction"
+  },
+  {
+    "id": "EXP_20",
+    "query": "Lithium toxicity interactions with ACE inhibitors and diuretics",
+    "expected_source": "DailyMed",
+    "expected_drug": "lithium",
+    "category": "interaction"
+  },
+  {
+    "id": "EXP_21",
+    "query": "Common adverse reactions of Gabapentin somnolence and dizziness",
+    "expected_source": "DailyMed",
+    "expected_drug": "gabapentin",
+    "category": "adverse_reaction"
+  },
+  {
+    "id": "EXP_22",
+    "query": "Adverse effects of Sertraline hydrochloride nausea insomnia",
+    "expected_source": "DailyMed",
+    "expected_drug": "sertraline",
+    "category": "adverse_reaction"
+  },
+  {
+    "id": "EXP_23",
+    "query": "Adverse reactions to Albuterol sulfate tremor and tachycardia",
+    "expected_source": "DailyMed",
+    "expected_drug": "albuterol",
+    "category": "adverse_reaction"
+  },
+  {
+    "id": "EXP_24",
+    "query": "Side effects of Furosemide hypokalemia and hyperuricemia",
+    "expected_source": "DailyMed",
+    "expected_drug": "furosemide",
+    "category": "adverse_reaction"
+  },
+  {
+    "id": "EXP_25",
+    "query": "Adverse events of Metoprolol tartrate bradycardia and fatigue",
+    "expected_source": "DailyMed",
+    "expected_drug": "metoprolol",
+    "category": "adverse_reaction"
+  },
+  {
+    "id": "EXP_26",
+    "query": "Dosage and administration of Amoxicillin in adult infections",
+    "expected_source": "DailyMed",
+    "expected_drug": "amoxicillin",
+    "category": "dosage"
+  },
+  {
+    "id": "EXP_27",
+    "query": "Initial dosage of Pantoprazole sodium for GERD",
+    "expected_source": "DailyMed",
+    "expected_drug": "pantoprazole",
+    "category": "dosage"
+  },
+  {
+    "id": "EXP_28",
+    "query": "Dosage titration for Duloxetine in diabetic peripheral neuropathy",
+    "expected_source": "DailyMed",
+    "expected_drug": "duloxetine",
+    "category": "dosage"
+  },
+  {
+    "id": "EXP_29",
+    "query": "Azithromycin 5-day dosage regimen for community acquired pneumonia",
+    "expected_source": "DailyMed",
+    "expected_drug": "azithromycin",
+    "category": "dosage"
+  },
+  {
+    "id": "EXP_30",
+    "query": "Starting dose of Allopurinol in gout patients",
+    "expected_source": "DailyMed",
+    "expected_drug": "allopurinol",
+    "category": "dosage"
+  },
+  {
+    "id": "EXP_31",
+    "query": "ICMR clinical practice guidelines for Type 2 Diabetes Mellitus management",
+    "expected_source": "ICMR",
+    "expected_drug": "diabetes",
+    "category": "guideline"
+  },
+  {
+    "id": "EXP_32",
+    "query": "ICMR antimicrobial stewardship guidelines for hospital empiric antibiotic therapy",
+    "expected_source": "ICMR",
+    "expected_drug": "antimicrobial",
+    "category": "guideline"
+  },
+  {
+    "id": "EXP_33",
+    "query": "MoHFW standard treatment guidelines for hypertension at primary health centres",
+    "expected_source": "MoHFW_STG",
+    "expected_drug": "hypertension",
+    "category": "guideline"
+  },
+  {
+    "id": "EXP_34",
+    "query": "MoHFW clinical establishment guidelines for emergency medical triage in CHC",
+    "expected_source": "MoHFW_STG",
+    "expected_drug": "emergency",
+    "category": "guideline"
+  },
+  {
+    "id": "EXP_35",
+    "query": "ICMR recommendations for community acquired pneumonia management in adults",
+    "expected_source": "ICMR",
+    "expected_drug": "pneumonia",
+    "category": "guideline"
+  },
+  {
+    "id": "EXP_36",
+    "query": "MedlinePlus overview of Type 2 Diabetes causes and symptoms",
+    "expected_source": "MedlinePlus",
+    "expected_drug": "diabetes",
+    "category": "health_topic"
+  },
+  {
+    "id": "EXP_37",
+    "query": "MedlinePlus guide to High Blood Pressure and lifestyle interventions",
+    "expected_source": "MedlinePlus",
+    "expected_drug": "hypertension",
+    "category": "health_topic"
+  },
+  {
+    "id": "EXP_38",
+    "query": "MedlinePlus Asthma triggers and long-term control medications",
+    "expected_source": "MedlinePlus",
+    "expected_drug": "asthma",
+    "category": "health_topic"
+  },
+  {
+    "id": "EXP_39",
+    "query": "MedlinePlus Chronic Kidney Disease staging and dietary guidelines",
+    "expected_source": "MedlinePlus",
+    "expected_drug": "kidney",
+    "category": "health_topic"
+  },
+  {
+    "id": "EXP_40",
+    "query": "MedlinePlus Coronary Artery Disease risk factors and angina symptoms",
+    "expected_source": "MedlinePlus",
+    "expected_drug": "coronary",
+    "category": "health_topic"
+  },
+  {
+    "id": "EXP_41",
+    "query": "What is the pediatric dose for Cardioregulin?",
+    "category": "unsupported_entity",
+    "should_abstain": true
+  },
+  {
+    "id": "EXP_42",
+    "query": "Indications and side effects of Phantasmamycine 500mg",
+    "category": "unsupported_entity",
+    "should_abstain": true
+  },
+  {
+    "id": "EXP_43",
+    "query": "How to prescribe Zylophin-B for acute pancreatitis?",
+    "category": "unsupported_entity",
+    "should_abstain": true
+  },
+  {
+    "id": "EXP_44",
+    "query": "Clinical trials for Necrostatil in autoimmune disease",
+    "category": "unsupported_entity",
+    "should_abstain": true
+  },
+  {
+    "id": "EXP_45",
+    "query": "Contraindications for Pseudo-Aspirin XR",
+    "category": "unsupported_entity",
+    "should_abstain": true
+  },
+  {
+    "id": "EXP_46",
+    "query": "How to configure a Kubernetes pod on Google Cloud?",
+    "category": "out_of_domain",
+    "should_abstain": true
+  },
+  {
+    "id": "EXP_47",
+    "query": "What is the capital of France and its population?",
+    "category": "out_of_domain",
+    "should_abstain": true
+  },
+  {
+    "id": "EXP_48",
+    "query": "Recipe for chocolate chip cookies with brown butter",
+    "category": "out_of_domain",
+    "should_abstain": true
+  },
+  {
+    "id": "EXP_49",
+    "query": "Patient suddenly collapsed, unconscious, no pulse, cyanotic lips",
+    "category": "emergency",
+    "is_emergency": true
+  },
+  {
+    "id": "EXP_50",
+    "query": "Crushing retrosternal chest pain with nausea and diaphoresis",
+    "category": "emergency",
+    "is_emergency": true
+  }
+]

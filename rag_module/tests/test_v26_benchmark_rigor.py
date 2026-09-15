@@ -43,7 +43,7 @@ class TestV26BenchmarkRigor(unittest.TestCase):
 
     def test_ground_truth_integrity(self):
         """Verify all ground truth chunk IDs and doc IDs exist in the indexed corpus."""
-        if len(self.meta) < 1000:
+        if not any(m.get("source_id") in ["medquad_nih", "medquad"] for m in self.meta):
             self.skipTest("V2.6 benchmark ground truth integrity requires legacy full MedQuAD corpus")
         for q in self.queries:
             gt_list = q.get("ground_truth", [])
@@ -55,7 +55,7 @@ class TestV26BenchmarkRigor(unittest.TestCase):
 
     def test_leakage_audit_pass(self):
         """Verify leakage audit passes with zero critical n-gram leaks."""
-        if len(self.meta) < 1000:
+        if not any(m.get("source_id") in ["medquad_nih", "medquad"] for m in self.meta):
             self.skipTest("V2.6 benchmark leakage audit requires legacy full MedQuAD corpus")
         report = run_leakage_audit(
             dataset_path=str(self.dataset_path),
