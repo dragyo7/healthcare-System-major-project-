@@ -1,0 +1,118 @@
+{
+  "endpoint": "/rag/query",
+  "status_code": 200,
+  "latency_sec": 2.6072,
+  "timestamp": "2026-09-15T05:58:39.934859+00:00",
+  "request": {
+    "query": "What are the indications and dosing guidelines for Cardioregulin?",
+    "top_k": 3
+  },
+  "response": {
+    "query": "What are the indications and dosing guidelines for Cardioregulin?",
+    "retrieval_mode": "hybrid",
+    "total_evidence": 3,
+    "evidence": [
+      {
+        "rank": 1,
+        "score": -6.722948,
+        "source_id": "DailyMed",
+        "source_name": "National Library of Medicine DailyMed",
+        "publisher": "U.S. National Library of Medicine / FDA",
+        "document_id": "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_indications___usage",
+        "chunk_id": "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_indications___usage-c0",
+        "title": "Lisinopril - Indications & Usage",
+        "section": "Indications & Usage",
+        "medical_domain": "pharmacology",
+        "source_url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=4b2c1256-42d4-4a4b-8e2a-0a8870fb381b",
+        "text": "Drug: Lisinopril\nSection: Indications & Usage\n\nLisinopril is indicated for the treatment of hypertension in adults and children >= 6 years; adjunct therapy in heart failure; acute myocardial infarction within 24 hours.",
+        "dense_score": 0.834,
+        "bm25_score": 8.0213,
+        "fused_score": 0.031099,
+        "rerank_score": -6.7229
+      },
+      {
+        "rank": 2,
+        "score": -7.305839,
+        "source_id": "DailyMed",
+        "source_name": "National Library of Medicine DailyMed",
+        "publisher": "U.S. National Library of Medicine / FDA",
+        "document_id": "dailymed_7823f03b-18a8-48b6-9bb2-16a7f0521e29_indications___usage",
+        "chunk_id": "dailymed_7823f03b-18a8-48b6-9bb2-16a7f0521e29_indications___usage-c0",
+        "title": "Atorvastatin - Indications & Usage",
+        "section": "Indications & Usage",
+        "medical_domain": "pharmacology",
+        "source_url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=7823f03b-18a8-48b6-9bb2-16a7f0521e29",
+        "text": "Drug: Atorvastatin\nSection: Indications & Usage\n\nAdjunct to diet for primary hyperlipidemia, hypertriglyceridemia, prevention of cardiovascular disease (MI, stroke, revascularization) in patients at risk.",
+        "dense_score": 0.8318,
+        "bm25_score": 4.8812,
+        "fused_score": 0.027402,
+        "rerank_score": -7.3058
+      },
+      {
+        "rank": 3,
+        "score": -10.203768,
+        "source_id": "ICMR",
+        "source_name": "Indian Council of Medical Research Clinical Guidelines",
+        "publisher": "Indian Council of Medical Research (ICMR, Govt of India)",
+        "document_id": "icmr_icmr_hypertension_2020_hypertension_definition",
+        "chunk_id": "icmr_icmr_hypertension_2020_hypertension_definition-c0",
+        "title": "ICMR Guidelines for Diagnosis and Management of Hypertension in India - Diagnosis and Screening Protocol in Indian Primary Care",
+        "section": "Diagnosis and Screening Protocol in Indian Primary Care",
+        "medical_domain": "cardiology",
+        "source_url": "https://main.icmr.nic.in/content/guidelines-management-hypertension",
+        "text": "ICMR Clinical Guideline: ICMR Guidelines for Diagnosis and Management of Hypertension in India (2020)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: Diagnosis and Screening Protocol in Indian Primary Care (Page 8)\n\nHypertension is defined as persistent Office Blood Pressure of Systolic BP >= 140 mmHg and/or Diastolic BP >= 90 mmHg based on the average of at least two seated readings taken on two separate clinical visits. Universal screening is recommended for all Indian adults >= 18 years visiting primary healthcare facilities.",
+        "dense_score": 0.8315,
+        "bm25_score": 6.4384,
+        "fused_score": 0.029206,
+        "rerank_score": -10.2038
+      }
+    ],
+    "context_text": "[Doc 1: Lisinopril - Indications & Usage | Source: National Library of Medicine DailyMed] (URL: https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=4b2c1256-42d4-4a4b-8e2a-0a8870fb381b)\nDrug: Lisinopril\nSection: Indications & Usage\n\nLisinopril is indicated for the treatment of hypertension in adults and children >= 6 years; adjunct therapy in heart failure; acute myocardial infarction within 24 hours.\n\n---\n\n[Doc 2: Atorvastatin - Indications & Usage | Source: National Library of Medicine DailyMed] (URL: https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=7823f03b-18a8-48b6-9bb2-16a7f0521e29)\nDrug: Atorvastatin\nSection: Indications & Usage\n\nAdjunct to diet for primary hyperlipidemia, hypertriglyceridemia, prevention of cardiovascular disease (MI, stroke, revascularization) in patients at risk.\n\n---\n\n[Doc 3: ICMR Guidelines for Diagnosis and Management of Hypertension in India - Diagnosis and Screening Protocol in Indian Primary Care | Source: Indian Council of Medical Research Clinical Guidelines] (URL: https://main.icmr.nic.in/content/guidelines-management-hypertension)\nICMR Clinical Guideline: ICMR Guidelines for Diagnosis and Management of Hypertension in India (2020)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: Diagnosis and Screening Protocol in Indian Primary Care (Page 8)\n\nHypertension is defined as persistent Office Blood Pressure of Systolic BP >= 140 mmHg and/or Diastolic BP >= 90 mmHg based on the average of at least two seated readings taken on two separate clinical visits. Universal screening is recommended for all Indian adults >= 18 years visiting primary healthcare facilities.",
+    "latency_ms": 2603.92,
+    "reranker_status": "available",
+    "filters_applied": {},
+    "grounding": {
+      "status": "grounded",
+      "generation_allowed": true,
+      "evidence_count": 3,
+      "usable_evidence_count": 3,
+      "accepted_chunk_ids": [
+        "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_indications___usage-c0",
+        "dailymed_7823f03b-18a8-48b6-9bb2-16a7f0521e29_indications___usage-c0",
+        "icmr_icmr_hypertension_2020_hypertension_definition-c0"
+      ],
+      "provenance_valid": true,
+      "top_evidence_rank": 1,
+      "evidence_sources": [
+        "DailyMed",
+        "ICMR"
+      ],
+      "evidence_documents": [
+        "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_indications___usage",
+        "dailymed_7823f03b-18a8-48b6-9bb2-16a7f0521e29_indications___usage",
+        "icmr_icmr_hypertension_2020_hypertension_definition"
+      ],
+      "evidence_sections": [
+        "Diagnosis and Screening Protocol in Indian Primary Care",
+        "Indications & Usage"
+      ],
+      "reason_codes": [
+        "EVIDENCE_SUFFICIENT"
+      ],
+      "warnings": [],
+      "conflict_detected": false,
+      "conflict_summary": null,
+      "policy_latency_ms": 0.456
+    },
+    "safety_assessment": {
+      "risk_category": "informational",
+      "is_emergency": false,
+      "emergency_message": null,
+      "is_injection": false,
+      "sanitized_query": "What are the indications and dosing guidelines for Cardioregulin?",
+      "requires_strict_grounding": false,
+      "warnings": []
+    }
+  },
+  "error": null
+}

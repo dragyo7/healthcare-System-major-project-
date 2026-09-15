@@ -1,0 +1,57 @@
+{
+  "stgs": [
+    {
+      "stg_id": "mohfw_stg_hypertension",
+      "title": "MoHFW Standard Treatment Guideline: Hypertension",
+      "care_level": "Primary and Secondary Care Healthcare Facilities",
+      "medical_domain": "cardiology",
+      "target_conditions": [
+        "Hypertension",
+        "Primary Health Centre",
+        "Amlodipine",
+        "Enalapril"
+      ],
+      "url": "https://clinicalestablishments.gov.in/stg/hypertension.pdf",
+      "sections": [
+        {
+          "section_id": "primary_health_centre_protocol",
+          "section_title": "Protocol at Primary Health Centre (PHC)",
+          "page_number": 4,
+          "content": "At the PHC level: 1) Measure BP accurately with calibrated digital or aneroid sphygmomanometer; 2) Confirm BP >= 140/90 mmHg across two visits; 3) Screen for red-flag emergency symptoms (chest pain, neurological deficit, dyspnea); 4) Initiate lifestyle counseling: dietary salt reduction (< 5 grams/day), physical activity 30 mins/day, tobacco cessation; 5) First-line pharmacological therapy: Tab Amlodipine 5 mg once daily in morning. If uncontrolled after 1 month, increase to Tab Amlodipine 10 mg or add Tab Telmisartan 40 mg once daily."
+        },
+        {
+          "section_id": "referral_criteria",
+          "section_title": "Emergency Referral Criteria to District Hospital / Secondary Care",
+          "page_number": 9,
+          "content": "Immediate emergency referral to District Hospital / Tertiary Facility required if: 1) Hypertensive emergency: BP > 180/120 mmHg with target organ damage (chest pain, altered sensorium, pulmonary edema, papilledema, acute renal failure); 2) Suspected secondary hypertension (onset age < 30 years, refractory hypertension on 3 drugs including a diuretic); 3) Severe hypertension in pregnancy (Pre-eclampsia / Eclampsia)."
+        }
+      ]
+    },
+    {
+      "stg_id": "mohfw_stg_diabetes",
+      "title": "MoHFW Standard Treatment Guideline: Type 2 Diabetes Mellitus",
+      "care_level": "Primary Health Centre and Community Health Centre Level",
+      "medical_domain": "endocrinology",
+      "target_conditions": [
+        "Type 2 Diabetes Mellitus",
+        "Metformin",
+        "Primary Healthcare"
+      ],
+      "url": "https://clinicalestablishments.gov.in/stg/diabetes.pdf",
+      "sections": [
+        {
+          "section_id": "screening_and_initial_management",
+          "section_title": "Standard Clinical Protocol at Sub-Centre and PHC",
+          "page_number": 3,
+          "content": "Universal screening for all individuals >= 30 years using Community Based Assessment Checklist (CBAC) under National NCD Program. If Fasting Blood Sugar >= 126 mg/dL or Random Blood Sugar >= 200 mg/dL: Initiate medical nutrition therapy and Tab Metformin 500 mg orally twice daily with meals. Monitor blood glucose monthly. Maintain foot care inspection at every clinical visit to prevent diabetic foot ulcers."
+        },
+        {
+          "section_id": "hypoglycemia_management",
+          "section_title": "Emergency Management of Acute Hypoglycemia",
+          "page_number": 7,
+          "content": "Definition: Blood glucose < 70 mg/dL with tremors, sweating, palpitation, confusion. Conscious patient: Rule of 15 - Administer 15 to 20 grams of fast-acting carbohydrate (3-4 teaspoons of sugar in water, or glucose tablets), recheck blood sugar in 15 minutes. Unconscious patient / Cannot swallow: Give 50 mL of 25% Dextrose IV or 100 mL of 10% Dextrose IV immediately. Do not administer oral liquids to an unconscious patient."
+        }
+      ]
+    }
+  ]
+}

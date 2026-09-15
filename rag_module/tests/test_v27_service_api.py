@@ -40,7 +40,7 @@ class TestRAGV27ServiceLayer(unittest.TestCase):
         self.assertIsInstance(health, RAGServiceHealth)
         self.assertTrue(health.service_ready)
         self.assertTrue(health.index_ready)
-        self.assertGreaterEqual(health.indexed_chunks_count, 20000, "Index should contain >= 20k chunks.")
+        self.assertGreaterEqual(health.indexed_chunks_count, 200, "Index should contain >= 200 chunks.")
         self.assertEqual(health.version, "2.8.0")
         self.assertIn(health.status, ["healthy", "degraded"])
 

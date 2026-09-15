@@ -3,12 +3,12 @@
   "source_display_name": "National Library of Medicine DailyMed (FDA SPL)",
   "publisher": "U.S. National Library of Medicine / FDA",
   "authority_level": "tier_1_regulatory",
-  "ingestion_timestamp": "2026-09-13T09:22:09.678736+00:00",
-  "duration_seconds": 0.33,
-  "corpus_version": "2.6",
+  "ingestion_timestamp": "2026-09-15T05:03:51.879912+00:00",
+  "duration_seconds": 0.028,
+  "corpus_version": "2.9",
   "code_version": "rag_v2.4",
-  "document_count": 2176,
-  "chunk_count": 2176,
+  "document_count": 188,
+  "chunk_count": 188,
   "embedding_model": "BAAI/bge-small-en",
   "embedding_dimension": 384,
   "chunking_config": {
@@ -20,50 +20,50 @@
     "hybrid_rrf_k": 60,
     "dense_k": 20,
     "bm25_k": 20,
-    "reranker_model": "BAAI/bge-reranker-small"
+    "reranker_model": "cross-encoder/ms-marco-MiniLM-L-6-v2"
   },
   "stats": {
     "source_id": "DailyMed",
     "source_name": "National Library of Medicine DailyMed",
-    "documents_seen": 2176,
-    "documents_valid": 2176,
+    "documents_seen": 188,
+    "documents_valid": 188,
     "documents_rejected": 0,
     "duplicates_removed": 0,
-    "documents_ingested": 2176
+    "documents_ingested": 188
   },
   "corpus_file": "corpus.json",
   "chunks_file": "chunks.json",
-  "content_hash_summary": "e53f02d650405353b59c9aca4a10c3840e6056e39029c9da7966c494af3f84ce",
+  "content_hash_summary": "21189dcd3ab49b66ab646d9a94ac028fdff5fae39ef5a7a7c3c8beabb58c9c93",
   "provenance_sample": [
     {
       "document_id": "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_indications___usage",
       "title": "Lisinopril - Indications & Usage",
       "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=4b2c1256-42d4-4a4b-8e2a-0a8870fb381b",
-      "hash": "aa7acfa01d49"
+      "hash": "aef12e0f7235"
     },
     {
       "document_id": "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_dosage___administration",
       "title": "Lisinopril - Dosage & Administration",
       "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=4b2c1256-42d4-4a4b-8e2a-0a8870fb381b",
-      "hash": "f74ea02717d0"
+      "hash": "ba88d4748c46"
     },
     {
       "document_id": "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_contraindications",
       "title": "Lisinopril - Contraindications",
       "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=4b2c1256-42d4-4a4b-8e2a-0a8870fb381b",
-      "hash": "14f5f367bbdc"
+      "hash": "6ec081646585"
     },
     {
       "document_id": "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_warnings___precautions",
       "title": "Lisinopril - Warnings & Precautions",
       "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=4b2c1256-42d4-4a4b-8e2a-0a8870fb381b",
-      "hash": "c6aea262fbb2"
+      "hash": "c94fd3c6c450"
     },
     {
       "document_id": "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_adverse_reactions",
       "title": "Lisinopril - Adverse Reactions",
       "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=4b2c1256-42d4-4a4b-8e2a-0a8870fb381b",
-      "hash": "9f117f019f68"
+      "hash": "cd47e55d76e7"
     }
   ]
 }

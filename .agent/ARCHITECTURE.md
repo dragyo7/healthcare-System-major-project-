@@ -38,10 +38,10 @@ flowchart TD
     POLICY --> PROV
     API --> PM
     API --> DM
-    
+
     PM -->|Extracted Entities| SVC
     DM -->|Standardized Synonyms| SVC
-    
+
     PKB --> RAG
     RAG --> VDB
     RAG --> LDB

@@ -1,0 +1,120 @@
+{
+  "endpoint": "/rag/query",
+  "status_code": 200,
+  "latency_sec": 1.9987,
+  "timestamp": "2026-09-15T06:00:52.786032+00:00",
+  "request": {
+    "query": "What is the surgical resection margin for stage IV glioblastoma multiforme?",
+    "top_k": 3
+  },
+  "response": {
+    "query": "What is the surgical resection margin for stage IV glioblastoma multiforme?",
+    "retrieval_mode": "hybrid",
+    "total_evidence": 3,
+    "evidence": [
+      {
+        "rank": 1,
+        "score": -11.157812,
+        "source_id": "ICMR",
+        "source_name": "Indian Council of Medical Research Clinical Guidelines",
+        "publisher": "Indian Council of Medical Research (ICMR, Govt of India)",
+        "document_id": "icmr_icmr_hypertension_2020_pharmacological_management",
+        "chunk_id": "icmr_icmr_hypertension_2020_pharmacological_management-c0",
+        "title": "ICMR Guidelines for Diagnosis and Management of Hypertension in India - First-Line Drug Selection & Combination Therapy",
+        "section": "First-Line Drug Selection & Combination Therapy",
+        "medical_domain": "cardiology",
+        "source_url": "https://main.icmr.nic.in/content/guidelines-management-hypertension",
+        "text": "ICMR Clinical Guideline: ICMR Guidelines for Diagnosis and Management of Hypertension in India (2020)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: First-Line Drug Selection & Combination Therapy (Page 22)\n\nInitial monotherapy for uncomplicated Stage 1 hypertension: Long-acting Calcium Channel Blocker (Amlodipine 5 mg once daily) OR Angiotensin Receptor Blocker (Telmisartan 40 mg once daily) OR ACE inhibitor (Enalapril 5 mg once daily). If BP is not controlled on monotherapy after 4 weeks or if initial BP is >= 20/10 mmHg above target (Stage 2 Hypertension), initiate combination therapy: Amlodipine + Telmisartan, or Amlodipine + Thiazide-like diuretic (Chlorthalidone 12.5 mg). Avoid combining ACE inhibitors with ARBs due to hyperkalemia and renal failure risk.",
+        "dense_score": 0.741,
+        "bm25_score": 6.7381,
+        "fused_score": 0.02895,
+        "rerank_score": -11.1578
+      },
+      {
+        "rank": 2,
+        "score": -11.317823,
+        "source_id": "ICMR",
+        "source_name": "Indian Council of Medical Research Clinical Guidelines",
+        "publisher": "Indian Council of Medical Research (ICMR, Govt of India)",
+        "document_id": "icmr_icmr_antimicrobial_2022_respiratory_infections",
+        "chunk_id": "icmr_icmr_antimicrobial_2022_respiratory_infections-c0",
+        "title": "ICMR National Treatment Guidelines for Antimicrobial Use in Infectious Diseases - Empiric Therapy for Community-Acquired Pneumonia (CAP)",
+        "section": "Empiric Therapy for Community-Acquired Pneumonia (CAP)",
+        "medical_domain": "antimicrobial_stewardship",
+        "source_url": "https://main.icmr.nic.in/content/national-treatment-guidelines-antimicrobial-use",
+        "text": "ICMR Clinical Guideline: ICMR National Treatment Guidelines for Antimicrobial Use in Infectious Diseases (2022)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: Empiric Therapy for Community-Acquired Pneumonia (CAP) (Page 42)\n\nOutpatient CAP (Mild, CURB-65 = 0-1, no comorbidities): First-line: Oral Amoxicillin 500 mg - 1000 mg three times daily for 5 days. Alternative: Oral Doxycycline 100 mg twice daily. Outpatient with comorbidities (COPD, diabetes, renal disease): Oral Amoxicillin-Clavulanic acid (875/125 mg twice daily) PLUS oral Azithromycin (500 mg Day 1, then 250 mg daily). Hospitalized Inpatient (Non-ICU, CURB-65 >= 2): Intravenous Ceftriaxone (1-2 g IV once daily) PLUS IV/Oral Azithromycin (500 mg once daily).",
+        "dense_score": 0.757,
+        "bm25_score": 5.0026,
+        "fused_score": 0.03009,
+        "rerank_score": -11.3178
+      },
+      {
+        "rank": 3,
+        "score": -11.354095,
+        "source_id": "ICMR",
+        "source_name": "Indian Council of Medical Research Clinical Guidelines",
+        "publisher": "Indian Council of Medical Research (ICMR, Govt of India)",
+        "document_id": "icmr_icmr_hypertension_2020_hypertension_definition",
+        "chunk_id": "icmr_icmr_hypertension_2020_hypertension_definition-c0",
+        "title": "ICMR Guidelines for Diagnosis and Management of Hypertension in India - Diagnosis and Screening Protocol in Indian Primary Care",
+        "section": "Diagnosis and Screening Protocol in Indian Primary Care",
+        "medical_domain": "cardiology",
+        "source_url": "https://main.icmr.nic.in/content/guidelines-management-hypertension",
+        "text": "ICMR Clinical Guideline: ICMR Guidelines for Diagnosis and Management of Hypertension in India (2020)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: Diagnosis and Screening Protocol in Indian Primary Care (Page 8)\n\nHypertension is defined as persistent Office Blood Pressure of Systolic BP >= 140 mmHg and/or Diastolic BP >= 90 mmHg based on the average of at least two seated readings taken on two separate clinical visits. Universal screening is recommended for all Indian adults >= 18 years visiting primary healthcare facilities.",
+        "dense_score": 0.7476,
+        "bm25_score": 5.3531,
+        "fused_score": 0.029211,
+        "rerank_score": -11.3541
+      }
+    ],
+    "context_text": "",
+    "latency_ms": 1992.71,
+    "reranker_status": "available",
+    "filters_applied": {},
+    "grounding": {
+      "status": "insufficient_evidence",
+      "generation_allowed": false,
+      "evidence_count": 3,
+      "usable_evidence_count": 3,
+      "accepted_chunk_ids": [
+        "icmr_icmr_hypertension_2020_pharmacological_management-c0",
+        "icmr_icmr_antimicrobial_2022_respiratory_infections-c0",
+        "icmr_icmr_hypertension_2020_hypertension_definition-c0"
+      ],
+      "provenance_valid": true,
+      "top_evidence_rank": 1,
+      "evidence_sources": [
+        "ICMR"
+      ],
+      "evidence_documents": [
+        "icmr_icmr_antimicrobial_2022_respiratory_infections",
+        "icmr_icmr_hypertension_2020_hypertension_definition",
+        "icmr_icmr_hypertension_2020_pharmacological_management"
+      ],
+      "evidence_sections": [
+        "Diagnosis and Screening Protocol in Indian Primary Care",
+        "Empiric Therapy for Community-Acquired Pneumonia (CAP)",
+        "First-Line Drug Selection & Combination Therapy"
+      ],
+      "reason_codes": [
+        "OUT_OF_DOMAIN"
+      ],
+      "warnings": [
+        "Substantive query term overlap (17%) is below domain threshold; query appears out-of-domain."
+      ],
+      "conflict_detected": false,
+      "conflict_summary": null,
+      "policy_latency_ms": 2.104
+    },
+    "safety_assessment": {
+      "risk_category": "informational",
+      "is_emergency": false,
+      "emergency_message": null,
+      "is_injection": false,
+      "sanitized_query": "What is the surgical resection margin for stage IV glioblastoma multiforme?",
+      "requires_strict_grounding": false,
+      "warnings": []
+    }
+  },
+  "error": null
+}

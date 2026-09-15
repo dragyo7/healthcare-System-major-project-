@@ -1,0 +1,99 @@
+{
+  "catalog_version": "2.8",
+  "last_updated": "2026-09-15T09:44:00Z",
+  "governance_policy": "Strict Authoritative Medical Provenance Policy (DS-001 - DS-013)",
+  "active_sources": [
+    {
+      "source_id": "DailyMed",
+      "display_name": "National Library of Medicine DailyMed (FDA SPL)",
+      "publisher": "U.S. Food and Drug Administration (FDA) / NLM",
+      "authority_tier": "tier_1_regulatory",
+      "source_type": "regulatory_drug_repository",
+      "domains": ["pharmacology", "toxicology", "clinical_pharmacology", "drug_safety"],
+      "document_types": ["package_insert", "spl_monograph", "boxed_warning", "contraindications"],
+      "update_frequency": "weekly",
+      "license": "U.S. Federal Government Public Domain",
+      "base_url": "https://dailymed.nlm.nih.gov",
+      "status": "ACTIVE_PRODUCTION"
+    },
+    {
+      "source_id": "MedlinePlus",
+      "display_name": "MedlinePlus Health Topics",
+      "publisher": "National Library of Medicine (NLM / NIH)",
+      "authority_tier": "tier_1_federal_research",
+      "source_type": "federal_research_institute",
+      "domains": ["internal_medicine", "emergency_medicine", "general_medicine", "endocrinology"],
+      "document_types": ["topic_summary", "consumer_health_overview", "disease_guide"],
+      "update_frequency": "monthly",
+      "license": "U.S. Federal Government Public Domain",
+      "base_url": "https://medlineplus.gov",
+      "status": "ACTIVE_PRODUCTION"
+    },
+    {
+      "source_id": "ICMR",
+      "display_name": "Indian Council of Medical Research Clinical Guidelines",
+      "publisher": "Indian Council of Medical Research (MoHFW, Government of India)",
+      "authority_tier": "tier_2_clinical_consensus",
+      "source_type": "guideline_clearinghouse",
+      "domains": ["infectious_diseases", "antimicrobial_stewardship", "cardiology", "hypertension", "diabetes"],
+      "document_types": ["clinical_practice_guideline", "treatment_algorithm", "screening_protocol"],
+      "update_frequency": "annual",
+      "license": "Government Open Data License - India (GODL)",
+      "base_url": "https://main.icmr.nic.in",
+      "status": "ACTIVE_PRODUCTION"
+    },
+    {
+      "source_id": "MoHFW_STG",
+      "display_name": "Ministry of Health & Family Welfare Standard Treatment Guidelines",
+      "publisher": "Ministry of Health & Family Welfare, Government of India",
+      "authority_tier": "tier_2_clinical_consensus",
+      "source_type": "guideline_clearinghouse",
+      "domains": ["primary_care", "emergency_medicine", "public_health", "referral_protocols"],
+      "document_types": ["standard_treatment_guideline", "primary_health_centre_protocol", "referral_criteria"],
+      "update_frequency": "biennial",
+      "license": "Government of India Public Domain",
+      "base_url": "https://clinicalestablishments.gov.in",
+      "status": "ACTIVE_PRODUCTION"
+    },
+    {
+      "source_id": "RxNorm",
+      "display_name": "RxNorm Normalized Prescribable Clinical Terminology",
+      "publisher": "National Library of Medicine (NLM)",
+      "authority_tier": "tier_1_federal_research",
+      "source_type": "terminology_standard",
+      "domains": ["clinical_terminology", "drug_nomenclature", "active_ingredients"],
+      "document_types": ["terminology_mapping", "brand_synonym_dictionary", "rxcui_concept"],
+      "update_frequency": "monthly",
+      "license": "U.S. National Library of Medicine (UMLS Metathesaurus terms)",
+      "base_url": "https://www.nlm.nih.gov/research/umls/rxnorm/",
+      "status": "ACTIVE_PRODUCTION"
+    },
+    {
+      "source_id": "openFDA",
+      "display_name": "openFDA Drug Adverse Events & Labeling API",
+      "publisher": "U.S. Food and Drug Administration (FDA)",
+      "authority_tier": "tier_1_regulatory",
+      "source_type": "regulatory_agency",
+      "domains": ["adverse_drug_events", "pharmacovigilance", "post_market_surveillance"],
+      "document_types": ["adverse_event_report", "drug_label"],
+      "update_frequency": "quarterly",
+      "license": "U.S. Federal Government Public Domain / CC0",
+      "base_url": "https://open.fda.gov",
+      "status": "ACTIVE_PRODUCTION"
+    }
+  ],
+  "quarantined_sources": [
+    {
+      "source_id": "DrugBank_Synthetic",
+      "display_name": "DrugBank Demo Fixture (8 rows)",
+      "reason": "Synthetic non-licensed micro-subset, replaced by verified DailyMed/FDA rulebase (DS-001).",
+      "status": "QUARANTINED"
+    },
+    {
+      "source_id": "SIDER_Synthetic",
+      "display_name": "SIDER Demo Fixture (18 rows)",
+      "reason": "Synthetic micro-subset without clinical provenance, replaced by DailyMed FDA SPL Adverse Reactions (DS-002).",
+      "status": "QUARANTINED"
+    }
+  ]
+}

@@ -24,7 +24,7 @@
 | **Combined Production Index** | **VALIDATED** | 26,143 unified clinical chunks indexed in FAISS (`index_v2.bin`) and BM25 (`bm25_index.pkl`). |
 | **Formal Benchmark Dataset (`v26_benchmark_dataset.json`)** | **VALIDATED** | Exactly **160 clinical queries** across 18 clinical categories with 315 verified ground-truth chunk bindings. |
 | **Grounding Policy Evaluation Suite (`grounding_evaluator.py`)** | **VALIDATED** | Evaluates in-domain grounding, out-of-domain abstention, provenance tampering, conflict detection, and sub-millisecond policy latency. |
-| **Automated Test Suite** | **VALIDATED** | **91 / 91 tests passing (100%) in 23.3s** covering pipeline, service layer, grounding policy, safety screening, and benchmark rigor. |
+| **Automated Test Suite** | **VALIDATED** | **107 / 107 tests passing (100%) in ~13-25s** covering pipeline, service layer, grounding policy, safety screening, benchmark rigor, and 16 adversarial boundary/injection/concurrency stress scenarios. |
 
 | **Prescription Module (`prescription_module`)** | **STANDALONE** | Isolated rule-based regex and NLP entity extractor. |
 | **Drug Module (`drug_module`)** | **STANDALONE** | Isolated drug catalog master data structure. |

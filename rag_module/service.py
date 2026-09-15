@@ -151,6 +151,7 @@ class EvidenceItem(BaseModel):
     dense_score: Optional[float] = Field(default=None, description="Cosine similarity score from dense vector retrieval.")
     bm25_score: Optional[float] = Field(default=None, description="BM25Okapi lexical score.")
     fused_score: Optional[float] = Field(default=None, description="Reciprocal Rank Fusion score (hybrid).")
+    rerank_score: Optional[float] = Field(default=None, description="Cross-encoder relevance score.")
 
     model_config = ConfigDict(extra="forbid")
 
@@ -290,7 +291,7 @@ class RAGService:
 
         reranker_status = "fallback_pass_through"
         if self.reranker and getattr(self.reranker, "use_reranker", False):
-            if getattr(self.reranker, "model", None) is not None:
+            if getattr(self.reranker, "_model", None) is not None:
                 reranker_status = "available"
             else:
                 reranker_status = "fallback_pass_through"
@@ -451,12 +452,13 @@ class RAGService:
         reranker_status = "disabled"
         if mode in ["hybrid_rerank", "hybrid"] and self.reranker:
             if getattr(self.reranker, "use_reranker", False):
-                if getattr(self.reranker, "model", None) is not None:
+                # Let the reranker handle lazy-loading internally via _get_model()
+                candidate_chunks = self.reranker.rerank(sanitized_query, candidate_chunks, top_k=top_k)
+                # Check post-call status: did the model actually load?
+                if getattr(self.reranker, "_model", None) is not None:
                     reranker_status = "available"
-                    candidate_chunks = self.reranker.rerank(sanitized_query, candidate_chunks, top_k=top_k)
                 else:
                     reranker_status = "fallback_pass_through"
-                    candidate_chunks = candidate_chunks[:top_k]
             else:
                 reranker_status = "disabled"
                 candidate_chunks = candidate_chunks[:top_k]
@@ -466,8 +468,11 @@ class RAGService:
         # Step 4: Construct structured EvidenceItem models
         evidence_items: List[EvidenceItem] = []
         for rank, chunk in enumerate(candidate_chunks, start=1):
-            score = float(chunk.get("score") or chunk.get("fused_score") or chunk.get("dense_score") or chunk.get("bm25_score") or 0.0)
-            
+            if "rerank_score" in chunk and chunk["rerank_score"] is not None:
+                score = float(chunk["rerank_score"])
+            else:
+                score = float(chunk.get("fused_score") or chunk.get("dense_score") or chunk.get("bm25_score") or chunk.get("score") or 0.0)
+
             item = EvidenceItem(
                 rank=rank,
                 score=round(score, 6),
@@ -483,7 +488,8 @@ class RAGService:
                 text=str(chunk.get("text") or "").strip(),
                 dense_score=round(float(chunk["dense_score"]), 4) if "dense_score" in chunk and chunk["dense_score"] is not None else None,
                 bm25_score=round(float(chunk["bm25_score"]), 4) if "bm25_score" in chunk and chunk["bm25_score"] is not None else None,
-                fused_score=round(float(chunk["fused_score"]), 6) if "fused_score" in chunk and chunk["fused_score"] is not None else None
+                fused_score=round(float(chunk["fused_score"]), 6) if "fused_score" in chunk and chunk["fused_score"] is not None else None,
+                rerank_score=round(float(chunk["rerank_score"]), 4) if "rerank_score" in chunk and chunk["rerank_score"] is not None else None
             )
             evidence_items.append(item)
 
@@ -494,10 +500,14 @@ class RAGService:
             retrieval_mode=mode
         )
 
-        # Step 6: Format context string via ContextBuilder (strictly bounded to usable chunks if generation allowed)
-        if grounding_decision.generation_allowed:
-            usable_count = max(grounding_decision.usable_evidence_count, 1) if candidate_chunks else 0
-            context_str, _ = self.context_builder.build_context(candidate_chunks[:usable_count])
+        # Step 6: Format context string via ContextBuilder (strictly bounded to accepted chunks if generation allowed)
+        if grounding_decision.generation_allowed and grounding_decision.accepted_chunk_ids:
+            accepted_set = set(grounding_decision.accepted_chunk_ids)
+            accepted_chunks = [c for c in candidate_chunks if (c.get("chunk_id") or c.get("id")) in accepted_set]
+            # Fallback to candidate_chunks[:usable_evidence_count] only if chunk_ids were not present in dicts
+            if not accepted_chunks and candidate_chunks:
+                accepted_chunks = candidate_chunks[:grounding_decision.usable_evidence_count]
+            context_str, _ = self.context_builder.build_context(accepted_chunks)
         else:
             context_str = ""
 

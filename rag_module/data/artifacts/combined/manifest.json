@@ -1,53 +1,81 @@
 {
   "source_id": "combined",
   "source_display_name": "Multi-Source Unified Knowledge Base",
-  "timestamp": "2026-09-13T09:22:10.847724+00:00",
+  "timestamp": "2026-09-15T05:03:51.921679+00:00",
   "corpus_version": "2.6",
-  "document_count": 18534,
-  "chunk_count": 26143,
+  "document_count": 236,
+  "chunk_count": 236,
   "sources": [
-    "MedQuAD",
     "DailyMed",
-    "openFDA"
+    "MedlinePlus",
+    "ICMR",
+    "MoHFW_STG",
+    "RxNorm"
   ],
   "source_breakdown": {
-    "MedQuAD": {
-      "document_count": 16358,
-      "chunk_count": 23967,
-      "stats": {
-        "source_id": "MedQuAD",
-        "source_name": "MedQuAD Medical Knowledge Base",
-        "documents_seen": 16406,
-        "documents_valid": 16406,
-        "documents_rejected": 0,
-        "duplicates_removed": 48,
-        "documents_ingested": 16358
-      }
-    },
     "DailyMed": {
-      "document_count": 2176,
-      "chunk_count": 2176,
+      "document_count": 188,
+      "chunk_count": 188,
       "stats": {
         "source_id": "DailyMed",
         "source_name": "National Library of Medicine DailyMed",
-        "documents_seen": 2176,
-        "documents_valid": 2176,
+        "documents_seen": 188,
+        "documents_valid": 188,
         "documents_rejected": 0,
         "duplicates_removed": 0,
-        "documents_ingested": 2176
+        "documents_ingested": 188
       }
     },
-    "openFDA": {
-      "document_count": 0,
-      "chunk_count": 0,
+    "MedlinePlus": {
+      "document_count": 16,
+      "chunk_count": 16,
       "stats": {
-        "source_id": "openFDA",
-        "source_name": "FDA Drug Product Labeling API",
-        "documents_seen": 0,
-        "documents_valid": 0,
+        "source_id": "MedlinePlus",
+        "source_name": "MedlinePlus Health Topics (NLM / NIH)",
+        "documents_seen": 16,
+        "documents_valid": 16,
         "documents_rejected": 0,
         "duplicates_removed": 0,
-        "documents_ingested": 0
+        "documents_ingested": 16
+      }
+    },
+    "ICMR": {
+      "document_count": 8,
+      "chunk_count": 8,
+      "stats": {
+        "source_id": "ICMR",
+        "source_name": "Indian Council of Medical Research Clinical Guidelines",
+        "documents_seen": 8,
+        "documents_valid": 8,
+        "documents_rejected": 0,
+        "duplicates_removed": 0,
+        "documents_ingested": 8
+      }
+    },
+    "MoHFW_STG": {
+      "document_count": 4,
+      "chunk_count": 4,
+      "stats": {
+        "source_id": "MoHFW_STG",
+        "source_name": "Ministry of Health & Family Welfare Standard Treatment Guidelines",
+        "documents_seen": 4,
+        "documents_valid": 4,
+        "documents_rejected": 0,
+        "duplicates_removed": 0,
+        "documents_ingested": 4
+      }
+    },
+    "RxNorm": {
+      "document_count": 20,
+      "chunk_count": 20,
+      "stats": {
+        "source_id": "RxNorm",
+        "source_name": "RxNorm Normalized Prescribable Clinical Terminology",
+        "documents_seen": 20,
+        "documents_valid": 20,
+        "documents_rejected": 0,
+        "duplicates_removed": 0,
+        "documents_ingested": 20
       }
     }
   },

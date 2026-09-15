@@ -31,7 +31,11 @@ Notes:
 """
 
 import requests
-from normalizer import normalize_drug_name
+try:
+    from drug_module.normalizer import normalize_drug_name
+except ImportError:
+    from normalizer import normalize_drug_name
+
 
 
 def fetch_openfda_side_effects(drug: str):

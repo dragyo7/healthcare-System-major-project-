@@ -1,0 +1,122 @@
+{
+  "endpoint": "/rag/query",
+  "status_code": 200,
+  "latency_sec": 1.5925,
+  "timestamp": "2026-09-15T05:59:11.545127+00:00",
+  "request": {
+    "query": "What is the capital of France and who won the 2022 World Cup?",
+    "top_k": 3
+  },
+  "response": {
+    "query": "What is the capital of France and who won the 2022 World Cup?",
+    "retrieval_mode": "hybrid",
+    "total_evidence": 3,
+    "evidence": [
+      {
+        "rank": 1,
+        "score": -10.915012,
+        "source_id": "ICMR",
+        "source_name": "Indian Council of Medical Research Clinical Guidelines",
+        "publisher": "Indian Council of Medical Research (ICMR, Govt of India)",
+        "document_id": "icmr_icmr_antimicrobial_2022_urinary_tract_infections",
+        "chunk_id": "icmr_icmr_antimicrobial_2022_urinary_tract_infections-c0",
+        "title": "ICMR National Treatment Guidelines for Antimicrobial Use in Infectious Diseases - Empiric Therapy for Uncomplicated Acute Cystitis",
+        "section": "Empiric Therapy for Uncomplicated Acute Cystitis",
+        "medical_domain": "antimicrobial_stewardship",
+        "source_url": "https://main.icmr.nic.in/content/national-treatment-guidelines-antimicrobial-use",
+        "text": "ICMR Clinical Guideline: ICMR National Treatment Guidelines for Antimicrobial Use in Infectious Diseases (2022)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: Empiric Therapy for Uncomplicated Acute Cystitis (Page 68)\n\nFirst-line empiric therapy for acute uncomplicated cystitis in adult females: Nitrofurantoin 100 mg orally twice daily for 5 days, OR Fosfomycin trometamol 3 g single-dose sachet. Avoid empiric Fluoroquinolones (ciprofloxacin, levofloxacin) for uncomplicated cystitis due to high rates (> 65%) of E. coli resistance in Indian community surveillance and risk of collateral fluoroquinolone damage.",
+        "dense_score": 0.6942,
+        "bm25_score": 4.2193,
+        "fused_score": 0.027652,
+        "rerank_score": -10.915
+      },
+      {
+        "rank": 2,
+        "score": -10.988334,
+        "source_id": "MedlinePlus",
+        "source_name": "MedlinePlus Health Topics (NLM / NIH)",
+        "publisher": "National Library of Medicine (NLM/NIH)",
+        "document_id": "mplus_community_acquired_pneumonia_overview",
+        "chunk_id": "mplus_community_acquired_pneumonia_overview-c0",
+        "title": "Pneumonia - Overview",
+        "section": "Overview",
+        "medical_domain": "pulmonology",
+        "source_url": "https://medlineplus.gov/pneumonia.html",
+        "text": "Topic: Pneumonia\nSection: Overview\nPublisher: National Library of Medicine (NLM/NIH)\n\nPneumonia is an infection that inflames the air sacs (alveoli) in one or both lungs. The air sacs may fill with fluid or pus (purulent material), causing cough with phlegm, fever, chills, and difficulty breathing. Community-Acquired Pneumonia (CAP) is acquired outside of hospitals. Streptococcus pneumoniae is the most common bacterial pathogen.",
+        "dense_score": 0.6899,
+        "bm25_score": 11.4447,
+        "fused_score": 0.030214,
+        "rerank_score": -10.9883
+      },
+      {
+        "rank": 3,
+        "score": -11.009953,
+        "source_id": "DailyMed",
+        "source_name": "National Library of Medicine DailyMed",
+        "publisher": "U.S. National Library of Medicine / FDA",
+        "document_id": "dailymed_4423f03b-18a8-48b6-9bb2-16a7f0521e44_boxed_warning",
+        "chunk_id": "dailymed_4423f03b-18a8-48b6-9bb2-16a7f0521e44_boxed_warning-c0",
+        "title": "Apixaban - Boxed Warning",
+        "section": "Boxed Warning",
+        "medical_domain": "pharmacology",
+        "source_url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=4423f03b-18a8-48b6-9bb2-16a7f0521e44",
+        "text": "Drug: Apixaban\nSection: Boxed Warning\n\nWARNING: PREMATURE DISCONTINUATION INCREASES RISK OF THROMBOTIC EVENTS; SPINAL/EPIDURAL HEMATOMA. Premature discontinuation of any oral anticoagulant increases the risk of thrombotic events. Epidural or spinal hematomas may occur in patients who are anticoagulated with apixaban receiving neuraxial anesthesia or spinal puncture.",
+        "dense_score": 0.7072,
+        "bm25_score": 9.1222,
+        "fused_score": 0.031281,
+        "rerank_score": -11.01
+      }
+    ],
+    "context_text": "",
+    "latency_ms": 1584.05,
+    "reranker_status": "available",
+    "filters_applied": {},
+    "grounding": {
+      "status": "insufficient_evidence",
+      "generation_allowed": false,
+      "evidence_count": 3,
+      "usable_evidence_count": 3,
+      "accepted_chunk_ids": [
+        "icmr_icmr_antimicrobial_2022_urinary_tract_infections-c0",
+        "mplus_community_acquired_pneumonia_overview-c0",
+        "dailymed_4423f03b-18a8-48b6-9bb2-16a7f0521e44_boxed_warning-c0"
+      ],
+      "provenance_valid": true,
+      "top_evidence_rank": 1,
+      "evidence_sources": [
+        "DailyMed",
+        "ICMR",
+        "MedlinePlus"
+      ],
+      "evidence_documents": [
+        "dailymed_4423f03b-18a8-48b6-9bb2-16a7f0521e44_boxed_warning",
+        "icmr_icmr_antimicrobial_2022_urinary_tract_infections",
+        "mplus_community_acquired_pneumonia_overview"
+      ],
+      "evidence_sections": [
+        "Boxed Warning",
+        "Empiric Therapy for Uncomplicated Acute Cystitis",
+        "Overview"
+      ],
+      "reason_codes": [
+        "OUT_OF_DOMAIN"
+      ],
+      "warnings": [
+        "Substantive query term overlap (29%) is below domain threshold; query appears out-of-domain."
+      ],
+      "conflict_detected": false,
+      "conflict_summary": null,
+      "policy_latency_ms": 0.921
+    },
+    "safety_assessment": {
+      "risk_category": "informational",
+      "is_emergency": false,
+      "emergency_message": null,
+      "is_injection": false,
+      "sanitized_query": "What is the capital of France and who won the 2022 World Cup?",
+      "requires_strict_grounding": false,
+      "warnings": []
+    }
+  },
+  "error": null
+}

@@ -47,7 +47,7 @@ class RAGConfig:
     SIMILARITY_THRESHOLD: float = 0.55  # Minimum cosine similarity for acceptance
     
     # Reranker Model
-    RERANKER_MODEL_NAME: str = "BAAI/bge-reranker-small"
+    RERANKER_MODEL_NAME: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
     USE_RERANKER: bool = True
     
     # LLM Generation Parameters

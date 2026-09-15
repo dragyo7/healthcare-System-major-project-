@@ -5,7 +5,7 @@ and consistency policies to produce auditable grounding and abstention decisions
 """
 import time
 from enum import Enum
-from typing import List, Dict, Any, Optional, Set
+from typing import List, Dict, Any, Optional, Set, Tuple
 import re
 from pydantic import BaseModel, Field, ConfigDict
 
@@ -34,6 +34,7 @@ class GroundingReasonCode(str, Enum):
     EMPTY_CONTENT = "EMPTY_CONTENT"
     CONFLICT_DETECTED = "CONFLICT_DETECTED"
     OUT_OF_DOMAIN = "OUT_OF_DOMAIN"
+    UNSUPPORTED_ENTITY = "UNSUPPORTED_ENTITY"
     PARTIAL_PROVENANCE = "PARTIAL_PROVENANCE"
 
 
@@ -42,7 +43,16 @@ class SourcePolicy(BaseModel):
     Policy rules defining source-level authority and requirements.
     """
     preferred_sources: List[str] = Field(
-        default_factory=lambda: ["DailyMed", "medquad_nih", "WHO_Guidelines", "openFDA"],
+        default_factory=lambda: [
+            "DailyMed",
+            "MedlinePlus",
+            "ICMR",
+            "MoHFW_STG",
+            "RxNorm",
+            "openFDA",
+            "medquad_nih",
+            "WHO_Guidelines"
+        ],
         description="Sources recognized as authoritative."
     )
     strict_provenance_required: bool = Field(default=True, description="Require 100% complete metadata fields.")
@@ -77,6 +87,7 @@ class GroundingDecision(BaseModel):
     generation_allowed: bool = Field(..., description="True if evidence is sufficient and safe for downstream generation.")
     evidence_count: int = Field(..., ge=0, description="Total number of evidence items presented.")
     usable_evidence_count: int = Field(..., ge=0, description="Number of evidence items meeting validity and quality filters.")
+    accepted_chunk_ids: List[str] = Field(default_factory=list, description="Exact chunk IDs that passed provenance and quality validation.")
     provenance_valid: bool = Field(..., description="True if all top usable evidence items have valid provenance.")
     top_evidence_rank: Optional[int] = Field(default=None, description="Rank of highest-scoring usable evidence item.")
     evidence_sources: List[str] = Field(default_factory=list, description="Unique source IDs present in usable evidence.")
@@ -91,18 +102,32 @@ class GroundingDecision(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-# Common contradiction marker pairs in clinical texts
+# Specific clinical contradiction marker pairs (condition-scoped to avoid false positives between Indications and Contraindications sections)
 CONTRADICTION_PAIRS = [
-    (r'\b(contraindicated|do\s+not\s+use|prohibited)\b', r'\b(indicated\s+for|recommended|approved\s+for)\b'),
-    (r'\b(not\s+recommended\s+in\s+pregnancy|unsafe\s+in\s+pregnancy|fetal\s+toxicity)\b', r'\b(safe\s+in\s+pregnancy|no\s+fetal\s+risk)\b'),
-    (r'\b(fatal|life-threatening|severe\s+toxicity)\b', r'\b(no\s+adverse\s+effects|well-tolerated|minimal\s+risk)\b')
+    (r'\b(contraindicated\s+in\s+pregnancy|unsafe\s+in\s+pregnancy|fetal\s+toxicity|pregnancy\s+category\s+x)\b', r'\b(safe\s+in\s+pregnancy|recommended\s+in\s+pregnancy|no\s+fetal\s+risk)\b'),
+    (r'\b(contraindicated\s+in\s+renal\s+failure|unsafe\s+in\s+renal\s+impairment)\b', r'\b(safe\s+in\s+renal\s+failure|indicated\s+in\s+severe\s+renal\s+impairment)\b'),
+    (r'\b(fatal\s+toxicity|life-threatening\s+hazard)\b', r'\b(completely\s+harmless|no\s+adverse\s+effects|zero\s+risk)\b')
 ]
 
 
 COMMON_STOPWORDS = {
     "what", "is", "the", "of", "and", "in", "to", "for", "a", "an", "how", "do", "i", "can",
     "are", "with", "on", "by", "at", "from", "it", "or", "as", "be", "this", "that", "which",
-    "should", "have", "has", "had", "does", "about", "tell", "me", "there"
+    "should", "have", "has", "had", "does", "about", "tell", "me", "there", "according"
+}
+
+GENERAL_CLINICAL_TERMS = {
+    "dosage", "dose", "doses", "dosing", "contraindication", "contraindications", "contraindicated",
+    "precaution", "precautions", "warning", "warnings", "interaction", "interactions", "interact",
+    "side", "effect", "effects", "adverse", "reaction", "reactions", "treatment", "therapy",
+    "management", "guideline", "guidelines", "protocol", "recommendation", "recommendations",
+    "approved", "prescribe", "prescribed", "indication", "indications", "usage", "use",
+    "population", "populations", "patient", "patients", "adult", "adults", "pediatric",
+    "child", "children", "elderly", "acute", "chronic", "severe", "mild", "moderate",
+    "failure", "heart", "renal", "kidney", "hepatic", "liver", "hypertension", "diabetes",
+    "infection", "infections", "impairment", "disease", "condition", "blood", "pressure",
+    "taking", "give", "given", "administer", "administration", "safe", "safety", "concerning",
+    "harmful", "overview", "diagnosis", "symptoms", "causes", "prevention"
 }
 
 
@@ -210,26 +235,51 @@ class EvidencePolicyEngine:
         top_item = usable_items[0]
         top_rank = int(getattr(top_item, "rank", 1) if hasattr(top_item, "rank") else top_item.get("rank", 1))
 
-        # 4. Lexical Grounding / Substantive Query Term Overlap Check
-        # Mitigates dense vector hubness / semantic hallucinations on out-of-domain queries
+        # 4. Lexical Grounding & Clinical Subject Entity Verification
+        # Distinguishes target clinical subject (e.g. 'cardioregulin', 'metformin')
+        # from generic medical vocabulary (e.g. 'dosage', 'heart', 'failure').
         query_words = [
             w for w in re.findall(r'\b[a-zA-Z0-9_-]+\b', query.lower())
             if len(w) >= 3 and w not in COMMON_STOPWORDS
         ]
 
+        # Identify candidate subject entity tokens (tokens not in generic clinical stoplist)
+        subject_tokens = [
+            w for w in query_words
+            if w not in GENERAL_CLINICAL_TERMS and len(w) >= 4
+        ]
+
         combined_top_text = " ".join([
-            str(getattr(it, "text", "") if hasattr(it, "text") else it.get("text", "")).lower()
+            f"{getattr(it, 'title', '')} {getattr(it, 'section', '')} {getattr(it, 'text', '')}".lower()
+            if hasattr(it, 'text') else f"{it.get('title', '')} {it.get('section', '')} {it.get('text', '')}".lower()
             for it in usable_items[:3]
         ])
+
+        # If user queried a specific named subject entity, verify it appears in retrieved evidence
+        is_unsupported_entity = False
+        missing_entity = None
+        if subject_tokens:
+            subject_found = False
+            for tok in subject_tokens:
+                # Check exact whole-word token match or standard singular/plural form
+                clean_tok = re.sub(r'(s|es|ing|ed)$', '', tok)
+                if re.search(r'\b' + re.escape(tok) + r'\b', combined_top_text):
+                    subject_found = True
+                    break
+                elif len(clean_tok) >= 3 and re.search(r'\b' + re.escape(clean_tok) + r'\b', combined_top_text):
+                    subject_found = True
+                    break
+            
+            if not subject_found:
+                is_unsupported_entity = True
+                missing_entity = subject_tokens[0]
 
         overlap_ratio = 1.0
         if query_words:
             matched_words = 0
             for w in query_words:
-                # Exact word boundary or meaningful substring
-                if re.search(r'\b' + re.escape(w), combined_top_text):
-                    matched_words += 1
-                elif len(w) >= 6 and re.search(r'\b' + re.escape(w[:5]), combined_top_text):
+                clean_w = re.sub(r'(s|es|ing|ed)$', '', w)
+                if re.search(r'\b' + re.escape(w) + r'\b', combined_top_text) or (len(clean_w) >= 3 and re.search(r'\b' + re.escape(clean_w) + r'\b', combined_top_text)):
                     matched_words += 1
             overlap_ratio = matched_words / len(query_words)
 
@@ -244,7 +294,7 @@ class EvidencePolicyEngine:
 
         is_strong = False
         is_weak = False
-        is_unsupported = is_out_of_domain
+        is_unsupported = is_out_of_domain or is_unsupported_entity
 
         if not is_unsupported:
             if mode_lower == "dense":
@@ -291,13 +341,16 @@ class EvidencePolicyEngine:
             reason_codes.append(GroundingReasonCode.CONFLICT_DETECTED)
             warnings.append(f"Contradictory evidence signals detected: {conflict_summary}")
 
-        elif is_unsupported:
+        elif is_unsupported_entity or is_unsupported:
             final_status = GroundingStatus.INSUFFICIENT_EVIDENCE
             generation_allowed = False
             if is_out_of_domain:
                 reason_codes.append(GroundingReasonCode.OUT_OF_DOMAIN)
                 warnings.append(f"Substantive query term overlap ({overlap_ratio:.0%}) is below domain threshold; query appears out-of-domain.")
-            else:
+            if is_unsupported_entity:
+                reason_codes.append(GroundingReasonCode.UNSUPPORTED_ENTITY)
+                warnings.append(f"Primary query subject entity '{missing_entity}' was not found in verified evidence passages.")
+            if not is_out_of_domain and not is_unsupported_entity:
                 reason_codes.append(GroundingReasonCode.LOW_RETRIEVAL_SCORE)
                 warnings.append("Top retrieved evidence score is below minimum relevance floor.")
 
@@ -325,6 +378,15 @@ class EvidencePolicyEngine:
         if not all_provenance_valid and final_status == GroundingStatus.GROUNDED:
             reason_codes.append(GroundingReasonCode.PARTIAL_PROVENANCE)
 
+        if generation_allowed:
+            accepted_ids = [
+                str(getattr(it, "chunk_id", "") if hasattr(it, "chunk_id") else it.get("chunk_id", ""))
+                for it in usable_items
+                if str(getattr(it, "chunk_id", "") if hasattr(it, "chunk_id") else it.get("chunk_id", ""))
+            ]
+        else:
+            accepted_ids = []
+
         elapsed_ms = (time.perf_counter() - start_time) * 1000.0
 
         return GroundingDecision(
@@ -332,6 +394,7 @@ class EvidencePolicyEngine:
             generation_allowed=generation_allowed,
             evidence_count=len(evidence_items),
             usable_evidence_count=len(usable_items),
+            accepted_chunk_ids=accepted_ids,
             provenance_valid=all_provenance_valid,
             top_evidence_rank=top_rank,
             evidence_sources=sorted(list(sources_set)),
@@ -345,23 +408,37 @@ class EvidencePolicyEngine:
         )
 
 
-    def _scan_evidence_conflicts(self, items: List[Any]) -> (bool, Optional[str]):
+    def _scan_evidence_conflicts(self, items: List[Any]) -> Tuple[bool, Optional[str]]:
         """
-        Scans for contradictory assertions between chunks sharing the same entity or section.
+        Scans for contradictory assertions between chunks sharing the same entity or clinical topic.
         """
         # Compare top 3 chunks pairwise
         sample_items = items[:3]
         for i in range(len(sample_items)):
-            text_i = str(getattr(sample_items[i], "text", "") if hasattr(sample_items[i], "text") else sample_items[i].get("text", ""))
-            sec_i = str(getattr(sample_items[i], "section", "") if hasattr(sample_items[i], "section") else sample_items[i].get("section", ""))
+            item_i = sample_items[i]
+            text_i = str(getattr(item_i, "text", "") if hasattr(item_i, "text") else item_i.get("text", ""))
+            sec_i = str(getattr(item_i, "section", "") if hasattr(item_i, "section") else item_i.get("section", ""))
+            doc_i = str(getattr(item_i, "document_id", "") if hasattr(item_i, "document_id") else item_i.get("document_id", ""))
+            title_i = str(getattr(item_i, "title", "") if hasattr(item_i, "title") else item_i.get("title", "")).lower()
 
             for j in range(i + 1, len(sample_items)):
-                text_j = str(getattr(sample_items[j], "text", "") if hasattr(sample_items[j], "text") else sample_items[j].get("text", ""))
-                sec_j = str(getattr(sample_items[j], "section", "") if hasattr(sample_items[j], "section") else sample_items[j].get("section", ""))
+                item_j = sample_items[j]
+                text_j = str(getattr(item_j, "text", "") if hasattr(item_j, "text") else item_j.get("text", ""))
+                sec_j = str(getattr(item_j, "section", "") if hasattr(item_j, "section") else item_j.get("section", ""))
+                doc_j = str(getattr(item_j, "document_id", "") if hasattr(item_j, "document_id") else item_j.get("document_id", ""))
+                title_j = str(getattr(item_j, "title", "") if hasattr(item_j, "title") else item_j.get("title", "")).lower()
 
-                # Check if both chunks target the same section or same document
-                for reg_a, reg_b in self.contradiction_regexes:
-                    if (reg_a.search(text_i) and reg_b.search(text_j)) or (reg_b.search(text_i) and reg_a.search(text_j)):
-                        return True, f"Conflict detected between Chunk {i+1} ('{sec_i}') and Chunk {j+1} ('{sec_j}') regarding clinical assertions."
+                # Extract primary subject entity to prevent false positive cross-drug conflict flags
+                drug_i = title_i.split("-")[0].strip() if "-" in title_i else title_i
+                drug_j = title_j.split("-")[0].strip() if "-" in title_j else title_j
+
+                # Only check for clinical conflict if chunks reference the same document or drug entity
+                is_same_entity = (doc_i == doc_j) or (drug_i and drug_j and (drug_i in drug_j or drug_j in drug_i))
+
+                if is_same_entity:
+                    for reg_a, reg_b in self.contradiction_regexes:
+                        if (reg_a.search(text_i) and reg_b.search(text_j)) or (reg_b.search(text_i) and reg_a.search(text_j)):
+                            return True, f"Conflict detected for '{drug_i}' between Chunk {i+1} ('{sec_i}') and Chunk {j+1} ('{sec_j}') regarding clinical assertions."
 
         return False, None
+

@@ -57,8 +57,14 @@ class ProvenanceValidator:
         "dailymed",
         "medquad_nih",
         "medquad",
+        "medlineplus",
+        "icmr",
+        "mohfw_stg",
+        "mohfw",
+        "rxnorm",
         "openfda",
         "who_guidelines",
+        "clinicalguidelines",
         "cancergov",
         "niddk",
         "cdc",
@@ -113,6 +119,7 @@ class ProvenanceValidator:
         # Check source registry recognition
         source_id = str(data.get("source_id", "")).strip().lower()
         if source_id and source_id not in cls.KNOWN_AUTHORITATIVE_SOURCES:
+            missing.append("source_id_unrecognized")
             warnings.append(f"Source ID '{source_id}' is not in the canonical registry of known clinical sources.")
 
         # Determine provenance status

@@ -1,0 +1,171 @@
+{
+  "provenance": {
+    "source": "National Library of Medicine DailyMed (FDA Structured Product Labeling)",
+    "verification_status": "VERIFIED",
+    "updated_at": "2026-09-15T00:00:00Z"
+  },
+  "side_effects": {
+    "lisinopril": [
+      "dizziness",
+      "headache",
+      "persistent dry cough",
+      "hyperkalemia",
+      "hypotension",
+      "angioedema",
+      "renal impairment"
+    ],
+    "losartan": [
+      "dizziness",
+      "nasal congestion",
+      "back pain",
+      "hyperkalemia",
+      "hypotension",
+      "renal impairment"
+    ],
+    "metformin": [
+      "diarrhea",
+      "nausea",
+      "vomiting",
+      "abdominal bloating",
+      "flatulence",
+      "metallic taste",
+      "lactic acidosis (rare, severe)",
+      "vitamin b12 deficiency"
+    ],
+    "amlodipine": [
+      "peripheral edema",
+      "dizziness",
+      "flushing",
+      "palpitations",
+      "fatigue",
+      "gingival hyperplasia"
+    ],
+    "atorvastatin": [
+      "myalgia",
+      "arthralgia",
+      "diarrhea",
+      "nasopharyngitis",
+      "elevated liver enzymes (transaminases)",
+      "rhabdomyolysis (rare, severe)"
+    ],
+    "warfarin": [
+      "major bleeding",
+      "bruising (ecchymosis)",
+      "hematuria",
+      "gastrointestinal hemorrhage",
+      "skin necrosis (rare)",
+      "purple toes syndrome"
+    ],
+    "aspirin": [
+      "dyspepsia",
+      "epigastric distress",
+      "nausea",
+      "gastrointestinal ulceration and bleeding",
+      "tinnitus (salicylism)",
+      "bronchospasm (aspirin-exacerbated respiratory disease)"
+    ],
+    "ibuprofen": [
+      "gastrointestinal bleeding",
+      "dyspepsia",
+      "peptic ulcer disease",
+      "acute kidney injury",
+      "fluid retention / peripheral edema",
+      "hypertension exacerbation",
+      "increased cardiovascular thrombotic risk"
+    ],
+    "amoxicillin": [
+      "diarrhea",
+      "nausea",
+      "vomiting",
+      "skin rash / urticaria",
+      "clostridium difficile-associated diarrhea",
+      "anaphylaxis / severe hypersensitivity"
+    ],
+    "ciprofloxacin": [
+      "tendonitis and tendon rupture (Boxed Warning)",
+      "peripheral neuropathy",
+      "central nervous system toxicities (seizures, dizziness)",
+      "qt prolongation / torsades de pointes",
+      "clostridium difficile diarrhea",
+      "photosensitivity"
+    ],
+    "clopidogrel": [
+      "bleeding (gastrointestinal, intracranial)",
+      "purpura",
+      "epistaxis",
+      "hematoma",
+      "thrombotic thrombocytopenic purpura (rare, severe)"
+    ],
+    "methotrexate": [
+      "bone marrow suppression (leukopenia, thrombocytopenia)",
+      "hepatotoxicity / cirrhosis",
+      "ulcerative stomatitis",
+      "nausea",
+      "pulmonary fibrosis",
+      "nephrotoxicity"
+    ],
+    "digoxin": [
+      "cardiac arrhythmias (ventricular extrasystoles, av block)",
+      "nausea / vomiting / anorexia",
+      "visual disturbances (yellow-green vision, halos)",
+      "dizziness",
+      "confusion in elderly"
+    ],
+    "omeprazole": [
+      "headache",
+      "abdominal pain",
+      "nausea",
+      "diarrhea",
+      "clostridium difficile infection",
+      "hypomagnesemia (long-term use)",
+      "bone fracture risk (long-term high dose)",
+      "vitamin b12 malabsorption"
+    ],
+    "paracetamol": [
+      "nausea",
+      "rash",
+      "acute liver injury / hepatic necrosis (in overdose)",
+      "angioedema"
+    ],
+    "carbamazepine": [
+      "dizziness",
+      "drowsiness",
+      "ataxia",
+      "nausea / vomiting",
+      "stevens-johnson syndrome / toxic epidermal necrolysis (HLA-B*1502 risk)",
+      "hyponatremia (SIADH)",
+      "leukopenia / aplastic anemia"
+    ],
+    "apixaban": [
+      "major bleeding",
+      "gingival bleeding",
+      "hematuria",
+      "epistaxis",
+      "anemia",
+      "spinal / epidural hematoma (Boxed Warning with neuraxial anesthesia)"
+    ],
+    "furosemide": [
+      "hypokalemia",
+      "hyponatremia",
+      "hypovolemia / dehydration",
+      "orthostatic hypotension",
+      "hyperuricemia / gout",
+      "ototoxicity (high doses)"
+    ],
+    "atenolol": [
+      "bradycardia",
+      "hypotension",
+      "cold extremities",
+      "fatigue",
+      "bronchospasm in asthmatic patients",
+      "masking of hypoglycemia symptoms"
+    ],
+    "levofloxacin": [
+      "tendonitis and tendon rupture (Boxed Warning)",
+      "qt prolongation",
+      "peripheral neuropathy",
+      "insomnia",
+      "aortic aneurysm rupture risk"
+    ]
+  }
+}

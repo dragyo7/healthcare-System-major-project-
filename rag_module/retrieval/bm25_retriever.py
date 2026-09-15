@@ -150,3 +150,10 @@ class BM25Retriever:
         """Loads BM25 index from disk."""
         with open(file_path, "rb") as f:
             return pickle.load(f)
+
+    def get_chunk(self, idx: int) -> Dict[str, Any]:
+        """Retrieves metadata chunk for an index."""
+        if self.metadata and 0 <= idx < len(self.metadata):
+            return self.metadata[idx]
+        return {}
+

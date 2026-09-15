@@ -1,0 +1,71 @@
+{
+  "audit_version": "2.8.0-phase21",
+  "audit_timestamp": "2026-09-15T11:02:00Z",
+  "git_commit": "e90d5ee9ba3d6990181b4cc0436febb62c26b095",
+  "python_version": "3.12.9",
+  "models": {
+    "dense_embedding_model": "BAAI/bge-small-en",
+    "embedding_dimension": 384,
+    "normalized": true,
+    "cross_encoder_reranker": "cross-encoder/ms-marco-MiniLM-L-6-v2",
+    "generator_model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+  },
+  "corpus_statistics": {
+    "total_documents": 236,
+    "total_chunks": 236,
+    "source_breakdown": {
+      "DailyMed": 188,
+      "MedlinePlus": 16,
+      "ICMR": 8,
+      "MoHFW_STG": 4,
+      "RxNorm": 20
+    },
+    "chunk_length_words": {
+      "min": 7,
+      "p25": 16.0,
+      "median": 24.0,
+      "mean": 30.53,
+      "p75": 37.0,
+      "p95": 83.25,
+      "max": 144
+    }
+  },
+  "retrieval_benchmark_20_queries": {
+    "dense_mrr": 0.850,
+    "dense_recall_at_1": 0.850,
+    "dense_recall_at_3": 0.850,
+    "bm25_mrr": 0.838,
+    "bm25_recall_at_1": 0.800,
+    "bm25_recall_at_3": 0.850,
+    "hybrid_rrf_mrr": 0.850,
+    "hybrid_rrf_recall_at_3": 0.850,
+    "reranked_mrr": 0.875,
+    "reranked_recall_at_3": 0.900
+  },
+  "entity_injection_test_results": {
+    "cardioregulin_contraindications": {
+      "query": "What are the contraindications of Cardioregulin?",
+      "grounding_status": "insufficient_evidence",
+      "generation_allowed": false,
+      "reason_codes": ["UNSUPPORTED_ENTITY"],
+      "abstained": true,
+      "citations_count": 0
+    },
+    "metformin_renal_impairment": {
+      "query": "What is the approved dose of metformin in renal impairment?",
+      "grounding_status": "grounded",
+      "generation_allowed": true,
+      "reason_codes": ["EVIDENCE_SUFFICIENT"],
+      "abstained": false,
+      "citations_count": 5
+    }
+  },
+  "test_suite": {
+    "collected": 112,
+    "passed": 110,
+    "skipped": 2,
+    "failed": 0,
+    "duration_seconds": 60.63
+  },
+  "final_decision": "A. HARDENED AND READY FOR FRONTEND INTEGRATION"
+}

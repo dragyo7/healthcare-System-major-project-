@@ -1,0 +1,12 @@
+{
+  "endpoint": "/ready",
+  "status_code": 200,
+  "latency_sec": 0.0027,
+  "timestamp": "2026-09-15T05:56:23.668220+00:00",
+  "request": null,
+  "response": {
+    "status": "ready",
+    "ready": true
+  },
+  "error": null
+}

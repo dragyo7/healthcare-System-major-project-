@@ -140,19 +140,38 @@ class FAISSIndexer:
         meta_path: Optional[Path] = None
     ) -> Tuple[faiss.Index, List[Dict[str, Any]]]:
         """
-        Loads pre-built FAISS index and metadata from disk.
+        Loads pre-built FAISS index and metadata from disk with strict dimension and count verification.
         """
         index_path = index_path or DEFAULT_CONFIG.FAISS_INDEX_PATH
         meta_path = meta_path or DEFAULT_CONFIG.METADATA_PATH
 
         if not index_path.exists():
             raise FileNotFoundError(f"FAISS index file not found at: {index_path}")
-        if not meta_path.exists():
-            raise FileNotFoundError(f"Metadata file not found at: {meta_path}")
+        
+        json_meta_path = meta_path.with_suffix(".json")
+        if json_meta_path.exists():
+            with open(json_meta_path, "r", encoding="utf-8") as f:
+                metadata = json.load(f)
+        elif meta_path.exists():
+            with open(meta_path, "rb") as f:
+                metadata = pickle.load(f)
+        else:
+            raise FileNotFoundError(f"Metadata file not found at: {meta_path} or {json_meta_path}")
 
         index = faiss.read_index(str(index_path))
-        with open(meta_path, "rb") as f:
-            metadata = pickle.load(f)
+
+        # Model/Index Version Lock verification (Part 17)
+        expected_dim = DEFAULT_CONFIG.EMBEDDING_DIMENSION
+        if index.d != expected_dim:
+            raise ValueError(
+                f"FAISS Index dimension mismatch: Index has {index.d}D, but active model requires {expected_dim}D. "
+                f"Refusing to load incompatible index."
+            )
+        if index.ntotal != len(metadata):
+            raise ValueError(
+                f"FAISS Index vector count ({index.ntotal}) does not match metadata item count ({len(metadata)}). "
+                f"Corrupted index/metadata synchronization detected."
+            )
 
         return index, metadata
 

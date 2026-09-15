@@ -1,0 +1,14 @@
+{
+  "endpoint": "/rag/query",
+  "status_code": 400,
+  "latency_sec": 0.0,
+  "timestamp": "2026-09-15T06:01:00.673620+00:00",
+  "request": {
+    "query": "   \n\t  "
+  },
+  "response": {
+    "error": "ValidationError",
+    "message": "query: Value error, Query cannot be empty or whitespace-only."
+  },
+  "error": "HTTP Error 400: Bad Request"
+}

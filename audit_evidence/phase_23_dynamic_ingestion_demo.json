@@ -1,0 +1,53 @@
+{
+  "scenario_a_initial": {
+    "total_chunks": 200,
+    "reused_chunks": 0,
+    "re_encoded_chunks": 200,
+    "vector_dimension": 384,
+    "total_cached_vectors": 200,
+    "duration_seconds": 2.697,
+    "scenario": "Scenario A: Initial Ingestion (200 chunks)",
+    "elapsed_s": 2.697
+  },
+  "scenario_b_addition": {
+    "total_chunks": 300,
+    "reused_chunks": 200,
+    "re_encoded_chunks": 100,
+    "vector_dimension": 384,
+    "total_cached_vectors": 300,
+    "duration_seconds": 2.634,
+    "scenario": "Scenario B: Document Addition (300 total, 100 new)",
+    "elapsed_s": 2.634
+  },
+  "scenario_c_modification": {
+    "total_chunks": 300,
+    "reused_chunks": 295,
+    "re_encoded_chunks": 5,
+    "vector_dimension": 384,
+    "total_cached_vectors": 305,
+    "duration_seconds": 0.123,
+    "scenario": "Scenario C: Document Modification (5 modified, 295 reused)",
+    "elapsed_s": 0.123
+  },
+  "scenario_d_deletion": {
+    "total_chunks": 250,
+    "reused_chunks": 250,
+    "re_encoded_chunks": 0,
+    "vector_dimension": 384,
+    "total_cached_vectors": 305,
+    "duration_seconds": 0.037,
+    "scenario": "Scenario D: Document Deletion (250 remaining)",
+    "elapsed_s": 0.037
+  },
+  "scenario_e_cached_sync": {
+    "total_chunks": 250,
+    "reused_chunks": 250,
+    "re_encoded_chunks": 0,
+    "vector_dimension": 384,
+    "total_cached_vectors": 305,
+    "duration_seconds": 0.043,
+    "scenario": "Scenario E: Identical Sync from Reloaded Cache",
+    "elapsed_s": 0.063
+  },
+  "incremental_efficiency_verified": true
+}

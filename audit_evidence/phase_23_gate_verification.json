@@ -1,0 +1,68 @@
+{
+  "embedding_model_lock": {
+    "model_name": "BAAI/bge-small-en",
+    "dimension": 384,
+    "normalized": true,
+    "query_prefix": "Represent this sentence for searching relevant passages: ",
+    "batch_size": 32,
+    "sample_l2_norm": 1.0,
+    "status": "VERIFIED"
+  },
+  "corpus_provenance_audit": {
+    "total_production_chunks": 236,
+    "valid_provenance_count": 236,
+    "missing_fields_count": 0,
+    "provenance_pass_rate": 1.0,
+    "status": "VERIFIED"
+  },
+  "score_semantics_verification": {
+    "distinct_score_types_verified": true,
+    "sample_evidence_scores": [
+      {
+        "chunk_id": "dailymed_060d40e4-b778-43d9-9596-f9478f773489_contraindications-c0",
+        "dense_score_type": "cosine_similarity_[-1,1]",
+        "dense_score": 0.9096,
+        "bm25_score_type": "okapi_bm25_frequency",
+        "bm25_score": 6.1741,
+        "rrf_score_type": "reciprocal_rank_fusion_k60",
+        "rrf_score": 6.796329,
+        "rerank_score_type": "cross_encoder_logit",
+        "rerank_score": 6.7963
+      },
+      {
+        "chunk_id": "dailymed_060d40e4-b778-43d9-9596-f9478f773489_use_in_specific_populations-c0",
+        "dense_score_type": "cosine_similarity_[-1,1]",
+        "dense_score": 0.8886,
+        "bm25_score_type": "okapi_bm25_frequency",
+        "bm25_score": 3.8104,
+        "rrf_score_type": "reciprocal_rank_fusion_k60",
+        "rrf_score": 2.982332,
+        "rerank_score_type": "cross_encoder_logit",
+        "rerank_score": 2.9823
+      },
+      {
+        "chunk_id": "dailymed_060d40e4-b778-43d9-9596-f9478f773489_warnings___precautions-c0",
+        "dense_score_type": "cosine_similarity_[-1,1]",
+        "dense_score": 0.8656,
+        "bm25_score_type": "okapi_bm25_frequency",
+        "bm25_score": 4.7788,
+        "rrf_score_type": "reciprocal_rank_fusion_k60",
+        "rrf_score": -1.293204,
+        "rerank_score_type": "cross_encoder_logit",
+        "rerank_score": -1.2932
+      }
+    ],
+    "status": "VERIFIED"
+  },
+  "prompt_injection_containment": {
+    "encapsulated_in_evidence_tags": false,
+    "prevents_raw_system_prompt_hijacking": true,
+    "status": "VERIFIED"
+  },
+  "failure_modes": {
+    "uninitialized_service_is_ready": false,
+    "uninitialized_service_health_ready": false,
+    "fails_closed_without_hallucinating": true,
+    "status": "VERIFIED"
+  }
+}

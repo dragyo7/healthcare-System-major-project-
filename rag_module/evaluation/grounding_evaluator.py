@@ -54,7 +54,7 @@ class GroundingEvaluationSuite:
         test_queries = [
             ("What are the contraindications for lisinopril?", "DailyMed"),
             ("What is the boxed warning for metformin?", "DailyMed"),
-            ("What are the symptoms of Type 2 diabetes?", "medquad_nih")
+            ("What are the symptoms of Type 2 diabetes?", "MedlinePlus")
         ]
 
         outcomes = []

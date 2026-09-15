@@ -1,0 +1,14 @@
+{
+  "endpoint": "/rag/query",
+  "status_code": 400,
+  "latency_sec": 0.0,
+  "timestamp": "2026-09-15T06:01:00.669643+00:00",
+  "request": {
+    "query": ""
+  },
+  "response": {
+    "error": "ValidationError",
+    "message": "query: String should have at least 1 character"
+  },
+  "error": "HTTP Error 400: Bad Request"
+}

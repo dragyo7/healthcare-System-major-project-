@@ -194,7 +194,7 @@ SOURCE_REGISTRY: Dict[str, SourceMetadata] = {
         description="Unified 16,406-record dataset compiled from 9 NIH institutes covering diseases, symptoms, and genetics."
     ),
 
-    # Future / Planned Sources (Registered for Extensibility, enabled=False until ingested)
+    # Future / Planned Sources & New Approved Knowledge Bases
     "DailyMed": SourceMetadata(
         source_id="DailyMed",
         display_name="National Library of Medicine DailyMed (FDA SPL)",
@@ -207,8 +207,68 @@ SOURCE_REGISTRY: Dict[str, SourceMetadata] = {
         license_notes="US Government Public Domain / Open Data",
         base_url="https://dailymed.nlm.nih.gov",
         enabled=True,
-        version="2.6",
+        version="2.9",
         description="Comprehensive FDA-approved drug package inserts with complete dosing schedules, black-box warnings, and interactions."
+    ),
+    "MedlinePlus": SourceMetadata(
+        source_id="MedlinePlus",
+        display_name="MedlinePlus Health Topics (NLM / NIH)",
+        publisher="National Library of Medicine (NLM/NIH)",
+        source_type="federal_research_institute",
+        authority_level="tier_1_federal_research",
+        document_types=["qa_pair", "health_topic_summary", "disease_summary"],
+        domains=["general_medicine", "internal_medicine", "public_health"],
+        adapter_class="MedlinePlusAdapter",
+        license_notes="US Government Public Domain",
+        base_url="https://medlineplus.gov",
+        enabled=True,
+        version="2.9",
+        description="Official consumer health and clinical topic summaries on diseases, diagnostics, and prevention."
+    ),
+    "ICMR": SourceMetadata(
+        source_id="ICMR",
+        display_name="Indian Council of Medical Research Clinical Guidelines",
+        publisher="Indian Council of Medical Research (ICMR, Govt of India)",
+        source_type="guideline_clearinghouse",
+        authority_level="tier_1_public_health",
+        document_types=["clinical_guideline", "consensus_statement"],
+        domains=["endocrinology", "cardiology", "infectious_disease", "antimicrobial_stewardship"],
+        adapter_class="ICMRAdapter",
+        license_notes="Government of India Open Access / Public Health Guidance",
+        base_url="https://main.icmr.nic.in",
+        enabled=True,
+        version="2.9",
+        description="Official national clinical practice guidelines, diagnostic thresholds, and treatment protocols for India."
+    ),
+    "MoHFW_STG": SourceMetadata(
+        source_id="MoHFW_STG",
+        display_name="Ministry of Health & Family Welfare Standard Treatment Guidelines",
+        publisher="Ministry of Health and Family Welfare (Govt of India)",
+        source_type="guideline_clearinghouse",
+        authority_level="tier_1_public_health",
+        document_types=["clinical_guideline", "standard_treatment_workflow"],
+        domains=["primary_care", "internal_medicine", "hypertension", "diabetes"],
+        adapter_class="MoHFWAdapter",
+        license_notes="Government of India Public Document",
+        base_url="https://clinicalestablishments.gov.in",
+        enabled=True,
+        version="2.9",
+        description="Standardized treatment guidelines (STGs) for primary and secondary healthcare facilities under the Clinical Establishments Act."
+    ),
+    "RxNorm": SourceMetadata(
+        source_id="RxNorm",
+        display_name="RxNorm Normalized Prescribable Clinical Terminology",
+        publisher="National Library of Medicine (NLM/NIH)",
+        source_type="regulatory_drug_repository",
+        authority_level="tier_1_regulatory",
+        document_types=["terminology_concept"],
+        domains=["pharmacology", "terminology_mapping", "clinical_drugs"],
+        adapter_class="RxNormAdapter",
+        license_notes="NLM / UMLS Open Terms (Prescribable subset)",
+        base_url="https://www.nlm.nih.gov/research/umls/rxnorm/",
+        enabled=True,
+        version="2026-02",
+        description="Standardized nomenclature and relational identifiers (RxCUI, ingredient, strength, form) for clinical drugs."
     ),
     "openFDA": SourceMetadata(
         source_id="openFDA",
@@ -221,7 +281,8 @@ SOURCE_REGISTRY: Dict[str, SourceMetadata] = {
         adapter_class="OpenFDAAdapter",
         license_notes="Public Domain (CC0 Equivalent)",
         base_url="https://open.fda.gov",
-        enabled=False,
+        enabled=True,
+        version="2.9",
         description="Structured JSON API for FDA prescription and OTC drug labels, boxed warnings, and indications."
     ),
     "ClinicalGuidelines": SourceMetadata(
@@ -258,7 +319,7 @@ class SourceRegistry:
             if sid.lower() == source_id.lower():
                 return meta
                 
-        # Check alias / normalized prefix matches (e.g. medquad_gard -> GARD, dailymed_spl -> DailyMed)
+        # Check alias / normalized prefix matches
         normalized_id = source_id.lower().replace("-", "_")
         alias_map = {
             "medquad_gard": "GARD",
@@ -272,6 +333,16 @@ class SourceRegistry:
             "medquad_nhlbi": "NHLBI",
             "medquad_cdc": "CDC",
             "dailymed_spl": "DailyMed",
+            "dailymed_fda": "DailyMed",
+            "medlineplus_topics": "MedlinePlus",
+            "medlineplus_gov": "MedlinePlus",
+            "icmr_guidelines": "ICMR",
+            "icmr_clinical": "ICMR",
+            "mohfw": "MoHFW_STG",
+            "mohfw_guidelines": "MoHFW_STG",
+            "mohfw_stgs": "MoHFW_STG",
+            "rxnorm_prescribable": "RxNorm",
+            "rxnorm_cui": "RxNorm",
             "openfda_drug_labels": "openFDA",
             "clinical_guidelines": "ClinicalGuidelines",
             "clinicalguidelines": "ClinicalGuidelines"

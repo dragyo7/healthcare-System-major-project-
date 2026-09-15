@@ -1,52 +1,94 @@
 """
-Create a spaCy NLP pipeline for prescription analysis using real drug data.
+spaCy NLP pipeline for prescription analysis.
 
-Requirements:
-- Load spaCy model "en_core_web_sm"
-- Load drug names from local file data/drug_list.json
-- Add EntityRuler before default NER
-
-Tasks:
-- Implement load_drug_list() to read JSON file
-- Create DRUG patterns dynamically from loaded list
-
-Behavior:
-- If drug_list.json is missing, fallback to default drug names
-- Ensure pipeline initializes without crashing
-
-Constraints:
-- Do NOT call external APIs here
-- Keep pipeline fast and lightweight
-
-Goal:
-- Dynamically detect real drug names in prescription text
+Features
+--------
+- Loads drug names from local JSON
+- Uses EntityRuler to detect medicines
+- Case-insensitive matching
+- No statistical NER (avoids PERSON/ORG mistakes)
 """
 
-import spacy
-from spacy.pipeline import EntityRuler
 import json
+from pathlib import Path
+import spacy
+
+DATA_FILE = Path("data/drug_list.json")
 
 
 def load_drug_list():
-    try:
-        with open("data/drug_list.json", "r") as f:
-            return json.load(f)
-    except:
-        return ["paracetamol", "ibuprofen", "amoxicillin", "metformin"]
+    """
+    Load drug names from JSON.
+    Falls back to a small built-in list.
+    """
+
+    fallback = [
+        "paracetamol",
+        "ibuprofen",
+        "amoxicillin",
+        "metformin",
+        "azithromycin",
+        "cetirizine",
+        "pantoprazole",
+        "crocin",
+        "dolo"
+    ]
+
+    if DATA_FILE.exists():
+        try:
+            with open(DATA_FILE, "r", encoding="utf-8") as f:
+                drugs = json.load(f)
+
+            drugs = [
+                drug.strip().lower()
+                for drug in drugs
+                if drug.strip()
+            ]
+
+            drugs = sorted(set(drugs))
+
+            if drugs:
+                print(f"Loaded {len(drugs)} drug names.")
+                return drugs
+
+        except Exception as e:
+            print("Error loading drug database:", e)
+
+    print("Using fallback drug list.")
+    return fallback
 
 
 def load_nlp():
-    nlp = spacy.load("en_core_web_sm")
+    """
+    Build the NLP pipeline.
+    """
 
-    ruler = nlp.add_pipe("entity_ruler", before="ner")
+    # Disable pretrained NER completely
+    nlp = spacy.load(
+        "en_core_web_sm",
+        disable=["ner"]
+    )
 
-    drug_list = load_drug_list()
+    ruler = nlp.add_pipe(
+        "entity_ruler",
+        config={
+            "phrase_matcher_attr": "LOWER"
+        }
+    )
 
-    patterns = [
-        {"label": "DRUG", "pattern": drug}
-        for drug in drug_list
-    ]
+    patterns = []
+
+    for drug in load_drug_list():
+
+        patterns.append(
+            {
+                "label": "DRUG",
+                "pattern": drug
+            }
+        )
 
     ruler.add_patterns(patterns)
+
+    print(f"EntityRuler loaded with {len(patterns)} patterns.")
 
     return nlp

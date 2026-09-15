@@ -1,0 +1,532 @@
+[
+  {
+    "query": "What are the contraindications for Metformin?",
+    "decision": "grounded",
+    "generation_allowed": true,
+    "accepted_chunk_ids": [
+      "dailymed_060d40e4-b778-43d9-9596-f9478f773489_contraindications-c0",
+      "dailymed_060d40e4-b778-43d9-9596-f9478f773489_use_in_specific_populations-c0",
+      "dailymed_060d40e4-b778-43d9-9596-f9478f773489_warnings___precautions-c0"
+    ],
+    "answer": "[Doc 1: Metformin - Contraindications | Source: National Library of Medicine DailyMed] (URL: https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=060d40e4-b778-43d9-9596-f9478f773489)\nDrug: Metfor...",
+    "atomic_claims": [
+      {
+        "claim_sentence": "Drug: Metformin\nSection: Contraindications\n\nSevere renal impairment (eGFR < 30 mL/min/1",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_060d40e4-b778-43d9-9596-f9478f773489_contraindications-c0",
+          "dailymed_060d40e4-b778-43d9-9596-f9478f773489_use_in_specific_populations-c0",
+          "dailymed_060d40e4-b778-43d9-9596-f9478f773489_warnings___precautions-c0"
+        ]
+      },
+      {
+        "claim_sentence": "73m2), metabolic acidosis, acute or chronic DKA",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_060d40e4-b778-43d9-9596-f9478f773489_contraindications-c0",
+          "dailymed_060d40e4-b778-43d9-9596-f9478f773489_use_in_specific_populations-c0",
+          "dailymed_060d40e4-b778-43d9-9596-f9478f773489_warnings___precautions-c0"
+        ]
+      },
+      {
+        "claim_sentence": "Drug: Metformin\nSection: Use in Specific Populations\n\nRenal Impairment: Contraindicated in eGFR < 30 mL/min",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_060d40e4-b778-43d9-9596-f9478f773489_contraindications-c0",
+          "dailymed_060d40e4-b778-43d9-9596-f9478f773489_use_in_specific_populations-c0",
+          "dailymed_060d40e4-b778-43d9-9596-f9478f773489_warnings___precautions-c0"
+        ]
+      },
+      {
+        "claim_sentence": "Drug: Metformin\nSection: Warnings & Precautions\n\nLactic acidosis, iodinated contrast imaging (hold metformin), Vitamin B12 deficiency (monitor every 2-3 years)",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_060d40e4-b778-43d9-9596-f9478f773489_contraindications-c0",
+          "dailymed_060d40e4-b778-43d9-9596-f9478f773489_use_in_specific_populations-c0",
+          "dailymed_060d40e4-b778-43d9-9596-f9478f773489_warnings___precautions-c0"
+        ]
+      }
+    ],
+    "overall_grounding_fidelity": "PASS"
+  },
+  {
+    "query": "What are the boxed warnings for Lisinopril?",
+    "decision": "grounded",
+    "generation_allowed": true,
+    "accepted_chunk_ids": [
+      "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_boxed_warning-c0",
+      "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_warnings___precautions-c0",
+      "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_indications___usage-c0"
+    ],
+    "answer": "[Doc 1: Lisinopril - Boxed Warning | Source: National Library of Medicine DailyMed] (URL: https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=4b2c1256-42d4-4a4b-8e2a-0a8870fb381b)\nDrug: Lisinopri...",
+    "atomic_claims": [
+      {
+        "claim_sentence": "Drug: Lisinopril\nSection: Boxed Warning\n\nWARNING: FETAL TOXICITY",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_boxed_warning-c0",
+          "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_warnings___precautions-c0",
+          "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_indications___usage-c0"
+        ]
+      },
+      {
+        "claim_sentence": "When pregnancy is detected, discontinue Lisinopril as soon as possible",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_boxed_warning-c0",
+          "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_warnings___precautions-c0",
+          "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_indications___usage-c0"
+        ]
+      },
+      {
+        "claim_sentence": "Drugs that act directly on the renin-angiotensin system can cause injury and death to the developing fetus",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_boxed_warning-c0",
+          "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_warnings___precautions-c0",
+          "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_indications___usage-c0"
+        ]
+      },
+      {
+        "claim_sentence": "Drug: Lisinopril\nSection: Warnings & Precautions\n\nAngioedema, anaphylaxis, hypotension in salt/volume depleted patients, renal impairment, hyperkalemia",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_boxed_warning-c0",
+          "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_warnings___precautions-c0",
+          "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_indications___usage-c0"
+        ]
+      }
+    ],
+    "overall_grounding_fidelity": "PASS"
+  },
+  {
+    "query": "What is the starting dose and adverse effects of Amlodipine?",
+    "decision": "grounded",
+    "generation_allowed": true,
+    "accepted_chunk_ids": [
+      "dailymed_c1f7b8a2-9382-4112-9c1e-1284a7df1930_adverse_reactions-c0",
+      "dailymed_6623f03b-18a8-48b6-9bb2-16a7f0521e66_dosage___administration-c0",
+      "dailymed_5523f03b-18a8-48b6-9bb2-16a7f0521e55_dosage___administration-c0"
+    ],
+    "answer": "[Doc 1: Amlodipine - Adverse Reactions | Source: National Library of Medicine DailyMed] (URL: https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=c1f7b8a2-9382-4112-9c1e-1284a7df1930)\nDrug: Amlod...",
+    "atomic_claims": [
+      {
+        "claim_sentence": "Drug: Amlodipine\nSection: Adverse Reactions\n\nPeripheral edema (dose-dependent), dizziness, flushing, palpitations, fatigue, nausea, somnolence",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_c1f7b8a2-9382-4112-9c1e-1284a7df1930_adverse_reactions-c0",
+          "dailymed_6623f03b-18a8-48b6-9bb2-16a7f0521e66_dosage___administration-c0",
+          "dailymed_5523f03b-18a8-48b6-9bb2-16a7f0521e55_dosage___administration-c0"
+        ]
+      },
+      {
+        "claim_sentence": "Drug: Empagliflozin\nSection: Dosage & Administration\n\nRecommended starting dose is 10 mg once daily in the morning with or without food; may increase to 25 mg once daily",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_c1f7b8a2-9382-4112-9c1e-1284a7df1930_adverse_reactions-c0",
+          "dailymed_6623f03b-18a8-48b6-9bb2-16a7f0521e66_dosage___administration-c0",
+          "dailymed_5523f03b-18a8-48b6-9bb2-16a7f0521e55_dosage___administration-c0"
+        ]
+      },
+      {
+        "claim_sentence": "eGFR < 20 mL/min: Not recommended",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_c1f7b8a2-9382-4112-9c1e-1284a7df1930_adverse_reactions-c0",
+          "dailymed_6623f03b-18a8-48b6-9bb2-16a7f0521e66_dosage___administration-c0",
+          "dailymed_5523f03b-18a8-48b6-9bb2-16a7f0521e55_dosage___administration-c0"
+        ]
+      },
+      {
+        "claim_sentence": "Drug: Glimepiride\nSection: Dosage & Administration\n\nInitial starting dose is 1 mg to 2 mg once daily with breakfast",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_c1f7b8a2-9382-4112-9c1e-1284a7df1930_adverse_reactions-c0",
+          "dailymed_6623f03b-18a8-48b6-9bb2-16a7f0521e66_dosage___administration-c0",
+          "dailymed_5523f03b-18a8-48b6-9bb2-16a7f0521e55_dosage___administration-c0"
+        ]
+      }
+    ],
+    "overall_grounding_fidelity": "PASS"
+  },
+  {
+    "query": "What are the severe drug interactions of Warfarin?",
+    "decision": "grounded",
+    "generation_allowed": true,
+    "accepted_chunk_ids": [
+      "dailymed_184b2c12-55d4-4a4b-8e2a-0a8870fb381b_drug_interactions-c0",
+      "dailymed_1123f03b-18a8-48b6-9bb2-16a7f0521e44_drug_interactions-c0",
+      "dailymed_9369d7b4-3677-4b68-b807-797746408226_contraindications-c0"
+    ],
+    "answer": "[Doc 1: Aspirin - Drug Interactions | Source: National Library of Medicine DailyMed] (URL: https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=184b2c12-55d4-4a4b-8e2a-0a8870fb381b)\nDrug: Aspirin\n...",
+    "atomic_claims": [
+      {
+        "claim_sentence": "Drug: Aspirin\nSection: Drug Interactions\n\nAnticoagulants (warfarin, heparin, apixaban): Major synergistic bleeding risk",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_184b2c12-55d4-4a4b-8e2a-0a8870fb381b_drug_interactions-c0",
+          "dailymed_1123f03b-18a8-48b6-9bb2-16a7f0521e44_drug_interactions-c0",
+          "dailymed_9369d7b4-3677-4b68-b807-797746408226_contraindications-c0"
+        ]
+      },
+      {
+        "claim_sentence": "NSAIDs (ibuprofen): Interferes with antiplatelet action and increases GI toxicity",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_184b2c12-55d4-4a4b-8e2a-0a8870fb381b_drug_interactions-c0",
+          "dailymed_1123f03b-18a8-48b6-9bb2-16a7f0521e44_drug_interactions-c0",
+          "dailymed_9369d7b4-3677-4b68-b807-797746408226_contraindications-c0"
+        ]
+      },
+      {
+        "claim_sentence": "Methotrexate: Severe toxicity",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_184b2c12-55d4-4a4b-8e2a-0a8870fb381b_drug_interactions-c0",
+          "dailymed_1123f03b-18a8-48b6-9bb2-16a7f0521e44_drug_interactions-c0",
+          "dailymed_9369d7b4-3677-4b68-b807-797746408226_contraindications-c0"
+        ]
+      },
+      {
+        "claim_sentence": "Drug: Doxycycline\nSection: Drug Interactions\n\nAntacids (aluminum, calcium, magnesium), iron preparations, bismuth subsalicylate: Impair doxycycline absorption",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_184b2c12-55d4-4a4b-8e2a-0a8870fb381b_drug_interactions-c0",
+          "dailymed_1123f03b-18a8-48b6-9bb2-16a7f0521e44_drug_interactions-c0",
+          "dailymed_9369d7b4-3677-4b68-b807-797746408226_contraindications-c0"
+        ]
+      }
+    ],
+    "overall_grounding_fidelity": "PASS"
+  },
+  {
+    "query": "What are the liver and muscle toxicity warnings for Atorvastatin?",
+    "decision": "grounded",
+    "generation_allowed": true,
+    "accepted_chunk_ids": [
+      "dailymed_7823f03b-18a8-48b6-9bb2-16a7f0521e29_warnings___precautions-c0",
+      "dailymed_7823f03b-18a8-48b6-9bb2-16a7f0521e29_contraindications-c0",
+      "dailymed_7823f03b-18a8-48b6-9bb2-16a7f0521e29_indications___usage-c0"
+    ],
+    "answer": "[Doc 1: Atorvastatin - Warnings & Precautions | Source: National Library of Medicine DailyMed] (URL: https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=7823f03b-18a8-48b6-9bb2-16a7f0521e29)\nDrug...",
+    "atomic_claims": [
+      {
+        "claim_sentence": "Drug: Atorvastatin\nSection: Warnings & Precautions\n\nMyopathy and rhabdomyolysis with acute renal failure; immune-mediated necrotizing myopathy; liver enzyme elevations",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_7823f03b-18a8-48b6-9bb2-16a7f0521e29_warnings___precautions-c0",
+          "dailymed_7823f03b-18a8-48b6-9bb2-16a7f0521e29_contraindications-c0",
+          "dailymed_7823f03b-18a8-48b6-9bb2-16a7f0521e29_indications___usage-c0"
+        ]
+      },
+      {
+        "claim_sentence": "Drug: Atorvastatin\nSection: Contraindications\n\nActive liver disease, unexplained persistent transaminase elevation, pregnancy, lactation, hypersensitivity",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_7823f03b-18a8-48b6-9bb2-16a7f0521e29_warnings___precautions-c0",
+          "dailymed_7823f03b-18a8-48b6-9bb2-16a7f0521e29_contraindications-c0",
+          "dailymed_7823f03b-18a8-48b6-9bb2-16a7f0521e29_indications___usage-c0"
+        ]
+      },
+      {
+        "claim_sentence": "Drug: Atorvastatin\nSection: Indications & Usage\n\nAdjunct to diet for primary hyperlipidemia, hypertriglyceridemia, prevention of cardiovascular disease (MI, stroke, revascularization) in patients at risk",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_7823f03b-18a8-48b6-9bb2-16a7f0521e29_warnings___precautions-c0",
+          "dailymed_7823f03b-18a8-48b6-9bb2-16a7f0521e29_contraindications-c0",
+          "dailymed_7823f03b-18a8-48b6-9bb2-16a7f0521e29_indications___usage-c0"
+        ]
+      }
+    ],
+    "overall_grounding_fidelity": "PASS"
+  },
+  {
+    "query": "What are the ICMR treatment recommendations for pneumonia?",
+    "decision": "grounded",
+    "generation_allowed": true,
+    "accepted_chunk_ids": [
+      "icmr_icmr_antimicrobial_2022_respiratory_infections-c0",
+      "mplus_community_acquired_pneumonia_treatment-c0",
+      "icmr_icmr_antimicrobial_2022_antimicrobial_stewardship_principles-c0"
+    ],
+    "answer": "[Doc 1: ICMR National Treatment Guidelines for Antimicrobial Use in Infectious Diseases - Empiric Therapy for Community-Acquired Pneumonia (CAP) | Source: Indian Council of Medical Research Clinical G...",
+    "atomic_claims": [
+      {
+        "claim_sentence": "ICMR Clinical Guideline: ICMR National Treatment Guidelines for Antimicrobial Use in Infectious Diseases (2022)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: Empiric Therapy for Community-Acquired Pneumonia (CAP) (Page 42)\n\nOutpatient CAP (Mild, CURB-65 = 0-1, no comorbidities): First-line: Oral Amoxicillin 500 mg - 1000 mg three times daily for 5 days",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "icmr_icmr_antimicrobial_2022_respiratory_infections-c0",
+          "mplus_community_acquired_pneumonia_treatment-c0",
+          "icmr_icmr_antimicrobial_2022_antimicrobial_stewardship_principles-c0"
+        ]
+      },
+      {
+        "claim_sentence": "Alternative: Oral Doxycycline 100 mg twice daily",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "icmr_icmr_antimicrobial_2022_respiratory_infections-c0",
+          "mplus_community_acquired_pneumonia_treatment-c0",
+          "icmr_icmr_antimicrobial_2022_antimicrobial_stewardship_principles-c0"
+        ]
+      },
+      {
+        "claim_sentence": "Outpatient with comorbidities (COPD, diabetes, renal disease): Oral Amoxicillin-Clavulanic acid (875/125 mg twice daily) PLUS oral Azithromycin (500 mg Day 1, then 250 mg daily)",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "icmr_icmr_antimicrobial_2022_respiratory_infections-c0",
+          "mplus_community_acquired_pneumonia_treatment-c0",
+          "icmr_icmr_antimicrobial_2022_antimicrobial_stewardship_principles-c0"
+        ]
+      },
+      {
+        "claim_sentence": "Hospitalized Inpatient (Non-ICU, CURB-65 >= 2): Intravenous Ceftriaxone (1-2 g IV once daily) PLUS IV/Oral Azithromycin (500 mg once daily)",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "icmr_icmr_antimicrobial_2022_respiratory_infections-c0",
+          "mplus_community_acquired_pneumonia_treatment-c0",
+          "icmr_icmr_antimicrobial_2022_antimicrobial_stewardship_principles-c0"
+        ]
+      }
+    ],
+    "overall_grounding_fidelity": "PASS"
+  },
+  {
+    "query": "What is the boxed warning for Ciprofloxacin regarding tendon rupture?",
+    "decision": "grounded",
+    "generation_allowed": true,
+    "accepted_chunk_ids": [
+      "dailymed_9923f03b-18a8-48b6-9bb2-16a7f0521e33_boxed_warning-c0",
+      "dailymed_9923f03b-18a8-48b6-9bb2-16a7f0521e33_warnings___precautions-c0",
+      "dailymed_553c5d67-5511-477a-a43b-748956eb0155_boxed_warning-c0"
+    ],
+    "answer": "[Doc 1: Ciprofloxacin - Boxed Warning | Source: National Library of Medicine DailyMed] (URL: https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=9923f03b-18a8-48b6-9bb2-16a7f0521e33)\nDrug: Ciprof...",
+    "atomic_claims": [
+      {
+        "claim_sentence": "Drug: Ciprofloxacin\nSection: Boxed Warning\n\nWARNING: SERIOUS ADVERSE REACTIONS INCLUDING TENDINITIS, TENDON RUPTURE, PERIPHERAL NEUROPATHY, CENTRAL NERVOUS SYSTEM EFFECTS AND EXACERBATION OF MYASTHENIA GRAVIS",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_9923f03b-18a8-48b6-9bb2-16a7f0521e33_boxed_warning-c0",
+          "dailymed_9923f03b-18a8-48b6-9bb2-16a7f0521e33_warnings___precautions-c0",
+          "dailymed_553c5d67-5511-477a-a43b-748956eb0155_boxed_warning-c0"
+        ]
+      },
+      {
+        "claim_sentence": "Fluoroquinolones are associated with disabling and potentially irreversible serious adverse reactions that have occurred together",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_9923f03b-18a8-48b6-9bb2-16a7f0521e33_boxed_warning-c0",
+          "dailymed_9923f03b-18a8-48b6-9bb2-16a7f0521e33_warnings___precautions-c0",
+          "dailymed_553c5d67-5511-477a-a43b-748956eb0155_boxed_warning-c0"
+        ]
+      },
+      {
+        "claim_sentence": "Drug: Ciprofloxacin\nSection: Warnings & Precautions\n\nTendon rupture (Achilles), peripheral neuropathy, CNS effects (seizures, hallucinations, depression), aortic aneurysm and dissection, QT prolongation",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_9923f03b-18a8-48b6-9bb2-16a7f0521e33_boxed_warning-c0",
+          "dailymed_9923f03b-18a8-48b6-9bb2-16a7f0521e33_warnings___precautions-c0",
+          "dailymed_553c5d67-5511-477a-a43b-748956eb0155_boxed_warning-c0"
+        ]
+      },
+      {
+        "claim_sentence": "Drug: Telmisartan\nSection: Boxed Warning\n\nWARNING: FETAL TOXICITY",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_9923f03b-18a8-48b6-9bb2-16a7f0521e33_boxed_warning-c0",
+          "dailymed_9923f03b-18a8-48b6-9bb2-16a7f0521e33_warnings___precautions-c0",
+          "dailymed_553c5d67-5511-477a-a43b-748956eb0155_boxed_warning-c0"
+        ]
+      }
+    ],
+    "overall_grounding_fidelity": "PASS"
+  },
+  {
+    "query": "Can Clopidogrel be safely combined with Omeprazole?",
+    "decision": "grounded",
+    "generation_allowed": true,
+    "accepted_chunk_ids": [
+      "dailymed_3323f03b-18a8-48b6-9bb2-16a7f0521e33_drug_interactions-c0",
+      "dailymed_3323f03b-18a8-48b6-9bb2-16a7f0521e33_adverse_reactions-c0",
+      "rxnorm_7646-c0"
+    ],
+    "answer": "[Doc 1: Clopidogrel - Drug Interactions | Source: National Library of Medicine DailyMed] (URL: https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=3323f03b-18a8-48b6-9bb2-16a7f0521e33)\nDrug: Clop...",
+    "atomic_claims": [
+      {
+        "claim_sentence": "Drug: Clopidogrel\nSection: Drug Interactions\n\nCYP2C19 Inhibitors (omeprazole, esomeprazole): Significantly reduce clopidogrel active metabolite and antiplatelet efficacy; avoid concomitant use",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_3323f03b-18a8-48b6-9bb2-16a7f0521e33_drug_interactions-c0",
+          "dailymed_3323f03b-18a8-48b6-9bb2-16a7f0521e33_adverse_reactions-c0",
+          "rxnorm_7646-c0"
+        ]
+      },
+      {
+        "claim_sentence": "Anticoagulants (warfarin, apixaban) / NSAIDs: Increased major bleeding risk",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_3323f03b-18a8-48b6-9bb2-16a7f0521e33_drug_interactions-c0",
+          "dailymed_3323f03b-18a8-48b6-9bb2-16a7f0521e33_adverse_reactions-c0",
+          "rxnorm_7646-c0"
+        ]
+      },
+      {
+        "claim_sentence": "Drug: Clopidogrel\nSection: Adverse Reactions\n\nBleeding, purpura, bruising, epistaxis, hematoma, gastrointestinal hemorrhage",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_3323f03b-18a8-48b6-9bb2-16a7f0521e33_drug_interactions-c0",
+          "dailymed_3323f03b-18a8-48b6-9bb2-16a7f0521e33_adverse_reactions-c0",
+          "rxnorm_7646-c0"
+        ]
+      },
+      {
+        "claim_sentence": "Medication Concept: Omeprazole Delayed-Release Capsule\nRxCUI: 7646\nActive Ingredient: omeprazole\nBrand / Trade Names: Prilosec, Omez\nDosage Form: Oral Capsule\nStrength: 20 mg, 40 mg\nTherapeutic Class: Proton Pump Inhibitor\nAuthority: National Library of Medicine (NLM/NIH)",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_3323f03b-18a8-48b6-9bb2-16a7f0521e33_drug_interactions-c0",
+          "dailymed_3323f03b-18a8-48b6-9bb2-16a7f0521e33_adverse_reactions-c0",
+          "rxnorm_7646-c0"
+        ]
+      }
+    ],
+    "overall_grounding_fidelity": "PASS"
+  },
+  {
+    "query": "What are the pregnancy warnings for Losartan?",
+    "decision": "grounded",
+    "generation_allowed": true,
+    "accepted_chunk_ids": [
+      "dailymed_893c5d67-5511-477a-a43b-748956eb012a_boxed_warning-c0",
+      "dailymed_893c5d67-5511-477a-a43b-748956eb012a_warnings___precautions-c0",
+      "dailymed_893c5d67-5511-477a-a43b-748956eb012a_use_in_specific_populations-c0"
+    ],
+    "answer": "[Doc 1: Losartan - Boxed Warning | Source: National Library of Medicine DailyMed] (URL: https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=893c5d67-5511-477a-a43b-748956eb012a)\nDrug: Losartan\nSe...",
+    "atomic_claims": [
+      {
+        "claim_sentence": "Drug: Losartan\nSection: Boxed Warning\n\nWARNING: FETAL TOXICITY",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_893c5d67-5511-477a-a43b-748956eb012a_boxed_warning-c0",
+          "dailymed_893c5d67-5511-477a-a43b-748956eb012a_warnings___precautions-c0",
+          "dailymed_893c5d67-5511-477a-a43b-748956eb012a_use_in_specific_populations-c0"
+        ]
+      },
+      {
+        "claim_sentence": "Discontinue Losartan immediately when pregnancy is detected",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_893c5d67-5511-477a-a43b-748956eb012a_boxed_warning-c0",
+          "dailymed_893c5d67-5511-477a-a43b-748956eb012a_warnings___precautions-c0",
+          "dailymed_893c5d67-5511-477a-a43b-748956eb012a_use_in_specific_populations-c0"
+        ]
+      },
+      {
+        "claim_sentence": "Renin-angiotensin blockers cause fetal injury, oligohydramnios, and death",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_893c5d67-5511-477a-a43b-748956eb012a_boxed_warning-c0",
+          "dailymed_893c5d67-5511-477a-a43b-748956eb012a_warnings___precautions-c0",
+          "dailymed_893c5d67-5511-477a-a43b-748956eb012a_use_in_specific_populations-c0"
+        ]
+      },
+      {
+        "claim_sentence": "Drug: Losartan\nSection: Warnings & Precautions\n\nFetal toxicity, hypotension in volume-depleted patients, renal failure, hyperkalemia",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_893c5d67-5511-477a-a43b-748956eb012a_boxed_warning-c0",
+          "dailymed_893c5d67-5511-477a-a43b-748956eb012a_warnings___precautions-c0",
+          "dailymed_893c5d67-5511-477a-a43b-748956eb012a_use_in_specific_populations-c0"
+        ]
+      }
+    ],
+    "overall_grounding_fidelity": "PASS"
+  },
+  {
+    "query": "What are the clinical signs of Digoxin toxicity?",
+    "decision": "grounded",
+    "generation_allowed": true,
+    "accepted_chunk_ids": [
+      "dailymed_2223f03b-18a8-48b6-9bb2-16a7f0521e22_drug_interactions-c0",
+      "dailymed_553c5d67-5511-477a-a43b-748956eb0155_drug_interactions-c0",
+      "dailymed_7723f03b-18a8-48b6-9bb2-16a7f0521e77_drug_interactions-c0"
+    ],
+    "answer": "[Doc 1: Furosemide - Drug Interactions | Source: National Library of Medicine DailyMed] (URL: https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=2223f03b-18a8-48b6-9bb2-16a7f0521e22)\nDrug: Furos...",
+    "atomic_claims": [
+      {
+        "claim_sentence": "Drug: Furosemide\nSection: Drug Interactions\n\nAminoglycosides (gentamicin, amikacin): Synergistic ototoxicity and nephrotoxicity",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_2223f03b-18a8-48b6-9bb2-16a7f0521e22_drug_interactions-c0",
+          "dailymed_553c5d67-5511-477a-a43b-748956eb0155_drug_interactions-c0",
+          "dailymed_7723f03b-18a8-48b6-9bb2-16a7f0521e77_drug_interactions-c0"
+        ]
+      },
+      {
+        "claim_sentence": "Digoxin: Hypokalemia potentiates digitalis arrhythmias",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_2223f03b-18a8-48b6-9bb2-16a7f0521e22_drug_interactions-c0",
+          "dailymed_553c5d67-5511-477a-a43b-748956eb0155_drug_interactions-c0",
+          "dailymed_7723f03b-18a8-48b6-9bb2-16a7f0521e77_drug_interactions-c0"
+        ]
+      },
+      {
+        "claim_sentence": "Lithium: Toxicity",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_2223f03b-18a8-48b6-9bb2-16a7f0521e22_drug_interactions-c0",
+          "dailymed_553c5d67-5511-477a-a43b-748956eb0155_drug_interactions-c0",
+          "dailymed_7723f03b-18a8-48b6-9bb2-16a7f0521e77_drug_interactions-c0"
+        ]
+      },
+      {
+        "claim_sentence": "NSAIDs: Antagonize diuretic effect",
+        "status": "DIRECTLY_SUPPORTED",
+        "keyword_overlap_ratio": 1.0,
+        "supporting_evidence_chunks": [
+          "dailymed_2223f03b-18a8-48b6-9bb2-16a7f0521e22_drug_interactions-c0",
+          "dailymed_553c5d67-5511-477a-a43b-748956eb0155_drug_interactions-c0",
+          "dailymed_7723f03b-18a8-48b6-9bb2-16a7f0521e77_drug_interactions-c0"
+        ]
+      }
+    ],
+    "overall_grounding_fidelity": "PASS"
+  }
+]

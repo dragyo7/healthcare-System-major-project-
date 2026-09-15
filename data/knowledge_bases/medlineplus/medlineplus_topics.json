@@ -1,0 +1,77 @@
+{
+  "topics": [
+    {
+      "topic_id": "type2_diabetes",
+      "title": "Type 2 Diabetes",
+      "medical_domain": "endocrinology",
+      "mesh_terms": [
+        "Diabetes Mellitus, Type 2",
+        "Hyperglycemia",
+        "Insulin Resistance",
+        "Metformin",
+        "HbA1c"
+      ],
+      "url": "https://medlineplus.gov/diabetestype2.html",
+      "sections": {
+        "Overview": "Type 2 diabetes is a chronic metabolic disease where blood glucose levels are too high. In type 2 diabetes, the body cells do not respond normally to insulin; this is called insulin resistance. The pancreas makes more insulin to try to get cells to respond, but eventually cannot keep up, leading to elevated blood sugar levels. Over time, high blood sugar damages nerves, blood vessels, eyes, kidneys, and the heart.",
+        "Symptoms": "Common symptoms of type 2 diabetes include increased thirst (polydipsia), frequent urination (polyuria), increased hunger (polyphagia), unexplained weight loss, fatigue, blurred vision, slow-healing sores, and frequent infections.",
+        "Diagnosis": "Type 2 diabetes is diagnosed through blood tests: 1) Fasting Plasma Glucose (FPG) test: 126 mg/dL or higher indicates diabetes; 2) Hemoglobin A1C test: 6.5% or higher on two separate tests confirms diabetes; 3) Oral Glucose Tolerance Test (OGTT): 200 mg/dL or higher at 2 hours; 4) Random Plasma Glucose: 200 mg/dL or higher accompanied by classic hyperglycemic symptoms.",
+        "Management and Treatment": "Management includes lifestyle modifications (healthy diet, physical activity, weight management), regular blood sugar monitoring, and pharmacological therapy. Metformin is the standard first-line medication for type 2 diabetes. Other drug classes include SGLT2 inhibitors, GLP-1 receptor agonists, DPP-4 inhibitors, sulfonylureas, and insulin. Target HbA1c for most non-pregnant adults is below 7.0%."
+      }
+    },
+    {
+      "topic_id": "hypertension",
+      "title": "High Blood Pressure (Hypertension)",
+      "medical_domain": "cardiology",
+      "mesh_terms": [
+        "Hypertension",
+        "Blood Pressure",
+        "Antihypertensive Agents",
+        "Cardiovascular Disease"
+      ],
+      "url": "https://medlineplus.gov/highbloodpressure.html",
+      "sections": {
+        "Overview": "High blood pressure (hypertension) is a common chronic medical condition where the force of the blood against artery walls is consistently too high. Blood pressure is recorded as two numbers: systolic pressure (pressure during heartbeats) over diastolic pressure (pressure when the heart rests between beats). Uncontrolled hypertension significantly increases the risk of heart attack, stroke, heart failure, peripheral artery disease, and chronic kidney disease.",
+        "Classification and Thresholds": "Standard clinical blood pressure categories: Normal: Systolic < 120 mmHg and Diastolic < 80 mmHg; Elevated: Systolic 120-129 mmHg and Diastolic < 80 mmHg; Stage 1 Hypertension: Systolic 130-139 mmHg or Diastolic 80-89 mmHg; Stage 2 Hypertension: Systolic >= 140 mmHg or Diastolic >= 90 mmHg; Hypertensive Crisis: Systolic > 180 mmHg and/or Diastolic > 120 mmHg (requires immediate emergency medical attention).",
+        "Symptoms": "Hypertension is often called the 'silent killer' because it typically causes no symptoms until severe or life-threatening organ damage has occurred. In severe hypertensive crises, symptoms may include severe headaches, chest pain, shortness of breath, blurred vision, dizziness, or nosebleeds.",
+        "Treatment and Lifestyle": "Treatment includes the DASH (Dietary Approaches to Stop Hypertension) diet, restricting sodium intake to < 2000 mg/day, regular aerobic exercise, smoking cessation, and limiting alcohol. Pharmacological first-line classes include ACE inhibitors (lisinopril), Angiotensin Receptor Blockers (losartan, telmisartan), Calcium Channel Blockers (amlodipine), and Thiazide diuretics (chlorthalidone, hydrochlorothiazide)."
+      }
+    },
+    {
+      "topic_id": "community_acquired_pneumonia",
+      "title": "Pneumonia",
+      "medical_domain": "pulmonology",
+      "mesh_terms": [
+        "Pneumonia",
+        "Streptococcus pneumoniae",
+        "Community-Acquired Pneumonia",
+        "Antibiotic Therapy"
+      ],
+      "url": "https://medlineplus.gov/pneumonia.html",
+      "sections": {
+        "Overview": "Pneumonia is an infection that inflames the air sacs (alveoli) in one or both lungs. The air sacs may fill with fluid or pus (purulent material), causing cough with phlegm, fever, chills, and difficulty breathing. Community-Acquired Pneumonia (CAP) is acquired outside of hospitals. Streptococcus pneumoniae is the most common bacterial pathogen.",
+        "Symptoms": "Signs and symptoms of pneumonia include cough (which may produce greenish, yellow, or bloody mucus), high fever, shaking chills, shortness of breath, rapid breathing, sharp or stabbing chest pain that worsens with deep breathing or coughing, fatigue, and confusion (especially in older adults).",
+        "Diagnosis and Severity Assessment": "Diagnosis is confirmed by chest X-ray showing lung infiltrates/consolidation, physical examination (crackles, bronchial breath sounds), pulse oximetry, sputum culture, and blood tests. Clinical severity is commonly evaluated using the CURB-65 score (Confusion, Urea > 7 mmol/L, Respiratory rate >= 30, Blood pressure < 90/60, Age >= 65) to determine outpatient vs inpatient hospital admission.",
+        "Treatment": "Bacterial pneumonia is treated with antibacterial agents. For previously healthy outpatients: Amoxicillin (high dose) or Doxycycline or Macrolides (azithromycin) are first-line options. In patients with comorbidities or risk factors: Combination therapy with Amoxicillin-Clavulanate plus Macrolide or respiratory fluoroquinolones (levofloxacin). Supportive care includes oxygen therapy, hydration, and antipyretics."
+      }
+    },
+    {
+      "topic_id": "tuberculosis",
+      "title": "Tuberculosis (TB)",
+      "medical_domain": "infectious_disease",
+      "mesh_terms": [
+        "Tuberculosis",
+        "Mycobacterium tuberculosis",
+        "Antitubercular Agents",
+        "Directly Observed Therapy"
+      ],
+      "url": "https://medlineplus.gov/tuberculosis.html",
+      "sections": {
+        "Overview": "Tuberculosis (TB) is a contagious infectious disease caused by the bacterium Mycobacterium tuberculosis. TB primarily affects the lungs (pulmonary TB) but can also affect the lymph nodes, brain, kidneys, spine, and joints (extrapulmonary TB). It spreads through airborne droplets when an infected person coughs, sneezes, or speaks.",
+        "Symptoms": "Symptoms of active pulmonary TB include persistent cough lasting 2 to 3 weeks or longer, coughing up blood or sputum (hemoptysis), chest pain, unprovoked weight loss, low-grade evening fever, drenching night sweats, fatigue, and loss of appetite.",
+        "Diagnosis": "Diagnostic evaluation includes sputum smear microscopy for Acid-Fast Bacilli (AFB), molecular diagnostic testing (Cartridge-Based Nucleic Acid Amplification Test / CBNAAT / GeneXpert), chest radiography, and mycobacterial culture.",
+        "Treatment Regimen": "Drug-susceptible active TB is treated with a standard multi-drug regimen: An intensive phase of 2 months of daily Rifampicin (R), Isoniazid (H), Pyrazinamide (Z), and Ethambutol (E) [2HRZE], followed by a continuation phase of 4 months of daily Rifampicin, Isoniazid, and Ethambutol [4HRE]. Complete adherence under Directly Observed Therapy (DOTS) is mandatory to prevent drug resistance (MDR-TB)."
+      }
+    }
+  ]
+}

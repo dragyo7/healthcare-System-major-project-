@@ -1,0 +1,63 @@
+{
+  "source_id": "MoHFW_STG",
+  "source_display_name": "Ministry of Health & Family Welfare Standard Treatment Guidelines",
+  "publisher": "Ministry of Health and Family Welfare (Govt of India)",
+  "authority_level": "tier_1_public_health",
+  "ingestion_timestamp": "2026-09-15T05:03:51.892915+00:00",
+  "duration_seconds": 0.003,
+  "corpus_version": "2.9",
+  "code_version": "rag_v2.4",
+  "document_count": 4,
+  "chunk_count": 4,
+  "embedding_model": "BAAI/bge-small-en",
+  "embedding_dimension": 384,
+  "chunking_config": {
+    "chunk_size_words": 250,
+    "overlap_words": 35,
+    "min_chunk_char_len": 40
+  },
+  "retrieval_config": {
+    "hybrid_rrf_k": 60,
+    "dense_k": 20,
+    "bm25_k": 20,
+    "reranker_model": "cross-encoder/ms-marco-MiniLM-L-6-v2"
+  },
+  "stats": {
+    "source_id": "MoHFW_STG",
+    "source_name": "Ministry of Health & Family Welfare Standard Treatment Guidelines",
+    "documents_seen": 4,
+    "documents_valid": 4,
+    "documents_rejected": 0,
+    "duplicates_removed": 0,
+    "documents_ingested": 4
+  },
+  "corpus_file": "corpus.json",
+  "chunks_file": "chunks.json",
+  "content_hash_summary": "903282f26a48ac37e7110946808dc7a34ccee5dc85dc5f7f571821eb9bd253c0",
+  "provenance_sample": [
+    {
+      "document_id": "mohfw_mohfw_stg_hypertension_primary_health_centre_protocol",
+      "title": "MoHFW Standard Treatment Guideline: Hypertension - Protocol at Primary Health Centre (PHC)",
+      "url": "https://clinicalestablishments.gov.in/stg/hypertension.pdf",
+      "hash": "c22e25c7090f"
+    },
+    {
+      "document_id": "mohfw_mohfw_stg_hypertension_referral_criteria",
+      "title": "MoHFW Standard Treatment Guideline: Hypertension - Emergency Referral Criteria to District Hospital / Secondary Care",
+      "url": "https://clinicalestablishments.gov.in/stg/hypertension.pdf",
+      "hash": "62436a2f1e00"
+    },
+    {
+      "document_id": "mohfw_mohfw_stg_diabetes_screening_and_initial_management",
+      "title": "MoHFW Standard Treatment Guideline: Type 2 Diabetes Mellitus - Standard Clinical Protocol at Sub-Centre and PHC",
+      "url": "https://clinicalestablishments.gov.in/stg/diabetes.pdf",
+      "hash": "65f73678febd"
+    },
+    {
+      "document_id": "mohfw_mohfw_stg_diabetes_hypoglycemia_management",
+      "title": "MoHFW Standard Treatment Guideline: Type 2 Diabetes Mellitus - Emergency Management of Acute Hypoglycemia",
+      "url": "https://clinicalestablishments.gov.in/stg/diabetes.pdf",
+      "hash": "0f7beffd6cc4"
+    }
+  ]
+}

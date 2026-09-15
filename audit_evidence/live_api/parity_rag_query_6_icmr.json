@@ -1,0 +1,119 @@
+{
+  "endpoint": "/rag/query",
+  "status_code": 200,
+  "latency_sec": 1.6276,
+  "timestamp": "2026-09-15T05:59:14.634833+00:00",
+  "request": {
+    "query": "What are the ICMR treatment guidelines for community-acquired pneumonia in pediatric patients?",
+    "top_k": 3
+  },
+  "response": {
+    "query": "What are the ICMR treatment guidelines for community-acquired pneumonia in pediatric patients?",
+    "retrieval_mode": "hybrid",
+    "total_evidence": 3,
+    "evidence": [
+      {
+        "rank": 1,
+        "score": 6.073914,
+        "source_id": "ICMR",
+        "source_name": "Indian Council of Medical Research Clinical Guidelines",
+        "publisher": "Indian Council of Medical Research (ICMR, Govt of India)",
+        "document_id": "icmr_icmr_antimicrobial_2022_respiratory_infections",
+        "chunk_id": "icmr_icmr_antimicrobial_2022_respiratory_infections-c0",
+        "title": "ICMR National Treatment Guidelines for Antimicrobial Use in Infectious Diseases - Empiric Therapy for Community-Acquired Pneumonia (CAP)",
+        "section": "Empiric Therapy for Community-Acquired Pneumonia (CAP)",
+        "medical_domain": "antimicrobial_stewardship",
+        "source_url": "https://main.icmr.nic.in/content/national-treatment-guidelines-antimicrobial-use",
+        "text": "ICMR Clinical Guideline: ICMR National Treatment Guidelines for Antimicrobial Use in Infectious Diseases (2022)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: Empiric Therapy for Community-Acquired Pneumonia (CAP) (Page 42)\n\nOutpatient CAP (Mild, CURB-65 = 0-1, no comorbidities): First-line: Oral Amoxicillin 500 mg - 1000 mg three times daily for 5 days. Alternative: Oral Doxycycline 100 mg twice daily. Outpatient with comorbidities (COPD, diabetes, renal disease): Oral Amoxicillin-Clavulanic acid (875/125 mg twice daily) PLUS oral Azithromycin (500 mg Day 1, then 250 mg daily). Hospitalized Inpatient (Non-ICU, CURB-65 >= 2): Intravenous Ceftriaxone (1-2 g IV once daily) PLUS IV/Oral Azithromycin (500 mg once daily).",
+        "dense_score": 0.8848,
+        "bm25_score": 12.2802,
+        "fused_score": 0.032787,
+        "rerank_score": 6.0739
+      },
+      {
+        "rank": 2,
+        "score": 1.701814,
+        "source_id": "ICMR",
+        "source_name": "Indian Council of Medical Research Clinical Guidelines",
+        "publisher": "Indian Council of Medical Research (ICMR, Govt of India)",
+        "document_id": "icmr_icmr_antimicrobial_2022_antimicrobial_stewardship_principles",
+        "chunk_id": "icmr_icmr_antimicrobial_2022_antimicrobial_stewardship_principles-c0",
+        "title": "ICMR National Treatment Guidelines for Antimicrobial Use in Infectious Diseases - Core Principles of Rational Antimicrobial Use",
+        "section": "Core Principles of Rational Antimicrobial Use",
+        "medical_domain": "antimicrobial_stewardship",
+        "source_url": "https://main.icmr.nic.in/content/national-treatment-guidelines-antimicrobial-use",
+        "text": "ICMR Clinical Guideline: ICMR National Treatment Guidelines for Antimicrobial Use in Infectious Diseases (2022)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: Core Principles of Rational Antimicrobial Use (Page 5)\n\nEmpiric antimicrobial therapy should be based on local institutional antibiograms and disease severity. Collect appropriate microbiological specimens prior to starting antibiotics. De-escalate from broad-spectrum to narrow-spectrum antibiotics once culture and susceptibility results are available. Reserve 'Access', 'Watch', and 'Reserve' categories as per WHO/ICMR classifications. Strict restriction on indiscriminate use of carbapenems, colistin, and vancomycin in outpatient settings.",
+        "dense_score": 0.8778,
+        "bm25_score": 11.0679,
+        "fused_score": 0.031281,
+        "rerank_score": 1.7018
+      },
+      {
+        "rank": 3,
+        "score": 0.140072,
+        "source_id": "MedlinePlus",
+        "source_name": "MedlinePlus Health Topics (NLM / NIH)",
+        "publisher": "National Library of Medicine (NLM/NIH)",
+        "document_id": "mplus_community_acquired_pneumonia_treatment",
+        "chunk_id": "mplus_community_acquired_pneumonia_treatment-c0",
+        "title": "Pneumonia - Treatment",
+        "section": "Treatment",
+        "medical_domain": "pulmonology",
+        "source_url": "https://medlineplus.gov/pneumonia.html",
+        "text": "Topic: Pneumonia\nSection: Treatment\nPublisher: National Library of Medicine (NLM/NIH)\n\nBacterial pneumonia is treated with antibacterial agents. For previously healthy outpatients: Amoxicillin (high dose) or Doxycycline or Macrolides (azithromycin) are first-line options. In patients with comorbidities or risk factors: Combination therapy with Amoxicillin-Clavulanate plus Macrolide or respiratory fluoroquinolones (levofloxacin). Supportive care includes oxygen therapy, hydration, and antipyretics.",
+        "dense_score": 0.8346,
+        "bm25_score": 12.0716,
+        "fused_score": 0.031754,
+        "rerank_score": 0.1401
+      }
+    ],
+    "context_text": "[Doc 1: ICMR National Treatment Guidelines for Antimicrobial Use in Infectious Diseases - Empiric Therapy for Community-Acquired Pneumonia (CAP) | Source: Indian Council of Medical Research Clinical Guidelines] (URL: https://main.icmr.nic.in/content/national-treatment-guidelines-antimicrobial-use)\nICMR Clinical Guideline: ICMR National Treatment Guidelines for Antimicrobial Use in Infectious Diseases (2022)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: Empiric Therapy for Community-Acquired Pneumonia (CAP) (Page 42)\n\nOutpatient CAP (Mild, CURB-65 = 0-1, no comorbidities): First-line: Oral Amoxicillin 500 mg - 1000 mg three times daily for 5 days. Alternative: Oral Doxycycline 100 mg twice daily. Outpatient with comorbidities (COPD, diabetes, renal disease): Oral Amoxicillin-Clavulanic acid (875/125 mg twice daily) PLUS oral Azithromycin (500 mg Day 1, then 250 mg daily). Hospitalized Inpatient (Non-ICU, CURB-65 >= 2): Intravenous Ceftriaxone (1-2 g IV once daily) PLUS IV/Oral Azithromycin (500 mg once daily).\n\n---\n\n[Doc 2: ICMR National Treatment Guidelines for Antimicrobial Use in Infectious Diseases - Core Principles of Rational Antimicrobial Use | Source: Indian Council of Medical Research Clinical Guidelines] (URL: https://main.icmr.nic.in/content/national-treatment-guidelines-antimicrobial-use)\nICMR Clinical Guideline: ICMR National Treatment Guidelines for Antimicrobial Use in Infectious Diseases (2022)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: Core Principles of Rational Antimicrobial Use (Page 5)\n\nEmpiric antimicrobial therapy should be based on local institutional antibiograms and disease severity. Collect appropriate microbiological specimens prior to starting antibiotics. De-escalate from broad-spectrum to narrow-spectrum antibiotics once culture and susceptibility results are available. Reserve 'Access', 'Watch', and 'Reserve' categories as per WHO/ICMR classifications. Strict restriction on indiscriminate use of carbapenems, colistin, and vancomycin in outpatient settings.\n\n---\n\n[Doc 3: Pneumonia - Treatment | Source: MedlinePlus Health Topics (NLM / NIH)] (URL: https://medlineplus.gov/pneumonia.html)\nTopic: Pneumonia\nSection: Treatment\nPublisher: National Library of Medicine (NLM/NIH)\n\nBacterial pneumonia is treated with antibacterial agents. For previously healthy outpatients: Amoxicillin (high dose) or Doxycycline or Macrolides (azithromycin) are first-line options. In patients with comorbidities or risk factors: Combination therapy with Amoxicillin-Clavulanate plus Macrolide or respiratory fluoroquinolones (levofloxacin). Supportive care includes oxygen therapy, hydration, and antipyretics.",
+    "latency_ms": 1624.74,
+    "reranker_status": "available",
+    "filters_applied": {},
+    "grounding": {
+      "status": "grounded",
+      "generation_allowed": true,
+      "evidence_count": 3,
+      "usable_evidence_count": 3,
+      "accepted_chunk_ids": [
+        "icmr_icmr_antimicrobial_2022_respiratory_infections-c0",
+        "icmr_icmr_antimicrobial_2022_antimicrobial_stewardship_principles-c0",
+        "mplus_community_acquired_pneumonia_treatment-c0"
+      ],
+      "provenance_valid": true,
+      "top_evidence_rank": 1,
+      "evidence_sources": [
+        "ICMR",
+        "MedlinePlus"
+      ],
+      "evidence_documents": [
+        "icmr_icmr_antimicrobial_2022_antimicrobial_stewardship_principles",
+        "icmr_icmr_antimicrobial_2022_respiratory_infections",
+        "mplus_community_acquired_pneumonia_treatment"
+      ],
+      "evidence_sections": [
+        "Core Principles of Rational Antimicrobial Use",
+        "Empiric Therapy for Community-Acquired Pneumonia (CAP)",
+        "Treatment"
+      ],
+      "reason_codes": [
+        "EVIDENCE_SUFFICIENT"
+      ],
+      "warnings": [],
+      "conflict_detected": false,
+      "conflict_summary": null,
+      "policy_latency_ms": 0.699
+    },
+    "safety_assessment": {
+      "risk_category": "medication_safety",
+      "is_emergency": false,
+      "emergency_message": null,
+      "is_injection": false,
+      "sanitized_query": "What are the ICMR treatment guidelines for community-acquired pneumonia in pediatric patients?",
+      "requires_strict_grounding": true,
+      "warnings": []
+    }
+  },
+  "error": null
+}

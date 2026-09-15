@@ -21,6 +21,24 @@ class DocumentType:
     GENERAL_REFERENCE = "general_reference"
 
 
+class ProvenanceStatus:
+    """Canonical provenance classification status."""
+    VERIFIED = "VERIFIED"
+    UNVERIFIED = "UNVERIFIED"
+    TEST_ONLY = "TEST_ONLY"
+    HISTORICAL = "HISTORICAL"
+
+
+class EvidenceRole:
+    """Categorical role of the evidence in clinical decision support."""
+    PRIMARY_MONOGRAPH = "primary_monograph"
+    CLINICAL_GUIDELINE = "clinical_guideline"
+    REFERENCE_SUMMARY = "reference_summary"
+    TERMINOLOGY_CONCEPT = "terminology_concept"
+    REGULATORY_REPORT = "regulatory_report"
+    QA_PAIR = "qa_pair"
+
+
 def compute_sha256(text: str) -> str:
     """Computes a deterministic SHA-256 hash of normalized text."""
     normalized = " ".join(text.strip().lower().split())
@@ -31,7 +49,7 @@ def compute_sha256(text: str) -> str:
 class KnowledgeDocument:
     """
     Canonical representation of a medical knowledge document.
-    All source adapters (MedQuAD, DailyMed, openFDA, Guidelines) normalize into this model.
+    All source adapters normalize into this model.
     """
     document_id: str
     source_id: str
@@ -40,18 +58,28 @@ class KnowledgeDocument:
     title: str
     content: str
     source_url: str = ""
-    document_type: str = DocumentType.GENERAL_REFERENCE  # "qa_pair", "drug_monograph", "clinical_guideline", "disease_summary"
-    medical_domain: str = "general_medicine"  # "oncology", "pharmacology", "genetics", "cardiology", etc.
-    section: Optional[str] = None             # "Indications", "Dosage", "Side Effects", "Symptoms", etc.
-    entities: List[str] = field(default_factory=list) # Extracted clinical entities (drugs, diseases, genes)
-    version: str = "2.3"
+    document_type: str = DocumentType.GENERAL_REFERENCE
+    evidence_role: str = EvidenceRole.REFERENCE_SUMMARY
+    provenance_status: str = ProvenanceStatus.VERIFIED
+    medical_domain: str = "general_medicine"
+    section: Optional[str] = None
+    section_id: Optional[str] = None
+    parent_document_id: Optional[str] = None
+    page_number: Optional[int] = None
+    publication_date: str = ""
+    language: str = "en"
+    checksum: str = ""
+    entities: List[str] = field(default_factory=list)
+    version: str = "2.9"
     retrieved_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     content_hash: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict) # Source-specific extension metadata
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         if not self.content_hash and self.content:
             self.content_hash = compute_sha256(self.content)
+        if not self.checksum and self.content_hash:
+            self.checksum = self.content_hash
 
     def validate(self) -> Tuple[bool, Optional[str]]:
         """Validates document integrity. Returns (is_valid, error_reason)."""
@@ -82,6 +110,7 @@ class KnowledgeDocument:
             data_copy["content"] = f"Question: {q}\nAnswer: {a}"
             data_copy["title"] = data_copy.get("focus") or q
             data_copy["document_type"] = "qa_pair"
+            data_copy["evidence_role"] = "qa_pair"
             if "qid" in data_copy:
                 data_copy.setdefault("metadata", {})["qid"] = data_copy["qid"]
             if "qtype" in data_copy:
@@ -90,8 +119,10 @@ class KnowledgeDocument:
         # Filter keys to match dataclass fields
         valid_keys = {
             "document_id", "source_id", "source_name", "publisher", "title",
-            "content", "source_url", "document_type", "medical_domain",
-            "section", "entities", "version", "retrieved_at", "content_hash",
+            "content", "source_url", "document_type", "evidence_role",
+            "provenance_status", "medical_domain", "section", "section_id",
+            "parent_document_id", "page_number", "publication_date", "language",
+            "checksum", "entities", "version", "retrieved_at", "content_hash",
             "metadata"
         }
         filtered = {k: v for k, v in data_copy.items() if k in valid_keys}
@@ -112,8 +143,16 @@ class KnowledgeChunk:
     text: str
     source_url: str = ""
     document_type: str = "general_reference"
+    evidence_role: str = EvidenceRole.REFERENCE_SUMMARY
+    provenance_status: str = ProvenanceStatus.VERIFIED
     medical_domain: str = "general_medicine"
     section: Optional[str] = None
+    section_id: Optional[str] = None
+    parent_document_id: Optional[str] = None
+    parent_chunk_id: Optional[str] = None
+    page_number: Optional[int] = None
+    publication_date: str = ""
+    checksum: str = ""
     chunk_index: int = 0
     word_count: int = 0
     char_count: int = 0
@@ -127,6 +166,8 @@ class KnowledgeChunk:
             self.char_count = len(self.text)
         if not self.content_hash and self.text:
             self.content_hash = compute_sha256(self.text)
+        if not self.checksum and self.content_hash:
+            self.checksum = self.content_hash
 
     def to_dict(self) -> Dict[str, Any]:
         """Serializes chunk to dictionary."""
@@ -137,9 +178,11 @@ class KnowledgeChunk:
         """Deserializes dictionary into KnowledgeChunk instance."""
         valid_keys = {
             "chunk_id", "document_id", "source_id", "source_name", "publisher",
-            "title", "text", "source_url", "document_type", "medical_domain",
-            "section", "chunk_index", "word_count", "char_count", "content_hash",
-            "metadata"
+            "title", "text", "source_url", "document_type", "evidence_role",
+            "provenance_status", "medical_domain", "section", "section_id",
+            "parent_document_id", "parent_chunk_id", "page_number",
+            "publication_date", "checksum", "chunk_index", "word_count",
+            "char_count", "content_hash", "metadata"
         }
         filtered = {k: v for k, v in data.items() if k in valid_keys}
         return cls(**filtered)

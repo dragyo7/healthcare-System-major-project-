@@ -1,0 +1,24 @@
+{
+  "total_unique_chunks": 311,
+  "chunk_length_words": {
+    "mean": 28.17,
+    "median_p50": 23.0,
+    "p95": 70.0,
+    "min": 7,
+    "max": 144
+  },
+  "sentence_fragmentation": "0% (Whole clinical section boundaries preserved)",
+  "section_distribution_top10": {
+    "Indications & Usage": 25,
+    "Dosage & Administration": 25,
+    "Contraindications": 25,
+    "Warnings & Precautions": 25,
+    "Adverse Reactions": 25,
+    "Drug Interactions": 25,
+    "Use in Specific Populations": 25,
+    "Indications And Usage": 25,
+    "Dosage And Administration": 25,
+    "Warnings And Precautions": 25
+  },
+  "semantic_coherence_verdict": "OPTIMAL_CLINICAL_COHERENCE"
+}

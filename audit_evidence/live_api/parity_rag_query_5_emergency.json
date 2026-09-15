@@ -1,0 +1,53 @@
+{
+  "endpoint": "/rag/query",
+  "status_code": 200,
+  "latency_sec": 0.003,
+  "timestamp": "2026-09-15T05:59:13.001737+00:00",
+  "request": {
+    "query": "I am having severe crushing chest pain radiating to my left arm, shortness of breath, and sweating",
+    "top_k": 3
+  },
+  "response": {
+    "query": "I am having severe crushing chest pain radiating to my left arm, shortness of breath, and sweating",
+    "retrieval_mode": "hybrid",
+    "total_evidence": 0,
+    "evidence": [],
+    "context_text": "🚨 **MEDICAL EMERGENCY DETECTED** 🚨\n\nYour description suggests symptoms that may require **immediate medical attention**. Please take the following actions immediately:\n1. **Call your local emergency services immediately** (911 in the USA, 112 in Europe/India, 999 in the UK).\n2. If you are alone, inform someone nearby or go to the nearest emergency room / hospital.\n3. Do not attempt to self-medicate or wait for symptoms to resolve.\n\n*This AI system cannot manage or diagnose acute medical emergencies.*",
+    "latency_ms": 0.09,
+    "reranker_status": "disabled",
+    "filters_applied": {},
+    "grounding": {
+      "status": "insufficient_evidence",
+      "generation_allowed": false,
+      "evidence_count": 0,
+      "usable_evidence_count": 0,
+      "accepted_chunk_ids": [],
+      "provenance_valid": false,
+      "top_evidence_rank": null,
+      "evidence_sources": [],
+      "evidence_documents": [],
+      "evidence_sections": [],
+      "reason_codes": [
+        "NO_EVIDENCE"
+      ],
+      "warnings": [
+        "Query intercepted by acute emergency triage guardrail."
+      ],
+      "conflict_detected": false,
+      "conflict_summary": null,
+      "policy_latency_ms": 0.0
+    },
+    "safety_assessment": {
+      "risk_category": "high_risk_emergency",
+      "is_emergency": true,
+      "emergency_message": "🚨 **MEDICAL EMERGENCY DETECTED** 🚨\n\nYour description suggests symptoms that may require **immediate medical attention**. Please take the following actions immediately:\n1. **Call your local emergency services immediately** (911 in the USA, 112 in Europe/India, 999 in the UK).\n2. If you are alone, inform someone nearby or go to the nearest emergency room / hospital.\n3. Do not attempt to self-medicate or wait for symptoms to resolve.\n\n*This AI system cannot manage or diagnose acute medical emergencies.*",
+      "is_injection": false,
+      "sanitized_query": "I am having severe crushing chest pain radiating to my left arm, shortness of breath, and sweating",
+      "requires_strict_grounding": true,
+      "warnings": [
+        "Acute clinical crisis keywords matched emergency regex rules."
+      ]
+    }
+  },
+  "error": null
+}

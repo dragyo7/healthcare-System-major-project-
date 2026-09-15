@@ -10,7 +10,7 @@ from typing import List, Dict, Any, Optional, Union
 from pathlib import Path
 from bs4 import BeautifulSoup
 
-from rag_module.knowledge.document_model import KnowledgeDocument, DocumentType
+from rag_module.knowledge.document_model import KnowledgeDocument, DocumentType, EvidenceRole, ProvenanceStatus
 from rag_module.ingestion.base_adapter import BaseSourceAdapter
 
 
@@ -68,7 +68,12 @@ class DailyMedAdapter(BaseSourceAdapter):
     def load_raw_data(self) -> Any:
         """Loads drug label dictionaries, JSON files, or XML files."""
         if self.data_source is None:
-            # Default to full 200+ DailyMed dataset or pilot as fallback
+            # Check verified authentic DailyMed SPL dataset first
+            essential_path = Path("data/knowledge_bases/dailymed/dailymed_essential_spl.json")
+            if essential_path.exists():
+                with open(essential_path, "r", encoding="utf-8") as f:
+                    return json.load(f)
+            
             default_path = Path(r"e:\Major Project Code") / "rag_module" / "data" / "dailymed_raw.json"
             if not default_path.exists():
                 default_path = Path(r"e:\Major Project Code") / "rag_module" / "data" / "dailymed_pilot_raw.json"
@@ -252,10 +257,14 @@ class DailyMedAdapter(BaseSourceAdapter):
                 content=f"Drug: {drug_name}\nSection: {sec_name}\n\n{text_str.strip()}",
                 source_url=url,
                 document_type=DocumentType.DRUG_MONOGRAPH,
+                evidence_role=EvidenceRole.PRIMARY_MONOGRAPH,
+                provenance_status=ProvenanceStatus.VERIFIED,
                 medical_domain="pharmacology",
                 section=sec_name,
+                section_id=sec_id,
+                parent_document_id=f"dailymed_{set_id}",
                 entities=[drug_name, generic_name] + brand_names + ([active_ingredient] if active_ingredient else []),
-                version="2.6",
+                version="2.9",
                 metadata={
                     "drug_name": drug_name,
                     "generic_name": generic_name,

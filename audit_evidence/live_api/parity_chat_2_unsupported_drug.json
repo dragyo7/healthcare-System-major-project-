@@ -1,0 +1,20 @@
+{
+  "endpoint": "/chat",
+  "status_code": 200,
+  "latency_sec": 3.3566,
+  "timestamp": "2026-09-15T05:58:37.326964+00:00",
+  "request": {
+    "query": "What is the pediatric dose of Sofosbuvir?",
+    "top_k": 3
+  },
+  "response": {
+    "question": "What is the pediatric dose of Sofosbuvir?",
+    "answer": "I am not able to find verified medical evidence regarding the requested subject in authoritative clinical guidelines.\n\n*Clinical Disclaimer: This healthcare AI assistant is an educational Major Project prototype and does not provide formal medical diagnoses, prescriptive orders, or emergency clinical advice. For health concerns or medication changes, always consult a licensed physician or healthcare professional.*",
+    "is_emergency": false,
+    "abstained": true,
+    "sources": [],
+    "retrieved_chunks_count": 3,
+    "pipeline_mode": "hybrid"
+  },
+  "error": null
+}

@@ -1,0 +1,83 @@
+{
+  "rxnorm_total_chunks": 20,
+  "primary_architectural_role": "Terminology Normalization & Synonyms Mapping (RxCUI identifier linkage to generic/brand name concepts)",
+  "clinical_evidence_role": "Secondary Terminology Definition only; clinical decisions (dosing, contraindications, boxed warnings) strictly require DailyMed / ICMR / MoHFW evidence.",
+  "sample_rxnorm_chunks": [
+    {
+      "chunk_id": "rxnorm_6809-c0",
+      "text": "Medication Concept: Metformin Oral Tablet\nRxCUI: 6809\nActive Ingredient: metformin\nBrand / Trade Names: Glucophage, Fortamet, Glycomet\nDosage Form: Oral Tablet\nStrength: 500 mg, 850 mg, 1000 mg\nTherapeutic Class: Biguanide Antidiabetic\nAuthority: National Library of Medicine (NLM/NIH)",
+      "metadata": {
+        "chunk_id": "rxnorm_6809-c0",
+        "document_id": "rxnorm_6809",
+        "doc_id": "rxnorm_6809",
+        "qid": "rxnorm_6809",
+        "source_id": "RxNorm",
+        "source_name": "RxNorm Normalized Prescribable Clinical Terminology",
+        "publisher": "National Library of Medicine (NLM/NIH)",
+        "url": "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=6809",
+        "source_url": "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=6809",
+        "title": "RxNorm Concept: Metformin Oral Tablet (RxCUI: 6809)",
+        "focus": "RxNorm Concept: Metformin Oral Tablet (RxCUI: 6809)",
+        "qtype": "Clinical Concept Summary",
+        "section": "Clinical Concept Summary",
+        "document_type": "drug_monograph",
+        "medical_domain": "pharmacology",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "word_count": 38,
+        "char_count": 285
+      }
+    },
+    {
+      "chunk_id": "rxnorm_29046-c0",
+      "text": "Medication Concept: Lisinopril Oral Tablet\nRxCUI: 29046\nActive Ingredient: lisinopril\nBrand / Trade Names: Zestril, Prinivil\nDosage Form: Oral Tablet\nStrength: 5 mg, 10 mg, 20 mg, 40 mg\nTherapeutic Class: ACE Inhibitor\nAuthority: National Library of Medicine (NLM/NIH)",
+      "metadata": {
+        "chunk_id": "rxnorm_29046-c0",
+        "document_id": "rxnorm_29046",
+        "doc_id": "rxnorm_29046",
+        "qid": "rxnorm_29046",
+        "source_id": "RxNorm",
+        "source_name": "RxNorm Normalized Prescribable Clinical Terminology",
+        "publisher": "National Library of Medicine (NLM/NIH)",
+        "url": "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=29046",
+        "source_url": "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=29046",
+        "title": "RxNorm Concept: Lisinopril Oral Tablet (RxCUI: 29046)",
+        "focus": "RxNorm Concept: Lisinopril Oral Tablet (RxCUI: 29046)",
+        "qtype": "Clinical Concept Summary",
+        "section": "Clinical Concept Summary",
+        "document_type": "drug_monograph",
+        "medical_domain": "pharmacology",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "word_count": 39,
+        "char_count": 268
+      }
+    },
+    {
+      "chunk_id": "rxnorm_17767-c0",
+      "text": "Medication Concept: Amlodipine Oral Tablet\nRxCUI: 17767\nActive Ingredient: amlodipine\nBrand / Trade Names: Norvasc, Amlong\nDosage Form: Oral Tablet\nStrength: 2.5 mg, 5 mg, 10 mg\nTherapeutic Class: Calcium Channel Blocker\nAuthority: National Library of Medicine (NLM/NIH)",
+      "metadata": {
+        "chunk_id": "rxnorm_17767-c0",
+        "document_id": "rxnorm_17767",
+        "doc_id": "rxnorm_17767",
+        "qid": "rxnorm_17767",
+        "source_id": "RxNorm",
+        "source_name": "RxNorm Normalized Prescribable Clinical Terminology",
+        "publisher": "National Library of Medicine (NLM/NIH)",
+        "url": "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=17767",
+        "source_url": "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=17767",
+        "title": "RxNorm Concept: Amlodipine Oral Tablet (RxCUI: 17767)",
+        "focus": "RxNorm Concept: Amlodipine Oral Tablet (RxCUI: 17767)",
+        "qtype": "Clinical Concept Summary",
+        "section": "Clinical Concept Summary",
+        "document_type": "drug_monograph",
+        "medical_domain": "pharmacology",
+        "chunk_index": 0,
+        "total_chunks": 1,
+        "word_count": 38,
+        "char_count": 270
+      }
+    }
+  ],
+  "runtime_verification": "RxNorm chunks contain normalized RXCUI concept definitions and brand aliases, which assist dense & BM25 retrieval by mapping brand names (e.g., Glucophage -> Metformin), but do not act as clinical practice guidelines."
+}

@@ -47,11 +47,14 @@ EMERGENCY_PATTERNS = [
 # Patterns for prompt injection / instruction override
 INJECTION_PATTERNS = [
     r'ignore\s+(all\s+)?(previous|prior|above)\s+instructions',
-    r'you\s+are\s+now\s+(in\s+)?(dan|developer\s+mode|unrestricted)',
-    r'(system\s*prompt|system\s*message|jailbreak|disregard\s+rules)',
+    r'disregard\s+(all\s+)?(previous|prior|rules|instructions)',
+    r'you\s+are\s+now\s+(a|an|in\s+)?(dan|developer\s+mode|unrestricted)',
+    r'(system\s*prompt|system\s*message|jailbreak|reveal\s+confidential)',
+    r'^\s*system\s*:',
     r'<\s*system\s*>',
     r'\[\s*INST\s*\]'
 ]
+
 
 # Keywords indicative of medication safety / dosing inquiry
 MEDICATION_SAFETY_KEYWORDS = [

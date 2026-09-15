@@ -1,0 +1,253 @@
+{
+  "concepts": [
+    {
+      "rxcui": "6809",
+      "name": "Metformin Oral Tablet",
+      "ingredient": "metformin",
+      "brand_names": [
+        "Glucophage",
+        "Fortamet",
+        "Glycomet"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "500 mg, 850 mg, 1000 mg",
+      "therapeutic_class": "Biguanide Antidiabetic"
+    },
+    {
+      "rxcui": "29046",
+      "name": "Lisinopril Oral Tablet",
+      "ingredient": "lisinopril",
+      "brand_names": [
+        "Zestril",
+        "Prinivil"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "5 mg, 10 mg, 20 mg, 40 mg",
+      "therapeutic_class": "ACE Inhibitor"
+    },
+    {
+      "rxcui": "17767",
+      "name": "Amlodipine Oral Tablet",
+      "ingredient": "amlodipine",
+      "brand_names": [
+        "Norvasc",
+        "Amlong"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "2.5 mg, 5 mg, 10 mg",
+      "therapeutic_class": "Calcium Channel Blocker"
+    },
+    {
+      "rxcui": "83367",
+      "name": "Atorvastatin Oral Tablet",
+      "ingredient": "atorvastatin",
+      "brand_names": [
+        "Lipitor",
+        "Atorva"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "10 mg, 20 mg, 40 mg, 80 mg",
+      "therapeutic_class": "HMG-CoA Reductase Inhibitor"
+    },
+    {
+      "rxcui": "11289",
+      "name": "Warfarin Oral Tablet",
+      "ingredient": "warfarin",
+      "brand_names": [
+        "Coumadin",
+        "Jantoven"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "1 mg, 2 mg, 2.5 mg, 5 mg",
+      "therapeutic_class": "Anticoagulant"
+    },
+    {
+      "rxcui": "1191",
+      "name": "Aspirin Oral Tablet",
+      "ingredient": "aspirin",
+      "brand_names": [
+        "Bayer Aspirin",
+        "Ecotrin",
+        "Disprin"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "81 mg, 325 mg, 500 mg",
+      "therapeutic_class": "Antiplatelet / Analgesic"
+    },
+    {
+      "rxcui": "5640",
+      "name": "Ibuprofen Oral Tablet",
+      "ingredient": "ibuprofen",
+      "brand_names": [
+        "Advil",
+        "Motrin",
+        "Brufen"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "200 mg, 400 mg, 600 mg, 800 mg",
+      "therapeutic_class": "NSAID"
+    },
+    {
+      "rxcui": "161",
+      "name": "Acetaminophen (Paracetamol) Oral Tablet",
+      "ingredient": "paracetamol",
+      "brand_names": [
+        "Tylenol",
+        "Panadol",
+        "Crocin",
+        "Calpol",
+        "Dolo 650"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "325 mg, 500 mg, 650 mg",
+      "therapeutic_class": "Analgesic / Antipyretic"
+    },
+    {
+      "rxcui": "723",
+      "name": "Amoxicillin Oral Capsule",
+      "ingredient": "amoxicillin",
+      "brand_names": [
+        "Amoxil",
+        "Moxatag",
+        "Novamox"
+      ],
+      "dosage_form": "Oral Capsule",
+      "strength": "250 mg, 500 mg, 875 mg",
+      "therapeutic_class": "Penicillin Antibacterial"
+    },
+    {
+      "rxcui": "18631",
+      "name": "Azithromycin Oral Tablet",
+      "ingredient": "azithromycin",
+      "brand_names": [
+        "Zithromax",
+        "Z-Pak",
+        "Azithral"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "250 mg, 500 mg",
+      "therapeutic_class": "Macrolide Antibacterial"
+    },
+    {
+      "rxcui": "10582",
+      "name": "Levothyroxine Oral Tablet",
+      "ingredient": "levothyroxine",
+      "brand_names": [
+        "Synthroid",
+        "Levoxyl",
+        "Thyronorm",
+        "Eltroxin"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "25 mcg, 50 mcg, 75 mcg, 100 mcg",
+      "therapeutic_class": "Thyroid Hormone"
+    },
+    {
+      "rxcui": "7646",
+      "name": "Omeprazole Delayed-Release Capsule",
+      "ingredient": "omeprazole",
+      "brand_names": [
+        "Prilosec",
+        "Omez"
+      ],
+      "dosage_form": "Oral Capsule",
+      "strength": "20 mg, 40 mg",
+      "therapeutic_class": "Proton Pump Inhibitor"
+    },
+    {
+      "rxcui": "5224",
+      "name": "Losartan Oral Tablet",
+      "ingredient": "losartan",
+      "brand_names": [
+        "Cozaar",
+        "Losacar"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "25 mg, 50 mg, 100 mg",
+      "therapeutic_class": "Angiotensin Receptor Blocker"
+    },
+    {
+      "rxcui": "341248",
+      "name": "Telmisartan Oral Tablet",
+      "ingredient": "telmisartan",
+      "brand_names": [
+        "Micardis",
+        "Telma"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "20 mg, 40 mg, 80 mg",
+      "therapeutic_class": "Angiotensin Receptor Blocker"
+    },
+    {
+      "rxcui": "6918",
+      "name": "Metoprolol Tartrate Oral Tablet",
+      "ingredient": "metoprolol",
+      "brand_names": [
+        "Lopressor",
+        "Betaloc"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "25 mg, 50 mg, 100 mg",
+      "therapeutic_class": "Beta-Blocker"
+    },
+    {
+      "rxcui": "1373458",
+      "name": "Empagliflozin Oral Tablet",
+      "ingredient": "empagliflozin",
+      "brand_names": [
+        "Jardiance",
+        "Gibtulio"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "10 mg, 25 mg",
+      "therapeutic_class": "SGLT2 Inhibitor"
+    },
+    {
+      "rxcui": "1488564",
+      "name": "Dapagliflozin Oral Tablet",
+      "ingredient": "dapagliflozin",
+      "brand_names": [
+        "Farxiga",
+        "Forxiga"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "5 mg, 10 mg",
+      "therapeutic_class": "SGLT2 Inhibitor"
+    },
+    {
+      "rxcui": "5955",
+      "name": "Sitagliptin Oral Tablet",
+      "ingredient": "sitagliptin",
+      "brand_names": [
+        "Januvia",
+        "Janumet"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "25 mg, 50 mg, 100 mg",
+      "therapeutic_class": "DPP-4 Inhibitor"
+    },
+    {
+      "rxcui": "4815",
+      "name": "Glipizide Oral Tablet",
+      "ingredient": "glipizide",
+      "brand_names": [
+        "Glucotrol"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "5 mg, 10 mg",
+      "therapeutic_class": "Sulfonylurea Antidiabetic"
+    },
+    {
+      "rxcui": "25789",
+      "name": "Glimepiride Oral Tablet",
+      "ingredient": "glimepiride",
+      "brand_names": [
+        "Amaryl",
+        "Glimy"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "1 mg, 2 mg, 3 mg, 4 mg",
+      "therapeutic_class": "Sulfonylurea Antidiabetic"
+    }
+  ]
+}

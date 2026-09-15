@@ -1,0 +1,58 @@
+[
+  {
+    "tag": "icmr_constrained",
+    "query": "According to ICMR guidelines, what is the treatment for community-acquired pneumonia?",
+    "decision": null,
+    "accepted_chunk_ids": [
+      "icmr_icmr_antimicrobial_2022_respiratory_infections-c0",
+      "icmr_icmr_antimicrobial_2022_urinary_tract_infections-c0",
+      "mplus_community_acquired_pneumonia_overview-c0",
+      "dailymed_c1f7b8a2-9382-4112-9c1e-1284a7df1944_indications___usage-c0",
+      "icmr_icmr_antimicrobial_2022_antimicrobial_stewardship_principles-c0"
+    ],
+    "sources": [],
+    "citations": []
+  },
+  {
+    "tag": "dailymed_constrained",
+    "query": "According to DailyMed, what are the boxed warnings for Lisinopril?",
+    "decision": null,
+    "accepted_chunk_ids": [
+      "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_boxed_warning-c0",
+      "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_warnings___precautions-c0",
+      "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_dosage___administration-c0",
+      "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_adverse_reactions-c0",
+      "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_indications___usage-c0"
+    ],
+    "sources": [],
+    "citations": []
+  },
+  {
+    "tag": "medlineplus_constrained",
+    "query": "According to MedlinePlus, what is Metformin used for?",
+    "decision": null,
+    "accepted_chunk_ids": [
+      "dailymed_060d40e4-b778-43d9-9596-f9478f773489_indications___usage-c0",
+      "mplus_type2_diabetes_management_and_treatment-c0",
+      "dailymed_060d40e4-b778-43d9-9596-f9478f773489_boxed_warning-c0",
+      "rxnorm_6809-c0",
+      "dailymed_060d40e4-b778-43d9-9596-f9478f773489_warnings___precautions-c0"
+    ],
+    "sources": [],
+    "citations": []
+  },
+  {
+    "tag": "mixed_sources",
+    "query": "According to ICMR and DailyMed, what is the protocol for diabetic ketoacidosis and Metformin dosage?",
+    "decision": null,
+    "accepted_chunk_ids": [
+      "icmr_icmr_t2dm_2023_stepwise_pharmacotherapy-c0",
+      "mplus_type2_diabetes_management_and_treatment-c0",
+      "mohfw_mohfw_stg_diabetes_screening_and_initial_management-c0",
+      "dailymed_6623f03b-18a8-48b6-9bb2-16a7f0521e66_warnings___precautions-c0",
+      "icmr_icmr_antimicrobial_2022_antimicrobial_stewardship_principles-c0"
+    ],
+    "sources": [],
+    "citations": []
+  }
+]

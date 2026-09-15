@@ -1,0 +1,97 @@
+{
+  "guidelines": [
+    {
+      "guideline_id": "icmr_t2dm_2023",
+      "title": "ICMR Guidelines for Management of Type 2 Diabetes in India",
+      "publication_year": "2023",
+      "medical_domain": "endocrinology",
+      "target_conditions": [
+        "Type 2 Diabetes Mellitus",
+        "Diabetic Nephropathy",
+        "Insulin Resistance",
+        "Metformin"
+      ],
+      "url": "https://main.icmr.nic.in/content/icmr-guidelines-management-type-2-diabetes",
+      "sections": [
+        {
+          "section_id": "diagnostic_criteria",
+          "section_title": "Diagnostic Thresholds for Indian Population",
+          "page_number": 12,
+          "content": "Due to the high prevalence of abdominal obesity, early onset of metabolic syndrome, and 'thin-fat Indian phenotype', diagnostic screening for type 2 diabetes in India is recommended starting at age 30 years (or earlier with family history/obesity). Diagnostic criteria: 1) Fasting Blood Glucose >= 126 mg/dL (7.0 mmol/L) after at least 8 hours of fast; 2) 2-hour Post-load Plasma Glucose >= 200 mg/dL (11.1 mmol/L) during a 75g Oral Glucose Tolerance Test; 3) Glycated Hemoglobin (HbA1c) >= 6.5% using a standardized NGSP-certified assay."
+        },
+        {
+          "section_id": "stepwise_pharmacotherapy",
+          "section_title": "Step-Wise Pharmacotherapy & Treatment Algorithm",
+          "page_number": 28,
+          "content": "Step 1: Metformin is the undisputed first-line pharmacological agent for all patients with Type 2 Diabetes without contraindications (eGFR >= 30 mL/min). Titrate starting from 500 mg daily to 1000-2000 mg daily with meals.\nStep 2: If HbA1c remains > 7.0% after 3 months of monotherapy, add a second oral agent based on patient comorbidities: In patients with atherosclerotic cardiovascular disease or diabetic kidney disease (microalbuminuria / eGFR 30-60), add an SGLT2 inhibitor (empagliflozin, dapagliflozin) or GLP-1 receptor agonist; in cost-sensitive primary care, add a second-generation sulfonylurea (glimepiride, gliclazide) with education on hypoglycemia.\nStep 3: Triple oral therapy or early initiation of basal insulin if HbA1c > 9.0% with symptomatic hyperglycemia."
+        },
+        {
+          "section_id": "glycemic_targets",
+          "section_title": "Glycemic Targets & Monitoring Guidelines",
+          "page_number": 34,
+          "content": "General adult target: HbA1c < 7.0% (Fasting blood glucose 80-130 mg/dL; Post-prandial blood glucose < 180 mg/dL). More stringent target (HbA1c < 6.5%) in young patients with short disease duration and no cardiovascular disease. Less stringent target (HbA1c 7.5% - 8.0%) in elderly patients, those with history of severe hypoglycemia, or advanced microvascular/macrovascular complications."
+        }
+      ]
+    },
+    {
+      "guideline_id": "icmr_antimicrobial_2022",
+      "title": "ICMR National Treatment Guidelines for Antimicrobial Use in Infectious Diseases",
+      "publication_year": "2022",
+      "medical_domain": "antimicrobial_stewardship",
+      "target_conditions": [
+        "Antimicrobial Stewardship",
+        "Pneumonia",
+        "Urinary Tract Infection",
+        "Antibiotic Resistance"
+      ],
+      "url": "https://main.icmr.nic.in/content/national-treatment-guidelines-antimicrobial-use",
+      "sections": [
+        {
+          "section_id": "antimicrobial_stewardship_principles",
+          "section_title": "Core Principles of Rational Antimicrobial Use",
+          "page_number": 5,
+          "content": "Empiric antimicrobial therapy should be based on local institutional antibiograms and disease severity. Collect appropriate microbiological specimens prior to starting antibiotics. De-escalate from broad-spectrum to narrow-spectrum antibiotics once culture and susceptibility results are available. Reserve 'Access', 'Watch', and 'Reserve' categories as per WHO/ICMR classifications. Strict restriction on indiscriminate use of carbapenems, colistin, and vancomycin in outpatient settings."
+        },
+        {
+          "section_id": "respiratory_infections",
+          "section_title": "Empiric Therapy for Community-Acquired Pneumonia (CAP)",
+          "page_number": 42,
+          "content": "Outpatient CAP (Mild, CURB-65 = 0-1, no comorbidities): First-line: Oral Amoxicillin 500 mg - 1000 mg three times daily for 5 days. Alternative: Oral Doxycycline 100 mg twice daily. Outpatient with comorbidities (COPD, diabetes, renal disease): Oral Amoxicillin-Clavulanic acid (875/125 mg twice daily) PLUS oral Azithromycin (500 mg Day 1, then 250 mg daily). Hospitalized Inpatient (Non-ICU, CURB-65 >= 2): Intravenous Ceftriaxone (1-2 g IV once daily) PLUS IV/Oral Azithromycin (500 mg once daily)."
+        },
+        {
+          "section_id": "urinary_tract_infections",
+          "section_title": "Empiric Therapy for Uncomplicated Acute Cystitis",
+          "page_number": 68,
+          "content": "First-line empiric therapy for acute uncomplicated cystitis in adult females: Nitrofurantoin 100 mg orally twice daily for 5 days, OR Fosfomycin trometamol 3 g single-dose sachet. Avoid empiric Fluoroquinolones (ciprofloxacin, levofloxacin) for uncomplicated cystitis due to high rates (> 65%) of E. coli resistance in Indian community surveillance and risk of collateral fluoroquinolone damage."
+        }
+      ]
+    },
+    {
+      "guideline_id": "icmr_hypertension_2020",
+      "title": "ICMR Guidelines for Diagnosis and Management of Hypertension in India",
+      "publication_year": "2020",
+      "medical_domain": "cardiology",
+      "target_conditions": [
+        "Hypertension",
+        "Cardiovascular Risk",
+        "Amlodipine",
+        "Telmisartan"
+      ],
+      "url": "https://main.icmr.nic.in/content/guidelines-management-hypertension",
+      "sections": [
+        {
+          "section_id": "hypertension_definition",
+          "section_title": "Diagnosis and Screening Protocol in Indian Primary Care",
+          "page_number": 8,
+          "content": "Hypertension is defined as persistent Office Blood Pressure of Systolic BP >= 140 mmHg and/or Diastolic BP >= 90 mmHg based on the average of at least two seated readings taken on two separate clinical visits. Universal screening is recommended for all Indian adults >= 18 years visiting primary healthcare facilities."
+        },
+        {
+          "section_id": "pharmacological_management",
+          "section_title": "First-Line Drug Selection & Combination Therapy",
+          "page_number": 22,
+          "content": "Initial monotherapy for uncomplicated Stage 1 hypertension: Long-acting Calcium Channel Blocker (Amlodipine 5 mg once daily) OR Angiotensin Receptor Blocker (Telmisartan 40 mg once daily) OR ACE inhibitor (Enalapril 5 mg once daily). If BP is not controlled on monotherapy after 4 weeks or if initial BP is >= 20/10 mmHg above target (Stage 2 Hypertension), initiate combination therapy: Amlodipine + Telmisartan, or Amlodipine + Thiazide-like diuretic (Chlorthalidone 12.5 mg). Avoid combining ACE inhibitors with ARBs due to hyperkalemia and renal failure risk."
+        }
+      ]
+    }
+  ]
+}

@@ -2,19 +2,21 @@
 Context Construction and Citation Attribution Layer.
 Formats retrieved passages into numbered citation blocks with token budgeting and deduplication.
 """
+import re
 from typing import List, Dict, Any, Tuple
 from rag_module.config.rag_config import DEFAULT_CONFIG
 
 
 def compute_word_overlap(text1: str, text2: str) -> float:
-    """Computes word-level Jaccard similarity between two texts."""
-    words1 = set(text1.lower().split())
-    words2 = set(text2.lower().split())
+    """Computes word-level Jaccard similarity between two texts with punctuation normalization."""
+    words1 = set(re.findall(r'\b[a-zA-Z0-9_-]+\b', text1.lower()))
+    words2 = set(re.findall(r'\b[a-zA-Z0-9_-]+\b', text2.lower()))
     if not words1 or not words2:
         return 0.0
     intersection = len(words1.intersection(words2))
     union = len(words1.union(words2))
     return intersection / union if union > 0 else 0.0
+
 
 
 class ContextBuilder:

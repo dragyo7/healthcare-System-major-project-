@@ -18,6 +18,10 @@ from rag_module.ingestion.adapters.medquad_adapter import MedQuADAdapter
 from rag_module.ingestion.adapters.dailymed_adapter import DailyMedAdapter
 from rag_module.ingestion.adapters.openfda_adapter import OpenFDAAdapter
 from rag_module.ingestion.adapters.guideline_adapter import GuidelineAdapter
+from rag_module.ingestion.adapters.medlineplus_adapter import MedlinePlusAdapter
+from rag_module.ingestion.adapters.icmr_adapter import ICMRAdapter
+from rag_module.ingestion.adapters.mohfw_adapter import MoHFWAdapter
+from rag_module.ingestion.adapters.rxnorm_adapter import RxNormAdapter
 from rag_module.chunking.semantic_chunker import SemanticChunker
 
 
@@ -27,6 +31,10 @@ from rag_module.config.source_config_loader import IngestionConfigManager, Sourc
 ADAPTER_MAP: Dict[str, Type[BaseSourceAdapter]] = {
     "MedQuADAdapter": MedQuADAdapter,
     "DailyMedAdapter": DailyMedAdapter,
+    "MedlinePlusAdapter": MedlinePlusAdapter,
+    "ICMRAdapter": ICMRAdapter,
+    "MoHFWAdapter": MoHFWAdapter,
+    "RxNormAdapter": RxNormAdapter,
     "OpenFDAAdapter": OpenFDAAdapter,
     "GuidelineAdapter": GuidelineAdapter
 }
@@ -78,7 +86,7 @@ class IngestionOrchestrator:
         chunk_size_words: int = DEFAULT_CONFIG.CHUNK_SIZE_WORDS,
         overlap_words: int = DEFAULT_CONFIG.CHUNK_OVERLAP_WORDS
     ):
-        self.artifacts_root = output_base_dir or artifacts_root or (DEFAULT_CONFIG.BASE_DIR / "rag_module" / "data" / "artifacts")
+        self.artifacts_root = output_base_dir or artifacts_root or DEFAULT_CONFIG.ARTIFACTS_DIR
         self.config_manager = config_manager or IngestionConfigManager()
         self.chunker = SemanticChunker(
             chunk_size_words=chunk_size_words,
@@ -99,6 +107,14 @@ class IngestionOrchestrator:
             return MedQuADAdapter()
         elif adapter_cls is DailyMedAdapter:
             return DailyMedAdapter(data_source=custom_source_data, allowlist=allowlist)
+        elif adapter_cls is MedlinePlusAdapter:
+            return MedlinePlusAdapter(data_source=custom_source_data)
+        elif adapter_cls is ICMRAdapter:
+            return ICMRAdapter(data_source=custom_source_data)
+        elif adapter_cls is MoHFWAdapter:
+            return MoHFWAdapter(data_source=custom_source_data)
+        elif adapter_cls is RxNormAdapter:
+            return RxNormAdapter(data_source=custom_source_data)
         elif adapter_cls is OpenFDAAdapter:
             return OpenFDAAdapter(data_source=custom_source_data, allowlist=allowlist)
         elif adapter_cls is GuidelineAdapter:
@@ -212,6 +228,32 @@ class IngestionOrchestrator:
             manifest_path=manifest_save_path
         )
 
+    def ingest_all(
+        self,
+        source_ids: Optional[List[str]] = None,
+        combine: bool = True
+    ) -> IngestionResult:
+        """
+        Ingests all specified (or default authoritative) sources and optionally combines them.
+        """
+        if source_ids is None:
+            source_ids = ["DailyMed", "MedlinePlus", "ICMR", "MoHFW_STG", "RxNorm"]
+        
+        results: List[IngestionResult] = []
+        for sid in source_ids:
+            try:
+                res = self.ingest_source(source_id=sid)
+                results.append(res)
+            except Exception as e:
+                print(f"[Ingestion] Warning: Failed to ingest source '{sid}': {e}")
+                
+        if combine and results:
+            return self.combine_sources(results)
+        elif results:
+            return results[0]
+        else:
+            raise RuntimeError("No sources were successfully ingested.")
+
     def combine_sources(
         self,
         results: List[IngestionResult],
@@ -280,3 +322,8 @@ class IngestionOrchestrator:
             stats={"sources": source_breakdown, "total_documents": len(combined_docs), "total_chunks": len(combined_chunks)},
             manifest_path=manifest_save_path
         )
+
+
+# Alias for backward and forward compatibility
+MultiSourceOrchestrator = IngestionOrchestrator
+

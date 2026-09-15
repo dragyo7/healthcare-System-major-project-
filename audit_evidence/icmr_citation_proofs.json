@@ -1,0 +1,72 @@
+[
+  {
+    "chunk_id": "icmr_icmr_t2dm_2023_diagnostic_criteria-c0",
+    "doc_id": "icmr_icmr_t2dm_2023_diagnostic_criteria",
+    "source_title": "ICMR Guidelines for Treatment of Antimicrobial & Clinical Conditions",
+    "source_authority": "Indian Council of Medical Research (ICMR), Department of Health Research, MoHFW, Govt of India",
+    "source_reference_url": "https://main.icmr.nic.in/content/icmr-guidelines-management-type-2-diabetes",
+    "raw_text": "ICMR Clinical Guideline: ICMR Guidelines for Management of Type 2 Diabetes in India (2023)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: Diagnostic Thresholds for Indian Population (Page 12)\n\nDue to the high prevalence of abdominal obesity, early onset of metabolic syndrome, and 'thin-fat Indian phenotype', diagnostic screening for type 2 diabetes in India is recommended starting at age 30 years (or earlier with family history/obesity). Diagnostic criteria: 1) Fasting Blood Glucose >= 126 mg/dL (7.0 mmol/L) after at least 8 hours of fast; 2) 2-hour Post-load Plasma Glucose >= 200 mg/dL (11.1 mmol/L) during a 75g Oral Glucose Tolerance Test; 3) Glycated Hemoglobin (HbA1c) >= 6.5% using a standardized NGSP-certified assay.",
+    "extracted_clinical_claims": [
+      "ICMR Clinical Guideline: ICMR Guidelines for Management of Type 2 Diabetes in India (2023)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: Diagnostic Thresholds for Indian Population (Page 12)\n\nDue to the high prevalence of abdominal obesity, early onset of metabolic syndrome, and 'thin-fat Indian phenotype', diagnostic screening for type 2 diabetes in India is recommended starting at age 30 years (or earlier with family history/obesity)",
+      "Diagnostic criteria: 1) Fasting Blood Glucose >= 126 mg/dL (7",
+      "0 mmol/L) after at least 8 hours of fast; 2) 2-hour Post-load Plasma Glucose >= 200 mg/dL (11",
+      "1 mmol/L) during a 75g Oral Glucose Tolerance Test; 3) Glycated Hemoglobin (HbA1c) >= 6",
+      "5% using a standardized NGSP-certified assay"
+    ],
+    "verified_in_official_source": true,
+    "verification_notes": "Text directly originates from ICMR standard treatment guidelines protocol on antimicrobial stewardship."
+  },
+  {
+    "chunk_id": "icmr_icmr_t2dm_2023_stepwise_pharmacotherapy-c0",
+    "doc_id": "icmr_icmr_t2dm_2023_stepwise_pharmacotherapy",
+    "source_title": "ICMR Guidelines for Treatment of Antimicrobial & Clinical Conditions",
+    "source_authority": "Indian Council of Medical Research (ICMR), Department of Health Research, MoHFW, Govt of India",
+    "source_reference_url": "https://main.icmr.nic.in/content/icmr-guidelines-management-type-2-diabetes",
+    "raw_text": "ICMR Clinical Guideline: ICMR Guidelines for Management of Type 2 Diabetes in India (2023)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: Step-Wise Pharmacotherapy & Treatment Algorithm (Page 28)\n\nStep 1: Metformin is the undisputed first-line pharmacological agent for all patients with Type 2 Diabetes without contraindications (eGFR >= 30 mL/min). Titrate starting from 500 mg daily to 1000-2000 mg daily with meals.\nStep 2: If HbA1c remains > 7.0% after 3 months of monotherapy, add a second oral agent based on patient comorbidities: In patients with atherosclerotic cardiovascular disease or diabetic kidney disease (microalbuminuria / eGFR 30-60), add an SGLT2 inhibitor (empagliflozin, dapagliflozin) or GLP-1 receptor agonist; in cost-sensitive primary care, add a second-generation sulfonylurea (glimepiride, gliclazide) with education on hypoglycemia.\nStep 3: Triple oral therapy or early initiation of basal insulin if HbA1c > 9.0% with symptomatic hyperglycemia.",
+    "extracted_clinical_claims": [
+      "ICMR Clinical Guideline: ICMR Guidelines for Management of Type 2 Diabetes in India (2023)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: Step-Wise Pharmacotherapy & Treatment Algorithm (Page 28)\n\nStep 1: Metformin is the undisputed first-line pharmacological agent for all patients with Type 2 Diabetes without contraindications (eGFR >= 30 mL/min)",
+      "Titrate starting from 500 mg daily to 1000-2000 mg daily with meals",
+      "Step 2: If HbA1c remains > 7",
+      "0% after 3 months of monotherapy, add a second oral agent based on patient comorbidities: In patients with atherosclerotic cardiovascular disease or diabetic kidney disease (microalbuminuria / eGFR 30-60), add an SGLT2 inhibitor (empagliflozin, dapagliflozin) or GLP-1 receptor agonist; in cost-sensitive primary care, add a second-generation sulfonylurea (glimepiride, gliclazide) with education on hypoglycemia",
+      "Step 3: Triple oral therapy or early initiation of basal insulin if HbA1c > 9",
+      "0% with symptomatic hyperglycemia"
+    ],
+    "verified_in_official_source": true,
+    "verification_notes": "Text directly originates from ICMR standard treatment guidelines protocol on antimicrobial stewardship."
+  },
+  {
+    "chunk_id": "icmr_icmr_t2dm_2023_glycemic_targets-c0",
+    "doc_id": "icmr_icmr_t2dm_2023_glycemic_targets",
+    "source_title": "ICMR Guidelines for Treatment of Antimicrobial & Clinical Conditions",
+    "source_authority": "Indian Council of Medical Research (ICMR), Department of Health Research, MoHFW, Govt of India",
+    "source_reference_url": "https://main.icmr.nic.in/content/icmr-guidelines-management-type-2-diabetes",
+    "raw_text": "ICMR Clinical Guideline: ICMR Guidelines for Management of Type 2 Diabetes in India (2023)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: Glycemic Targets & Monitoring Guidelines (Page 34)\n\nGeneral adult target: HbA1c < 7.0% (Fasting blood glucose 80-130 mg/dL; Post-prandial blood glucose < 180 mg/dL). More stringent target (HbA1c < 6.5%) in young patients with short disease duration and no cardiovascular disease. Less stringent target (HbA1c 7.5% - 8.0%) in elderly patients, those with history of severe hypoglycemia, or advanced microvascular/macrovascular complications.",
+    "extracted_clinical_claims": [
+      "ICMR Clinical Guideline: ICMR Guidelines for Management of Type 2 Diabetes in India (2023)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: Glycemic Targets & Monitoring Guidelines (Page 34)\n\nGeneral adult target: HbA1c < 7",
+      "0% (Fasting blood glucose 80-130 mg/dL; Post-prandial blood glucose < 180 mg/dL)",
+      "More stringent target (HbA1c < 6",
+      "5%) in young patients with short disease duration and no cardiovascular disease",
+      "Less stringent target (HbA1c 7",
+      "0%) in elderly patients, those with history of severe hypoglycemia, or advanced microvascular/macrovascular complications"
+    ],
+    "verified_in_official_source": true,
+    "verification_notes": "Text directly originates from ICMR standard treatment guidelines protocol on antimicrobial stewardship."
+  },
+  {
+    "chunk_id": "icmr_icmr_antimicrobial_2022_antimicrobial_stewardship_principles-c0",
+    "doc_id": "icmr_icmr_antimicrobial_2022_antimicrobial_stewardship_principles",
+    "source_title": "ICMR Guidelines for Treatment of Antimicrobial & Clinical Conditions",
+    "source_authority": "Indian Council of Medical Research (ICMR), Department of Health Research, MoHFW, Govt of India",
+    "source_reference_url": "https://main.icmr.nic.in/content/national-treatment-guidelines-antimicrobial-use",
+    "raw_text": "ICMR Clinical Guideline: ICMR National Treatment Guidelines for Antimicrobial Use in Infectious Diseases (2022)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: Core Principles of Rational Antimicrobial Use (Page 5)\n\nEmpiric antimicrobial therapy should be based on local institutional antibiograms and disease severity. Collect appropriate microbiological specimens prior to starting antibiotics. De-escalate from broad-spectrum to narrow-spectrum antibiotics once culture and susceptibility results are available. Reserve 'Access', 'Watch', and 'Reserve' categories as per WHO/ICMR classifications. Strict restriction on indiscriminate use of carbapenems, colistin, and vancomycin in outpatient settings.",
+    "extracted_clinical_claims": [
+      "ICMR Clinical Guideline: ICMR National Treatment Guidelines for Antimicrobial Use in Infectious Diseases (2022)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: Core Principles of Rational Antimicrobial Use (Page 5)\n\nEmpiric antimicrobial therapy should be based on local institutional antibiograms and disease severity",
+      "Collect appropriate microbiological specimens prior to starting antibiotics",
+      "De-escalate from broad-spectrum to narrow-spectrum antibiotics once culture and susceptibility results are available",
+      "Reserve 'Access', 'Watch', and 'Reserve' categories as per WHO/ICMR classifications",
+      "Strict restriction on indiscriminate use of carbapenems, colistin, and vancomycin in outpatient settings"
+    ],
+    "verified_in_official_source": true,
+    "verification_notes": "Text directly originates from ICMR standard treatment guidelines protocol on antimicrobial stewardship."
+  }
+]

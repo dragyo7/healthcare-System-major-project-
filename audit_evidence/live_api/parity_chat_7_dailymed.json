@@ -1,0 +1,12 @@
+{
+  "endpoint": "/chat",
+  "status_code": 500,
+  "latency_sec": 0.0,
+  "timestamp": "2026-09-15T06:00:17.842783+00:00",
+  "request": {
+    "query": "What are the boxed warnings and contraindications for Lisinopril according to FDA DailyMed?",
+    "top_k": 3
+  },
+  "response": null,
+  "error": "timed out"
+}

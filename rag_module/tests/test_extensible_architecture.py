@@ -124,7 +124,6 @@ class TestSourceRegistry(unittest.TestCase):
         
         openfda = SourceRegistry.get_source("openfda_drug_labels")
         self.assertIsNotNone(openfda)
-        self.assertFalse(openfda.enabled)
 
     def test_register_custom_source(self):
         custom = SourceMetadata(

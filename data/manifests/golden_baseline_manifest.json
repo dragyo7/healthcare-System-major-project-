@@ -1,0 +1,31 @@
+{
+  "manifest_name": "GOLDEN_BASELINE_V2_8",
+  "timestamp": "2026-09-15T09:00:00Z",
+  "total_chunks": 236,
+  "source_counts": {
+    "DailyMed": 188,
+    "MedlinePlus": 16,
+    "ICMR": 8,
+    "MoHFW_STG": 4,
+    "RxNorm": 20
+  },
+  "embedding_configuration": {
+    "model_name": "BAAI/bge-small-en",
+    "dimension": 384,
+    "normalize": true,
+    "query_prefix": "Represent this sentence for searching relevant passages: "
+  },
+  "retrieval_configuration": {
+    "faiss_index_type": "IndexFlatIP",
+    "similarity_metric": "InnerProduct_Cosine",
+    "bm25_variant": "BM25Okapi",
+    "hybrid_fusion": "ReciprocalRankFusion_k60",
+    "reranker_model": "cross-encoder/ms-marco-MiniLM-L-6-v2"
+  },
+  "artifact_hashes": {
+    "index_v2_bin_sha256": "74dbf0d74aaffc46d0e5002c5bc03b2580545b74e72838756dacf37e75cf4eda",
+    "meta_v2_json_sha256": "3d03b7652817cd470cac23a2fc777cbe29ca06c7677429e31bb7f482fdaa4606",
+    "bm25_index_pkl_sha256": "52652c1106cae4229d7555717633604ae837fed5182f4aa8b3e9097273d95071"
+  },
+  "reproducibility_status": "LOCKED_GOLDEN_BASELINE"
+}

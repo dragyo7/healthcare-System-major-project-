@@ -1,0 +1,119 @@
+{
+  "endpoint": "/rag/query",
+  "status_code": 200,
+  "latency_sec": 3.5064,
+  "timestamp": "2026-09-15T05:58:33.968947+00:00",
+  "request": {
+    "query": "What is the pediatric dose of Sofosbuvir?",
+    "top_k": 3
+  },
+  "response": {
+    "query": "What is the pediatric dose of Sofosbuvir?",
+    "retrieval_mode": "hybrid",
+    "total_evidence": 3,
+    "evidence": [
+      {
+        "rank": 1,
+        "score": -5.782636,
+        "source_id": "DailyMed",
+        "source_name": "National Library of Medicine DailyMed",
+        "publisher": "U.S. National Library of Medicine / FDA",
+        "document_id": "dailymed_6623f03b-18a8-48b6-9bb2-16a7f0521e66_dosage___administration",
+        "chunk_id": "dailymed_6623f03b-18a8-48b6-9bb2-16a7f0521e66_dosage___administration-c0",
+        "title": "Empagliflozin - Dosage & Administration",
+        "section": "Dosage & Administration",
+        "medical_domain": "pharmacology",
+        "source_url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=6623f03b-18a8-48b6-9bb2-16a7f0521e66",
+        "text": "Drug: Empagliflozin\nSection: Dosage & Administration\n\nRecommended starting dose is 10 mg once daily in the morning with or without food; may increase to 25 mg once daily. eGFR < 20 mL/min: Not recommended.",
+        "dense_score": 0.8265,
+        "bm25_score": 6.9453,
+        "fused_score": 0.031258,
+        "rerank_score": -5.7826
+      },
+      {
+        "rank": 2,
+        "score": -9.024282,
+        "source_id": "DailyMed",
+        "source_name": "National Library of Medicine DailyMed",
+        "publisher": "U.S. National Library of Medicine / FDA",
+        "document_id": "dailymed_5523f03b-18a8-48b6-9bb2-16a7f0521e88_use_in_specific_populations",
+        "chunk_id": "dailymed_5523f03b-18a8-48b6-9bb2-16a7f0521e88_use_in_specific_populations-c0",
+        "title": "Tramadol - Use in Specific Populations",
+        "section": "Use in Specific Populations",
+        "medical_domain": "pharmacology",
+        "source_url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=5523f03b-18a8-48b6-9bb2-16a7f0521e88",
+        "text": "Drug: Tramadol\nSection: Use in Specific Populations\n\nPediatric: Contraindicated under 12 years. Lactation: Contraindicated in breastfeeding due to rapid CYP2D6 metabolism risk.",
+        "dense_score": 0.8175,
+        "bm25_score": 4.5258,
+        "fused_score": 0.027418,
+        "rerank_score": -9.0243
+      },
+      {
+        "rank": 3,
+        "score": -9.934587,
+        "source_id": "DailyMed",
+        "source_name": "National Library of Medicine DailyMed",
+        "publisher": "U.S. National Library of Medicine / FDA",
+        "document_id": "dailymed_184b2c12-55d4-4a4b-8e2a-0a8870fb381b_use_in_specific_populations",
+        "chunk_id": "dailymed_184b2c12-55d4-4a4b-8e2a-0a8870fb381b_use_in_specific_populations-c0",
+        "title": "Aspirin - Use in Specific Populations",
+        "section": "Use in Specific Populations",
+        "medical_domain": "pharmacology",
+        "source_url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=184b2c12-55d4-4a4b-8e2a-0a8870fb381b",
+        "text": "Drug: Aspirin\nSection: Use in Specific Populations\n\nPediatric: Contraindicated in viral illness (Reye's syndrome). Pregnancy: Avoid in 3rd trimester.",
+        "dense_score": 0.8308,
+        "bm25_score": 4.6843,
+        "fused_score": 0.030886,
+        "rerank_score": -9.9346
+      }
+    ],
+    "context_text": "",
+    "latency_ms": 3470.61,
+    "reranker_status": "available",
+    "filters_applied": {},
+    "grounding": {
+      "status": "insufficient_evidence",
+      "generation_allowed": false,
+      "evidence_count": 3,
+      "usable_evidence_count": 3,
+      "accepted_chunk_ids": [
+        "dailymed_6623f03b-18a8-48b6-9bb2-16a7f0521e66_dosage___administration-c0",
+        "dailymed_5523f03b-18a8-48b6-9bb2-16a7f0521e88_use_in_specific_populations-c0",
+        "dailymed_184b2c12-55d4-4a4b-8e2a-0a8870fb381b_use_in_specific_populations-c0"
+      ],
+      "provenance_valid": true,
+      "top_evidence_rank": 1,
+      "evidence_sources": [
+        "DailyMed"
+      ],
+      "evidence_documents": [
+        "dailymed_184b2c12-55d4-4a4b-8e2a-0a8870fb381b_use_in_specific_populations",
+        "dailymed_5523f03b-18a8-48b6-9bb2-16a7f0521e88_use_in_specific_populations",
+        "dailymed_6623f03b-18a8-48b6-9bb2-16a7f0521e66_dosage___administration"
+      ],
+      "evidence_sections": [
+        "Dosage & Administration",
+        "Use in Specific Populations"
+      ],
+      "reason_codes": [
+        "UNSUPPORTED_ENTITY"
+      ],
+      "warnings": [
+        "Primary query subject entity 'sofosbuvir' was not found in verified evidence passages."
+      ],
+      "conflict_detected": false,
+      "conflict_summary": null,
+      "policy_latency_ms": 0.319
+    },
+    "safety_assessment": {
+      "risk_category": "medication_safety",
+      "is_emergency": false,
+      "emergency_message": null,
+      "is_injection": false,
+      "sanitized_query": "What is the pediatric dose of Sofosbuvir?",
+      "requires_strict_grounding": true,
+      "warnings": []
+    }
+  },
+  "error": null
+}
