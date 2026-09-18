@@ -41,7 +41,7 @@ class TestRAGV27ServiceLayer(unittest.TestCase):
         self.assertTrue(health.service_ready)
         self.assertTrue(health.index_ready)
         self.assertGreaterEqual(health.indexed_chunks_count, 200, "Index should contain >= 200 chunks.")
-        self.assertEqual(health.version, "2.8.0")
+        self.assertEqual(health.version, "2.9.1")
         self.assertIn(health.status, ["healthy", "degraded"])
 
 
@@ -230,7 +230,7 @@ class TestRAGV27FastAPIIntegration(unittest.TestCase):
             self.assertIn("service_ready", data)
             self.assertIn("indexed_chunks_count", data)
             self.assertIn("version", data)
-            self.assertEqual(data["version"], "2.8.0")
+            self.assertEqual(data["version"], "2.9.1")
 
 
     def test_16_api_readiness_endpoint(self):

@@ -3,6 +3,7 @@ Modular LLM Generation Layer.
 Provides clean system/evidence/user prompt boundaries, lazy model loading,
 and fallback capabilities for medical answer generation.
 """
+import re
 from typing import Optional, Dict, Any
 from rag_module.config.rag_config import DEFAULT_CONFIG
 
@@ -37,6 +38,65 @@ class MedicalGenerator:
             cls._instance = cls()
         return cls._instance
 
+    @classmethod
+    def clean_generation_output(cls, text: str, context: str) -> str:
+        """
+        Cleans conversational filler, formatting artifacts, and resolves leading anaphoric
+        pronouns to the verified primary clinical entity from accepted context passages.
+        Preserves all clinical facts, numeric values, units, and qualifiers unchanged.
+        """
+        if not text or not text.strip():
+            return ""
+
+        cleaned = text.strip()
+
+        # 1. Clean conversational filler, affirmations, list numbers, and boilerplate
+        filler_patterns = [
+            r"^(?:Sure!|Certainly!|Yes,\s*|No,\s*|Here (?:is|are)[^:\n]*:?|Based on the provided (?:passages|evidence)[^:\n]*:?|The passage states that\s*)\s*",
+            r"^(?:\d+\.\s*|\*\s*|- \s*)",
+        ]
+        for pat in filler_patterns:
+            cleaned = re.sub(pat, "", cleaned, flags=re.IGNORECASE).strip()
+
+        # 2. Extract primary entity from context Doc 1 header if present
+        primary_entity = None
+        if context:
+            doc1_match = re.search(r"\[Doc 1:\s*([^:|\]]+)", context)
+            if doc1_match:
+                raw_title = doc1_match.group(1).strip()
+                cleaned_entity = re.sub(
+                    r"\s+(?:Oral|Tablet|Capsule|Injection|Solution|Topical|Suspension|Syrup|Inhaler|Cream|Ointment|Patch|Uses|Side Effects|Interactions|Warnings|Dosage|Dosing|Boxed Warning).*$",
+                    "",
+                    raw_title,
+                    flags=re.IGNORECASE
+                ).strip()
+                if cleaned_entity and len(cleaned_entity) <= 50:
+                    primary_entity = cleaned_entity
+
+        # 3. Dynamic anaphora resolution for leading pronouns
+        if primary_entity:
+            verbs = (
+                r"(?:is|are|was|were|works|acts|lowers|reduces|decreases|increases|inhibits|"
+                r"blocks|treats|prevents|helps|causes|has|have|can|may|should|must|will|does|did|"
+                r"cannot|improves|binds|contains|provides|functions|requires|stimulates|produces)"
+            )
+            anaphora_pattern = rf"^(?:It|This|The drug|This drug|The medication|This medication)\s+({verbs})\b"
+            cleaned = re.sub(anaphora_pattern, rf"{primary_entity} \1", cleaned, flags=re.IGNORECASE)
+
+            def replace_sent_pronoun(m):
+                sep = m.group(1)
+                verb = m.group(2)
+                return f"{sep}{primary_entity} {verb}"
+
+            cleaned = re.sub(
+                rf"(\.\s+)(?:It|This|The drug|This drug|The medication|This medication)\s+({verbs})\b",
+                replace_sent_pronoun,
+                cleaned,
+                flags=re.IGNORECASE
+            )
+
+        return cleaned
+
     def _lazy_load_model(self):
         """Loads TinyLlama model and tokenizer on first generation request."""
         if self._model is None:
@@ -69,10 +129,13 @@ class MedicalGenerator:
             "You are an authoritative, evidence-grounded medical AI assistant.\n\n"
             "STRICT CLINICAL RULES:\n"
             "1. Answer the question using ONLY the factual medical evidence provided in <evidence_passages>.\n"
-            "2. Never extrapolate, speculate, or introduce unverified medical claims.\n"
-            "3. If the evidence does not directly answer the question, state: 'The provided medical evidence does not contain sufficient details to answer this question.'\n"
-            "4. Summarize clearly, concisely, and use professional clinical terminology.\n"
-            "5. Maximum 3 to 4 sentences."
+            "2. Always repeat the specific medication or medical condition name (e.g. 'Lisinopril', 'Metformin'); NEVER use ambiguous pronouns such as 'It' or 'This drug'.\n"
+            "3. Do not include conversational filler (such as 'Sure!', 'Certainly!', or 'Here is...').\n"
+            "4. Do not output numbered lists or fragments; output concise, complete factual sentences.\n"
+            "5. Preserve numerical values, units, and qualifiers exactly as stated in the evidence.\n"
+            "6. Never extrapolate, speculate, or introduce unverified medical claims.\n"
+            "7. If the evidence does not directly answer the question, state: 'The provided medical evidence does not contain sufficient details to answer this question.'\n"
+            "8. Maximum 2 to 3 sentences."
         )
 
         sys_prompt = system_prompt or default_system_prompt
@@ -80,7 +143,8 @@ class MedicalGenerator:
         user_content = (
             f"<evidence_passages>\n{context}\n</evidence_passages>\n\n"
             f"<patient_question>\n{query}\n</patient_question>\n\n"
-            f"Please provide a clear, concise, evidence-grounded medical summary answering the patient question."
+            f"Please provide a clear, concise, evidence-grounded medical summary answering the patient question.\n"
+            f"Explicitly name the subject medication or condition in each sentence instead of using pronouns. Do not use conversational filler."
         )
 
         messages = [
@@ -114,10 +178,13 @@ class MedicalGenerator:
             )
 
         generated_tokens = outputs[0][inputs["input_ids"].shape[1]:]
-        answer = self._tokenizer.decode(
+        raw_answer = self._tokenizer.decode(
             generated_tokens,
             skip_special_tokens=True
         ).strip()
+
+        # Apply deterministic output cleaning and dynamic anaphora resolution
+        answer = self.clean_generation_output(raw_answer, context)
 
         return answer
 
@@ -129,4 +196,12 @@ class MockGenerator(MedicalGenerator):
     def generate(self, query: str, context: str, system_prompt: Optional[str] = None) -> str:
         if not context or context.startswith("No relevant"):
             return "I am not able to find sufficient verified medical evidence to answer this question."
-        return f"Based on the verified medical reference: {context[:150]}..."
+        lines = [
+            line.strip() for line in context.split("\n")
+            if line.strip() and not line.strip().startswith("[") and not line.strip().startswith("---")
+        ]
+        if lines:
+            raw = lines[0]
+        else:
+            raw = f"Based on the verified medical reference: {context[:150]}..."
+        return self.clean_generation_output(raw, context)

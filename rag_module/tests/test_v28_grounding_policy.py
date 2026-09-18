@@ -276,11 +276,11 @@ class TestRAGV28ServiceAndAPIIntegration(unittest.TestCase):
         self.assertIn("usable_evidence_count", data["grounding"])
 
     def test_14_api_health_version_updated(self):
-        """Verify GET /rag/health reports version 2.8.0."""
+        """Verify GET /rag/health reports version 2.9.1."""
         response = self.client.get("/rag/health")
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertEqual(data["version"], "2.8.0")
+        self.assertEqual(data["version"], "2.9.1")
 
     def test_15_grounding_evaluation_suite_run(self):
         """Verify GroundingEvaluationSuite executes cleanly and passes all benchmarks."""

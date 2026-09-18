@@ -1,5 +1,5 @@
 """
-Production FastAPI Application for Healthcare RAG Module (V2.8).
+Production FastAPI Application for Healthcare RAG Module (V2.9.1).
 Exposes /rag/query, /rag/health, /ready, along with backward-compatible /retrieve and /chat endpoints.
 Delegates all retrieval and evidence policy operations to the RAGService boundary.
 """
@@ -38,7 +38,7 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI(
     title="Healthcare Medical RAG Intelligence API",
     description="Evidence-grounded Medical Evidence Retrieval & Safety Orchestration API with multi-source hybrid retrieval, provenance validation, and deterministic evidence policy.",
-    version="2.8.0"
+    version="2.9.1"
 )
 
 # CORS Configuration for Frontend Integration (Vite, Next.js, React dev servers)
@@ -158,6 +158,9 @@ class LegacyQueryResponse(BaseModel):
     sources: List[CitationItem]
     retrieved_chunks_count: int
     pipeline_mode: str
+    is_grounded: Optional[bool] = Field(False, description="Whether the answer passed post-generation grounding verification.")
+    verified: Optional[bool] = Field(False, description="Canonical alias for is_grounded.")
+    grounding_status: Optional[str] = Field("unknown", description="High-level grounding classification status.")
 
 
 # Global pipeline singleton for backward-compatible /chat
@@ -228,80 +231,50 @@ def retrieve_endpoint(request: RAGQueryRequest):
 @app.post("/chat", response_model=LegacyQueryResponse, tags=["Compatibility"])
 def chat_endpoint(request: LegacyQueryRequest):
     """
-    Processes medical queries through the full generation pipeline (triage, retrieval, grounding policy, generation).
-    Guarantees parity with /rag/query and fails closed on unverified/unsupported entities.
+    Processes medical queries through the full generation pipeline (triage, retrieval, grounding policy, generation, grounding verification).
+    Consumes MedicalRAGPipeline.query() as the single canonical execution path:
+      /chat -> MedicalRAGPipeline.query() -> generation -> verifier -> final gate -> /chat response
+    Public /chat requests cannot bypass grounding verification.
     """
     try:
-        service = get_rag_service()
+        pipeline = get_legacy_pipeline()
         top_k = request.top_k or 5
-        rag_resp = service.retrieve(RAGQueryRequest(
-            query=request.query,
-            mode=request.mode or "hybrid",
-            top_k=top_k
-        ))
+        mode = request.mode or "hybrid"
+        generate_answer = request.generate_answer if request.generate_answer is not None else True
 
-        # Check emergency triage first
-        if rag_resp.safety_assessment and rag_resp.safety_assessment.is_emergency:
-            return {
-                "question": request.query,
-                "answer": rag_resp.safety_assessment.emergency_message or "Acute emergency detected.",
-                "is_emergency": True,
-                "abstained": False,
-                "sources": [],
-                "retrieved_chunks_count": 0,
-                "pipeline_mode": "emergency_triage"
-            }
+        # Preferred architecture: /chat -> MedicalRAGPipeline.query() -> generation -> verifier -> final gate -> /chat response
+        # verify_answer=True is strictly enforced to prevent public bypass
+        res = pipeline.query(
+            user_query=request.query,
+            mode=mode,
+            top_k=top_k,
+            generate_answer=generate_answer,
+            verify_answer=True
+        )
 
-        # Check evidence grounding decision
-        if not rag_resp.grounding or not rag_resp.grounding.generation_allowed or not rag_resp.grounding.accepted_chunk_ids:
-            abstention_text = "I am not able to find sufficient verified medical evidence to answer this question."
-            if rag_resp.grounding and GroundingReasonCode.UNSUPPORTED_ENTITY in rag_resp.grounding.reason_codes:
-                abstention_text = "I am not able to find verified medical evidence regarding the requested subject in authoritative clinical guidelines."
-            elif rag_resp.grounding and GroundingReasonCode.OUT_OF_DOMAIN in rag_resp.grounding.reason_codes:
-                abstention_text = "This query appears to be outside the supported medical domain. I cannot provide guidance."
+        verification = res.get("verification")
+        is_grounded = bool(verification.get("is_grounded", False)) if verification else (not res.get("abstained", False) and not res.get("is_emergency", False))
 
-            disclaimer = "\n\n*Clinical Disclaimer: This healthcare AI assistant is an educational Major Project prototype and does not provide formal medical diagnoses, prescriptive orders, or emergency clinical advice. For health concerns or medication changes, always consult a licensed physician or healthcare professional.*"
-            return {
-                "question": request.query,
-                "answer": abstention_text + disclaimer,
-                "is_emergency": False,
-                "abstained": True,
-                "sources": [],
-                "retrieved_chunks_count": rag_resp.total_evidence,
-                "pipeline_mode": request.mode or "hybrid"
-            }
-
-        # Format citations from accepted evidence items
-        citations = []
-        for idx, item in enumerate(rag_resp.evidence, start=1):
-            if item.chunk_id in rag_resp.grounding.accepted_chunk_ids:
-                citations.append({
-                    "source_index": idx,
-                    "title": item.title,
-                    "source_name": item.source_name,
-                    "publisher": item.publisher,
-                    "url": item.source_url,
-                    "chunk_id": item.chunk_id,
-                    "qtype": item.section,
-                    "score": item.score
-                })
-
-        # Generate answer if requested
-        if request.generate_answer:
-            pipeline = get_legacy_pipeline()
-            raw_answer = pipeline.generator.generate(request.query, rag_resp.context_text)
-            final_answer = pipeline.guardrails.append_disclaimer(raw_answer)
+        if res.get("is_emergency", False):
+            grounding_status = "emergency_diverted"
+        elif not res.get("abstained", False) and is_grounded:
+            grounding_status = "grounded"
+        elif verification and not verification.get("is_grounded", False):
+            grounding_status = "withheld_verification_failure"
         else:
-            final_answer = "Context retrieved successfully."
+            grounding_status = "abstained_policy"
 
         return {
-            "question": request.query,
-            "answer": final_answer,
-            "is_emergency": False,
-            "abstained": False,
-            "sources": citations,
-            "retrieved_chunks_count": len(citations),
-            "pipeline_mode": request.mode or "hybrid"
+            "question": res.get("question", request.query),
+            "answer": res.get("answer", ""),
+            "is_emergency": res.get("is_emergency", False),
+            "abstained": res.get("abstained", False),
+            "sources": res.get("sources", []),
+            "retrieved_chunks_count": res.get("retrieved_chunks_count", 0),
+            "pipeline_mode": res.get("pipeline_mode", mode),
+            "is_grounded": is_grounded,
+            "verified": is_grounded,
+            "grounding_status": grounding_status
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"RAG execution failed: {str(e)}")
@@ -322,7 +295,7 @@ def rag_trace_endpoint(request: DiagnosticTraceRequest):
     """
     Development-only forensic diagnostic endpoint.
     Exposes structured intermediate signals across every pipeline stage:
-    Query -> Safety -> Embedder -> Dense -> BM25 -> RRF -> Reranker -> Policy -> Context -> LLM -> Citations.
+    Query -> Safety -> Embedder -> Dense -> BM25 -> RRF -> Reranker -> Policy -> Context -> LLM -> Citations -> Verification.
     """
     service = get_rag_service()
     if not service.is_ready():
@@ -414,11 +387,15 @@ def rag_trace_endpoint(request: DiagnosticTraceRequest):
     rag_resp = service.retrieve(RAGQueryRequest(query=query, mode="hybrid_rerank", top_k=top_k))
 
     # 8. Generation if allowed
+    verification_data = None
+    internal_provenance_data = None
     if rag_resp.grounding and rag_resp.grounding.generation_allowed and rag_resp.context_text:
         pipeline = get_legacy_pipeline()
-        chat_res = pipeline.query(user_query=query, mode="hybrid_rerank", generate_answer=True)
+        chat_res = pipeline.query(user_query=query, mode="hybrid_rerank", top_k=top_k, generate_answer=True, verify_answer=True)
         final_answer = chat_res.get("answer", "")
         citations = chat_res.get("sources", [])
+        verification_data = chat_res.get("verification")
+        internal_provenance_data = chat_res.get("internal_provenance")
     else:
         if safety_assessment.is_emergency:
             final_answer = safety_assessment.emergency_message or "Emergency triage active."
@@ -450,6 +427,8 @@ def rag_trace_endpoint(request: DiagnosticTraceRequest):
             "reason_codes": [r.value if hasattr(r, "value") else str(r) for r in rag_resp.grounding.reason_codes] if rag_resp.grounding else [],
             "warnings": rag_resp.grounding.warnings if rag_resp.grounding else []
         },
+        "verification": verification_data,
+        "internal_provenance": internal_provenance_data,
         "context_text_sample": rag_resp.context_text[:300] if rag_resp.context_text else "",
         "final_answer": final_answer,
         "citations": citations

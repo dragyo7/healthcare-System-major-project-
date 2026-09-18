@@ -14,6 +14,7 @@ from rag_module.reranking.cross_encoder_reranker import CrossEncoderReranker
 from rag_module.context.context_builder import ContextBuilder
 from rag_module.safety.guardrails import SafetyGuardrails
 from rag_module.safety.evidence_policy import EvidencePolicyEngine, GroundingReasonCode
+from rag_module.safety.grounding_verifier import AnswerGroundingVerifier, ClaimStatus
 from rag_module.generation.generator_v2 import MedicalGenerator
 
 
@@ -28,7 +29,8 @@ class MedicalRAGPipeline:
         bm25_retriever: Optional[BM25Retriever] = None,
         reranker: Optional[CrossEncoderReranker] = None,
         generator: Optional[MedicalGenerator] = None,
-        evidence_policy: Optional[EvidencePolicyEngine] = None
+        evidence_policy: Optional[EvidencePolicyEngine] = None,
+        verifier: Optional[AnswerGroundingVerifier] = None
     ):
         self.config = config or DEFAULT_CONFIG
         
@@ -76,11 +78,16 @@ class MedicalRAGPipeline:
         # 6. Generator
         self.generator = generator or MedicalGenerator.get_instance()
 
+        # 7. Grounding Verifier (V2.9)
+        self.grounding_verifier = verifier or AnswerGroundingVerifier()
+
     def query(
         self,
         user_query: str,
         mode: str = "hybrid",  # "dense", "bm25", "hybrid", "hybrid_rerank"
-        generate_answer: bool = True
+        top_k: Optional[int] = None,
+        generate_answer: bool = True,
+        verify_answer: bool = True
     ) -> Dict[str, Any]:
         """
         Executes end-to-end RAG query processing.
@@ -141,14 +148,15 @@ class MedicalRAGPipeline:
             candidate_chunks = [dict(self.dense_retriever.metadata[idx], dense_score=score) for idx, score in dense_results]
 
         # Step 4: Second-Stage Reranking (if enabled/requested)
+        k_val = top_k or self.config.FINAL_TOP_K
         if mode in ["hybrid_rerank", "hybrid"] and self.reranker and candidate_chunks:
             final_chunks = self.reranker.rerank(
                 sanitized_query,
                 candidate_chunks,
-                top_k=self.config.FINAL_TOP_K
+                top_k=k_val
             )
         else:
-            final_chunks = candidate_chunks[:self.config.FINAL_TOP_K]
+            final_chunks = candidate_chunks[:k_val]
 
         # Step 5: Abstention Gate & Evidence Policy Evaluation
         should_abstain, abstention_msg = self.guardrails.check_abstention(final_chunks)
@@ -181,19 +189,66 @@ class MedicalRAGPipeline:
         # Step 6: Context & Citation Construction
         context_str, citations = self.context_builder.build_context(accepted_chunks)
 
-        # Step 7: Generation
+        # Step 7: Generation & Post-Generation Verification
+        abstained = False
+        verification_result = None
         if generate_answer:
             raw_answer = self.generator.generate(sanitized_query, context_str)
-            final_answer = self.guardrails.append_disclaimer(raw_answer)
+            if verify_answer:
+                verification_result = self.grounding_verifier.verify_answer(
+                    answer=raw_answer,
+                    evidence_chunks=accepted_chunks,
+                    citations=[str(c.get("chunk_id")) for c in accepted_chunks if isinstance(c, dict) and "chunk_id" in c]
+                )
+                if verification_result.is_grounded:
+                    final_answer = self.guardrails.append_disclaimer(raw_answer)
+                    abstained = False
+                else:
+                    fail_reason = verification_result.discrepancies[0] if verification_result.discrepancies else "Generated assertions could not be deterministically verified against accepted clinical evidence."
+                    suppression_msg = (
+                        "I am not able to verify the clinical accuracy of the generated answer against authoritative guidelines "
+                        f"({fail_reason}). As a patient safety precaution, this answer has been withheld."
+                    )
+                    final_answer = self.guardrails.append_disclaimer(suppression_msg)
+                    abstained = True
+            else:
+                final_answer = self.guardrails.append_disclaimer(raw_answer)
+                abstained = False
         else:
             final_answer = "Context retrieved successfully."
+            abstained = False
 
-        return {
+        res = {
             "question": sanitized_query,
             "answer": final_answer,
             "is_emergency": False,
-            "abstained": False,
-            "sources": citations,
-            "retrieved_chunks_count": len(accepted_chunks),
+            "abstained": abstained,
+            "sources": citations if not abstained else [],
+            "retrieved_chunks_count": len(accepted_chunks) if not abstained else 0,
             "pipeline_mode": mode
         }
+        if verification_result is not None:
+            res["verification"] = {
+                "is_grounded": verification_result.is_grounded,
+                "verified": verification_result.is_grounded,  # Canonical alias mapping (is_grounded == verified)
+                "has_contradiction": verification_result.has_contradiction,
+                "candidate_answer": verification_result.answer,
+                "grounded_claim_count": verification_result.grounded_claim_count,
+                "total_claim_count": verification_result.total_claim_count,
+                "failed_claims": verification_result.failed_claims,
+                "discrepancies": verification_result.discrepancies,
+                "claim_results": [c.model_dump() for c in verification_result.claim_results]
+            }
+            # Internal diagnostic provenance retained even when user-facing output is withheld
+            res["internal_provenance"] = {
+                "query": sanitized_query,
+                "retrieved_chunk_ids": [str(c.get("chunk_id")) for c in final_chunks if isinstance(c, dict) and "chunk_id" in c],
+                "accepted_chunk_ids": [str(c.get("chunk_id")) for c in accepted_chunks if isinstance(c, dict) and "chunk_id" in c],
+                "candidate_answer": verification_result.answer,
+                "claim_statuses": {c.claim_text: c.status.value for c in verification_result.claim_results},
+                "failed_claims": verification_result.failed_claims,
+                "discrepancies": verification_result.discrepancies,
+                "final_decision": "GROUNDED" if verification_result.is_grounded else "ABSTAINED_UNVERIFIED",
+                "evidence_chunks": accepted_chunks
+            }
+        return res

@@ -55,7 +55,7 @@ The Clinical Decision Support (CDS) Retrieval-Augmented Generation system uses a
 
 ### Stage 1A: Dense Semantic Retrieval
 - **Embedding Model**: `BAAI/bge-small-en` (384 dimensions, cosine similarity via normalized inner product).
-- **Index Engine**: FAISS (`IndexFlatIP`) with full exact search across 236 verified clinical chunks.
+- **Index Engine**: FAISS (`IndexFlatIP`) with full exact search across 2,204 verified clinical chunks.
 - **Role**: Captures conceptual relationships, clinical synonyms, symptom paraphrasing, and semantic context (e.g., "renal impairment" ↔ "kidney failure").
 
 ### Stage 1B: Lexical Retrieval (BM25)
@@ -112,3 +112,21 @@ Evaluated against a curated test suite of **20 authoritative clinical CDS querie
 
 3. **Latency Profile**:
    The full Hybrid + Reranker pipeline operates at ~154 ms median latency on CPU, well within the sub-500 ms threshold required for real-time clinical interactive workflows.
+
+---
+
+## 5. V2.9 Grounding Verifier & Final Safety Gate
+
+In RAG V2.9, post-generation grounding verification is integrated directly downstream of candidate LLM generation:
+
+```
+[Candidate Answer] ──> [AnswerGroundingVerifier] ──> [Grounded?] ──YES──> [Returned with Citations]
+                                                           │
+                                                           NO
+                                                           ▼
+                                                [Fail-Closed Withholding + Disclaimer]
+```
+
+- **Proposition Deconstruction**: Decomposes candidate text into atomic assertions and extracts standardized `(subject, predicate, target_object, numeric_value, unit, qualifiers)`.
+- **Dynamic Entity Isolation**: Checks claim entities against dynamic corpus-derived metadata (e.g. DailyMed SPL monograph titles) without static dictionaries.
+- **Fail-Closed Suppression**: If any proposition exhibits an unsupported claim, contradiction, entity mismatch, or numeric conflict, the user-facing answer is withheld (`abstained=True`) while internal diagnostic provenance is fully preserved in `/rag/trace`.

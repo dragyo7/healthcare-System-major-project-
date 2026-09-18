@@ -181,7 +181,7 @@ class RAGServiceHealth(BaseModel):
     Exposes no sensitive filesystem paths or credentials.
     """
     status: str = Field(..., description="Overall service status ('healthy', 'degraded', 'unready').")
-    version: str = Field(default="2.8.0", description="RAG Service version.")
+    version: str = Field(default="2.9.1", description="RAG Service version.")
     service_ready: bool = Field(..., description="Whether the service is ready to accept retrieval requests.")
     index_ready: bool = Field(..., description="Whether underlying vector and lexical indexes are loaded.")
     indexed_chunks_count: int = Field(..., ge=0, description="Total number of indexed chunks available.")
@@ -300,7 +300,7 @@ class RAGService:
 
         return RAGServiceHealth(
             status=status,
-            version="2.8.0",
+            version="2.9.1",
             service_ready=service_ready,
             index_ready=service_ready,
             indexed_chunks_count=chunks_count,
