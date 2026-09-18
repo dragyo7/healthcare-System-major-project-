@@ -7,7 +7,8 @@ This document records the durable architectural decisions governing the healthca
 ## 1. Modular Source-Adapter Architecture
 * **Decision**: Implement a decoupled `BaseSourceAdapter` and `SourceRegistry` pattern where each medical knowledge source possesses a dedicated ingestion adapter.
 * **Rationale**: Medical data arrives in incompatible formats (DailyMed XML, openFDA JSON, MedQuAD XML/JSON, clinical PDF guidelines). Tightly coupling ingestion to the retrieval engine forces risky code rewrites whenever a new source is added.
-* **Current Status**: **Active & Validated** across MedQuAD, DailyMed, openFDA, and Guideline adapters.
+* **Current Status**: **Implemented & Validated**. Decoupled adapters exist for MedQuAD, DailyMed, openFDA, and Clinical Guidelines.
+* **Production Corpus Distinction**: The *currently active production corpus* contains **2,204 chunks** primarily sourced from DailyMed (2,176 chunks), ICMR (8 chunks), MoHFW (4 chunks), and MedlinePlus (16 chunks). The existence of an adapter (e.g. openFDA, MedQuAD) does not mean it is loaded into the production vector index unless indexed.
 * **Tradeoff**: Introduces an abstraction layer and explicit normalization step before chunking.
 
 ---
@@ -22,8 +23,8 @@ This document records the durable architectural decisions governing the healthca
 
 ## 3. Retaining Local FAISS Index (Avoiding Premature Cloud Vector DBs)
 * **Decision**: Retain local in-memory/disk `faiss.IndexFlatIP` rather than adopting managed external vector databases (e.g., Pinecone, Qdrant, Milvus).
-* **Rationale**: The project corpus ($\sim 25,000$ chunks) easily fits in memory. Local FAISS eliminates external cloud network latency, authentication dependencies, recurring API costs, and security exposure of clinical queries.
-* **Current Status**: **Active & Validated** (exact cosine similarity with normalized embeddings).
+* **Rationale**: The production corpus (2,204 chunks) easily fits in memory. Local FAISS eliminates external cloud network latency, authentication dependencies, recurring API costs, and security exposure of clinical queries.
+* **Current Status**: **Active & Validated** (exact cosine similarity with normalized embeddings, 384 dimensions).
 * **Tradeoff**: Distributed horizontal sharding is deferred until the corpus scales beyond millions of vectors.
 
 ---
@@ -45,10 +46,10 @@ This document records the durable architectural decisions governing the healthca
 ---
 
 ## 6. Optional / Fallback-Safe Cross-Encoder Reranking
-* **Decision**: Design the Cross-Encoder reranker (`BAAI/bge-reranker-small`) as a non-blocking optional component with automatic pass-through fallback.
-* **Rationale**: Rerankers are computationally heavy on CPU and may fail to load in resource-constrained offline testing environments. If remote model weights are unavailable, the system must degrade gracefully without crashing.
-* **Current Status**: **Active in Fallback Mode** (`FALLBACK / NOT EXECUTED`).
-* **Tradeoff**: Loses minor potential precision boosts from deep cross-attention when weights are absent.
+* **Decision**: Deploy `cross-encoder/ms-marco-MiniLM-L-6-v2` as a second-stage reranker with lazy-loading and automatic pass-through fallback.
+* **Rationale**: Cross-encoder models compute deep token-level cross-attention across (query, chunk) pairs, substantially refining top-k precision. To optimize memory on local workstations, the model is lazy-loaded on the first inference request. If model weights fail to load, the system degrades gracefully to RRF pass-through ranking without crashing.
+* **Current Status**: **Active & Verified**. Loads `cross-encoder/ms-marco-MiniLM-L-6-v2` on first query, computes relevance logits, and reorders candidates.
+* **Tradeoff**: Slightly increases initial inference latency (~0.8s cold start) on first call.
 
 ---
 
@@ -60,15 +61,7 @@ This document records the durable architectural decisions governing the healthca
 
 ---
 
-## 8. Evidence-Based Benchmark Rigor & Grounding
-* **Decision**: Mandate that all benchmark evaluations use unambiguous gold standard evidence mappings (`expected_document_id`, `expected_drug`, `expected_sections`) rather than loose keyword/topic substring heuristics.
-* **Rationale**: Forensic audit V2.2 proved that loose keyword heuristics artificially inflated early benchmark recall to 100%. Rigorous medical evaluation requires exact section-level and document-level attribution.
-* **Current Status**: **Active & Validated** in `pharmacology_benchmark.json`.
-* **Tradeoff**: Benchmark construction requires detailed clinical curation.
-
----
-
-## 9. Deterministic Evidence Policy & Safe Abstention Boundary (V2.8)
+## 8. Deterministic Evidence Policy & Safe Abstention Boundary (V2.8)
 * **Decision**: Enforce a deterministic `EvidencePolicyEngine` and typed `GroundingDecision` contract (`GROUNDED`, `WEAK_EVIDENCE`, `INSUFFICIENT_EVIDENCE`, `CONFLICTING_EVIDENCE`) rather than uncalibrated probabilistic confidence scores or direct generation pass-through.
 * **Rationale**: Vector similarity scores reflect dense semantic proximity, NOT clinical truth or factual adequacy. In high-stakes healthcare AI, the system must deterministically abstain (`generation_allowed = False`) with machine-readable reason codes when retrieved evidence is absent, out-of-domain, or contradictory.
 * **Current Status**: **Active & Validated** in `rag_module/safety/evidence_policy.py`.
@@ -76,7 +69,7 @@ This document records the durable architectural decisions governing the healthca
 
 ---
 
-## 10. Strict Provenance Audit & Zero Metadata Fabrication (V2.8)
+## 9. Strict Provenance Audit & Zero Metadata Fabrication (V2.8)
 * **Decision**: Mandate 9-field provenance validation (`source_id`, `source_name`, `publisher`, `document_id`, `chunk_id`, `title`, `section`, `medical_domain`, `source_url`) via `ProvenanceValidator` and strictly prohibit synthetic fabrication of missing clinical metadata.
 * **Rationale**: Clinical citations must be legally and medically auditable. If a document lacks publisher or document identity, it must be flagged as `PARTIALLY_IDENTIFIED` or `INVALID` rather than having plausible fake identifiers generated by code.
 * **Current Status**: **Active & Validated** in `rag_module/safety/provenance_validator.py`.
@@ -84,21 +77,28 @@ This document records the durable architectural decisions governing the healthca
 
 ---
 
-## 11. Production Corpus Isolation & 236 Golden Regression Preservation (Phase 24/25)
+## 10. Production Corpus Isolation & 236 Golden Regression Preservation (Phase 24/25)
 * **Decision**: Isolate the expanded 2,204 production corpus (`data/normalized/expanded_production_chunks.json`) while permanently maintaining the 236-chunk golden baseline (`data/indices/index_v2.bin`, `meta_v2.json`, `bm25_index.pkl`) as an unalterable regression test fixture.
 * **Rationale**: Scaling knowledge must never silently break known baseline behavior. Preserving the 236-chunk golden baseline with exact cryptographic hash locks guarantees backwards-compatible regression testing across all model and pipeline iterations.
 * **Current Status**: **Active & Verified**.
 
 ---
 
-## 12. Dual-Pipeline Evidence Policy & Safety Unification (Phase 25)
+## 11. Dual-Pipeline Evidence Policy & Safety Unification (Phase 25)
 * **Decision**: Unify safety triage (`QuerySafetyEngine`) and deterministic evidence policy grounding (`EvidencePolicyEngine`) across both `RAGService` and `MedicalRAGPipeline`.
 * **Rationale**: Both direct query execution (`rag_pipeline.query()`) and service-layer orchestration (`RAGService.retrieve()`) must enforce identical fail-closed abstention rules (`generation_allowed = False`) when unsupported entities (e.g. Cardioregulin, Zorblaxian fever) or out-of-domain queries are encountered.
 * **Current Status**: **Active & Verified** (110 passed pytest tests).
 
 ---
 
-## 13. Model & Index Cryptographic Hash Lock Manifest (Phase 25)
+## 12. Model & Index Cryptographic Hash Lock Manifest (Phase 25)
 * **Decision**: Enforce an explicit machine-readable model and index manifest (`data/manifests/model_index_lock.json`) recording exact model ID (`BAAI/bge-small-en`), dimension (384), normalization (L2), query prefix, metric (inner product), and SHA-256 digests of all serialized index files.
 * **Rationale**: Prevents silent runtime index corruption or incompatible embedding model substitutions.
 * **Current Status**: **Active & Locked**.
+
+---
+
+## 13. Frontend Architecture, Modular Adapters & Browser E2E Integration (Phase 26)
+* **Decision**: Architect the React frontend with decoupled API services (`ragApi.js`), clean modular boundaries (`frontend/src/modules/` for multilingual, registry, and OCR adapters), and first-class Clinical Decision Support (CDS) Assistant interfaces (`CDSAssistant.jsx`, `DrugChecker.jsx`).
+* **Rationale**: Decoupling the UI presentation layer from the RAG retrieval core allows future modules (neural machine translation, document OCR, drug interaction calculators) to be integrated as clean adapters without modifying the underlying retrieval, reranking, or evidence policy core.
+* **Current Status**: **Active & Verified** via real browser end-to-end testing and OpenAPI contract synchronization.
