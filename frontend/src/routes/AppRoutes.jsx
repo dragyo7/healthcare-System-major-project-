@@ -32,6 +32,7 @@ import Prescription from "../pages/Patient/Prescription";
 import Chat from "../pages/Patient/Chat";
 import DrugChecker from "../pages/Patient/DrugChecker";
 import CDSAssistant from "../pages/Common/CDSAssistant";
+import Knowledge from "../pages/Doctor/Knowledge";
 
 export default function AppRoutes() {
   return (
@@ -150,6 +151,18 @@ export default function AppRoutes() {
               <RoleGuard allowedRoles={["doctor"]}>
                 <DashboardLayout role="doctor">
                   <Reports />
+                </DashboardLayout>
+              </RoleGuard>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/doctor/knowledge"
+          element={
+            <ProtectedRoute>
+              <RoleGuard allowedRoles={["doctor"]}>
+                <DashboardLayout role="doctor">
+                  <Knowledge />
                 </DashboardLayout>
               </RoleGuard>
             </ProtectedRoute>

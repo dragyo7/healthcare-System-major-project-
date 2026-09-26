@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Users, Calendar, AlertCircle, ArrowRight, Activity, MessageSquare } from "lucide-react";
+import { Users, Calendar, AlertCircle, ArrowRight, Activity, MessageSquare, Sparkles, ShieldCheck } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import PageHeader from "../../components/shared/PageHeader";
 import StatCard from "../../components/shared/StatCard";
@@ -47,6 +47,32 @@ export default function DoctorDashboard() {
         title="Clinician Workspace"
         subtitle={`Welcome, Dr. ${user?.name || ""}. Access automated patient diagnostic tools and record indexes.`}
       />
+
+      {/* Primary Feature Hero Card: Doctor AI Assistant */}
+      <Card className="p-6 bg-gradient-to-r from-primary-950 via-primary-900 to-indigo-950 text-white border-0 shadow-xl relative overflow-hidden">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="max-w-2xl flex flex-col gap-2.5">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-500/20 text-primary-200 text-xs font-semibold backdrop-blur-xs w-fit border border-primary-400/20">
+              <Sparkles className="h-3.5 w-3.5 text-primary-300" />
+              <span>Evidence-Grounded Clinical Intelligence • RAG V2.10</span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Clinical Decision Support (CDS) Assistant</h2>
+            <p className="text-xs sm:text-sm text-primary-100/80 leading-relaxed">
+              Query DailyMed FDA monographs, drug interactions, boxed warnings, and verified clinical practice guidelines with deterministic fail-closed safety verification.
+            </p>
+          </div>
+          <div className="shrink-0 flex flex-col sm:flex-row md:flex-col gap-2">
+            <Link to="/doctor/cds-assistant">
+              <Button className="w-full bg-white text-primary-950 hover:bg-primary-50 font-bold px-5 py-2.5 rounded-xl flex items-center justify-center gap-2 text-sm shadow-md">
+                <Sparkles className="h-4 w-4 text-primary-600" />
+                Launch Assistant
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+            <span className="text-[11px] text-center text-primary-200/60 font-mono">2,204 Chunks • Hybrid RRF + Verifier</span>
+          </div>
+        </div>
+      </Card>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         {stats.map((stat, index) => (

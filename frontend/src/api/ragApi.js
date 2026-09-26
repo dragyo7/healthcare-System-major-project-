@@ -5,7 +5,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || APP_CONFIG.apiBaseUrl || "h
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 35000, // 35s to allow for CPU cross-encoder reranking
+  timeout: 90000, // 90s to accommodate CPU model loading and cross-encoder reranking
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -44,17 +44,29 @@ export const ragApi = {
   },
 
   /**
-   * Conversational Clinical Query with synthesis and safety guardrails.
-   * @param {Object} params - { message, mode, top_k, generate_answer }
+   * Conversational Clinical Query with evidence synthesis and safety guardrails.
+   * Minimal canonical request: { query: "What is metformin?" }
+   * @param {Object|string} params - { query, message, mode, top_k, generate_answer, audience }
    */
-  chat: async ({ message, mode = "hybrid", top_k = 5, generate_answer = true }) => {
+  chat: async (params) => {
     try {
-      const payload = {
-        message: message.trim(),
-        mode,
-        top_k: Number(top_k),
-        generate_answer: Boolean(generate_answer),
-      };
+      let payload;
+      if (typeof params === "string") {
+        payload = { query: params.trim() };
+      } else if (params && typeof params === "object") {
+        const queryText = (params.query || params.message || "").trim();
+        payload = { query: queryText };
+        // Only include optional parameters if explicitly passed to respect backend centralized defaults
+        if (params.mode) payload.mode = params.mode;
+        if (params.top_k !== undefined && params.top_k !== null) payload.top_k = Number(params.top_k);
+        if (params.generate_answer !== undefined) payload.generate_answer = Boolean(params.generate_answer);
+        if (params.audience) payload.audience = params.audience;
+        if (params.patient_context) payload.patient_context = params.patient_context;
+        if (params.clinician_context) payload.clinician_context = params.clinician_context;
+      } else {
+        payload = { query: "" };
+      }
+
       const response = await apiClient.post("/chat", payload);
       return { success: true, data: response.data };
     } catch (error) {

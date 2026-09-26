@@ -196,7 +196,25 @@ export default function Login() {
           Sign In
         </Button>
 
-        <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-4 select-none">
+        {/* Quick Demo Access Pill for Evaluators */}
+        <div className="mt-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
+          <div>
+            <span className="font-bold text-slate-700 dark:text-slate-300 block">Demo Clinician Account:</span>
+            <span className="text-[11px] text-slate-500 font-mono">doctor@medai.com • password123</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setEmail("doctor@medai.com");
+              setPassword("password123");
+            }}
+            className="px-2.5 py-1 rounded-lg bg-primary-50 dark:bg-primary-950/60 text-primary-700 dark:text-primary-300 font-bold border border-primary-200 dark:border-primary-800 hover:bg-primary-100 transition-colors cursor-pointer text-xs"
+          >
+            Auto Fill
+          </button>
+        </div>
+
+        <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-3 select-none">
           Don't have an account?{" "}
           <Link
             to={ROUTES.SIGNUP}
