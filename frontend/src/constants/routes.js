@@ -9,4 +9,7 @@ export const ROUTES = {
   UNAUTHORIZED: "/unauthorized",
   SERVER_ERROR: "/server-error",
   RESET_PASSWORD: "/reset-password",
+  CDS_ASSISTANT: "/cds",
+  DOCTOR_CDS: "/doctor/cds-assistant",
+  PATIENT_CDS: "/patient/cds-assistant",
 };

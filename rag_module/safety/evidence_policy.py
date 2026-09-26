@@ -113,7 +113,18 @@ CONTRADICTION_PAIRS = [
 COMMON_STOPWORDS = {
     "what", "is", "the", "of", "and", "in", "to", "for", "a", "an", "how", "do", "i", "can",
     "are", "with", "on", "by", "at", "from", "it", "or", "as", "be", "this", "that", "which",
-    "should", "have", "has", "had", "does", "about", "tell", "me", "there", "according"
+    "should", "have", "has", "had", "does", "about", "tell", "me", "there", "according",
+    "during", "generally", "someone", "anyone", "explain", "warn", "warned", "warning",
+    "know", "when", "why", "where", "who", "please", "could", "would", "been", "also",
+    "into", "onto", "than", "then", "over", "under", "between", "among", "through",
+    "before", "after", "while", "will", "were", "being", "more", "most", "other",
+    "some", "such", "only", "own", "same", "very",
+    "like", "seek", "seeking", "sought", "attention", "relevant", "important", "importance",
+    "maximum", "minimum", "highest", "lowest", "many", "much", "daily", "day", "days",
+    "week", "weeks", "month", "months", "year", "years", "time", "times",
+    "take", "takes", "took", "taken", "taking", "call", "calling", "visit", "go", "get",
+    "need", "needs", "needed", "want", "wants", "help", "information", "info", "details", "detail",
+    "occur", "occurs", "occurred", "occurring"
 }
 
 GENERAL_CLINICAL_TERMS = {
@@ -136,7 +147,10 @@ GENERAL_CLINICAL_TERMS = {
     "fasting", "level", "levels", "glucose", "icmr", "mohfw", "dailymed", "fda", "stg",
     "pharmacology", "pharmacological", "pharmacokinetics", "pharmacodynamic", "pharmacodynamics",
     "absorption", "kinetics", "metabolism", "excretion", "clearance", "plasma", "serum",
-    "concentration", "concentrations", "mg", "ml", "oral", "intravenous", "injection"
+    "concentration", "concentrations", "mg", "ml", "oral", "intravenous", "injection",
+    "maximum", "max", "minimum", "min", "daily", "schedule", "routine", "emergency", "urgent", "attention",
+    "alone", "cause", "causes", "causing", "consider", "considering", "know", "hypoglycemia", "elevate", "elevation",
+    "reduce", "reduction", "increase", "increases", "increased", "lowering", "lower", "high", "low"
 }
 
 
@@ -262,7 +276,7 @@ class EvidencePolicyEngine:
         combined_top_text = " ".join([
             f"{getattr(it, 'title', '')} {getattr(it, 'section', '')} {getattr(it, 'text', '')}".lower()
             if hasattr(it, 'text') else f"{it.get('title', '')} {it.get('section', '')} {it.get('text', '')}".lower()
-            for it in usable_items[:3]
+            for it in usable_items[:10]
         ])
 
         # If user queried a specific named subject entity, verify it appears in retrieved evidence
@@ -270,18 +284,22 @@ class EvidencePolicyEngine:
         missing_entity = None
         if subject_tokens:
             unmatched_tokens = []
+            matched_tokens = []
             for tok in subject_tokens:
                 clean_tok = re.sub(r'(s|es|ing|ed|al|ic|ical|in|ine)$', '', tok)
                 matched = (
                     re.search(r'\b' + re.escape(tok) + r'\b', combined_top_text) is not None or
                     (len(clean_tok) >= 4 and re.search(r'\b' + re.escape(clean_tok) + r'(?:s|es|ing|ed|al|ic|ical|in|ine)?\b', combined_top_text) is not None)
                 )
-                if not matched:
+                if matched:
+                    matched_tokens.append(tok)
+                else:
                     unmatched_tokens.append(tok)
 
-            if unmatched_tokens:
+            # An entity is unsupported if NONE of the candidate subject tokens matched in verified evidence (e.g. 'imaginaryzol')
+            if len(matched_tokens) == 0:
                 is_unsupported_entity = True
-                missing_entity = unmatched_tokens[0]
+                missing_entity = unmatched_tokens[0] if unmatched_tokens else "unknown"
 
         overlap_ratio = 1.0
         if query_words:
@@ -298,8 +316,17 @@ class EvidencePolicyEngine:
         dense_score = getattr(top_item, "dense_score", None) if hasattr(top_item, "dense_score") else top_item.get("dense_score")
         bm25_score = getattr(top_item, "bm25_score", None) if hasattr(top_item, "bm25_score") else top_item.get("bm25_score")
 
-        # Out of domain check: if less than 35% of substantive query words appear in top evidence
-        is_out_of_domain = bool(query_words and overlap_ratio < 0.35)
+        # Out of domain check:
+        # A query is out of domain if substantive query word overlap is extremely low (< 35%),
+        # or if subject tokens exist and either none matched or fewer than 35% of them matched with no clinical intent.
+        has_clinical_intent = any(w in GENERAL_CLINICAL_TERMS for w in query_words)
+        subject_match_ratio = (len(matched_tokens) / len(subject_tokens)) if subject_tokens else 1.0
+        is_out_of_domain = bool(
+            query_words and (
+                overlap_ratio < 0.35 or
+                (not has_clinical_intent and subject_match_ratio < 0.5)
+            )
+        )
 
         is_strong = False
         is_weak = False

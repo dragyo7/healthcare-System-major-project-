@@ -23,6 +23,7 @@ class ClaimStatus(str, Enum):
     Mutually exclusive verification outcomes for atomic clinical propositions.
     """
     SUPPORTED = "supported"
+    WEAKLY_SUPPORTED = "weakly_supported"
     CONTRADICTED = "contradicted"
     UNSUPPORTED_BY_EVIDENCE = "unsupported_by_evidence"
     QUALIFIER_MISMATCH = "qualifier_mismatch"
@@ -44,6 +45,7 @@ class Proposition(BaseModel):
     unit: Optional[str] = Field(default=None, description="Measurement or dosing unit (mg, mcg, g, ml/min).")
     clinical_property: Optional[str] = Field(default=None, description="Clinical binding property (initial_dose, maximum_dose, maintenance_dose).")
     frequency: Optional[str] = Field(default=None, description="Dosing schedule or frequency (once daily, twice daily, four times daily, every 12 hours).")
+    condition: Optional[str] = Field(default=None, description="Clinical condition or disease indication (e.g. hypertension, type 2 diabetes).")
     qualifiers: Dict[str, Any] = Field(default_factory=dict, description="Contextual qualifiers (population, organ_impairment, pregnancy, temporal).")
     raw_text: str = Field(default="", description="Original sentence or proposition text.")
 
@@ -64,6 +66,20 @@ class ClaimVerificationResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class AnswerComponent(BaseModel):
+    """
+    Component-level verification outcome for decomposed multi-part answers.
+    """
+    intent: str = Field(..., description="Logical sub-intent or aspect (e.g. indications, adverse_effects, contraindications, dosage).")
+    label: str = Field(..., description="Human-readable component label (e.g. Indications & Usage).")
+    status: ClaimStatus = Field(default=ClaimStatus.UNSUPPORTED_BY_EVIDENCE, description="Deterministic component status.")
+    claims: List[ClaimVerificationResult] = Field(default_factory=list, description="Propositions/claims mapped to this component.")
+    supported_text: Optional[str] = Field(default=None, description="Concatenated supported claims for this component.")
+    citations: List[str] = Field(default_factory=list, description="Preserved citation chunk IDs for this component.")
+
+    model_config = ConfigDict(extra="forbid")
+
+
 class AnswerVerificationResult(BaseModel):
     """
     Whole-answer verification outcome enforcing fail-closed suppression.
@@ -76,6 +92,10 @@ class AnswerVerificationResult(BaseModel):
     discrepancies: List[str] = Field(default_factory=list, description="List of discrepancy reasons for failed claims.")
     grounded_claim_count: int = Field(default=0, description="Count of supported claims.")
     total_claim_count: int = Field(default=0, description="Total count of evaluated claims.")
+    supported_claims: List[str] = Field(default_factory=list, description="List of verified supported claim sentences.")
+    partial_answer: Optional[str] = Field(default=None, description="Assembled verified partial answer if safe.")
+    safe_for_partial: bool = Field(default=False, description="True if answer is eligible for safe partial disclosure.")
+    components: List[AnswerComponent] = Field(default_factory=list, description="Decomposed multi-part answer components.")
 
     model_config = ConfigDict(extra="forbid")
 
@@ -133,6 +153,15 @@ FREQUENCY_ORDERED = [
     ("once daily", [r'\bonce\s+daily\b', r'\bqd\b', r'\bonce\s+a\s+day\b', r'\bevery\s+day\b'])
 ]
 
+CLINICAL_TERM_EQUIVALENTS = {
+    "pain": {"analgesic", "analgesics", "analgesia", "antinociceptive", "ache"},
+    "fever": {"antipyretic", "antipyretics", "pyrexia", "febrile"},
+    "hypertension": {"blood pressure", "antihypertensive"},
+    "clots": {"clotting", "thrombosis", "thromboembolic", "anticoagulant", "coagulation"},
+    "stroke": {"cerebrovascular", "cva", "infarction"},
+    "sugar": {"glucose", "glycemic"}
+}
+
 
 class AnswerGroundingVerifier:
     """
@@ -174,17 +203,61 @@ class AnswerGroundingVerifier:
         if re.search(r'\b(whereas\s+perhaps|oscillates\s+between|somewhat\s+oscillates)\b', clean_text, re.IGNORECASE):
             return None
 
+        # Strip leading discourse connectives, transition adverbs, and epistemic reporting clauses
+        clean_text = re.sub(
+            r'^(?:However|Overall|Additionally|Furthermore|Moreover|In addition|Therefore|Generally|Specifically|Consequently|Importantly|Finally|In general|Notably|Of note|As such),\s*',
+            '',
+            clean_text,
+            flags=re.IGNORECASE
+        ).strip()
+        clean_text = re.sub(
+            r'^(?:(?:the\s+)?(?:provided\s+)?(?:evidence|text|passage|data|guidelines?|literature|trials?)\s+(?:suggests?|indicates?|shows?|demonstrates?|recommends?|states?|only\s+mentions?)\s+(?:that\s+)?(?:the\s+)?(?:dosage\s+range\s+for\s+)?)',
+            '',
+            clean_text,
+            flags=re.IGNORECASE
+        ).strip()
+        clean_text = re.sub(
+            r'^(?:(?:according\s+to|as\s+per)\s+[^,]+,\s*)',
+            '',
+            clean_text,
+            flags=re.IGNORECASE
+        ).strip()
+
+        NON_SUBJECT_WORDS = {
+            "the", "common", "adverse", "usual", "recommended", "initial", "starting", "maximum", "dose",
+            "however", "overall", "additionally", "furthermore", "moreover", "therefore", "generally",
+            "specifically", "consequently", "importantly", "finally", "patients", "individuals", "adults",
+            "children", "target", "evidence", "passage", "treatment", "therapy", "use", "administration",
+            "it", "this", "these", "there", "note", "care", "medication", "drug", "agent", "product", "according",
+            "provided", "side", "per", "as", "reactions", "effects", "boxed", "can", "could", "may", "might", "will", "would", "shall", "should",
+            "titration", "adjustment", "monitoring", "discontinuation", "intake", "evaluation"
+        }
+
         # 1. Subject extraction (generic active agent or noun phrase)
         subject = ""
 
         # Pattern A: "Reactions of X", "Dose of X", "Use of X"
         of_match = re.search(
-            r'\b(?:reactions\s+of|effects\s+of|dose\s+of|use\s+of|safety\s+of|indications?\s+for)\s+([a-zA-Z0-9_/-]+(?:\s+and\s+[a-zA-Z0-9_/-]+(?:\s+potassium)?)?)',
+            r'\b(?:reactions?\s+of|effects?\s+of|dose\s+of|use\s+of|safety\s+of|indications?\s+for)\s+([a-zA-Z0-9_/-]+(?:\s+and\s+[a-zA-Z0-9_/-]+(?:\s+potassium)?)?)',
             clean_text,
             re.IGNORECASE
         )
         if of_match:
-            subject = of_match.group(1).strip()
+            cand = of_match.group(1).strip()
+            if cand.lower() not in NON_SUBJECT_WORDS:
+                subject = cand
+
+        # Pattern A1: "maximum dose for adults of X", "dose in adults of X", "effects in patients of X"
+        if not subject:
+            ext_of_match = re.search(
+                r'\b(?:reactions?|effects?|dose|dosage|use|safety|indications?|contraindications?)\b[^.,;!?]*?\b(?:of|for)\s+([a-zA-Z0-9_/-]+(?:\s+and\s+[a-zA-Z0-9_/-]+(?:\s+potassium)?)?)',
+                clean_text,
+                re.IGNORECASE
+            )
+            if ext_of_match:
+                cand = ext_of_match.group(1).strip()
+                if cand.lower() not in NON_SUBJECT_WORDS and not cand.lower().startswith(("adult", "pediatric", "child", "elder")):
+                    subject = cand
 
         # Pattern B: "The usual initial starting dose of X..."
         if not subject:
@@ -195,16 +268,27 @@ class AnswerGroundingVerifier:
             )
             if subj_match:
                 candidate = subj_match.group(1).strip()
-                if candidate.lower() not in ["the", "common", "adverse", "usual", "recommended", "initial", "starting", "maximum", "dose"]:
+                if candidate.lower() not in NON_SUBJECT_WORDS:
                     subject = candidate
 
         # Pattern C: "X is indicated...", "X decreases...", "X is a vitamin"
         if not subject:
-            direct_match = re.match(r'^([a-zA-Z0-9_/-]+(?:\s+and\s+[a-zA-Z0-9_/-]+(?:\s+potassium)?)?)\s+(?:is|are|decreases|increases|reduces|improves|prevents|causes)', clean_text, re.IGNORECASE)
+            direct_match = re.match(r'^([a-zA-Z0-9_/-]+(?:\s+and\s+[a-zA-Z0-9_/-]+(?:\s+potassium)?|\s+[a-zA-Z0-9_/-]+)?)\s+(?:is|are|decreases|increases|reduces|improves|prevents|causes|works|acts|should|can|may)', clean_text, re.IGNORECASE)
             if direct_match:
                 candidate = direct_match.group(1).strip()
-                if candidate.lower() not in ["the", "there", "it", "this"]:
+                cand_words = set(candidate.lower().split())
+                if candidate.lower() not in NON_SUBJECT_WORDS and not cand_words.issubset(NON_SUBJECT_WORDS):
                     subject = candidate
+
+        # Pattern D: Pharmaceutical nomenclature suffix pattern (-ol, -il, -in, -an, -ide, -ate, etc.)
+        # Requires at least 3 characters before the suffix to prevent matching common English words like 'can', 'than', 'plan'
+        if not subject:
+            pharma_match = re.search(r'\b([a-zA-Z0-9_-]{3,}(?:ol|il|in|an|ide|ate|one|ine|pam|lam|cin|zole|xib))\b', clean_text, re.IGNORECASE)
+            if pharma_match:
+                cand = pharma_match.group(1).strip()
+                cand_words = set(cand.lower().split())
+                if cand.lower() not in NON_SUBJECT_WORDS and not cand_words.issubset(NON_SUBJECT_WORDS):
+                    subject = cand
 
         # 2. Predicate & Polarity extraction
         predicate = ""
@@ -238,16 +322,22 @@ class AnswerGroundingVerifier:
                     frequency = freq_name
                     break
 
-        # Contraindication / Warning pattern
+        # Contraindication / Warning / Precaution pattern
         if any(re.search(r'\b' + re.escape(w) + r'\b', clean_text, re.IGNORECASE) for w in SAFETY_CONTRAINDICATION_TERMS):
             predicate = "contraindicated"
             polarity = "negative"
             obj_match = re.search(r'\bcontraindicated\s+(?:in|during|for)?\s*([^.]+)', clean_text, re.IGNORECASE)
             if obj_match:
                 target_object = obj_match.group(1).strip()
+        elif re.search(r'\b(?:used\s+cautiously|use\s+with\s+caution|precaution|cautious|monitor\s+patients)\b', clean_text, re.IGNORECASE):
+            predicate = "contraindicated"
+            polarity = "negative"
+            caut_match = re.search(r'\b(?:cautiously|caution|precaution|cautious|monitor\s+patients)\s+(?:in|for|with)?\s*([^.]+)', clean_text, re.IGNORECASE)
+            if caut_match:
+                target_object = caut_match.group(1).strip()
 
         # Permissive safety claim (e.g. "safe for use during pregnancy")
-        elif any(re.search(r'\b' + re.escape(w) + r'\b', clean_text, re.IGNORECASE) for w in SAFETY_PERMISSIVE_TERMS) and re.search(r'\b(pregnancy|trimesters|lactation|pediatric)\b', clean_text, re.IGNORECASE):
+        elif not predicate and any(re.search(r'\b' + re.escape(w) + r'\b', clean_text, re.IGNORECASE) for w in SAFETY_PERMISSIVE_TERMS) and re.search(r'\b(pregnancy|trimesters|lactation|pediatric)\b', clean_text, re.IGNORECASE):
             predicate = "safe"
             polarity = "positive"
             obj_match = re.search(r'\bsafe\s+(?:for\s+use\s+)?(?:in|during)?\s*([^.]+)', clean_text, re.IGNORECASE)
@@ -255,14 +345,14 @@ class AnswerGroundingVerifier:
                 target_object = obj_match.group(1).strip()
 
         # Directional mechanism pattern
-        elif any(re.search(r'\b' + re.escape(w) + r'\b', clean_text, re.IGNORECASE) for w in DIRECTIONAL_DECREASE_TERMS):
+        elif not predicate and any(re.search(r'\b' + re.escape(w) + r'\b', clean_text, re.IGNORECASE) for w in DIRECTIONAL_DECREASE_TERMS):
             predicate = "decreases"
             polarity = "negative"
             dec_match = re.search(r'\b(?:decreases|reduces|lowers|inhibits)\s+([^.]+)', clean_text, re.IGNORECASE)
             if dec_match:
                 target_object = dec_match.group(1).strip()
 
-        elif any(re.search(r'\b' + re.escape(w) + r'\b', clean_text, re.IGNORECASE) for w in DIRECTIONAL_INCREASE_TERMS):
+        elif not predicate and any(re.search(r'\b' + re.escape(w) + r'\b', clean_text, re.IGNORECASE) for w in DIRECTIONAL_INCREASE_TERMS):
             predicate = "increases"
             polarity = "positive"
             inc_match = re.search(r'\b(?:increases|raises|elevates|augments)\s+([^.]+)', clean_text, re.IGNORECASE)
@@ -270,7 +360,7 @@ class AnswerGroundingVerifier:
                 target_object = inc_match.group(1).strip()
 
         # Indication pattern
-        elif re.search(r'\bindicated\s+(?:for|as)?\s*([^.]+)', clean_text, re.IGNORECASE):
+        elif not predicate and re.search(r'\bindicated\s+(?:for|as)?\s*([^.]+)', clean_text, re.IGNORECASE):
             predicate = "indicated"
             polarity = "positive"
             ind_match = re.search(r'\bindicated\s+(?:for|as)?\s*([^.]+)', clean_text, re.IGNORECASE)
@@ -278,7 +368,7 @@ class AnswerGroundingVerifier:
                 target_object = ind_match.group(1).strip()
 
         # Adverse reaction pattern
-        elif re.search(r'\b(adverse reactions?|side effects?)\b', clean_text, re.IGNORECASE):
+        elif not predicate and re.search(r'\b(adverse reactions?|side effects?)\b', clean_text, re.IGNORECASE):
             predicate = "adverse_reaction"
             polarity = "negative"
             adv_match = re.search(r'\b(?:include|including|are)\s+([^.]+)', clean_text, re.IGNORECASE)
@@ -286,23 +376,30 @@ class AnswerGroundingVerifier:
                 target_object = adv_match.group(1).strip()
 
         # Copula definitional assertion: "X is a Y" or "X is defined as Y"
-        elif re.search(r'\b(?:is|are)\s+(?:defined\s+as\s+|(?:an?|the)\s+)?([a-zA-Z0-9_\s/-]+)', clean_text, re.IGNORECASE):
+        elif not predicate and re.search(r'\b(?:is|are)\s+(?:defined\s+as\s+|(?:an?|the)\s+)?([a-zA-Z0-9_\s/-]+)', clean_text, re.IGNORECASE):
             copula_match = re.search(r'\b(?:is|are)\s+(?:defined\s+as\s+|(?:an?|the)\s+)?([a-zA-Z0-9_\s/-]+)', clean_text, re.IGNORECASE)
             predicate = "is"
             polarity = "positive"
             if copula_match:
-                target_object = copula_match.group(1).strip()
+                raw_obj = copula_match.group(1).strip()
+                # If target object extends across relative clauses ("including", "which", "according to"), bound it
+                bounded = re.split(r'\b(?:including|which|according|whereas|whereby|such\s+as)\b', raw_obj, flags=re.IGNORECASE)[0].strip()
+                target_object = bounded if bounded else raw_obj
 
         # General assertion if predicate still missing but dose exists
         if not predicate and is_dosing:
             predicate = "dose"
 
-        # General assertion for "improves glycemic control" or "prevents stroke"
+        # General assertion for "improves glycemic control", "treats", "exerts therapeutic effect", "has been shown"
         if not predicate:
-            gen_match = re.search(r'\b(?:improves|treats|prevents|reduces|causes)\s+([^.]+)', clean_text, re.IGNORECASE)
+            gen_match = re.search(r'\b(?:improves|treats|prevents|reduces|causes|exerts|demonstrates|provides|exhibits)\s+([^.]+)', clean_text, re.IGNORECASE)
             if gen_match:
                 predicate = "indicated"
                 target_object = gen_match.group(1).strip()
+            elif re.search(r'\b(?:has|have)\s+(?:been\s+shown\s+to\s+)?(?:have\s+)?(?:an?\s+)?(?:therapeutic\s+effect|efficacy|action|activity)\b', clean_text, re.IGNORECASE):
+                predicate = "indicated"
+                has_match = re.search(r'\b(?:therapeutic\s+effect|efficacy|action|activity)\s*(?:through|via|on|in)?\s*([^.]*)', clean_text, re.IGNORECASE)
+                target_object = has_match.group(1).strip() if has_match else "therapeutic effect"
 
         if not predicate:
             return None
@@ -330,6 +427,13 @@ class AnswerGroundingVerifier:
         elif re.search(r'\b(chronic|long-term|indefinite|maintenance)\b', clean_text, re.IGNORECASE):
             qualifiers["temporal"] = "chronic"
 
+        # Clinical Condition
+        condition = None
+        for cond_name in ["hypertension", "heart failure", "myocardial infarction", "type 2 diabetes", "diabetes mellitus", "angina", "edema"]:
+            if re.search(r'\b' + re.escape(cond_name) + r'\b', clean_text, re.IGNORECASE):
+                condition = cond_name
+                break
+
         return Proposition(
             subject=subject,
             predicate=predicate,
@@ -339,6 +443,7 @@ class AnswerGroundingVerifier:
             unit=unit,
             clinical_property=clinical_prop,
             frequency=frequency,
+            condition=condition,
             qualifiers=qualifiers,
             raw_text=clean_text
         )
@@ -456,6 +561,25 @@ class AnswerGroundingVerifier:
                 )
 
         cited_chunks = [evidence_chunk_map[cid] for cid in citation_chunk_ids if cid in evidence_chunk_map]
+
+        # Pronoun, generic term, and empty subject co-reference resolution against cited evidence entity
+        generic_subject_terms = {
+            "it", "this", "these", "this drug", "the drug", "this medication", "the medication",
+            "medication", "drug", "agent", "product", "side", "effect", "effects", "adverse",
+            "reaction", "reactions", "treatment", "therapy", "use", "dose", "dosage", "evidence",
+            "passage", "text", "information", "guideline", "guidelines", "patient", "patients"
+        }
+        all_evidence_entities = [self._extract_entity_from_evidence(c) for c in evidence_chunks if isinstance(c, dict)]
+        if not prop.subject or prop.subject.lower() in generic_subject_terms:
+            # Check if any evidence entity explicitly appears in the claim text
+            for ent in all_evidence_entities:
+                if ent and re.search(r'\b' + re.escape(ent.lower()) + r'\b', claim_text.lower()):
+                    prop.subject = ent
+                    break
+            if not prop.subject or prop.subject.lower() in generic_subject_terms:
+                cited_entities = {self._extract_entity_from_evidence(c) for c in cited_chunks if isinstance(c, dict)}
+                if len(cited_entities) == 1:
+                    prop.subject = list(cited_entities)[0]
 
         # 3. Check for missing/malformed evidence text in cited chunks
         has_valid_text = any(bool(str(c.get("text") or "").strip()) for c in cited_chunks)
@@ -657,12 +781,27 @@ class AnswerGroundingVerifier:
 
         # 10. Unsupported Claim / Plausible Hallucination check
         if prop.target_object:
+            GENERIC_TARGET_STOPWORDS = {
+                "the", "and", "for", "with", "patients", "treatment", "observed", "clinical", "trials",
+                "medication", "medicine", "prescription", "drug", "conditions", "various", "therapy",
+                "used", "treat", "treating", "use", "management", "indicated", "indication"
+            }
             target_words = [
                 w.lower() for w in re.findall(r'\b[a-zA-Z]{3,}\b', prop.target_object)
-                if w.lower() not in ["the", "and", "for", "with", "patients", "treatment", "observed", "clinical", "trials"]
+                if w.lower() not in GENERIC_TARGET_STOPWORDS
             ]
             if target_words:
-                matched_words = [w for w in target_words if w in combined_lower]
+                matched_words = []
+                for w in target_words:
+                    # Direct substring match
+                    if w in combined_lower:
+                        matched_words.append(w)
+                    # Morphological stem match for medical terms (length >= 5 e.g. 'inflammation' stem 'inflamm' matches 'inflammatory')
+                    elif len(w) >= 6 and w[:5] in combined_lower:
+                        matched_words.append(w)
+                    # Standard medical clinical synonym equivalents
+                    elif w in CLINICAL_TERM_EQUIVALENTS and any(eq in combined_lower for eq in CLINICAL_TERM_EQUIVALENTS[w]):
+                        matched_words.append(w)
                 overlap = len(matched_words) / len(target_words)
                 if overlap < 0.50:
                     return ClaimVerificationResult(
@@ -677,12 +816,12 @@ class AnswerGroundingVerifier:
         supporting_chunks = []
         for chunk, text in cleaned_chunk_texts:
             c_text_lower = text.lower()
-            if prop.predicate == "dose" and prop.value is not None:
+            if (prop.predicate == "dose" or prop.value is not None) and prop.value is not None:
                 if f"{prop.value:g}" in c_text_lower:
                     supporting_chunks.append(str(chunk.get("chunk_id")))
             elif prop.target_object:
                 target_words = [w.lower() for w in re.findall(r'\b[a-zA-Z]{4,}\b', prop.target_object) if w.lower() not in ["patients", "treatment"]]
-                if any(w in c_text_lower for w in target_words):
+                if any(w in c_text_lower or (len(w) >= 6 and w[:5] in c_text_lower) for w in target_words):
                     supporting_chunks.append(str(chunk.get("chunk_id")))
             else:
                 supporting_chunks.append(str(chunk.get("chunk_id")))
@@ -712,12 +851,13 @@ class AnswerGroundingVerifier:
         self,
         answer: str,
         evidence_chunks: List[Dict[str, Any]],
-        citations: Optional[List[str]] = None
+        citations: Optional[List[str]] = None,
+        target_intents: Optional[List[Any]] = None
     ) -> AnswerVerificationResult:
         """
         Verifies a complete candidate answer string.
         Deconstructs answer into atomic claims, audits each against citations,
-        and enforces whole-answer fail-closed suppression if ANY claim fails.
+        evaluates answer components, and enforces fail-closed suppression if ANY claim fails.
         """
         if not answer or not answer.strip():
             return AnswerVerificationResult(
@@ -733,25 +873,50 @@ class AnswerGroundingVerifier:
         has_contradiction = False
         grounded_count = 0
 
-        # Resolve available citation chunk IDs
-        all_citation_ids = citations or [str(c.get("chunk_id")) for c in evidence_chunks if isinstance(c, dict) and "chunk_id" in c]
+        # Resolve available citation chunk IDs normalized to string IDs
+        all_citation_ids: List[str] = []
+        if citations:
+            for item in citations:
+                if isinstance(item, dict) and "chunk_id" in item:
+                    all_citation_ids.append(str(item["chunk_id"]))
+                elif isinstance(item, str):
+                    all_citation_ids.append(item)
+        if not all_citation_ids:
+            all_citation_ids = [str(c.get("chunk_id")) for c in evidence_chunks if isinstance(c, dict) and "chunk_id" in c]
+
+        evidence_chunk_map = {
+            str(c.get("chunk_id")): c
+            for c in evidence_chunks
+            if isinstance(c, dict) and "chunk_id" in c
+        }
 
         for claim in claims:
-            # Check if this claim can be verified against ANY valid cited chunk
-            # If multiple citations exist, test against all cited chunks
             best_res: Optional[ClaimVerificationResult] = None
 
-            # First try evaluating with all citation IDs together
+            # Prioritize chunks compatible with the proposition's subject
+            prop = self.extract_proposition(claim)
+            target_subj = prop.subject if prop else ""
+            if target_subj:
+                compat_cids = [
+                    cid for cid in all_citation_ids
+                    if cid in evidence_chunk_map and self._check_entity_compatibility(target_subj, self._extract_entity_from_evidence(evidence_chunk_map[cid]))
+                ]
+            else:
+                compat_cids = all_citation_ids
+
+            eval_cids = compat_cids if compat_cids else all_citation_ids
+
+            # First try evaluating with compatible citation IDs together
             res_all = self.verify_claim(
                 claim_text=claim,
                 evidence_chunks=evidence_chunks,
-                citation_chunk_ids=all_citation_ids
+                citation_chunk_ids=eval_cids
             )
             if res_all.status == ClaimStatus.SUPPORTED:
                 best_res = res_all
             else:
                 # Try evaluating against individual citations to find specific supporting chunk
-                for cid in all_citation_ids:
+                for cid in eval_cids:
                     res_single = self.verify_claim(
                         claim_text=claim,
                         evidence_chunks=evidence_chunks,
@@ -774,6 +939,131 @@ class AnswerGroundingVerifier:
                     has_contradiction = True
 
         is_grounded = (len(failed_claims) == 0 and grounded_count > 0)
+        supported_claims = [c.claim_text for c in claim_results if c.status == ClaimStatus.SUPPORTED]
+
+        # Component-level decomposition & mapping
+        INTENT_LABELS = {
+            "indications": "Indications & Clinical Usage",
+            "adverse_effects": "Adverse Reactions & Side Effects",
+            "contraindications": "Contraindications & Warnings",
+            "dosage": "Dosage & Administration",
+            "interactions": "Drug Interactions",
+            "special_populations": "Use in Specific Populations",
+            "general_factual": "General Clinical Information",
+            "overview": "Clinical Overview"
+        }
+
+        component_map: Dict[str, Dict[str, Any]] = {}
+        if target_intents:
+            for ti in target_intents:
+                t_str = str(ti.value if hasattr(ti, 'value') else ti).lower()
+                component_map[t_str] = {
+                    "label": INTENT_LABELS.get(t_str, t_str.replace("_", " ").title()),
+                    "claims": []
+                }
+
+        # Map evaluated claims to logical components
+        for cres in claim_results:
+            claim_text_lower = cres.claim_text.lower()
+            prop = cres.proposition
+            c_intent = "general_factual"
+            if prop:
+                if prop.predicate in ["contraindicated", "safe"] or "contraindication" in claim_text_lower or "warning" in claim_text_lower:
+                    c_intent = "contraindications"
+                elif prop.predicate == "adverse_reaction" or "adverse" in claim_text_lower or "side effect" in claim_text_lower:
+                    c_intent = "adverse_effects"
+                elif prop.predicate == "dose" or prop.value is not None or "dose" in claim_text_lower or "dosage" in claim_text_lower:
+                    c_intent = "dosage"
+                elif prop.predicate in ["indicated", "decreases", "increases", "is"] or "prescribed" in claim_text_lower or "used for" in claim_text_lower or "treat" in claim_text_lower:
+                    c_intent = "indications"
+            else:
+                if "contraindication" in claim_text_lower or "warning" in claim_text_lower:
+                    c_intent = "contraindications"
+                elif "adverse" in claim_text_lower or "side effect" in claim_text_lower:
+                    c_intent = "adverse_effects"
+                elif "dose" in claim_text_lower or "dosage" in claim_text_lower:
+                    c_intent = "dosage"
+                elif "prescribed" in claim_text_lower or "used for" in claim_text_lower or "treat" in claim_text_lower:
+                    c_intent = "indications"
+
+            if c_intent not in component_map:
+                component_map[c_intent] = {
+                    "label": INTENT_LABELS.get(c_intent, c_intent.replace("_", " ").title()),
+                    "claims": []
+                }
+            component_map[c_intent]["claims"].append(cres)
+
+        # Build evaluated AnswerComponent objects
+        components: List[AnswerComponent] = []
+        for c_intent, c_data in component_map.items():
+            c_claims: List[ClaimVerificationResult] = c_data["claims"]
+            if not c_claims:
+                c_status = ClaimStatus.UNSUPPORTED_BY_EVIDENCE
+                supp_text = None
+                comp_citations = []
+            else:
+                if any(c.status == ClaimStatus.CONTRADICTED for c in c_claims):
+                    c_status = ClaimStatus.CONTRADICTED
+                elif any(c.status == ClaimStatus.NUMERIC_MISMATCH for c in c_claims):
+                    c_status = ClaimStatus.NUMERIC_MISMATCH
+                elif any(c.status == ClaimStatus.ENTITY_MISMATCH for c in c_claims):
+                    c_status = ClaimStatus.ENTITY_MISMATCH
+                elif any(c.status == ClaimStatus.QUALIFIER_MISMATCH for c in c_claims):
+                    c_status = ClaimStatus.QUALIFIER_MISMATCH
+                elif any(c.status == ClaimStatus.INVALID_CITATION for c in c_claims):
+                    c_status = ClaimStatus.INVALID_CITATION
+                elif all(c.status == ClaimStatus.SUPPORTED for c in c_claims):
+                    c_status = ClaimStatus.SUPPORTED
+                elif any(c.status == ClaimStatus.WEAKLY_SUPPORTED for c in c_claims):
+                    c_status = ClaimStatus.WEAKLY_SUPPORTED
+                else:
+                    c_status = ClaimStatus.UNSUPPORTED_BY_EVIDENCE
+
+                supp_claims = [c.claim_text for c in c_claims if c.status == ClaimStatus.SUPPORTED]
+                supp_text = " ".join(supp_claims) if supp_claims else None
+                comp_citations = list(set([cid for c in c_claims if c.status == ClaimStatus.SUPPORTED for cid in c.supporting_chunk_ids]))
+
+            components.append(AnswerComponent(
+                intent=c_intent,
+                label=c_data["label"],
+                status=c_status,
+                claims=c_claims,
+                supported_text=supp_text,
+                citations=comp_citations
+            ))
+
+        supported_components = [c for c in components if c.status == ClaimStatus.SUPPORTED and c.supported_text]
+        toxic_components = [c for c in components if c.status in [
+            ClaimStatus.CONTRADICTED, ClaimStatus.NUMERIC_MISMATCH,
+            ClaimStatus.ENTITY_MISMATCH, ClaimStatus.QUALIFIER_MISMATCH, ClaimStatus.INVALID_CITATION
+        ]]
+        unverified_components = [c for c in components if c.status in [ClaimStatus.UNSUPPORTED_BY_EVIDENCE, ClaimStatus.UNVERIFIED]]
+
+        # Whole-answer grounding requires zero claim failures AND all target components supported
+        all_components_supported = all(c.status == ClaimStatus.SUPPORTED for c in components) if components else True
+        is_grounded = (len(failed_claims) == 0 and grounded_count > 0 and all_components_supported)
+
+        # Determine safety for partial disclosure:
+        # A partial answer is permitted ONLY IF:
+        # 1. Not already fully grounded
+        # 2. At least one component is verified SUPPORTED
+        # 3. NO critical contradictions (has_contradiction is False)
+        # 4. Zero toxic failures across evaluated components
+        has_toxic_failure = len(toxic_components) > 0
+        safe_for_partial = (not is_grounded) and (len(supported_components) > 0) and (not has_contradiction) and (not has_toxic_failure)
+
+        partial_answer = None
+        if safe_for_partial and supported_components:
+            base_supported = "\n\n".join([c.supported_text for c in supported_components if c.supported_text])
+            unverified_labels = [c.label for c in unverified_components if c.status != ClaimStatus.SUPPORTED]
+            if unverified_labels:
+                partial_answer = (
+                    f"{base_supported}\n\n"
+                    f"[Clinical Note: The statements above for {', '.join([c.label for c in supported_components])} "
+                    f"are verified by authoritative guidelines. However, the following aspect(s) could not be verified from retrieved guidelines: {', '.join(unverified_labels)}.]"
+                )
+            else:
+                partial_answer = base_supported
 
         return AnswerVerificationResult(
             answer=answer,
@@ -783,5 +1073,9 @@ class AnswerGroundingVerifier:
             failed_claims=failed_claims,
             discrepancies=discrepancies,
             grounded_claim_count=grounded_count,
-            total_claim_count=len(claims)
+            total_claim_count=len(claims),
+            supported_claims=supported_claims,
+            partial_answer=partial_answer,
+            safe_for_partial=safe_for_partial,
+            components=components
         )

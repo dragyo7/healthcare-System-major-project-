@@ -64,6 +64,10 @@ class MedicalGenerator:
             doc1_match = re.search(r"\[Doc 1:\s*([^:|\]]+)", context)
             if doc1_match:
                 raw_title = doc1_match.group(1).strip()
+                if " - " in raw_title:
+                    raw_title = raw_title.split(" - ")[0].strip()
+                if " | " in raw_title:
+                    raw_title = raw_title.split(" | ")[0].strip()
                 cleaned_entity = re.sub(
                     r"\s+(?:Oral|Tablet|Capsule|Injection|Solution|Topical|Suspension|Syrup|Inhaler|Cream|Ointment|Patch|Uses|Side Effects|Interactions|Warnings|Dosage|Dosing|Boxed Warning).*$",
                     "",
@@ -95,6 +99,22 @@ class MedicalGenerator:
                 flags=re.IGNORECASE
             )
 
+        # 4. Remove trailing generic disclaimer boilerplate that fails proposition verification
+        # (The system already appends formal CLINICAL_DISCLAIMER via guardrails)
+        cleaned = re.sub(
+            r"(?:\.\s+)?(?:Patients?\s+should\s+(?:always\s+)?consult|Patients?\s+should\s+(?:always\s+)?talk|Consult\s+(?:your|a)\s+doctor|Always\s+consult\s+(?:your|a)\s+(?:doctor|physician|healthcare))[^.!?]*(?:[.!?]|$)",
+            ".",
+            cleaned,
+            flags=re.IGNORECASE
+        ).strip()
+        cleaned = re.sub(r"\.\s*\.", ".", cleaned)
+
+        # 5. Drop any trailing uncompleted fragment sentence (e.g. cut off by max_new_tokens)
+        if cleaned and cleaned[-1] not in ".!?":
+            last_punct = max(cleaned.rfind("."), cleaned.rfind("!"), cleaned.rfind("?"))
+            if last_punct > 0:
+                cleaned = cleaned[:last_punct + 1].strip()
+
         return cleaned
 
     def _lazy_load_model(self):
@@ -114,10 +134,13 @@ class MedicalGenerator:
         self,
         query: str,
         context: str,
-        system_prompt: Optional[str] = None
+        system_prompt: Optional[str] = None,
+        audience: Optional[str] = "doctor"
     ) -> str:
         """
         Generates a concise, evidence-grounded medical answer using retrieved context.
+        Supports audience modes: 'doctor' (precise clinical nomenclature) and 'patient' (accessible plain language).
+        Both modes adhere to identical strict grounding and verification constraints.
         """
         if not context or context.startswith("No relevant medical context"):
             return "I am not able to find sufficient verified medical evidence to answer this question. Please consult a qualified doctor."
@@ -125,26 +148,40 @@ class MedicalGenerator:
         self._lazy_load_model()
         import torch
 
-        default_system_prompt = (
-            "You are an authoritative, evidence-grounded medical AI assistant.\n\n"
-            "STRICT CLINICAL RULES:\n"
-            "1. Answer the question using ONLY the factual medical evidence provided in <evidence_passages>.\n"
-            "2. Always repeat the specific medication or medical condition name (e.g. 'Lisinopril', 'Metformin'); NEVER use ambiguous pronouns such as 'It' or 'This drug'.\n"
-            "3. Do not include conversational filler (such as 'Sure!', 'Certainly!', or 'Here is...').\n"
-            "4. Do not output numbered lists or fragments; output concise, complete factual sentences.\n"
-            "5. Preserve numerical values, units, and qualifiers exactly as stated in the evidence.\n"
-            "6. Never extrapolate, speculate, or introduce unverified medical claims.\n"
-            "7. If the evidence does not directly answer the question, state: 'The provided medical evidence does not contain sufficient details to answer this question.'\n"
-            "8. Maximum 2 to 3 sentences."
-        )
+        if audience == "patient":
+            default_system_prompt = (
+                "You are an authoritative, evidence-grounded medical AI assistant communicating with a patient.\n\n"
+                "STRICT CLINICAL RULES:\n"
+                "1. Answer the question using ONLY the factual medical evidence provided in <evidence_passages>. Explain concepts clearly and accessibly without distorting clinical facts.\n"
+                "2. Always repeat the specific medication or medical condition name (e.g. 'Lisinopril', 'Metformin'); NEVER use ambiguous pronouns such as 'It' or 'This drug'.\n"
+                "3. Do not include conversational filler (such as 'Sure!', 'Certainly!', or 'Here is...').\n"
+                "4. Do not output numbered lists or fragments; output concise, complete factual sentences.\n"
+                "5. Preserve numerical values, units, and qualifiers exactly as stated in the evidence.\n"
+                "6. Never extrapolate, speculate, or introduce unverified outside medical claims.\n"
+                "7. If the evidence does not directly answer the question, state: 'The provided medical evidence does not contain sufficient details to answer this question.'\n"
+                "8. Output exactly 1 to 2 concise sentences."
+            )
+        else:
+            default_system_prompt = (
+                "You are an authoritative, evidence-grounded medical AI assistant communicating with a healthcare professional.\n\n"
+                "STRICT CLINICAL RULES:\n"
+                "1. Answer the question using ONLY the factual medical evidence provided in <evidence_passages>. Use precise clinical nomenclature, exact indications, dosage qualifiers, and contraindication criteria.\n"
+                "2. Always repeat the specific medication or medical condition name (e.g. 'Lisinopril', 'Metformin'); NEVER use ambiguous pronouns such as 'It' or 'This drug'.\n"
+                "3. Do not include conversational filler (such as 'Sure!', 'Certainly!', or 'Here is...').\n"
+                "4. Do not output numbered lists or fragments; output concise, complete factual sentences.\n"
+                "5. Preserve numerical values, units, and qualifiers exactly as stated in the evidence.\n"
+                "6. Never extrapolate, speculate, or introduce unverified outside medical claims.\n"
+                "7. If the evidence does not directly answer the question, state: 'The provided medical evidence does not contain sufficient details to answer this question.'\n"
+                "8. Output exactly 1 to 2 concise sentences."
+            )
 
         sys_prompt = system_prompt or default_system_prompt
 
         user_content = (
             f"<evidence_passages>\n{context}\n</evidence_passages>\n\n"
             f"<patient_question>\n{query}\n</patient_question>\n\n"
-            f"Please provide a clear, concise, evidence-grounded medical summary answering the patient question.\n"
-            f"Explicitly name the subject medication or condition in each sentence instead of using pronouns. Do not use conversational filler."
+            f"Please provide a 1-2 sentence evidence-grounded summary answering the patient question using ONLY the provided text.\n"
+            f"Explicitly name the subject medication or condition. Do not invent outside conditions or filler."
         )
 
         messages = [
@@ -193,7 +230,7 @@ class MockGenerator(MedicalGenerator):
     """
     Lightweight deterministic generator for testing and CI/CD pipelines.
     """
-    def generate(self, query: str, context: str, system_prompt: Optional[str] = None) -> str:
+    def generate(self, query: str, context: str, system_prompt: Optional[str] = None, audience: Optional[str] = "doctor", **kwargs) -> str:
         if not context or context.startswith("No relevant"):
             return "I am not able to find sufficient verified medical evidence to answer this question."
         lines = [

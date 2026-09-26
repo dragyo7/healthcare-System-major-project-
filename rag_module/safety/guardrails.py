@@ -13,7 +13,8 @@ EMERGENCY_PATTERNS = [
     r'\b(stroke|facial\s+droop|slurred\s+speech|sudden\s+numbness|arm\s+weakness)\b',
     r'\b(anaphylaxis|throat\s+closing|severe\s+allergic\s+reaction)\b',
     r'\b(suicide|kill\s+myself|end\s+my\s+life|self\s+harm)\b',
-    r'\b(unconscious|unresponsive|severe\s+bleeding|coughing\s+up\s+blood)\b'
+    r'\b(unconscious|unresponsive|severe\s+bleeding|coughing\s+(?:up\s+)?blood|vomiting\s+blood)\b',
+    r'\b(poisoning|poisoned|drank\s+(?:bleach|acid|chemical|pesticide|detergent|toxic)|swallowed\s+(?:bleach|battery|acid|chemical|poison))\b'
 ]
 
 # Prompt injection and delimiter hijacking patterns

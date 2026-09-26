@@ -126,7 +126,10 @@ class LegacyQueryRequest(BaseModel):
     message: Optional[str] = Field(None, description="Alias for query")
     mode: Optional[str] = Field("hybrid", description="Retrieval mode: dense, bm25, hybrid, or hybrid_rerank")
     generate_answer: Optional[bool] = Field(True, description="Whether to invoke LLM for answer generation")
-    top_k: Optional[int] = Field(5, ge=1, le=100, description="Top-k candidates")
+    top_k: Optional[int] = Field(None, ge=1, le=100, description="Top-k candidates (defaults to dynamic backend budgeting)")
+    audience: Optional[str] = Field("doctor", description="Target audience: 'doctor' or 'patient'")
+    patient_context: Optional[Dict[str, Any]] = Field(None, description="Optional patient EHR context")
+    clinician_context: Optional[Dict[str, Any]] = Field(None, description="Optional clinician context")
 
     @model_validator(mode="before")
     @classmethod
@@ -238,7 +241,7 @@ def chat_endpoint(request: LegacyQueryRequest):
     """
     try:
         pipeline = get_legacy_pipeline()
-        top_k = request.top_k or 5
+        top_k = request.top_k  # If None, dynamically budgeted by pipeline
         mode = request.mode or "hybrid"
         generate_answer = request.generate_answer if request.generate_answer is not None else True
 
@@ -249,7 +252,10 @@ def chat_endpoint(request: LegacyQueryRequest):
             mode=mode,
             top_k=top_k,
             generate_answer=generate_answer,
-            verify_answer=True
+            verify_answer=True,
+            audience=request.audience,
+            patient_context=request.patient_context,
+            clinician_context=request.clinician_context
         )
 
         verification = res.get("verification")
@@ -259,6 +265,9 @@ def chat_endpoint(request: LegacyQueryRequest):
             grounding_status = "emergency_diverted"
         elif not res.get("abstained", False) and is_grounded:
             grounding_status = "grounded"
+        elif not res.get("abstained", False) and verification and verification.get("safe_for_partial", False):
+            grounding_status = "partially_grounded"
+            is_grounded = True
         elif verification and not verification.get("is_grounded", False):
             grounding_status = "withheld_verification_failure"
         else:
@@ -389,6 +398,7 @@ def rag_trace_endpoint(request: DiagnosticTraceRequest):
     # 8. Generation if allowed
     verification_data = None
     internal_provenance_data = None
+    query_analysis_data = None
     if rag_resp.grounding and rag_resp.grounding.generation_allowed and rag_resp.context_text:
         pipeline = get_legacy_pipeline()
         chat_res = pipeline.query(user_query=query, mode="hybrid_rerank", top_k=top_k, generate_answer=True, verify_answer=True)
@@ -396,6 +406,7 @@ def rag_trace_endpoint(request: DiagnosticTraceRequest):
         citations = chat_res.get("sources", [])
         verification_data = chat_res.get("verification")
         internal_provenance_data = chat_res.get("internal_provenance")
+        query_analysis_data = chat_res.get("query_analysis")
     else:
         if safety_assessment.is_emergency:
             final_answer = safety_assessment.emergency_message or "Emergency triage active."
@@ -405,6 +416,7 @@ def rag_trace_endpoint(request: DiagnosticTraceRequest):
 
     return {
         "query": query,
+        "query_analysis": query_analysis_data,
         "safety": {
             "is_emergency": safety_assessment.is_emergency,
             "risk_category": safety_assessment.risk_category.value if hasattr(safety_assessment.risk_category, "value") else str(safety_assessment.risk_category),

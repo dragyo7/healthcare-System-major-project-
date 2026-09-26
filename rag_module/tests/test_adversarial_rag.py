@@ -282,6 +282,19 @@ class TestRAGAdversarialStress(unittest.TestCase):
         self.assertEqual(resp.status_code, 400)
         self.assertIn("Extra inputs are not permitted", resp.text)
 
+    def test_17_acute_poisoning_and_hemoptysis_intercepted(self):
+        """Verify chemical poisoning ingestion and hemoptysis queries trigger emergency triage."""
+        queries = [
+            "My child drank an entire bottle of bleach five minutes ago and is coughing blood.",
+            "Patient swallowed battery and acid, severe bleeding and vomiting blood",
+            "Acute pesticide poisoning, patient is unresponsive and choking"
+        ]
+        safety = QuerySafetyEngine()
+        for q in queries:
+            assessment = safety.assess_query(q)
+            self.assertTrue(assessment.is_emergency, f"Failed emergency interception for: {q}")
+            self.assertEqual(assessment.risk_category, QueryRiskCategory.HIGH_RISK_EMERGENCY)
+
 
 if __name__ == "__main__":
     unittest.main()

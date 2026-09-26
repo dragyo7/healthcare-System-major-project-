@@ -109,6 +109,18 @@ class RAGQueryRequest(BaseModel):
         default=None,
         description="Optional filter by clinical section name (e.g. ['indications & usage', 'dosage & administration'])."
     )
+    audience: Optional[str] = Field(
+        default="doctor",
+        description="Target audience mode: 'doctor' (precise nomenclature) or 'patient' (accessible plain language)."
+    )
+    patient_context: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Optional patient EHR context (e.g. renal function, allergies, current medications)."
+    )
+    clinician_context: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Optional clinician context (specialty, care setting, hospital department)."
+    )
 
     @field_validator("query")
     @classmethod

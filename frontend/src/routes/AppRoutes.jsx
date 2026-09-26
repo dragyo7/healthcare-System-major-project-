@@ -20,7 +20,7 @@ import RoleGuard from "../components/shared/RoleGuard";
 import DashboardLayout from "../layouts/DashboardLayout";
 import { ROUTES } from "../constants/routes";
 
-// New Page Imports
+// Page Imports
 import Appointments from "../pages/Common/Appointments";
 import Settings from "../pages/Common/Settings";
 import Profile from "../pages/Common/Profile";
@@ -31,6 +31,7 @@ import Vitals from "../pages/Patient/Vitals";
 import Prescription from "../pages/Patient/Prescription";
 import Chat from "../pages/Patient/Chat";
 import DrugChecker from "../pages/Patient/DrugChecker";
+import CDSAssistant from "../pages/Common/CDSAssistant";
 
 export default function AppRoutes() {
   return (
@@ -39,6 +40,16 @@ export default function AppRoutes() {
         {/* Onboarding & Splash */}
         <Route path="/" element={<Splash />} />
         <Route path="/home" element={<Home />} />
+
+        {/* Top-Level Direct CDS Assistant Access (Public / Demo Demo Evaluation) */}
+        <Route
+          path="/cds"
+          element={
+            <DashboardLayout role="patient">
+              <CDSAssistant />
+            </DashboardLayout>
+          }
+        />
 
         {/* Auth Pages wrapped in GuestRoute */}
         <Route
@@ -91,6 +102,18 @@ export default function AppRoutes() {
               <RoleGuard allowedRoles={["doctor"]}>
                 <DashboardLayout role="doctor">
                   <DoctorDashboard />
+                </DashboardLayout>
+              </RoleGuard>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/doctor/cds-assistant"
+          element={
+            <ProtectedRoute>
+              <RoleGuard allowedRoles={["doctor"]}>
+                <DashboardLayout role="doctor">
+                  <CDSAssistant />
                 </DashboardLayout>
               </RoleGuard>
             </ProtectedRoute>
@@ -169,7 +192,6 @@ export default function AppRoutes() {
           }
         />
 
-
         {/* Protected Patient Routes */}
         <Route
           path="/patient"
@@ -178,6 +200,18 @@ export default function AppRoutes() {
               <RoleGuard allowedRoles={["patient"]}>
                 <DashboardLayout role="patient">
                   <PatientDashboard />
+                </DashboardLayout>
+              </RoleGuard>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/patient/cds-assistant"
+          element={
+            <ProtectedRoute>
+              <RoleGuard allowedRoles={["patient"]}>
+                <DashboardLayout role="patient">
+                  <CDSAssistant />
                 </DashboardLayout>
               </RoleGuard>
             </ProtectedRoute>

@@ -52,7 +52,7 @@ class RAGConfig:
     
     # LLM Generation Parameters
     GENERATOR_MODEL_NAME: str = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
-    MAX_NEW_TOKENS: int = 200
+    MAX_NEW_TOKENS: int = 90
     TEMPERATURE: float = 0.2
     TOP_P: float = 0.9
     REPETITION_PENALTY: float = 1.15
