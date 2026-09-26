@@ -4,19 +4,18 @@
 
 * **Repository**: `https://github.com/dragyo7/healthcare-System-major-project-`
 * **Current Branch**: `feature/rag-v2-foundation`
-* **RAG Backend Status**: **FROZEN at `fd2cac7` (v2.9.1)**.
-  * Backend & API regression tests: **VERIFIED** (156 passed, 2 skipped, 0 failed).
-  * Fail-closed safety, hybrid retrieval, cross-encoder reranker, and grounding verifier: **FROZEN & VERIFIED**.
+* **RAG Backend Status**: **FROZEN at `497a547` (v2.10 Hardened Baseline)**.
+  * Backend & API regression tests: **VERIFIED** (190 passed, 2 skipped, 0 failed in 202s).
+  * Request Contract: Clean minimal `{ "query": "..." }` with centralized defaults and backward-compatible full payload support.
+  * Safety & Grounding: Early prompt injection interception (`prompt_injection_blocked`), Lipitor $\to$ Atorvastatin canonical generic normalization, emergency triage bypass (100% intercepted), and deterministic fail-closed verification.
   * Active Runtime Corpus: **2,204 Authentic Production Chunks** (`GET /health` reports `indexed_chunks_count: 2204`).
   * Archived Regression Baseline: **236 Golden Baseline Chunks** (`data/indices/golden_236/`).
-* **Frontend Status**: **BUILD VERIFIED (Browser E2E Pending)**.
+* **Frontend Status**: **ACTIVE INTEGRATION**.
   * Stack: React 19 + Vite 8 + Tailwind CSS v4 (`http://127.0.0.1:5173`).
-  * Production Build: Verified (`npm run build` passes cleanly).
-  * API Integration: Implemented via `frontend/src/api/ragApi.js` connecting to FastAPI endpoints.
-  * Browser E2E Status: **Pending** (UI components implemented and build passes; true browser-level E2E session not yet recorded).
+  * Target: Doctor Dashboard $\to$ Doctor AI Assistant connected to backend `/chat`.
 * **Platform Integration Status**: **IN PROGRESS**.
-  * Standalone engines exist for Drug Safety (`drug_module`) and Prescription Parsing (`prescription_module`).
-  * Unified CDS API gateway and end-to-end orchestration are the active development targets.
+  * Phase 1: Working RAG Backend Checkpoint & Push.
+  * Phase 2: Doctor Dashboard & Real RAG Chatbot Frontend Integration.
 
 ---
 
@@ -69,9 +68,9 @@
 The active engineering path follows this progression:
 
 ```text
-RAG v2.9.1 (FROZEN at fd2cac7)
+RAG v2.10 (FROZEN at 497a547)
     ↓
-Frontend RAG integration (Build verified, browser E2E pending)
+Frontend Doctor Dashboard + Real RAG Chatbot Integration (Active Milestone)
     ↓
 Unified public API surface (Gateway aggregating RAG, Drug Safety, Prescription)
     ↓
