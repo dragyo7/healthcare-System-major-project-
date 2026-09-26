@@ -17,6 +17,8 @@ from enum import Enum
 from typing import List, Dict, Any, Optional, Tuple, Set
 from pydantic import BaseModel, Field, ConfigDict
 
+from rag_module.retrieval.entity_normalizer import ClinicalEntityNormalizer
+
 
 class ClaimStatus(str, Enum):
     """
@@ -169,7 +171,8 @@ class AnswerGroundingVerifier:
     Contains zero hardcoded medical facts, drug databases, or clinical cutoffs.
     """
 
-    def __init__(self):
+    def __init__(self, normalizer: Optional[ClinicalEntityNormalizer] = None):
+        self.normalizer = normalizer or ClinicalEntityNormalizer()
         self._compiled_injections = [re.compile(p, re.IGNORECASE) for p in INSTRUCTION_OVERRIDE_PATTERNS]
 
     # =========================================================================
@@ -225,6 +228,7 @@ class AnswerGroundingVerifier:
 
         NON_SUBJECT_WORDS = {
             "the", "common", "adverse", "usual", "recommended", "initial", "starting", "maximum", "dose",
+            "most", "more", "least", "frequent",
             "however", "overall", "additionally", "furthermore", "moreover", "therefore", "generally",
             "specifically", "consequently", "importantly", "finally", "patients", "individuals", "adults",
             "children", "target", "evidence", "passage", "treatment", "therapy", "use", "administration",
@@ -262,7 +266,7 @@ class AnswerGroundingVerifier:
         # Pattern B: "The usual initial starting dose of X..."
         if not subject:
             subj_match = re.match(
-                r'^(?:the\s+)?(?:usual\s+|recommended\s+)?(?:initial\s+|starting\s+|maximum\s+|adult\s+|common\s+)*(?:dose\s+of\s+|adult\s+dose\s+of\s+|adverse\s+reactions\s+of\s+)?([a-zA-Z0-9_/-]+(?:\s+and\s+[a-zA-Z0-9_/-]+(?:\s+potassium)?)?)',
+                r'^(?:the\s+)?(?:usual\s+|recommended\s+|most\s+|more\s+)?(?:initial\s+|starting\s+|maximum\s+|adult\s+|common\s+)*(?:dose\s+of\s+|adult\s+dose\s+of\s+|adverse\s+reactions?\s+of\s+|adverse\s+reaction\s+reported\s+is\s+)?([a-zA-Z0-9_/-]+(?:\s+and\s+[a-zA-Z0-9_/-]+(?:\s+potassium)?)?)',
                 clean_text,
                 re.IGNORECASE
             )
@@ -494,6 +498,17 @@ class AnswerGroundingVerifier:
         if c_clean in e_clean or e_clean in c_clean:
             return True
 
+        # Check canonical generic equivalence via normalizer (e.g. Lipitor <-> Atorvastatin)
+        if self.normalizer:
+            c_norm = self.normalizer.normalize_term(c)
+            e_norm = self.normalizer.normalize_term(e)
+            if c_norm and e_norm and c_norm.canonical_name.lower() == e_norm.canonical_name.lower():
+                return True
+            if c_norm and c_norm.canonical_name.lower() in e_clean:
+                return True
+            if e_norm and e_norm.canonical_name.lower() in c_clean:
+                return True
+
         return False
 
     # =========================================================================
@@ -567,7 +582,8 @@ class AnswerGroundingVerifier:
             "it", "this", "these", "this drug", "the drug", "this medication", "the medication",
             "medication", "drug", "agent", "product", "side", "effect", "effects", "adverse",
             "reaction", "reactions", "treatment", "therapy", "use", "dose", "dosage", "evidence",
-            "passage", "text", "information", "guideline", "guidelines", "patient", "patients"
+            "passage", "text", "information", "guideline", "guidelines", "patient", "patients",
+            "most", "more", "least"
         }
         all_evidence_entities = [self._extract_entity_from_evidence(c) for c in evidence_chunks if isinstance(c, dict)]
         if not prop.subject or prop.subject.lower() in generic_subject_terms:

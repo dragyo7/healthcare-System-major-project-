@@ -160,9 +160,23 @@ class MedicalRAGPipeline:
                 "answer": emergency_alert,
                 "is_emergency": True,
                 "abstained": False,
+                "grounding_status": "emergency_diverted",
                 "sources": [],
                 "retrieved_chunks_count": 0,
                 "pipeline_mode": "emergency_triage"
+            }
+
+        # Step 1.5: Prompt Injection Early Blocking
+        if self.guardrails.detect_injection(user_query):
+            return {
+                "question": user_query,
+                "answer": "Security Alert: Request blocked. This system cannot process prompts attempting to override or inspect system instructions.",
+                "is_emergency": False,
+                "abstained": True,
+                "grounding_status": "prompt_injection_blocked",
+                "sources": [],
+                "retrieved_chunks_count": 0,
+                "pipeline_mode": "prompt_injection_blocked"
             }
 
         # Step 2: Input Sanitization
@@ -186,29 +200,40 @@ class MedicalRAGPipeline:
         bm25_k = budget.bm25_k
         target_final_k = top_k or budget.final_top_k
 
+        # If query has canonical entities distinct from raw mentions, construct retrieval query
+        # that includes canonical generic names so BM25 and dense retrieval find canonical monographs
+        retrieval_query = sanitized_query
+        canonical_terms = []
+        for ent in query_analysis.resolved_entities:
+            c_name = ent.get("canonical_name")
+            if c_name and c_name.lower() not in sanitized_query.lower():
+                canonical_terms.append(c_name)
+        if canonical_terms:
+            retrieval_query = f"{sanitized_query} {' '.join(canonical_terms)}"
+
         # Step 3: Retrieval Stage
         candidate_chunks = []
         if mode == "dense" and self.dense_retriever:
-            dense_results = self.dense_retriever.search(sanitized_query, top_k=dense_k)
+            dense_results = self.dense_retriever.search(retrieval_query, top_k=dense_k)
             candidate_chunks = [dict(self.dense_retriever.metadata[idx], dense_score=score) for idx, score in dense_results]
         elif mode == "bm25" and self.bm25_retriever:
-            bm25_results = self.bm25_retriever.search(sanitized_query, top_k=bm25_k)
+            bm25_results = self.bm25_retriever.search(retrieval_query, top_k=bm25_k)
             candidate_chunks = [dict(self.bm25_retriever.metadata[idx], bm25_score=score) for idx, score in bm25_results]
         elif self.hybrid_retriever:
             candidate_chunks = self.hybrid_retriever.search(
-                sanitized_query,
+                retrieval_query,
                 dense_k=dense_k,
                 bm25_k=bm25_k,
                 final_k=max(dense_k, bm25_k, target_final_k * 3)
             )
         elif self.dense_retriever:
-            dense_results = self.dense_retriever.search(sanitized_query, top_k=target_final_k)
+            dense_results = self.dense_retriever.search(retrieval_query, top_k=target_final_k)
             candidate_chunks = [dict(self.dense_retriever.metadata[idx], dense_score=score) for idx, score in dense_results]
 
         # Step 4: Second-Stage Reranking & Dynamic Section Selection
         if mode in ["hybrid_rerank", "hybrid"] and self.reranker and candidate_chunks:
             scored_candidates = self.reranker.rerank(
-                sanitized_query,
+                retrieval_query,
                 candidate_chunks,
                 top_k=len(candidate_chunks)
             )
@@ -219,10 +244,18 @@ class MedicalRAGPipeline:
         # If the query identified a single target drug/entity and is not a multi-entity comparison,
         # prioritize chunks belonging to that target entity to prevent cross-entity distractor contamination.
         if query_analysis.candidate_entities and ClinicalIntent.COMPARISON not in query_analysis.intents:
-            primary_entity = query_analysis.candidate_entities[0].lower()
+            target_entity_names = set(e.lower() for e in query_analysis.candidate_entities)
+            for res_ent in query_analysis.resolved_entities:
+                c_name = res_ent.get("canonical_name")
+                if c_name:
+                    target_entity_names.add(c_name.lower())
+                mono = res_ent.get("matched_monograph")
+                if mono:
+                    target_entity_names.add(mono.lower())
+
             entity_matching = [
                 c for c in scored_candidates
-                if primary_entity in str(c.get("title", "")).lower() or primary_entity in str(c.get("text", "")).lower()
+                if any(t in str(c.get("title", "")).lower() or t in str(c.get("text", "")).lower() for t in target_entity_names)
             ]
             if len(entity_matching) >= 1:
                 non_conflicting = [

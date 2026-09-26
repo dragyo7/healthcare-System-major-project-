@@ -10,6 +10,7 @@ import re
 from pydantic import BaseModel, Field, ConfigDict
 
 from rag_module.safety.provenance_validator import ProvenanceValidator, ProvenanceStatus
+from rag_module.retrieval.entity_normalizer import ClinicalEntityNormalizer
 
 
 class GroundingStatus(str, Enum):
@@ -160,8 +161,13 @@ class EvidencePolicyEngine:
     Deterministic policy evaluator that assesses retrieved evidence and determines
     whether downstream answer generation should be authorized or safely blocked.
     """
-    def __init__(self, config: Optional[EvidencePolicyConfig] = None):
+    def __init__(
+        self,
+        config: Optional[EvidencePolicyConfig] = None,
+        normalizer: Optional[ClinicalEntityNormalizer] = None
+    ):
         self.config = config or EvidencePolicyConfig()
+        self.normalizer = normalizer or ClinicalEntityNormalizer()
         self.contradiction_regexes = [
             (re.compile(p1, re.IGNORECASE), re.compile(p2, re.IGNORECASE))
             for p1, p2 in CONTRADICTION_PAIRS
@@ -291,6 +297,15 @@ class EvidencePolicyEngine:
                     re.search(r'\b' + re.escape(tok) + r'\b', combined_top_text) is not None or
                     (len(clean_tok) >= 4 and re.search(r'\b' + re.escape(clean_tok) + r'(?:s|es|ing|ed|al|ic|ical|in|ine)?\b', combined_top_text) is not None)
                 )
+                if not matched and self.normalizer:
+                    norm = self.normalizer.normalize_term(tok)
+                    if norm:
+                        canon = norm.canonical_name.lower()
+                        if (
+                            re.search(r'\b' + re.escape(canon) + r'\b', combined_top_text) is not None or
+                            (len(canon) >= 4 and re.search(r'\b' + re.escape(canon[:4]) + r'\b', combined_top_text) is not None)
+                        ):
+                            matched = True
                 if matched:
                     matched_tokens.append(tok)
                 else:
@@ -306,7 +321,15 @@ class EvidencePolicyEngine:
             matched_words = 0
             for w in query_words:
                 clean_w = re.sub(r'(s|es|ing|ed)$', '', w)
-                if re.search(r'\b' + re.escape(w) + r'\b', combined_top_text) or (len(clean_w) >= 3 and re.search(r'\b' + re.escape(clean_w) + r'\b', combined_top_text)):
+                matched = (
+                    re.search(r'\b' + re.escape(w) + r'\b', combined_top_text) is not None or
+                    (len(clean_w) >= 3 and re.search(r'\b' + re.escape(clean_w) + r'\b', combined_top_text) is not None)
+                )
+                if not matched and self.normalizer:
+                    norm = self.normalizer.normalize_term(w)
+                    if norm and re.search(r'\b' + re.escape(norm.canonical_name.lower()) + r'\b', combined_top_text) is not None:
+                        matched = True
+                if matched:
                     matched_words += 1
             overlap_ratio = matched_words / len(query_words)
 
@@ -315,6 +338,8 @@ class EvidencePolicyEngine:
         top_score = float(getattr(top_item, "score", 0.0) if hasattr(top_item, "score") else top_item.get("score", 0.0))
         dense_score = getattr(top_item, "dense_score", None) if hasattr(top_item, "dense_score") else top_item.get("dense_score")
         bm25_score = getattr(top_item, "bm25_score", None) if hasattr(top_item, "bm25_score") else top_item.get("bm25_score")
+        if dense_score is None and top_score >= 0.5:
+            dense_score = top_score
 
         # Out of domain check:
         # A query is out of domain if substantive query word overlap is extremely low (< 35%),

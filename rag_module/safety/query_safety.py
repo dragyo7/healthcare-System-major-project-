@@ -47,10 +47,10 @@ EMERGENCY_PATTERNS = [
 
 # Patterns for prompt injection / instruction override
 INJECTION_PATTERNS = [
-    r'ignore\s+(all\s+)?(previous|prior|above)\s+instructions',
+    r'(ignore|disregard|forget)\s+(all\s+)?(previous|prior|above|your)\s+instructions',
     r'disregard\s+(all\s+)?(previous|prior|rules|instructions)',
     r'you\s+are\s+now\s+(a|an|in\s+)?(dan|developer\s+mode|unrestricted)',
-    r'(system\s*prompt|system\s*message|jailbreak|reveal\s+confidential)',
+    r'(system\s*prompt|system\s*message|jailbreak|reveal\s+(confidential|hidden))',
     r'^\s*system\s*:',
     r'<\s*system\s*>',
     r'\[\s*INST\s*\]'

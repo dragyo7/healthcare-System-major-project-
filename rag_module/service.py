@@ -384,6 +384,38 @@ class RAGService:
                 safety_assessment=safety_assessment
             )
 
+        # Step 0b: Early Interception of Prompt Injection
+        if safety_assessment.is_injection:
+            elapsed_ms = (time.perf_counter() - start_time) * 1000.0
+            injection_grounding = GroundingDecision(
+                status=GroundingStatus.INSUFFICIENT_EVIDENCE,
+                generation_allowed=False,
+                evidence_count=0,
+                usable_evidence_count=0,
+                provenance_valid=False,
+                top_evidence_rank=None,
+                evidence_sources=[],
+                evidence_documents=[],
+                evidence_sections=[],
+                reason_codes=[GroundingReasonCode.POLICY_ABSTENTION],
+                warnings=["Query intercepted by security guardrail: prompt injection attempt blocked."],
+                conflict_detected=False,
+                conflict_summary=None,
+                policy_latency_ms=0.0
+            )
+            return RAGQueryResponse(
+                query=raw_query,
+                retrieval_mode=mode,
+                total_evidence=0,
+                evidence=[],
+                context_text="Security Alert: Request blocked. This system cannot process prompts attempting to override or inspect system instructions.",
+                latency_ms=round(elapsed_ms, 2),
+                reranker_status="disabled",
+                filters_applied={},
+                grounding=injection_grounding,
+                safety_assessment=safety_assessment
+            )
+
         # Step 1: Execute primary retrieval
         candidate_chunks: List[Dict[str, Any]] = []
 

@@ -19,9 +19,11 @@ EMERGENCY_PATTERNS = [
 
 # Prompt injection and delimiter hijacking patterns
 PROMPT_INJECTION_PATTERNS = [
-    r'ignore\s+(all\s+)?(previous|prior|above)\s+instructions',
-    r'you\s+are\s+now\s+(in\s+)?(dan|developer\s+mode|unrestricted)',
-    r'(system\s*prompt|system\s*message|jailbreak|disregard\s+rules)',
+    r'(ignore|disregard|forget)\s+(all\s+)?(previous|prior|above|your)\s+instructions',
+    r'disregard\s+(all\s+)?(previous|prior|rules|instructions)',
+    r'you\s+are\s+now\s+(a|an|in\s+)?(dan|developer\s+mode|unrestricted)',
+    r'(system\s*prompt|system\s*message|jailbreak|reveal\s+(confidential|hidden))',
+    r'^\s*system\s*:',
     r'<\s*system\s*>',
     r'\[\s*INST\s*\]'
 ]
@@ -63,6 +65,14 @@ class SafetyGuardrails:
         if self.emergency_regex.search(query):
             return EMERGENCY_RESPONSE
         return None
+
+    def detect_injection(self, text: str) -> bool:
+        """
+        Detects prompt injection attempts aiming to override system instructions or extract prompts.
+        """
+        if not text:
+            return False
+        return bool(self.injection_regex.search(text))
 
     def sanitize_input(self, user_text: str) -> str:
         """

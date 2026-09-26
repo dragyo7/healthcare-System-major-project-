@@ -121,25 +121,79 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 # Legacy Compatibility Request/Response Models
 # =====================================================================
 
-class LegacyQueryRequest(BaseModel):
-    query: Optional[str] = Field(None, description="Patient or clinician medical question")
-    message: Optional[str] = Field(None, description="Alias for query")
-    mode: Optional[str] = Field("hybrid", description="Retrieval mode: dense, bm25, hybrid, or hybrid_rerank")
-    generate_answer: Optional[bool] = Field(True, description="Whether to invoke LLM for answer generation")
-    top_k: Optional[int] = Field(None, ge=1, le=100, description="Top-k candidates (defaults to dynamic backend budgeting)")
-    audience: Optional[str] = Field("doctor", description="Target audience: 'doctor' or 'patient'")
-    patient_context: Optional[Dict[str, Any]] = Field(None, description="Optional patient EHR context")
-    clinician_context: Optional[Dict[str, Any]] = Field(None, description="Optional clinician context")
+class ChatRequest(BaseModel):
+    """
+    Canonical request contract for clinical chat interactions.
+    The minimum valid request requires only 'query'. All other fields are optional advanced controls.
+    """
+    query: str = Field(
+        ...,
+        min_length=1,
+        description="Patient or clinician medical question (REQUIRED). Minimum valid request: {'query': 'What is metformin?'}"
+    )
+    message: Optional[str] = Field(
+        None,
+        description="Optional alias for query. Defaults centrally to query if not provided."
+    )
+    mode: str = Field(
+        "hybrid",
+        description="Retrieval mode: 'dense', 'bm25', 'hybrid', or 'hybrid_rerank'. Default: 'hybrid'."
+    )
+    generate_answer: bool = Field(
+        True,
+        description="Whether to invoke LLM for answer generation. Default: True."
+    )
+    top_k: Optional[int] = Field(
+        None,
+        ge=1,
+        le=100,
+        description="Candidate retrieval depth. Default: None (activates dynamic backend query budgeting)."
+    )
+    audience: str = Field(
+        "doctor",
+        description="Target audience: 'doctor' or 'patient'. Default: 'doctor'."
+    )
+    patient_context: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Optional patient EHR context (e.g. age, conditions, current meds). Default: {}."
+    )
+    clinician_context: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Optional clinician context (e.g. specialty, guidelines). Default: {}."
+    )
 
     @model_validator(mode="before")
     @classmethod
-    def normalize_query_and_message(cls, data: Any) -> Any:
+    def normalize_request(cls, data: Any) -> Any:
         if isinstance(data, dict):
-            q = data.get("query") or data.get("message")
-            if q is not None:
-                data["query"] = str(q)
+            # Backward compatibility: accept 'message' if 'query' is omitted
+            q = data.get("query")
+            m = data.get("message")
+            if (q is None or (isinstance(q, str) and not q.strip())) and m is not None:
+                data["query"] = str(m).strip()
+                q = data["query"]
+            elif q is not None and isinstance(q, str):
+                data["query"] = q.strip()
+                q = data["query"]
+
+            if q is not None and m is None:
                 data["message"] = str(q)
+
+            if data.get("patient_context") is None:
+                data["patient_context"] = {}
+            if data.get("clinician_context") is None:
+                data["clinician_context"] = {}
+            if data.get("mode") is None:
+                data["mode"] = "hybrid"
+            if data.get("generate_answer") is None:
+                data["generate_answer"] = True
+            if data.get("audience") is None:
+                data["audience"] = "doctor"
         return data
+
+
+# Canonical backward-compatibility alias
+LegacyQueryRequest = ChatRequest
 
 
 class CitationItem(BaseModel):
@@ -164,6 +218,9 @@ class LegacyQueryResponse(BaseModel):
     is_grounded: Optional[bool] = Field(False, description="Whether the answer passed post-generation grounding verification.")
     verified: Optional[bool] = Field(False, description="Canonical alias for is_grounded.")
     grounding_status: Optional[str] = Field("unknown", description="High-level grounding classification status.")
+
+
+ChatResponse = LegacyQueryResponse
 
 
 # Global pipeline singleton for backward-compatible /chat
@@ -231,27 +288,31 @@ def retrieve_endpoint(request: RAGQueryRequest):
     return service.retrieve(request)
 
 
-@app.post("/chat", response_model=LegacyQueryResponse, tags=["Compatibility"])
-def chat_endpoint(request: LegacyQueryRequest):
+@app.post("/chat", response_model=LegacyQueryResponse, tags=["Generation", "Clinical"])
+def chat_endpoint(request: ChatRequest):
     """
-    Processes medical queries through the full generation pipeline (triage, retrieval, grounding policy, generation, grounding verification).
+    Processes clinical questions through the full evidence-grounded generation pipeline.
+
+    Minimum valid request:
+      {"query": "What is metformin?"}
+
+    Optional advanced parameters:
+      message, mode, generate_answer, top_k, audience, patient_context, clinician_context.
+
     Consumes MedicalRAGPipeline.query() as the single canonical execution path:
       /chat -> MedicalRAGPipeline.query() -> generation -> verifier -> final gate -> /chat response
     Public /chat requests cannot bypass grounding verification.
     """
     try:
         pipeline = get_legacy_pipeline()
-        top_k = request.top_k  # If None, dynamically budgeted by pipeline
-        mode = request.mode or "hybrid"
-        generate_answer = request.generate_answer if request.generate_answer is not None else True
 
         # Preferred architecture: /chat -> MedicalRAGPipeline.query() -> generation -> verifier -> final gate -> /chat response
         # verify_answer=True is strictly enforced to prevent public bypass
         res = pipeline.query(
             user_query=request.query,
-            mode=mode,
-            top_k=top_k,
-            generate_answer=generate_answer,
+            mode=request.mode,
+            top_k=request.top_k,
+            generate_answer=request.generate_answer,
             verify_answer=True,
             audience=request.audience,
             patient_context=request.patient_context,
@@ -263,6 +324,8 @@ def chat_endpoint(request: LegacyQueryRequest):
 
         if res.get("is_emergency", False):
             grounding_status = "emergency_diverted"
+        elif res.get("grounding_status") == "prompt_injection_blocked":
+            grounding_status = "prompt_injection_blocked"
         elif not res.get("abstained", False) and is_grounded:
             grounding_status = "grounded"
         elif not res.get("abstained", False) and verification and verification.get("safe_for_partial", False):
@@ -280,7 +343,7 @@ def chat_endpoint(request: LegacyQueryRequest):
             "abstained": res.get("abstained", False),
             "sources": res.get("sources", []),
             "retrieved_chunks_count": res.get("retrieved_chunks_count", 0),
-            "pipeline_mode": res.get("pipeline_mode", mode),
+            "pipeline_mode": res.get("pipeline_mode", request.mode),
             "is_grounded": is_grounded,
             "verified": is_grounded,
             "grounding_status": grounding_status
