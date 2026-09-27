@@ -1,0 +1,338 @@
+[
+  {
+    "document_id": "icmr_icmr_t2dm_2023_diagnostic_criteria",
+    "source_id": "ICMR",
+    "source_name": "Indian Council of Medical Research Clinical Guidelines",
+    "publisher": "Indian Council of Medical Research (ICMR, Govt of India)",
+    "title": "ICMR Guidelines for Management of Type 2 Diabetes in India - Diagnostic Thresholds for Indian Population",
+    "content": "ICMR Clinical Guideline: ICMR Guidelines for Management of Type 2 Diabetes in India (2023)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: Diagnostic Thresholds for Indian Population (Page 12)\n\nDue to the high prevalence of abdominal obesity, early onset of metabolic syndrome, and 'thin-fat Indian phenotype', diagnostic screening for type 2 diabetes in India is recommended starting at age 30 years (or earlier with family history/obesity). Diagnostic criteria: 1) Fasting Blood Glucose >= 126 mg/dL (7.0 mmol/L) after at least 8 hours of fast; 2) 2-hour Post-load Plasma Glucose >= 200 mg/dL (11.1 mmol/L) during a 75g Oral Glucose Tolerance Test; 3) Glycated Hemoglobin (HbA1c) >= 6.5% using a standardized NGSP-certified assay.",
+    "source_url": "https://main.icmr.nic.in/content/icmr-guidelines-management-type-2-diabetes",
+    "document_type": "clinical_guideline",
+    "evidence_role": "clinical_guideline",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "endocrinology",
+    "section": "Diagnostic Thresholds for Indian Population",
+    "section_id": "diagnostic_criteria",
+    "parent_document_id": "icmr_icmr_t2dm_2023",
+    "page_number": 12,
+    "publication_date": "2023",
+    "language": "en",
+    "checksum": "f4a89f725330a6c7a2846ee26bfb12921498851386eb5ea88f4569f670444a8a",
+    "entities": [
+      "Type 2 Diabetes Mellitus",
+      "Diabetic Nephropathy",
+      "Insulin Resistance",
+      "Metformin"
+    ],
+    "version": "2.9",
+    "retrieved_at": "2026-09-15T05:03:51.887061+00:00",
+    "content_hash": "f4a89f725330a6c7a2846ee26bfb12921498851386eb5ea88f4569f670444a8a",
+    "metadata": {
+      "guideline_id": "icmr_t2dm_2023",
+      "guideline_title": "ICMR Guidelines for Management of Type 2 Diabetes in India",
+      "section_title": "Diagnostic Thresholds for Indian Population",
+      "page_number": 12,
+      "publication_year": "2023",
+      "target_conditions": [
+        "Type 2 Diabetes Mellitus",
+        "Diabetic Nephropathy",
+        "Insulin Resistance",
+        "Metformin"
+      ]
+    }
+  },
+  {
+    "document_id": "icmr_icmr_t2dm_2023_stepwise_pharmacotherapy",
+    "source_id": "ICMR",
+    "source_name": "Indian Council of Medical Research Clinical Guidelines",
+    "publisher": "Indian Council of Medical Research (ICMR, Govt of India)",
+    "title": "ICMR Guidelines for Management of Type 2 Diabetes in India - Step-Wise Pharmacotherapy & Treatment Algorithm",
+    "content": "ICMR Clinical Guideline: ICMR Guidelines for Management of Type 2 Diabetes in India (2023)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: Step-Wise Pharmacotherapy & Treatment Algorithm (Page 28)\n\nStep 1: Metformin is the undisputed first-line pharmacological agent for all patients with Type 2 Diabetes without contraindications (eGFR >= 30 mL/min). Titrate starting from 500 mg daily to 1000-2000 mg daily with meals.\nStep 2: If HbA1c remains > 7.0% after 3 months of monotherapy, add a second oral agent based on patient comorbidities: In patients with atherosclerotic cardiovascular disease or diabetic kidney disease (microalbuminuria / eGFR 30-60), add an SGLT2 inhibitor (empagliflozin, dapagliflozin) or GLP-1 receptor agonist; in cost-sensitive primary care, add a second-generation sulfonylurea (glimepiride, gliclazide) with education on hypoglycemia.\nStep 3: Triple oral therapy or early initiation of basal insulin if HbA1c > 9.0% with symptomatic hyperglycemia.",
+    "source_url": "https://main.icmr.nic.in/content/icmr-guidelines-management-type-2-diabetes",
+    "document_type": "clinical_guideline",
+    "evidence_role": "clinical_guideline",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "endocrinology",
+    "section": "Step-Wise Pharmacotherapy & Treatment Algorithm",
+    "section_id": "stepwise_pharmacotherapy",
+    "parent_document_id": "icmr_icmr_t2dm_2023",
+    "page_number": 28,
+    "publication_date": "2023",
+    "language": "en",
+    "checksum": "5e5113b16ac94c665a99a34721015e3421d9636105d6a1dc1f223d5078437dcb",
+    "entities": [
+      "Type 2 Diabetes Mellitus",
+      "Diabetic Nephropathy",
+      "Insulin Resistance",
+      "Metformin"
+    ],
+    "version": "2.9",
+    "retrieved_at": "2026-09-15T05:03:51.887061+00:00",
+    "content_hash": "5e5113b16ac94c665a99a34721015e3421d9636105d6a1dc1f223d5078437dcb",
+    "metadata": {
+      "guideline_id": "icmr_t2dm_2023",
+      "guideline_title": "ICMR Guidelines for Management of Type 2 Diabetes in India",
+      "section_title": "Step-Wise Pharmacotherapy & Treatment Algorithm",
+      "page_number": 28,
+      "publication_year": "2023",
+      "target_conditions": [
+        "Type 2 Diabetes Mellitus",
+        "Diabetic Nephropathy",
+        "Insulin Resistance",
+        "Metformin"
+      ]
+    }
+  },
+  {
+    "document_id": "icmr_icmr_t2dm_2023_glycemic_targets",
+    "source_id": "ICMR",
+    "source_name": "Indian Council of Medical Research Clinical Guidelines",
+    "publisher": "Indian Council of Medical Research (ICMR, Govt of India)",
+    "title": "ICMR Guidelines for Management of Type 2 Diabetes in India - Glycemic Targets & Monitoring Guidelines",
+    "content": "ICMR Clinical Guideline: ICMR Guidelines for Management of Type 2 Diabetes in India (2023)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: Glycemic Targets & Monitoring Guidelines (Page 34)\n\nGeneral adult target: HbA1c < 7.0% (Fasting blood glucose 80-130 mg/dL; Post-prandial blood glucose < 180 mg/dL). More stringent target (HbA1c < 6.5%) in young patients with short disease duration and no cardiovascular disease. Less stringent target (HbA1c 7.5% - 8.0%) in elderly patients, those with history of severe hypoglycemia, or advanced microvascular/macrovascular complications.",
+    "source_url": "https://main.icmr.nic.in/content/icmr-guidelines-management-type-2-diabetes",
+    "document_type": "clinical_guideline",
+    "evidence_role": "clinical_guideline",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "endocrinology",
+    "section": "Glycemic Targets & Monitoring Guidelines",
+    "section_id": "glycemic_targets",
+    "parent_document_id": "icmr_icmr_t2dm_2023",
+    "page_number": 34,
+    "publication_date": "2023",
+    "language": "en",
+    "checksum": "89ec1dc53b54017c66f895ff60c42b72a90b8464528989abab1b9607c8175ca6",
+    "entities": [
+      "Type 2 Diabetes Mellitus",
+      "Diabetic Nephropathy",
+      "Insulin Resistance",
+      "Metformin"
+    ],
+    "version": "2.9",
+    "retrieved_at": "2026-09-15T05:03:51.887061+00:00",
+    "content_hash": "89ec1dc53b54017c66f895ff60c42b72a90b8464528989abab1b9607c8175ca6",
+    "metadata": {
+      "guideline_id": "icmr_t2dm_2023",
+      "guideline_title": "ICMR Guidelines for Management of Type 2 Diabetes in India",
+      "section_title": "Glycemic Targets & Monitoring Guidelines",
+      "page_number": 34,
+      "publication_year": "2023",
+      "target_conditions": [
+        "Type 2 Diabetes Mellitus",
+        "Diabetic Nephropathy",
+        "Insulin Resistance",
+        "Metformin"
+      ]
+    }
+  },
+  {
+    "document_id": "icmr_icmr_antimicrobial_2022_antimicrobial_stewardship_principles",
+    "source_id": "ICMR",
+    "source_name": "Indian Council of Medical Research Clinical Guidelines",
+    "publisher": "Indian Council of Medical Research (ICMR, Govt of India)",
+    "title": "ICMR National Treatment Guidelines for Antimicrobial Use in Infectious Diseases - Core Principles of Rational Antimicrobial Use",
+    "content": "ICMR Clinical Guideline: ICMR National Treatment Guidelines for Antimicrobial Use in Infectious Diseases (2022)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: Core Principles of Rational Antimicrobial Use (Page 5)\n\nEmpiric antimicrobial therapy should be based on local institutional antibiograms and disease severity. Collect appropriate microbiological specimens prior to starting antibiotics. De-escalate from broad-spectrum to narrow-spectrum antibiotics once culture and susceptibility results are available. Reserve 'Access', 'Watch', and 'Reserve' categories as per WHO/ICMR classifications. Strict restriction on indiscriminate use of carbapenems, colistin, and vancomycin in outpatient settings.",
+    "source_url": "https://main.icmr.nic.in/content/national-treatment-guidelines-antimicrobial-use",
+    "document_type": "clinical_guideline",
+    "evidence_role": "clinical_guideline",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "antimicrobial_stewardship",
+    "section": "Core Principles of Rational Antimicrobial Use",
+    "section_id": "antimicrobial_stewardship_principles",
+    "parent_document_id": "icmr_icmr_antimicrobial_2022",
+    "page_number": 5,
+    "publication_date": "2022",
+    "language": "en",
+    "checksum": "21edec62bb8b8f55b8eb8534fe1d5e3ef1057be804bbf5e962391ca30f57b850",
+    "entities": [
+      "Antimicrobial Stewardship",
+      "Pneumonia",
+      "Urinary Tract Infection",
+      "Antibiotic Resistance"
+    ],
+    "version": "2.9",
+    "retrieved_at": "2026-09-15T05:03:51.887061+00:00",
+    "content_hash": "21edec62bb8b8f55b8eb8534fe1d5e3ef1057be804bbf5e962391ca30f57b850",
+    "metadata": {
+      "guideline_id": "icmr_antimicrobial_2022",
+      "guideline_title": "ICMR National Treatment Guidelines for Antimicrobial Use in Infectious Diseases",
+      "section_title": "Core Principles of Rational Antimicrobial Use",
+      "page_number": 5,
+      "publication_year": "2022",
+      "target_conditions": [
+        "Antimicrobial Stewardship",
+        "Pneumonia",
+        "Urinary Tract Infection",
+        "Antibiotic Resistance"
+      ]
+    }
+  },
+  {
+    "document_id": "icmr_icmr_antimicrobial_2022_respiratory_infections",
+    "source_id": "ICMR",
+    "source_name": "Indian Council of Medical Research Clinical Guidelines",
+    "publisher": "Indian Council of Medical Research (ICMR, Govt of India)",
+    "title": "ICMR National Treatment Guidelines for Antimicrobial Use in Infectious Diseases - Empiric Therapy for Community-Acquired Pneumonia (CAP)",
+    "content": "ICMR Clinical Guideline: ICMR National Treatment Guidelines for Antimicrobial Use in Infectious Diseases (2022)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: Empiric Therapy for Community-Acquired Pneumonia (CAP) (Page 42)\n\nOutpatient CAP (Mild, CURB-65 = 0-1, no comorbidities): First-line: Oral Amoxicillin 500 mg - 1000 mg three times daily for 5 days. Alternative: Oral Doxycycline 100 mg twice daily. Outpatient with comorbidities (COPD, diabetes, renal disease): Oral Amoxicillin-Clavulanic acid (875/125 mg twice daily) PLUS oral Azithromycin (500 mg Day 1, then 250 mg daily). Hospitalized Inpatient (Non-ICU, CURB-65 >= 2): Intravenous Ceftriaxone (1-2 g IV once daily) PLUS IV/Oral Azithromycin (500 mg once daily).",
+    "source_url": "https://main.icmr.nic.in/content/national-treatment-guidelines-antimicrobial-use",
+    "document_type": "clinical_guideline",
+    "evidence_role": "clinical_guideline",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "antimicrobial_stewardship",
+    "section": "Empiric Therapy for Community-Acquired Pneumonia (CAP)",
+    "section_id": "respiratory_infections",
+    "parent_document_id": "icmr_icmr_antimicrobial_2022",
+    "page_number": 42,
+    "publication_date": "2022",
+    "language": "en",
+    "checksum": "9eb4da98c3f45e865389f15ae9843331371efd6dd6e59c2e181ec2ed1935596f",
+    "entities": [
+      "Antimicrobial Stewardship",
+      "Pneumonia",
+      "Urinary Tract Infection",
+      "Antibiotic Resistance"
+    ],
+    "version": "2.9",
+    "retrieved_at": "2026-09-15T05:03:51.887061+00:00",
+    "content_hash": "9eb4da98c3f45e865389f15ae9843331371efd6dd6e59c2e181ec2ed1935596f",
+    "metadata": {
+      "guideline_id": "icmr_antimicrobial_2022",
+      "guideline_title": "ICMR National Treatment Guidelines for Antimicrobial Use in Infectious Diseases",
+      "section_title": "Empiric Therapy for Community-Acquired Pneumonia (CAP)",
+      "page_number": 42,
+      "publication_year": "2022",
+      "target_conditions": [
+        "Antimicrobial Stewardship",
+        "Pneumonia",
+        "Urinary Tract Infection",
+        "Antibiotic Resistance"
+      ]
+    }
+  },
+  {
+    "document_id": "icmr_icmr_antimicrobial_2022_urinary_tract_infections",
+    "source_id": "ICMR",
+    "source_name": "Indian Council of Medical Research Clinical Guidelines",
+    "publisher": "Indian Council of Medical Research (ICMR, Govt of India)",
+    "title": "ICMR National Treatment Guidelines for Antimicrobial Use in Infectious Diseases - Empiric Therapy for Uncomplicated Acute Cystitis",
+    "content": "ICMR Clinical Guideline: ICMR National Treatment Guidelines for Antimicrobial Use in Infectious Diseases (2022)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: Empiric Therapy for Uncomplicated Acute Cystitis (Page 68)\n\nFirst-line empiric therapy for acute uncomplicated cystitis in adult females: Nitrofurantoin 100 mg orally twice daily for 5 days, OR Fosfomycin trometamol 3 g single-dose sachet. Avoid empiric Fluoroquinolones (ciprofloxacin, levofloxacin) for uncomplicated cystitis due to high rates (> 65%) of E. coli resistance in Indian community surveillance and risk of collateral fluoroquinolone damage.",
+    "source_url": "https://main.icmr.nic.in/content/national-treatment-guidelines-antimicrobial-use",
+    "document_type": "clinical_guideline",
+    "evidence_role": "clinical_guideline",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "antimicrobial_stewardship",
+    "section": "Empiric Therapy for Uncomplicated Acute Cystitis",
+    "section_id": "urinary_tract_infections",
+    "parent_document_id": "icmr_icmr_antimicrobial_2022",
+    "page_number": 68,
+    "publication_date": "2022",
+    "language": "en",
+    "checksum": "c24c141645ff35a1a7c482954548d84e3c1b8e328a2a959376e537bf41bb73b2",
+    "entities": [
+      "Antimicrobial Stewardship",
+      "Pneumonia",
+      "Urinary Tract Infection",
+      "Antibiotic Resistance"
+    ],
+    "version": "2.9",
+    "retrieved_at": "2026-09-15T05:03:51.887061+00:00",
+    "content_hash": "c24c141645ff35a1a7c482954548d84e3c1b8e328a2a959376e537bf41bb73b2",
+    "metadata": {
+      "guideline_id": "icmr_antimicrobial_2022",
+      "guideline_title": "ICMR National Treatment Guidelines for Antimicrobial Use in Infectious Diseases",
+      "section_title": "Empiric Therapy for Uncomplicated Acute Cystitis",
+      "page_number": 68,
+      "publication_year": "2022",
+      "target_conditions": [
+        "Antimicrobial Stewardship",
+        "Pneumonia",
+        "Urinary Tract Infection",
+        "Antibiotic Resistance"
+      ]
+    }
+  },
+  {
+    "document_id": "icmr_icmr_hypertension_2020_hypertension_definition",
+    "source_id": "ICMR",
+    "source_name": "Indian Council of Medical Research Clinical Guidelines",
+    "publisher": "Indian Council of Medical Research (ICMR, Govt of India)",
+    "title": "ICMR Guidelines for Diagnosis and Management of Hypertension in India - Diagnosis and Screening Protocol in Indian Primary Care",
+    "content": "ICMR Clinical Guideline: ICMR Guidelines for Diagnosis and Management of Hypertension in India (2020)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: Diagnosis and Screening Protocol in Indian Primary Care (Page 8)\n\nHypertension is defined as persistent Office Blood Pressure of Systolic BP >= 140 mmHg and/or Diastolic BP >= 90 mmHg based on the average of at least two seated readings taken on two separate clinical visits. Universal screening is recommended for all Indian adults >= 18 years visiting primary healthcare facilities.",
+    "source_url": "https://main.icmr.nic.in/content/guidelines-management-hypertension",
+    "document_type": "clinical_guideline",
+    "evidence_role": "clinical_guideline",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "cardiology",
+    "section": "Diagnosis and Screening Protocol in Indian Primary Care",
+    "section_id": "hypertension_definition",
+    "parent_document_id": "icmr_icmr_hypertension_2020",
+    "page_number": 8,
+    "publication_date": "2020",
+    "language": "en",
+    "checksum": "70845cfa79afc0cd828611aa6babc323d92d591c33a55a748bfff691fd8f6563",
+    "entities": [
+      "Hypertension",
+      "Cardiovascular Risk",
+      "Amlodipine",
+      "Telmisartan"
+    ],
+    "version": "2.9",
+    "retrieved_at": "2026-09-15T05:03:51.887061+00:00",
+    "content_hash": "70845cfa79afc0cd828611aa6babc323d92d591c33a55a748bfff691fd8f6563",
+    "metadata": {
+      "guideline_id": "icmr_hypertension_2020",
+      "guideline_title": "ICMR Guidelines for Diagnosis and Management of Hypertension in India",
+      "section_title": "Diagnosis and Screening Protocol in Indian Primary Care",
+      "page_number": 8,
+      "publication_year": "2020",
+      "target_conditions": [
+        "Hypertension",
+        "Cardiovascular Risk",
+        "Amlodipine",
+        "Telmisartan"
+      ]
+    }
+  },
+  {
+    "document_id": "icmr_icmr_hypertension_2020_pharmacological_management",
+    "source_id": "ICMR",
+    "source_name": "Indian Council of Medical Research Clinical Guidelines",
+    "publisher": "Indian Council of Medical Research (ICMR, Govt of India)",
+    "title": "ICMR Guidelines for Diagnosis and Management of Hypertension in India - First-Line Drug Selection & Combination Therapy",
+    "content": "ICMR Clinical Guideline: ICMR Guidelines for Diagnosis and Management of Hypertension in India (2020)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: First-Line Drug Selection & Combination Therapy (Page 22)\n\nInitial monotherapy for uncomplicated Stage 1 hypertension: Long-acting Calcium Channel Blocker (Amlodipine 5 mg once daily) OR Angiotensin Receptor Blocker (Telmisartan 40 mg once daily) OR ACE inhibitor (Enalapril 5 mg once daily). If BP is not controlled on monotherapy after 4 weeks or if initial BP is >= 20/10 mmHg above target (Stage 2 Hypertension), initiate combination therapy: Amlodipine + Telmisartan, or Amlodipine + Thiazide-like diuretic (Chlorthalidone 12.5 mg). Avoid combining ACE inhibitors with ARBs due to hyperkalemia and renal failure risk.",
+    "source_url": "https://main.icmr.nic.in/content/guidelines-management-hypertension",
+    "document_type": "clinical_guideline",
+    "evidence_role": "clinical_guideline",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "cardiology",
+    "section": "First-Line Drug Selection & Combination Therapy",
+    "section_id": "pharmacological_management",
+    "parent_document_id": "icmr_icmr_hypertension_2020",
+    "page_number": 22,
+    "publication_date": "2020",
+    "language": "en",
+    "checksum": "f683ac16dea9a515110145e1e6f4feb9faf3558d583cfd95cd44807d7c4895ba",
+    "entities": [
+      "Hypertension",
+      "Cardiovascular Risk",
+      "Amlodipine",
+      "Telmisartan"
+    ],
+    "version": "2.9",
+    "retrieved_at": "2026-09-15T05:03:51.887061+00:00",
+    "content_hash": "f683ac16dea9a515110145e1e6f4feb9faf3558d583cfd95cd44807d7c4895ba",
+    "metadata": {
+      "guideline_id": "icmr_hypertension_2020",
+      "guideline_title": "ICMR Guidelines for Diagnosis and Management of Hypertension in India",
+      "section_title": "First-Line Drug Selection & Combination Therapy",
+      "page_number": 22,
+      "publication_year": "2020",
+      "target_conditions": [
+        "Hypertension",
+        "Cardiovascular Risk",
+        "Amlodipine",
+        "Telmisartan"
+      ]
+    }
+  }
+]

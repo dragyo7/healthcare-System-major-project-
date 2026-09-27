@@ -1,71 +1,110 @@
 """
-Build a prescription analysis engine combining NLP and regex.
+Prescription extraction engine.
 
-Requirements:
-- Use spaCy pipeline from nlp_pipeline
-- Use regex extraction functions
-
-Tasks:
-- Process input text with spaCy
-- Extract DRUG entities
-
-For each DRUG:
-- Extract a local context window (±5 words around entity)
-- Apply regex only within this window
-- Assign correct dosage and frequency to each drug
-
-Output format:
-{
-  "drugs": [
-    {
-      "name": "Paracetamol",
-      "dosage": "500mg",
-      "frequency": "twice daily",
-      "confidence": 0.9
-    }
-  ]
-}
-
-Constraints:
-- Handle multiple drugs in one sentence
-- Avoid assigning same dosage to all drugs
-- Keep logic rule-based
-
-Goal:
-- Achieve realistic prescription parsing behavior
+Uses:
+- spaCy EntityRuler for medicine detection
+- Regex rules for dosage, frequency, duration, etc.
 """
 
 from nlp_pipeline import load_nlp
-from regex_rules import extract_dosage, extract_frequency
+
+from regex_rules import (
+    extract_dosage,
+    extract_frequency,
+    extract_duration,
+    extract_route,
+    extract_instruction
+)
 
 nlp = load_nlp()
 
 
-def get_context_window(doc, ent, window_size=5):
+def get_context_window(doc, ent, window_size=10):
+    """
+    Get words surrounding the detected drug.
+    """
+
     start = max(ent.start - window_size, 0)
     end = min(ent.end + window_size, len(doc))
+
     return doc[start:end].text
 
 
+def calculate_confidence(
+    dosage,
+    frequency,
+    duration,
+    route,
+    instruction
+):
+    """
+    Simple rule-based confidence.
+    """
+
+    confidence = 0.40
+
+    if dosage:
+        confidence += 0.20
+
+    if frequency:
+        confidence += 0.15
+
+    if duration:
+        confidence += 0.10
+
+    if route:
+        confidence += 0.10
+
+    if instruction:
+        confidence += 0.05
+
+    return round(min(confidence, 1.0), 2)
+
+
 def analyze_prescription(text):
-    doc = nlp(text)
 
     drugs = []
 
-    for ent in doc.ents:
-        if ent.label_ == "DRUG":
-            context = get_context_window(doc, ent)
+    # Process each non-empty line separately
+    for line in text.splitlines():
 
-            dosage = extract_dosage(context)
-            frequency = extract_frequency(context)
+        line = line.strip()
 
-            drug_info = {
-                "name": ent.text,
+        if not line:
+            continue
+
+        doc = nlp(line)
+
+        for ent in doc.ents:
+
+            if ent.label_ != "DRUG":
+                continue
+
+            dosage = extract_dosage(line)
+            frequency = extract_frequency(line)
+            duration = extract_duration(line)
+            route = extract_route(line)
+            instruction = extract_instruction(line)
+
+            confidence = calculate_confidence(
+                dosage,
+                frequency,
+                duration,
+                route,
+                instruction
+            )
+
+            drugs.append({
+                "name": ent.text.title(),
                 "dosage": dosage,
                 "frequency": frequency,
-                "confidence": 0.9 if dosage or frequency else 0.6
-            }
+                "duration": duration,
+                "route": route,
+                "instructions": instruction,
+                "confidence": confidence
+            })
 
-            drugs.append(drug_info)
-
-    return {"drugs": drugs}
+    return {
+        "drug_count": len(drugs),
+        "drugs": drugs
+    }

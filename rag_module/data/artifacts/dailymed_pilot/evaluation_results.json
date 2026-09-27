@@ -1,0 +1,89 @@
+{
+  "reranker_status": "FALLBACK (Pass-Through)",
+  "regimes": [
+    {
+      "regime": "A. DailyMed Dense",
+      "total_queries": 45,
+      "recall_at_1": 86.67,
+      "recall_at_3": 95.56,
+      "recall_at_5": 95.56,
+      "recall_at_10": 95.56,
+      "strict_docid_recall_at_1": 82.22,
+      "strict_docid_recall_at_5": 93.33,
+      "mrr": 0.9111,
+      "mean_latency_ms": 17.63
+    },
+    {
+      "regime": "B. DailyMed BM25",
+      "total_queries": 45,
+      "recall_at_1": 84.44,
+      "recall_at_3": 91.11,
+      "recall_at_5": 93.33,
+      "recall_at_10": 93.33,
+      "strict_docid_recall_at_1": 80.0,
+      "strict_docid_recall_at_5": 91.11,
+      "mrr": 0.8796,
+      "mean_latency_ms": 0.18
+    },
+    {
+      "regime": "C. DailyMed Hybrid",
+      "total_queries": 45,
+      "recall_at_1": 84.44,
+      "recall_at_3": 93.33,
+      "recall_at_5": 93.33,
+      "recall_at_10": 95.56,
+      "strict_docid_recall_at_1": 80.0,
+      "strict_docid_recall_at_5": 91.11,
+      "mrr": 0.8926,
+      "mean_latency_ms": 14.6
+    },
+    {
+      "regime": "D. Combined Dense",
+      "total_queries": 45,
+      "recall_at_1": 84.44,
+      "recall_at_3": 95.56,
+      "recall_at_5": 95.56,
+      "recall_at_10": 95.56,
+      "strict_docid_recall_at_1": 82.22,
+      "strict_docid_recall_at_5": 93.33,
+      "mrr": 0.9,
+      "mean_latency_ms": 16.5
+    },
+    {
+      "regime": "E. Combined BM25",
+      "total_queries": 45,
+      "recall_at_1": 84.44,
+      "recall_at_3": 95.56,
+      "recall_at_5": 95.56,
+      "recall_at_10": 95.56,
+      "strict_docid_recall_at_1": 80.0,
+      "strict_docid_recall_at_5": 93.33,
+      "mrr": 0.8926,
+      "mean_latency_ms": 104.66
+    },
+    {
+      "regime": "F. Combined Hybrid",
+      "total_queries": 45,
+      "recall_at_1": 84.44,
+      "recall_at_3": 95.56,
+      "recall_at_5": 95.56,
+      "recall_at_10": 95.56,
+      "strict_docid_recall_at_1": 80.0,
+      "strict_docid_recall_at_5": 93.33,
+      "mrr": 0.9,
+      "mean_latency_ms": 150.28
+    },
+    {
+      "regime": "G. Combined Hybrid + Reranker (Fallback)",
+      "total_queries": 45,
+      "recall_at_1": 84.44,
+      "recall_at_3": 95.56,
+      "recall_at_5": 95.56,
+      "recall_at_10": 95.56,
+      "strict_docid_recall_at_1": 80.0,
+      "strict_docid_recall_at_5": 93.33,
+      "mrr": 0.9,
+      "mean_latency_ms": 146.81
+    }
+  ]
+}

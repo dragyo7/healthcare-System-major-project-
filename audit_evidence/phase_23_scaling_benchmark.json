@@ -1,0 +1,58 @@
+{
+  "Tier_1_Golden_236": {
+    "chunk_count": 236,
+    "index_disk_size_kb": 354.04,
+    "metadata_json_size_kb": 303.66,
+    "bm25_index_size_kb": 344.51,
+    "indexing_build_time_s": 0.036,
+    "recall@1": 45.0,
+    "recall@3": 60.0,
+    "recall@5": 100.0,
+    "mrr": 0.605,
+    "latency_p50_ms": 84.11,
+    "latency_p95_ms": 532.5,
+    "latency_mean_ms": 452.11
+  },
+  "Tier_2_Scale_500": {
+    "chunk_count": 311,
+    "index_disk_size_kb": 466.54,
+    "metadata_json_size_kb": 369.1,
+    "bm25_index_size_kb": 397.49,
+    "indexing_build_time_s": 5.318,
+    "recall@1": 45.0,
+    "recall@3": 60.0,
+    "recall@5": 100.0,
+    "mrr": 0.605,
+    "latency_p50_ms": 70.68,
+    "latency_p95_ms": 438.85,
+    "latency_mean_ms": 424.98
+  },
+  "Tier_3_Scale_1000": {
+    "chunk_count": 1000,
+    "index_disk_size_kb": 1500.04,
+    "metadata_json_size_kb": 1201.62,
+    "bm25_index_size_kb": 797.03,
+    "indexing_build_time_s": 12.999,
+    "recall@1": 55.0,
+    "recall@3": 55.0,
+    "recall@5": 100.0,
+    "mrr": 0.6425,
+    "latency_p50_ms": 63.33,
+    "latency_p95_ms": 457.24,
+    "latency_mean_ms": 439.95
+  },
+  "Tier_4_Scale_5000": {
+    "chunk_count": 5000,
+    "index_disk_size_kb": 7500.04,
+    "metadata_json_size_kb": 6042.51,
+    "bm25_index_size_kb": 3148.77,
+    "indexing_build_time_s": 59.701,
+    "recall@1": 50.0,
+    "recall@3": 60.0,
+    "recall@5": 100.0,
+    "mrr": 0.6242,
+    "latency_p50_ms": 67.59,
+    "latency_p95_ms": 457.1,
+    "latency_mean_ms": 442.48
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "endpoint": "/chat",
+  "status_code": 200,
+  "latency_sec": 0.003,
+  "timestamp": "2026-09-15T05:59:13.005959+00:00",
+  "request": {
+    "query": "I am having severe crushing chest pain radiating to my left arm, shortness of breath, and sweating",
+    "top_k": 3
+  },
+  "response": {
+    "question": "I am having severe crushing chest pain radiating to my left arm, shortness of breath, and sweating",
+    "answer": "🚨 **MEDICAL EMERGENCY DETECTED** 🚨\n\nYour description suggests symptoms that may require **immediate medical attention**. Please take the following actions immediately:\n1. **Call your local emergency services immediately** (911 in the USA, 112 in Europe/India, 999 in the UK).\n2. If you are alone, inform someone nearby or go to the nearest emergency room / hospital.\n3. Do not attempt to self-medicate or wait for symptoms to resolve.\n\n*This AI system cannot manage or diagnose acute medical emergencies.*",
+    "is_emergency": true,
+    "abstained": false,
+    "sources": [],
+    "retrieved_chunks_count": 0,
+    "pipeline_mode": "emergency_triage"
+  },
+  "error": null
+}

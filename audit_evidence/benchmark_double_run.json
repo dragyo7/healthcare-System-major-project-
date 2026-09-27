@@ -1,0 +1,82 @@
+{
+  "environment": {
+    "python_version": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "embedding_model": "BAAI/bge-small-en",
+    "reranker_model": "cross-encoder/ms-marco-MiniLM-L-6-v2",
+    "index_faiss_sha256": "74dbf0d74aaffc46d0e5002c5bc03b2580545b74e72838756dacf37e75cf4eda",
+    "meta_json_sha256": "3d03b7652817cd470cac23a2fc777cbe29ca06c7677429e31bb7f482fdaa4606",
+    "bm25_index_sha256": "52652c1106cae4229d7555717633604ae837fed5182f4aa8b3e9097273d95071",
+    "benchmark_query_count": 20
+  },
+  "run_1_metrics": {
+    "Dense Only": {
+      "recall@1": 85.0,
+      "recall@3": 85.0,
+      "recall@5": 85.0,
+      "mrr": 0.85,
+      "latency_p50_ms": 19.08,
+      "latency_p95_ms": 21.17
+    },
+    "BM25 Only": {
+      "recall@1": 80.0,
+      "recall@3": 85.0,
+      "recall@5": 90.0,
+      "mrr": 0.8375,
+      "latency_p50_ms": 0.21,
+      "latency_p95_ms": 0.64
+    },
+    "Hybrid RRF": {
+      "recall@1": 85.0,
+      "recall@3": 85.0,
+      "recall@5": 85.0,
+      "mrr": 0.85,
+      "latency_p50_ms": 17.02,
+      "latency_p95_ms": 19.22
+    },
+    "Hybrid + CrossEncoder Reranker": {
+      "recall@1": 85.0,
+      "recall@3": 90.0,
+      "recall@5": 90.0,
+      "mrr": 0.875,
+      "latency_p50_ms": 146.98,
+      "latency_p95_ms": 704.09
+    }
+  },
+  "run_2_metrics": {
+    "Dense Only": {
+      "recall@1": 85.0,
+      "recall@3": 85.0,
+      "recall@5": 85.0,
+      "mrr": 0.85,
+      "latency_p50_ms": 17.69,
+      "latency_p95_ms": 20.21
+    },
+    "BM25 Only": {
+      "recall@1": 80.0,
+      "recall@3": 85.0,
+      "recall@5": 90.0,
+      "mrr": 0.8375,
+      "latency_p50_ms": 0.21,
+      "latency_p95_ms": 0.51
+    },
+    "Hybrid RRF": {
+      "recall@1": 85.0,
+      "recall@3": 85.0,
+      "recall@5": 85.0,
+      "mrr": 0.85,
+      "latency_p50_ms": 17.48,
+      "latency_p95_ms": 20.79
+    },
+    "Hybrid + CrossEncoder Reranker": {
+      "recall@1": 85.0,
+      "recall@3": 90.0,
+      "recall@5": 90.0,
+      "mrr": 0.875,
+      "latency_p50_ms": 157.39,
+      "latency_p95_ms": 698.15
+    }
+  },
+  "metrics_identical": true,
+  "reproducibility_verdict": "PERFECTLY_REPRODUCIBLE"
+}

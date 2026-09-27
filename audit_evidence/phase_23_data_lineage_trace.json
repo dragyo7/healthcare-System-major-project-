@@ -1,0 +1,57 @@
+{
+  "step_1_official_source": {
+    "authority": "U.S. National Library of Medicine & FDA",
+    "source_id": "DailyMed",
+    "set_id": "4b2c1256-42d4-4a4b-8e2a-0a8870fb381b",
+    "official_url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=4b2c1256-42d4-4a4b-8e2a-0a8870fb381b"
+  },
+  "step_2_raw_artifact": {
+    "raw_file": "rag_module/data/dailymed_raw.json",
+    "raw_sha256": "08e2e5684445e0751a59a30f02943494eebf7ec02d889e599033ca20c2bcf8e8",
+    "loinc_section": "CONTRAINDICATIONS (LOINC 34070-3)"
+  },
+  "step_3_parser_adapter": {
+    "adapter_class": "DailyMedAdapter (rag_module/ingestion/adapters/dailymed_adapter.py)",
+    "normalized_doc_id": "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_contraindications"
+  },
+  "step_4_chunk_generation": {
+    "chunk_id": "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_contraindications-c0",
+    "chunker": "SemanticChunker (256 token ceiling, whole-sentence boundary)",
+    "word_count": 17,
+    "exact_text": "Drug: Metformin\nSection: Contraindications\n\nSevere renal impairment (eGFR < 30 mL/min/1.73m2), metabolic acidosis, acute or chronic DKA."
+  },
+  "step_5_vector_embedding": {
+    "model": "BAAI/bge-small-en (384D)",
+    "vector_dimension": 384,
+    "faiss_index_type": "IndexFlatIP",
+    "faiss_position": 0
+  },
+  "step_6_retrieval_and_reranking": {
+    "dense_score": 0.9096,
+    "bm25_score": 6.1741,
+    "rrf_fused_score": 6.796329,
+    "rerank_score": 6.7963
+  },
+  "step_7_evidence_policy_evaluation": {
+    "grounding_status": "grounded",
+    "generation_allowed": true,
+    "provenance_valid": true,
+    "accepted_chunk_ids": [
+      "dailymed_060d40e4-b778-43d9-9596-f9478f773489_contraindications-c0",
+      "dailymed_060d40e4-b778-43d9-9596-f9478f773489_use_in_specific_populations-c0",
+      "dailymed_060d40e4-b778-43d9-9596-f9478f773489_warnings___precautions-c0"
+    ],
+    "reason_codes": [
+      "EVIDENCE_SUFFICIENT"
+    ]
+  },
+  "step_8_context_and_citation": {
+    "context_excerpt": "[Doc 1: Metformin - Contraindications | Source: National Library of Medicine DailyMed] (URL: https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=060d40e4-b778-43d9-9596-f9478f773489)\nDrug: Metfor...",
+    "citation_rendered": {
+      "title": "Metformin - Contraindications",
+      "publisher": "U.S. National Library of Medicine / FDA",
+      "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=060d40e4-b778-43d9-9596-f9478f773489"
+    }
+  },
+  "lineage_trace_verdict": "PERFECT_TRACEABLE_PROVENANCE"
+}

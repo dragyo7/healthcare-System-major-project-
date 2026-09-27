@@ -1,0 +1,12 @@
+{
+  "endpoint": "/chat",
+  "status_code": 500,
+  "latency_sec": 0.0,
+  "timestamp": "2026-09-15T06:00:50.785113+00:00",
+  "request": {
+    "query": "Can I take aspirin with blood pressure medication?",
+    "top_k": 3
+  },
+  "response": null,
+  "error": "timed out"
+}

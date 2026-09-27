@@ -1,0 +1,20 @@
+{
+  "endpoint": "/chat",
+  "status_code": 200,
+  "latency_sec": 1.4493,
+  "timestamp": "2026-09-15T05:59:12.997208+00:00",
+  "request": {
+    "query": "What is the capital of France and who won the 2022 World Cup?",
+    "top_k": 3
+  },
+  "response": {
+    "question": "What is the capital of France and who won the 2022 World Cup?",
+    "answer": "This query appears to be outside the supported medical domain. I cannot provide guidance.\n\n*Clinical Disclaimer: This healthcare AI assistant is an educational Major Project prototype and does not provide formal medical diagnoses, prescriptive orders, or emergency clinical advice. For health concerns or medication changes, always consult a licensed physician or healthcare professional.*",
+    "is_emergency": false,
+    "abstained": true,
+    "sources": [],
+    "retrieved_chunks_count": 3,
+    "pipeline_mode": "hybrid"
+  },
+  "error": null
+}

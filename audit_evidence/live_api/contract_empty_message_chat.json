@@ -1,0 +1,13 @@
+{
+  "endpoint": "/chat",
+  "status_code": 500,
+  "latency_sec": 0.0,
+  "timestamp": "2026-09-15T06:01:30.688640+00:00",
+  "request": {
+    "query": ""
+  },
+  "response": {
+    "detail": "RAG execution failed: 1 validation error for RAGQueryRequest\nquery\n  String should have at least 1 character [type=string_too_short, input_value='', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/string_too_short"
+  },
+  "error": "HTTP Error 500: Internal Server Error"
+}

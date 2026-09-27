@@ -1,0 +1,56 @@
+{
+  "version": "2.6",
+  "default_batch_size": 50,
+  "sources": {
+    "MedQuAD": {
+      "enabled": true,
+      "authority_level": "tier_1_federal_research",
+      "allowlist": [],
+      "domains": [
+        "oncology",
+        "genetics",
+        "endocrinology",
+        "neurology",
+        "cardiology",
+        "geriatrics",
+        "infectious_disease"
+      ],
+      "batch_size": 100,
+      "rate_limit_delay_sec": 0.0,
+      "output_subdir": "medquad"
+    },
+    "DailyMed": {
+      "enabled": true,
+      "authority_level": "tier_1_regulatory",
+      "allowlist": [],
+      "domains": ["pharmacology"],
+      "batch_size": 50,
+      "rate_limit_delay_sec": 0.0,
+      "output_subdir": "dailymed"
+    },
+    "openFDA": {
+      "enabled": false,
+      "authority_level": "tier_1_regulatory",
+      "allowlist": [
+        "lisinopril",
+        "amoxicillin",
+        "metformin",
+        "atorvastatin",
+        "levothyroxine"
+      ],
+      "domains": ["pharmacology"],
+      "batch_size": 25,
+      "rate_limit_delay_sec": 0.25,
+      "output_subdir": "openfda"
+    },
+    "ClinicalGuidelines": {
+      "enabled": false,
+      "authority_level": "tier_2_clinical_consensus",
+      "allowlist": [],
+      "domains": ["evidence_based_medicine", "clinical_protocols"],
+      "batch_size": 10,
+      "rate_limit_delay_sec": 0.0,
+      "output_subdir": "guidelines"
+    }
+  }
+}

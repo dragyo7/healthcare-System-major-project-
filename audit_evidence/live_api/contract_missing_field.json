@@ -1,0 +1,14 @@
+{
+  "endpoint": "/rag/query",
+  "status_code": 400,
+  "latency_sec": 0.0,
+  "timestamp": "2026-09-15T06:01:00.662644+00:00",
+  "request": {
+    "top_k": 3
+  },
+  "response": {
+    "error": "ValidationError",
+    "message": "query: Field required"
+  },
+  "error": "HTTP Error 400: Bad Request"
+}

@@ -1,0 +1,650 @@
+[
+  {
+    "document_id": "mplus_type2_diabetes_overview",
+    "source_id": "MedlinePlus",
+    "source_name": "MedlinePlus Health Topics (NLM / NIH)",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "Type 2 Diabetes - Overview",
+    "content": "Topic: Type 2 Diabetes\nSection: Overview\nPublisher: National Library of Medicine (NLM/NIH)\n\nType 2 diabetes is a chronic metabolic disease where blood glucose levels are too high. In type 2 diabetes, the body cells do not respond normally to insulin; this is called insulin resistance. The pancreas makes more insulin to try to get cells to respond, but eventually cannot keep up, leading to elevated blood sugar levels. Over time, high blood sugar damages nerves, blood vessels, eyes, kidneys, and the heart.",
+    "source_url": "https://medlineplus.gov/diabetestype2.html",
+    "document_type": "disease_summary",
+    "evidence_role": "reference_summary",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "endocrinology",
+    "section": "Overview",
+    "section_id": "overview",
+    "parent_document_id": "mplus_type2_diabetes",
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "8aa1bad64768cbd4e2a24ebea3d8c64fc670f23001c82ae221b1f061f1503a48",
+    "entities": [
+      "Diabetes Mellitus, Type 2",
+      "Hyperglycemia",
+      "Insulin Resistance",
+      "Metformin",
+      "HbA1c"
+    ],
+    "version": "2.9",
+    "retrieved_at": "2026-09-15T05:03:51.881922+00:00",
+    "content_hash": "8aa1bad64768cbd4e2a24ebea3d8c64fc670f23001c82ae221b1f061f1503a48",
+    "metadata": {
+      "topic_id": "type2_diabetes",
+      "topic_name": "Type 2 Diabetes",
+      "section_name": "Overview",
+      "mesh_terms": [
+        "Diabetes Mellitus, Type 2",
+        "Hyperglycemia",
+        "Insulin Resistance",
+        "Metformin",
+        "HbA1c"
+      ]
+    }
+  },
+  {
+    "document_id": "mplus_type2_diabetes_symptoms",
+    "source_id": "MedlinePlus",
+    "source_name": "MedlinePlus Health Topics (NLM / NIH)",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "Type 2 Diabetes - Symptoms",
+    "content": "Topic: Type 2 Diabetes\nSection: Symptoms\nPublisher: National Library of Medicine (NLM/NIH)\n\nCommon symptoms of type 2 diabetes include increased thirst (polydipsia), frequent urination (polyuria), increased hunger (polyphagia), unexplained weight loss, fatigue, blurred vision, slow-healing sores, and frequent infections.",
+    "source_url": "https://medlineplus.gov/diabetestype2.html",
+    "document_type": "disease_summary",
+    "evidence_role": "reference_summary",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "endocrinology",
+    "section": "Symptoms",
+    "section_id": "symptoms",
+    "parent_document_id": "mplus_type2_diabetes",
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "fc44df94339747394690c0b87682a70bc63207b386fd467bc100150ebe3f1d60",
+    "entities": [
+      "Diabetes Mellitus, Type 2",
+      "Hyperglycemia",
+      "Insulin Resistance",
+      "Metformin",
+      "HbA1c"
+    ],
+    "version": "2.9",
+    "retrieved_at": "2026-09-15T05:03:51.881922+00:00",
+    "content_hash": "fc44df94339747394690c0b87682a70bc63207b386fd467bc100150ebe3f1d60",
+    "metadata": {
+      "topic_id": "type2_diabetes",
+      "topic_name": "Type 2 Diabetes",
+      "section_name": "Symptoms",
+      "mesh_terms": [
+        "Diabetes Mellitus, Type 2",
+        "Hyperglycemia",
+        "Insulin Resistance",
+        "Metformin",
+        "HbA1c"
+      ]
+    }
+  },
+  {
+    "document_id": "mplus_type2_diabetes_diagnosis",
+    "source_id": "MedlinePlus",
+    "source_name": "MedlinePlus Health Topics (NLM / NIH)",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "Type 2 Diabetes - Diagnosis",
+    "content": "Topic: Type 2 Diabetes\nSection: Diagnosis\nPublisher: National Library of Medicine (NLM/NIH)\n\nType 2 diabetes is diagnosed through blood tests: 1) Fasting Plasma Glucose (FPG) test: 126 mg/dL or higher indicates diabetes; 2) Hemoglobin A1C test: 6.5% or higher on two separate tests confirms diabetes; 3) Oral Glucose Tolerance Test (OGTT): 200 mg/dL or higher at 2 hours; 4) Random Plasma Glucose: 200 mg/dL or higher accompanied by classic hyperglycemic symptoms.",
+    "source_url": "https://medlineplus.gov/diabetestype2.html",
+    "document_type": "disease_summary",
+    "evidence_role": "reference_summary",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "endocrinology",
+    "section": "Diagnosis",
+    "section_id": "diagnosis",
+    "parent_document_id": "mplus_type2_diabetes",
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "80f2469bec4f82fa531bdf7e6b54d71544768179e956013ad2f826584bcb067e",
+    "entities": [
+      "Diabetes Mellitus, Type 2",
+      "Hyperglycemia",
+      "Insulin Resistance",
+      "Metformin",
+      "HbA1c"
+    ],
+    "version": "2.9",
+    "retrieved_at": "2026-09-15T05:03:51.881922+00:00",
+    "content_hash": "80f2469bec4f82fa531bdf7e6b54d71544768179e956013ad2f826584bcb067e",
+    "metadata": {
+      "topic_id": "type2_diabetes",
+      "topic_name": "Type 2 Diabetes",
+      "section_name": "Diagnosis",
+      "mesh_terms": [
+        "Diabetes Mellitus, Type 2",
+        "Hyperglycemia",
+        "Insulin Resistance",
+        "Metformin",
+        "HbA1c"
+      ]
+    }
+  },
+  {
+    "document_id": "mplus_type2_diabetes_management_and_treatment",
+    "source_id": "MedlinePlus",
+    "source_name": "MedlinePlus Health Topics (NLM / NIH)",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "Type 2 Diabetes - Management and Treatment",
+    "content": "Topic: Type 2 Diabetes\nSection: Management and Treatment\nPublisher: National Library of Medicine (NLM/NIH)\n\nManagement includes lifestyle modifications (healthy diet, physical activity, weight management), regular blood sugar monitoring, and pharmacological therapy. Metformin is the standard first-line medication for type 2 diabetes. Other drug classes include SGLT2 inhibitors, GLP-1 receptor agonists, DPP-4 inhibitors, sulfonylureas, and insulin. Target HbA1c for most non-pregnant adults is below 7.0%.",
+    "source_url": "https://medlineplus.gov/diabetestype2.html",
+    "document_type": "disease_summary",
+    "evidence_role": "reference_summary",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "endocrinology",
+    "section": "Management and Treatment",
+    "section_id": "management_and_treatment",
+    "parent_document_id": "mplus_type2_diabetes",
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "464c4baee5e508cc0852c84b73db4bc2eab7e91ab1d995c7c7f0d9a466446cf4",
+    "entities": [
+      "Diabetes Mellitus, Type 2",
+      "Hyperglycemia",
+      "Insulin Resistance",
+      "Metformin",
+      "HbA1c"
+    ],
+    "version": "2.9",
+    "retrieved_at": "2026-09-15T05:03:51.881922+00:00",
+    "content_hash": "464c4baee5e508cc0852c84b73db4bc2eab7e91ab1d995c7c7f0d9a466446cf4",
+    "metadata": {
+      "topic_id": "type2_diabetes",
+      "topic_name": "Type 2 Diabetes",
+      "section_name": "Management and Treatment",
+      "mesh_terms": [
+        "Diabetes Mellitus, Type 2",
+        "Hyperglycemia",
+        "Insulin Resistance",
+        "Metformin",
+        "HbA1c"
+      ]
+    }
+  },
+  {
+    "document_id": "mplus_hypertension_overview",
+    "source_id": "MedlinePlus",
+    "source_name": "MedlinePlus Health Topics (NLM / NIH)",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "High Blood Pressure (Hypertension) - Overview",
+    "content": "Topic: High Blood Pressure (Hypertension)\nSection: Overview\nPublisher: National Library of Medicine (NLM/NIH)\n\nHigh blood pressure (hypertension) is a common chronic medical condition where the force of the blood against artery walls is consistently too high. Blood pressure is recorded as two numbers: systolic pressure (pressure during heartbeats) over diastolic pressure (pressure when the heart rests between beats). Uncontrolled hypertension significantly increases the risk of heart attack, stroke, heart failure, peripheral artery disease, and chronic kidney disease.",
+    "source_url": "https://medlineplus.gov/highbloodpressure.html",
+    "document_type": "disease_summary",
+    "evidence_role": "reference_summary",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "cardiology",
+    "section": "Overview",
+    "section_id": "overview",
+    "parent_document_id": "mplus_hypertension",
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "583c19e5b68b52116f1316a3a71087250bb171cebf89d6c0d98c45c2c50c4d6d",
+    "entities": [
+      "Hypertension",
+      "Blood Pressure",
+      "Antihypertensive Agents",
+      "Cardiovascular Disease"
+    ],
+    "version": "2.9",
+    "retrieved_at": "2026-09-15T05:03:51.881922+00:00",
+    "content_hash": "583c19e5b68b52116f1316a3a71087250bb171cebf89d6c0d98c45c2c50c4d6d",
+    "metadata": {
+      "topic_id": "hypertension",
+      "topic_name": "High Blood Pressure (Hypertension)",
+      "section_name": "Overview",
+      "mesh_terms": [
+        "Hypertension",
+        "Blood Pressure",
+        "Antihypertensive Agents",
+        "Cardiovascular Disease"
+      ]
+    }
+  },
+  {
+    "document_id": "mplus_hypertension_classification_and_thresholds",
+    "source_id": "MedlinePlus",
+    "source_name": "MedlinePlus Health Topics (NLM / NIH)",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "High Blood Pressure (Hypertension) - Classification and Thresholds",
+    "content": "Topic: High Blood Pressure (Hypertension)\nSection: Classification and Thresholds\nPublisher: National Library of Medicine (NLM/NIH)\n\nStandard clinical blood pressure categories: Normal: Systolic < 120 mmHg and Diastolic < 80 mmHg; Elevated: Systolic 120-129 mmHg and Diastolic < 80 mmHg; Stage 1 Hypertension: Systolic 130-139 mmHg or Diastolic 80-89 mmHg; Stage 2 Hypertension: Systolic >= 140 mmHg or Diastolic >= 90 mmHg; Hypertensive Crisis: Systolic > 180 mmHg and/or Diastolic > 120 mmHg (requires immediate emergency medical attention).",
+    "source_url": "https://medlineplus.gov/highbloodpressure.html",
+    "document_type": "disease_summary",
+    "evidence_role": "reference_summary",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "cardiology",
+    "section": "Classification and Thresholds",
+    "section_id": "classification_and_thresholds",
+    "parent_document_id": "mplus_hypertension",
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "be1167987ab19e5148437a3ba5d8f6db2156e7f41a53361e1461415d5866bb8a",
+    "entities": [
+      "Hypertension",
+      "Blood Pressure",
+      "Antihypertensive Agents",
+      "Cardiovascular Disease"
+    ],
+    "version": "2.9",
+    "retrieved_at": "2026-09-15T05:03:51.881922+00:00",
+    "content_hash": "be1167987ab19e5148437a3ba5d8f6db2156e7f41a53361e1461415d5866bb8a",
+    "metadata": {
+      "topic_id": "hypertension",
+      "topic_name": "High Blood Pressure (Hypertension)",
+      "section_name": "Classification and Thresholds",
+      "mesh_terms": [
+        "Hypertension",
+        "Blood Pressure",
+        "Antihypertensive Agents",
+        "Cardiovascular Disease"
+      ]
+    }
+  },
+  {
+    "document_id": "mplus_hypertension_symptoms",
+    "source_id": "MedlinePlus",
+    "source_name": "MedlinePlus Health Topics (NLM / NIH)",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "High Blood Pressure (Hypertension) - Symptoms",
+    "content": "Topic: High Blood Pressure (Hypertension)\nSection: Symptoms\nPublisher: National Library of Medicine (NLM/NIH)\n\nHypertension is often called the 'silent killer' because it typically causes no symptoms until severe or life-threatening organ damage has occurred. In severe hypertensive crises, symptoms may include severe headaches, chest pain, shortness of breath, blurred vision, dizziness, or nosebleeds.",
+    "source_url": "https://medlineplus.gov/highbloodpressure.html",
+    "document_type": "disease_summary",
+    "evidence_role": "reference_summary",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "cardiology",
+    "section": "Symptoms",
+    "section_id": "symptoms",
+    "parent_document_id": "mplus_hypertension",
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "fae15bfe0fb7dc431d561d72e0459927d898097e1bd7525a2cd42708252b04d3",
+    "entities": [
+      "Hypertension",
+      "Blood Pressure",
+      "Antihypertensive Agents",
+      "Cardiovascular Disease"
+    ],
+    "version": "2.9",
+    "retrieved_at": "2026-09-15T05:03:51.881922+00:00",
+    "content_hash": "fae15bfe0fb7dc431d561d72e0459927d898097e1bd7525a2cd42708252b04d3",
+    "metadata": {
+      "topic_id": "hypertension",
+      "topic_name": "High Blood Pressure (Hypertension)",
+      "section_name": "Symptoms",
+      "mesh_terms": [
+        "Hypertension",
+        "Blood Pressure",
+        "Antihypertensive Agents",
+        "Cardiovascular Disease"
+      ]
+    }
+  },
+  {
+    "document_id": "mplus_hypertension_treatment_and_lifestyle",
+    "source_id": "MedlinePlus",
+    "source_name": "MedlinePlus Health Topics (NLM / NIH)",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "High Blood Pressure (Hypertension) - Treatment and Lifestyle",
+    "content": "Topic: High Blood Pressure (Hypertension)\nSection: Treatment and Lifestyle\nPublisher: National Library of Medicine (NLM/NIH)\n\nTreatment includes the DASH (Dietary Approaches to Stop Hypertension) diet, restricting sodium intake to < 2000 mg/day, regular aerobic exercise, smoking cessation, and limiting alcohol. Pharmacological first-line classes include ACE inhibitors (lisinopril), Angiotensin Receptor Blockers (losartan, telmisartan), Calcium Channel Blockers (amlodipine), and Thiazide diuretics (chlorthalidone, hydrochlorothiazide).",
+    "source_url": "https://medlineplus.gov/highbloodpressure.html",
+    "document_type": "disease_summary",
+    "evidence_role": "reference_summary",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "cardiology",
+    "section": "Treatment and Lifestyle",
+    "section_id": "treatment_and_lifestyle",
+    "parent_document_id": "mplus_hypertension",
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "b2e82341a9024a1af85f69305b7d33f60d645bac8e54af0f81d9532dbd14acab",
+    "entities": [
+      "Hypertension",
+      "Blood Pressure",
+      "Antihypertensive Agents",
+      "Cardiovascular Disease"
+    ],
+    "version": "2.9",
+    "retrieved_at": "2026-09-15T05:03:51.882919+00:00",
+    "content_hash": "b2e82341a9024a1af85f69305b7d33f60d645bac8e54af0f81d9532dbd14acab",
+    "metadata": {
+      "topic_id": "hypertension",
+      "topic_name": "High Blood Pressure (Hypertension)",
+      "section_name": "Treatment and Lifestyle",
+      "mesh_terms": [
+        "Hypertension",
+        "Blood Pressure",
+        "Antihypertensive Agents",
+        "Cardiovascular Disease"
+      ]
+    }
+  },
+  {
+    "document_id": "mplus_community_acquired_pneumonia_overview",
+    "source_id": "MedlinePlus",
+    "source_name": "MedlinePlus Health Topics (NLM / NIH)",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "Pneumonia - Overview",
+    "content": "Topic: Pneumonia\nSection: Overview\nPublisher: National Library of Medicine (NLM/NIH)\n\nPneumonia is an infection that inflames the air sacs (alveoli) in one or both lungs. The air sacs may fill with fluid or pus (purulent material), causing cough with phlegm, fever, chills, and difficulty breathing. Community-Acquired Pneumonia (CAP) is acquired outside of hospitals. Streptococcus pneumoniae is the most common bacterial pathogen.",
+    "source_url": "https://medlineplus.gov/pneumonia.html",
+    "document_type": "disease_summary",
+    "evidence_role": "reference_summary",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "pulmonology",
+    "section": "Overview",
+    "section_id": "overview",
+    "parent_document_id": "mplus_community_acquired_pneumonia",
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "30f6a125af370ce7e298050316a06293886f8a5fd4eabe16c268f8e836e98090",
+    "entities": [
+      "Pneumonia",
+      "Streptococcus pneumoniae",
+      "Community-Acquired Pneumonia",
+      "Antibiotic Therapy"
+    ],
+    "version": "2.9",
+    "retrieved_at": "2026-09-15T05:03:51.882919+00:00",
+    "content_hash": "30f6a125af370ce7e298050316a06293886f8a5fd4eabe16c268f8e836e98090",
+    "metadata": {
+      "topic_id": "community_acquired_pneumonia",
+      "topic_name": "Pneumonia",
+      "section_name": "Overview",
+      "mesh_terms": [
+        "Pneumonia",
+        "Streptococcus pneumoniae",
+        "Community-Acquired Pneumonia",
+        "Antibiotic Therapy"
+      ]
+    }
+  },
+  {
+    "document_id": "mplus_community_acquired_pneumonia_symptoms",
+    "source_id": "MedlinePlus",
+    "source_name": "MedlinePlus Health Topics (NLM / NIH)",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "Pneumonia - Symptoms",
+    "content": "Topic: Pneumonia\nSection: Symptoms\nPublisher: National Library of Medicine (NLM/NIH)\n\nSigns and symptoms of pneumonia include cough (which may produce greenish, yellow, or bloody mucus), high fever, shaking chills, shortness of breath, rapid breathing, sharp or stabbing chest pain that worsens with deep breathing or coughing, fatigue, and confusion (especially in older adults).",
+    "source_url": "https://medlineplus.gov/pneumonia.html",
+    "document_type": "disease_summary",
+    "evidence_role": "reference_summary",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "pulmonology",
+    "section": "Symptoms",
+    "section_id": "symptoms",
+    "parent_document_id": "mplus_community_acquired_pneumonia",
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "e419c856e40dc6817595086269fd99b5724bd15706184255df8852bd3e47eb90",
+    "entities": [
+      "Pneumonia",
+      "Streptococcus pneumoniae",
+      "Community-Acquired Pneumonia",
+      "Antibiotic Therapy"
+    ],
+    "version": "2.9",
+    "retrieved_at": "2026-09-15T05:03:51.882919+00:00",
+    "content_hash": "e419c856e40dc6817595086269fd99b5724bd15706184255df8852bd3e47eb90",
+    "metadata": {
+      "topic_id": "community_acquired_pneumonia",
+      "topic_name": "Pneumonia",
+      "section_name": "Symptoms",
+      "mesh_terms": [
+        "Pneumonia",
+        "Streptococcus pneumoniae",
+        "Community-Acquired Pneumonia",
+        "Antibiotic Therapy"
+      ]
+    }
+  },
+  {
+    "document_id": "mplus_community_acquired_pneumonia_diagnosis_and_severity_assessment",
+    "source_id": "MedlinePlus",
+    "source_name": "MedlinePlus Health Topics (NLM / NIH)",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "Pneumonia - Diagnosis and Severity Assessment",
+    "content": "Topic: Pneumonia\nSection: Diagnosis and Severity Assessment\nPublisher: National Library of Medicine (NLM/NIH)\n\nDiagnosis is confirmed by chest X-ray showing lung infiltrates/consolidation, physical examination (crackles, bronchial breath sounds), pulse oximetry, sputum culture, and blood tests. Clinical severity is commonly evaluated using the CURB-65 score (Confusion, Urea > 7 mmol/L, Respiratory rate >= 30, Blood pressure < 90/60, Age >= 65) to determine outpatient vs inpatient hospital admission.",
+    "source_url": "https://medlineplus.gov/pneumonia.html",
+    "document_type": "disease_summary",
+    "evidence_role": "reference_summary",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "pulmonology",
+    "section": "Diagnosis and Severity Assessment",
+    "section_id": "diagnosis_and_severity_assessment",
+    "parent_document_id": "mplus_community_acquired_pneumonia",
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "821ddf52b0b01a0897ba9f4aeeb55a42e2fe9a7bbba40bce5cc7b81c513635e4",
+    "entities": [
+      "Pneumonia",
+      "Streptococcus pneumoniae",
+      "Community-Acquired Pneumonia",
+      "Antibiotic Therapy"
+    ],
+    "version": "2.9",
+    "retrieved_at": "2026-09-15T05:03:51.882919+00:00",
+    "content_hash": "821ddf52b0b01a0897ba9f4aeeb55a42e2fe9a7bbba40bce5cc7b81c513635e4",
+    "metadata": {
+      "topic_id": "community_acquired_pneumonia",
+      "topic_name": "Pneumonia",
+      "section_name": "Diagnosis and Severity Assessment",
+      "mesh_terms": [
+        "Pneumonia",
+        "Streptococcus pneumoniae",
+        "Community-Acquired Pneumonia",
+        "Antibiotic Therapy"
+      ]
+    }
+  },
+  {
+    "document_id": "mplus_community_acquired_pneumonia_treatment",
+    "source_id": "MedlinePlus",
+    "source_name": "MedlinePlus Health Topics (NLM / NIH)",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "Pneumonia - Treatment",
+    "content": "Topic: Pneumonia\nSection: Treatment\nPublisher: National Library of Medicine (NLM/NIH)\n\nBacterial pneumonia is treated with antibacterial agents. For previously healthy outpatients: Amoxicillin (high dose) or Doxycycline or Macrolides (azithromycin) are first-line options. In patients with comorbidities or risk factors: Combination therapy with Amoxicillin-Clavulanate plus Macrolide or respiratory fluoroquinolones (levofloxacin). Supportive care includes oxygen therapy, hydration, and antipyretics.",
+    "source_url": "https://medlineplus.gov/pneumonia.html",
+    "document_type": "disease_summary",
+    "evidence_role": "reference_summary",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "pulmonology",
+    "section": "Treatment",
+    "section_id": "treatment",
+    "parent_document_id": "mplus_community_acquired_pneumonia",
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "3eaa639b5e1fc97cfd38f0d994ff62b3880e3b7149df473c02802e9e063a364b",
+    "entities": [
+      "Pneumonia",
+      "Streptococcus pneumoniae",
+      "Community-Acquired Pneumonia",
+      "Antibiotic Therapy"
+    ],
+    "version": "2.9",
+    "retrieved_at": "2026-09-15T05:03:51.882919+00:00",
+    "content_hash": "3eaa639b5e1fc97cfd38f0d994ff62b3880e3b7149df473c02802e9e063a364b",
+    "metadata": {
+      "topic_id": "community_acquired_pneumonia",
+      "topic_name": "Pneumonia",
+      "section_name": "Treatment",
+      "mesh_terms": [
+        "Pneumonia",
+        "Streptococcus pneumoniae",
+        "Community-Acquired Pneumonia",
+        "Antibiotic Therapy"
+      ]
+    }
+  },
+  {
+    "document_id": "mplus_tuberculosis_overview",
+    "source_id": "MedlinePlus",
+    "source_name": "MedlinePlus Health Topics (NLM / NIH)",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "Tuberculosis (TB) - Overview",
+    "content": "Topic: Tuberculosis (TB)\nSection: Overview\nPublisher: National Library of Medicine (NLM/NIH)\n\nTuberculosis (TB) is a contagious infectious disease caused by the bacterium Mycobacterium tuberculosis. TB primarily affects the lungs (pulmonary TB) but can also affect the lymph nodes, brain, kidneys, spine, and joints (extrapulmonary TB). It spreads through airborne droplets when an infected person coughs, sneezes, or speaks.",
+    "source_url": "https://medlineplus.gov/tuberculosis.html",
+    "document_type": "disease_summary",
+    "evidence_role": "reference_summary",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "infectious_disease",
+    "section": "Overview",
+    "section_id": "overview",
+    "parent_document_id": "mplus_tuberculosis",
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "7af61bac61dad7b4a6bbae82affb01d7ae43f37f6938f915e5c4c3b1665fca05",
+    "entities": [
+      "Tuberculosis",
+      "Mycobacterium tuberculosis",
+      "Antitubercular Agents",
+      "Directly Observed Therapy"
+    ],
+    "version": "2.9",
+    "retrieved_at": "2026-09-15T05:03:51.882919+00:00",
+    "content_hash": "7af61bac61dad7b4a6bbae82affb01d7ae43f37f6938f915e5c4c3b1665fca05",
+    "metadata": {
+      "topic_id": "tuberculosis",
+      "topic_name": "Tuberculosis (TB)",
+      "section_name": "Overview",
+      "mesh_terms": [
+        "Tuberculosis",
+        "Mycobacterium tuberculosis",
+        "Antitubercular Agents",
+        "Directly Observed Therapy"
+      ]
+    }
+  },
+  {
+    "document_id": "mplus_tuberculosis_symptoms",
+    "source_id": "MedlinePlus",
+    "source_name": "MedlinePlus Health Topics (NLM / NIH)",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "Tuberculosis (TB) - Symptoms",
+    "content": "Topic: Tuberculosis (TB)\nSection: Symptoms\nPublisher: National Library of Medicine (NLM/NIH)\n\nSymptoms of active pulmonary TB include persistent cough lasting 2 to 3 weeks or longer, coughing up blood or sputum (hemoptysis), chest pain, unprovoked weight loss, low-grade evening fever, drenching night sweats, fatigue, and loss of appetite.",
+    "source_url": "https://medlineplus.gov/tuberculosis.html",
+    "document_type": "disease_summary",
+    "evidence_role": "reference_summary",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "infectious_disease",
+    "section": "Symptoms",
+    "section_id": "symptoms",
+    "parent_document_id": "mplus_tuberculosis",
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "d48bb255a8fb93dce1427f8ae5901262c44506b7bcd839d8b209c083da460324",
+    "entities": [
+      "Tuberculosis",
+      "Mycobacterium tuberculosis",
+      "Antitubercular Agents",
+      "Directly Observed Therapy"
+    ],
+    "version": "2.9",
+    "retrieved_at": "2026-09-15T05:03:51.882919+00:00",
+    "content_hash": "d48bb255a8fb93dce1427f8ae5901262c44506b7bcd839d8b209c083da460324",
+    "metadata": {
+      "topic_id": "tuberculosis",
+      "topic_name": "Tuberculosis (TB)",
+      "section_name": "Symptoms",
+      "mesh_terms": [
+        "Tuberculosis",
+        "Mycobacterium tuberculosis",
+        "Antitubercular Agents",
+        "Directly Observed Therapy"
+      ]
+    }
+  },
+  {
+    "document_id": "mplus_tuberculosis_diagnosis",
+    "source_id": "MedlinePlus",
+    "source_name": "MedlinePlus Health Topics (NLM / NIH)",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "Tuberculosis (TB) - Diagnosis",
+    "content": "Topic: Tuberculosis (TB)\nSection: Diagnosis\nPublisher: National Library of Medicine (NLM/NIH)\n\nDiagnostic evaluation includes sputum smear microscopy for Acid-Fast Bacilli (AFB), molecular diagnostic testing (Cartridge-Based Nucleic Acid Amplification Test / CBNAAT / GeneXpert), chest radiography, and mycobacterial culture.",
+    "source_url": "https://medlineplus.gov/tuberculosis.html",
+    "document_type": "disease_summary",
+    "evidence_role": "reference_summary",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "infectious_disease",
+    "section": "Diagnosis",
+    "section_id": "diagnosis",
+    "parent_document_id": "mplus_tuberculosis",
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "faefb6fceb2457c3e0977113271f2f6d26b96c0dbfe15cb89f25b21bc78c8d02",
+    "entities": [
+      "Tuberculosis",
+      "Mycobacterium tuberculosis",
+      "Antitubercular Agents",
+      "Directly Observed Therapy"
+    ],
+    "version": "2.9",
+    "retrieved_at": "2026-09-15T05:03:51.882919+00:00",
+    "content_hash": "faefb6fceb2457c3e0977113271f2f6d26b96c0dbfe15cb89f25b21bc78c8d02",
+    "metadata": {
+      "topic_id": "tuberculosis",
+      "topic_name": "Tuberculosis (TB)",
+      "section_name": "Diagnosis",
+      "mesh_terms": [
+        "Tuberculosis",
+        "Mycobacterium tuberculosis",
+        "Antitubercular Agents",
+        "Directly Observed Therapy"
+      ]
+    }
+  },
+  {
+    "document_id": "mplus_tuberculosis_treatment_regimen",
+    "source_id": "MedlinePlus",
+    "source_name": "MedlinePlus Health Topics (NLM / NIH)",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "Tuberculosis (TB) - Treatment Regimen",
+    "content": "Topic: Tuberculosis (TB)\nSection: Treatment Regimen\nPublisher: National Library of Medicine (NLM/NIH)\n\nDrug-susceptible active TB is treated with a standard multi-drug regimen: An intensive phase of 2 months of daily Rifampicin (R), Isoniazid (H), Pyrazinamide (Z), and Ethambutol (E) [2HRZE], followed by a continuation phase of 4 months of daily Rifampicin, Isoniazid, and Ethambutol [4HRE]. Complete adherence under Directly Observed Therapy (DOTS) is mandatory to prevent drug resistance (MDR-TB).",
+    "source_url": "https://medlineplus.gov/tuberculosis.html",
+    "document_type": "disease_summary",
+    "evidence_role": "reference_summary",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "infectious_disease",
+    "section": "Treatment Regimen",
+    "section_id": "treatment_regimen",
+    "parent_document_id": "mplus_tuberculosis",
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "47d474dc3752869cfe068df12cac9efc689725a6dccd2ff3015f377806e7e320",
+    "entities": [
+      "Tuberculosis",
+      "Mycobacterium tuberculosis",
+      "Antitubercular Agents",
+      "Directly Observed Therapy"
+    ],
+    "version": "2.9",
+    "retrieved_at": "2026-09-15T05:03:51.882919+00:00",
+    "content_hash": "47d474dc3752869cfe068df12cac9efc689725a6dccd2ff3015f377806e7e320",
+    "metadata": {
+      "topic_id": "tuberculosis",
+      "topic_name": "Tuberculosis (TB)",
+      "section_name": "Treatment Regimen",
+      "mesh_terms": [
+        "Tuberculosis",
+        "Mycobacterium tuberculosis",
+        "Antitubercular Agents",
+        "Directly Observed Therapy"
+      ]
+    }
+  }
+]

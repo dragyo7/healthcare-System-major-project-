@@ -1,0 +1,12 @@
+{
+  "endpoint": "/rag/trace",
+  "status_code": 500,
+  "latency_sec": 0.0,
+  "timestamp": "2026-09-15T05:57:24.462374+00:00",
+  "request": {
+    "query": "What are the contraindications for Metformin?",
+    "top_k": 3
+  },
+  "response": null,
+  "error": "timed out"
+}

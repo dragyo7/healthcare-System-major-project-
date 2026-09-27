@@ -1,0 +1,166 @@
+[
+  {
+    "document_id": "mohfw_mohfw_stg_hypertension_primary_health_centre_protocol",
+    "source_id": "MoHFW_STG",
+    "source_name": "Ministry of Health & Family Welfare Standard Treatment Guidelines",
+    "publisher": "Ministry of Health and Family Welfare (Govt of India)",
+    "title": "MoHFW Standard Treatment Guideline: Hypertension - Protocol at Primary Health Centre (PHC)",
+    "content": "MoHFW Standard Treatment Guideline: MoHFW Standard Treatment Guideline: Hypertension\nFacility Level: Primary and Secondary Care Healthcare Facilities\nSection: Protocol at Primary Health Centre (PHC) (Page 4)\nPublisher: Ministry of Health and Family Welfare (Govt of India)\n\nAt the PHC level: 1) Measure BP accurately with calibrated digital or aneroid sphygmomanometer; 2) Confirm BP >= 140/90 mmHg across two visits; 3) Screen for red-flag emergency symptoms (chest pain, neurological deficit, dyspnea); 4) Initiate lifestyle counseling: dietary salt reduction (< 5 grams/day), physical activity 30 mins/day, tobacco cessation; 5) First-line pharmacological therapy: Tab Amlodipine 5 mg once daily in morning. If uncontrolled after 1 month, increase to Tab Amlodipine 10 mg or add Tab Telmisartan 40 mg once daily.",
+    "source_url": "https://clinicalestablishments.gov.in/stg/hypertension.pdf",
+    "document_type": "clinical_guideline",
+    "evidence_role": "clinical_guideline",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "cardiology",
+    "section": "Protocol at Primary Health Centre (PHC)",
+    "section_id": "primary_health_centre_protocol",
+    "parent_document_id": "mohfw_mohfw_stg_hypertension",
+    "page_number": 4,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "c22e25c7090f227b847cd99dbc3aa1e39d099f7abc4d4e999e1beeeda75a715b",
+    "entities": [
+      "Hypertension",
+      "Primary Health Centre",
+      "Amlodipine",
+      "Enalapril"
+    ],
+    "version": "2.9",
+    "retrieved_at": "2026-09-15T05:03:51.891104+00:00",
+    "content_hash": "c22e25c7090f227b847cd99dbc3aa1e39d099f7abc4d4e999e1beeeda75a715b",
+    "metadata": {
+      "stg_id": "mohfw_stg_hypertension",
+      "stg_title": "MoHFW Standard Treatment Guideline: Hypertension",
+      "care_level": "Primary and Secondary Care Healthcare Facilities",
+      "section_title": "Protocol at Primary Health Centre (PHC)",
+      "page_number": 4,
+      "target_conditions": [
+        "Hypertension",
+        "Primary Health Centre",
+        "Amlodipine",
+        "Enalapril"
+      ]
+    }
+  },
+  {
+    "document_id": "mohfw_mohfw_stg_hypertension_referral_criteria",
+    "source_id": "MoHFW_STG",
+    "source_name": "Ministry of Health & Family Welfare Standard Treatment Guidelines",
+    "publisher": "Ministry of Health and Family Welfare (Govt of India)",
+    "title": "MoHFW Standard Treatment Guideline: Hypertension - Emergency Referral Criteria to District Hospital / Secondary Care",
+    "content": "MoHFW Standard Treatment Guideline: MoHFW Standard Treatment Guideline: Hypertension\nFacility Level: Primary and Secondary Care Healthcare Facilities\nSection: Emergency Referral Criteria to District Hospital / Secondary Care (Page 9)\nPublisher: Ministry of Health and Family Welfare (Govt of India)\n\nImmediate emergency referral to District Hospital / Tertiary Facility required if: 1) Hypertensive emergency: BP > 180/120 mmHg with target organ damage (chest pain, altered sensorium, pulmonary edema, papilledema, acute renal failure); 2) Suspected secondary hypertension (onset age < 30 years, refractory hypertension on 3 drugs including a diuretic); 3) Severe hypertension in pregnancy (Pre-eclampsia / Eclampsia).",
+    "source_url": "https://clinicalestablishments.gov.in/stg/hypertension.pdf",
+    "document_type": "clinical_guideline",
+    "evidence_role": "clinical_guideline",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "cardiology",
+    "section": "Emergency Referral Criteria to District Hospital / Secondary Care",
+    "section_id": "referral_criteria",
+    "parent_document_id": "mohfw_mohfw_stg_hypertension",
+    "page_number": 9,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "62436a2f1e00d252d20232689da7a0dd3541c609acc6248727f7e9b2751cf70a",
+    "entities": [
+      "Hypertension",
+      "Primary Health Centre",
+      "Amlodipine",
+      "Enalapril"
+    ],
+    "version": "2.9",
+    "retrieved_at": "2026-09-15T05:03:51.891846+00:00",
+    "content_hash": "62436a2f1e00d252d20232689da7a0dd3541c609acc6248727f7e9b2751cf70a",
+    "metadata": {
+      "stg_id": "mohfw_stg_hypertension",
+      "stg_title": "MoHFW Standard Treatment Guideline: Hypertension",
+      "care_level": "Primary and Secondary Care Healthcare Facilities",
+      "section_title": "Emergency Referral Criteria to District Hospital / Secondary Care",
+      "page_number": 9,
+      "target_conditions": [
+        "Hypertension",
+        "Primary Health Centre",
+        "Amlodipine",
+        "Enalapril"
+      ]
+    }
+  },
+  {
+    "document_id": "mohfw_mohfw_stg_diabetes_screening_and_initial_management",
+    "source_id": "MoHFW_STG",
+    "source_name": "Ministry of Health & Family Welfare Standard Treatment Guidelines",
+    "publisher": "Ministry of Health and Family Welfare (Govt of India)",
+    "title": "MoHFW Standard Treatment Guideline: Type 2 Diabetes Mellitus - Standard Clinical Protocol at Sub-Centre and PHC",
+    "content": "MoHFW Standard Treatment Guideline: MoHFW Standard Treatment Guideline: Type 2 Diabetes Mellitus\nFacility Level: Primary Health Centre and Community Health Centre Level\nSection: Standard Clinical Protocol at Sub-Centre and PHC (Page 3)\nPublisher: Ministry of Health and Family Welfare (Govt of India)\n\nUniversal screening for all individuals >= 30 years using Community Based Assessment Checklist (CBAC) under National NCD Program. If Fasting Blood Sugar >= 126 mg/dL or Random Blood Sugar >= 200 mg/dL: Initiate medical nutrition therapy and Tab Metformin 500 mg orally twice daily with meals. Monitor blood glucose monthly. Maintain foot care inspection at every clinical visit to prevent diabetic foot ulcers.",
+    "source_url": "https://clinicalestablishments.gov.in/stg/diabetes.pdf",
+    "document_type": "clinical_guideline",
+    "evidence_role": "clinical_guideline",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "endocrinology",
+    "section": "Standard Clinical Protocol at Sub-Centre and PHC",
+    "section_id": "screening_and_initial_management",
+    "parent_document_id": "mohfw_mohfw_stg_diabetes",
+    "page_number": 3,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "65f73678febd75435b11b57a91573f3255580529dbe3bd077ce1aa9b070d7abe",
+    "entities": [
+      "Type 2 Diabetes Mellitus",
+      "Metformin",
+      "Primary Healthcare"
+    ],
+    "version": "2.9",
+    "retrieved_at": "2026-09-15T05:03:51.891846+00:00",
+    "content_hash": "65f73678febd75435b11b57a91573f3255580529dbe3bd077ce1aa9b070d7abe",
+    "metadata": {
+      "stg_id": "mohfw_stg_diabetes",
+      "stg_title": "MoHFW Standard Treatment Guideline: Type 2 Diabetes Mellitus",
+      "care_level": "Primary Health Centre and Community Health Centre Level",
+      "section_title": "Standard Clinical Protocol at Sub-Centre and PHC",
+      "page_number": 3,
+      "target_conditions": [
+        "Type 2 Diabetes Mellitus",
+        "Metformin",
+        "Primary Healthcare"
+      ]
+    }
+  },
+  {
+    "document_id": "mohfw_mohfw_stg_diabetes_hypoglycemia_management",
+    "source_id": "MoHFW_STG",
+    "source_name": "Ministry of Health & Family Welfare Standard Treatment Guidelines",
+    "publisher": "Ministry of Health and Family Welfare (Govt of India)",
+    "title": "MoHFW Standard Treatment Guideline: Type 2 Diabetes Mellitus - Emergency Management of Acute Hypoglycemia",
+    "content": "MoHFW Standard Treatment Guideline: MoHFW Standard Treatment Guideline: Type 2 Diabetes Mellitus\nFacility Level: Primary Health Centre and Community Health Centre Level\nSection: Emergency Management of Acute Hypoglycemia (Page 7)\nPublisher: Ministry of Health and Family Welfare (Govt of India)\n\nDefinition: Blood glucose < 70 mg/dL with tremors, sweating, palpitation, confusion. Conscious patient: Rule of 15 - Administer 15 to 20 grams of fast-acting carbohydrate (3-4 teaspoons of sugar in water, or glucose tablets), recheck blood sugar in 15 minutes. Unconscious patient / Cannot swallow: Give 50 mL of 25% Dextrose IV or 100 mL of 10% Dextrose IV immediately. Do not administer oral liquids to an unconscious patient.",
+    "source_url": "https://clinicalestablishments.gov.in/stg/diabetes.pdf",
+    "document_type": "clinical_guideline",
+    "evidence_role": "clinical_guideline",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "endocrinology",
+    "section": "Emergency Management of Acute Hypoglycemia",
+    "section_id": "hypoglycemia_management",
+    "parent_document_id": "mohfw_mohfw_stg_diabetes",
+    "page_number": 7,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "0f7beffd6cc40b233d31f1a8a60a63bb12fdaa35dfd1089aa8c1bbccd6a72490",
+    "entities": [
+      "Type 2 Diabetes Mellitus",
+      "Metformin",
+      "Primary Healthcare"
+    ],
+    "version": "2.9",
+    "retrieved_at": "2026-09-15T05:03:51.891846+00:00",
+    "content_hash": "0f7beffd6cc40b233d31f1a8a60a63bb12fdaa35dfd1089aa8c1bbccd6a72490",
+    "metadata": {
+      "stg_id": "mohfw_stg_diabetes",
+      "stg_title": "MoHFW Standard Treatment Guideline: Type 2 Diabetes Mellitus",
+      "care_level": "Primary Health Centre and Community Health Centre Level",
+      "section_title": "Emergency Management of Acute Hypoglycemia",
+      "page_number": 7,
+      "target_conditions": [
+        "Type 2 Diabetes Mellitus",
+        "Metformin",
+        "Primary Healthcare"
+      ]
+    }
+  }
+]

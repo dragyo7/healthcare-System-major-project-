@@ -1,0 +1,12 @@
+{
+  "endpoint": "/chat",
+  "status_code": 500,
+  "latency_sec": 0.0,
+  "timestamp": "2026-09-15T05:59:09.950185+00:00",
+  "request": {
+    "query": "What are the indications and dosing guidelines for Cardioregulin?",
+    "top_k": 3
+  },
+  "response": null,
+  "error": "timed out"
+}

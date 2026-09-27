@@ -1,0 +1,58 @@
+{
+  "total_indexed_chunks": 236,
+  "total_unique_doc_ids": 236,
+  "documents_equal_chunks": true,
+  "source_family_breakdown": {
+    "DailyMed": {
+      "source_documents_raw_count": 188,
+      "normalized_logical_documents": 188,
+      "indexed_chunks": 188,
+      "unique_sections_covered": 8,
+      "avg_chunks_per_document": 1.0,
+      "mean_word_count": 22.4,
+      "min_word_count": 7,
+      "max_word_count": 53
+    },
+    "MedlinePlus": {
+      "source_documents_raw_count": 16,
+      "normalized_logical_documents": 16,
+      "indexed_chunks": 16,
+      "unique_sections_covered": 9,
+      "avg_chunks_per_document": 1.0,
+      "mean_word_count": 60.9,
+      "min_word_count": 38,
+      "max_word_count": 82
+    },
+    "ICMR": {
+      "source_documents_raw_count": 8,
+      "normalized_logical_documents": 8,
+      "indexed_chunks": 8,
+      "unique_sections_covered": 8,
+      "avg_chunks_per_document": 1.0,
+      "mean_word_count": 104.8,
+      "min_word_count": 87,
+      "max_word_count": 144
+    },
+    "MoHFW_STG": {
+      "source_documents_raw_count": 4,
+      "normalized_logical_documents": 4,
+      "indexed_chunks": 4,
+      "unique_sections_covered": 4,
+      "avg_chunks_per_document": 1.0,
+      "mean_word_count": 106.8,
+      "min_word_count": 96,
+      "max_word_count": 117
+    },
+    "RxNorm": {
+      "source_documents_raw_count": 20,
+      "normalized_logical_documents": 20,
+      "indexed_chunks": 20,
+      "unique_sections_covered": 1,
+      "avg_chunks_per_document": 1.0,
+      "mean_word_count": 38.0,
+      "min_word_count": 34,
+      "max_word_count": 43
+    }
+  },
+  "architectural_explanation": "In production corpus index_v2.bin / meta_v2.json (N=236), each discrete knowledge entry (e.g., an FDA SPL label section such as metformin_contraindications or an ICMR guideline clinical protocol) was extracted by the ingestion pipeline as an individual, self-contained semantic logical document (mean length ~30.5 words). Because each extracted section is concise, high-density, and already focused on a single clinical facet (e.g. boxed warning, dosage, contraindication), the chunker configured with a chunk size of 256-512 tokens does not partition these atomic clinical sections further into multiple chunks. Thus, each logical document produces exactly 1 chunk (average chunks/doc = 1.0). This 1:1 mapping preserves complete clinical context per retrieval unit without creating detached, fragmented sentences."
+}

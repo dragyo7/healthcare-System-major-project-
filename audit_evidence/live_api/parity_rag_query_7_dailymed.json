@@ -1,0 +1,118 @@
+{
+  "endpoint": "/rag/query",
+  "status_code": 200,
+  "latency_sec": 3.1748,
+  "timestamp": "2026-09-15T05:59:47.827548+00:00",
+  "request": {
+    "query": "What are the boxed warnings and contraindications for Lisinopril according to FDA DailyMed?",
+    "top_k": 3
+  },
+  "response": {
+    "query": "What are the boxed warnings and contraindications for Lisinopril according to FDA DailyMed?",
+    "retrieval_mode": "hybrid",
+    "total_evidence": 3,
+    "evidence": [
+      {
+        "rank": 1,
+        "score": 5.406521,
+        "source_id": "DailyMed",
+        "source_name": "National Library of Medicine DailyMed",
+        "publisher": "U.S. National Library of Medicine / FDA",
+        "document_id": "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_boxed_warning",
+        "chunk_id": "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_boxed_warning-c0",
+        "title": "Lisinopril - Boxed Warning",
+        "section": "Boxed Warning",
+        "medical_domain": "pharmacology",
+        "source_url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=4b2c1256-42d4-4a4b-8e2a-0a8870fb381b",
+        "text": "Drug: Lisinopril\nSection: Boxed Warning\n\nWARNING: FETAL TOXICITY. When pregnancy is detected, discontinue Lisinopril as soon as possible. Drugs that act directly on the renin-angiotensin system can cause injury and death to the developing fetus.",
+        "dense_score": 0.8639,
+        "bm25_score": 12.4957,
+        "fused_score": 0.032787,
+        "rerank_score": 5.4065
+      },
+      {
+        "rank": 2,
+        "score": 2.011392,
+        "source_id": "DailyMed",
+        "source_name": "National Library of Medicine DailyMed",
+        "publisher": "U.S. National Library of Medicine / FDA",
+        "document_id": "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_warnings___precautions",
+        "chunk_id": "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_warnings___precautions-c0",
+        "title": "Lisinopril - Warnings & Precautions",
+        "section": "Warnings & Precautions",
+        "medical_domain": "pharmacology",
+        "source_url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=4b2c1256-42d4-4a4b-8e2a-0a8870fb381b",
+        "text": "Drug: Lisinopril\nSection: Warnings & Precautions\n\nAngioedema, anaphylaxis, hypotension in salt/volume depleted patients, renal impairment, hyperkalemia.",
+        "dense_score": 0.8627,
+        "bm25_score": 6.7931,
+        "fused_score": 0.030579,
+        "rerank_score": 2.0114
+      },
+      {
+        "rank": 3,
+        "score": -1.678259,
+        "source_id": "DailyMed",
+        "source_name": "National Library of Medicine DailyMed",
+        "publisher": "U.S. National Library of Medicine / FDA",
+        "document_id": "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_indications___usage",
+        "chunk_id": "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_indications___usage-c0",
+        "title": "Lisinopril - Indications & Usage",
+        "section": "Indications & Usage",
+        "medical_domain": "pharmacology",
+        "source_url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=4b2c1256-42d4-4a4b-8e2a-0a8870fb381b",
+        "text": "Drug: Lisinopril\nSection: Indications & Usage\n\nLisinopril is indicated for the treatment of hypertension in adults and children >= 6 years; adjunct therapy in heart failure; acute myocardial infarction within 24 hours.",
+        "dense_score": 0.8407,
+        "bm25_score": 10.2497,
+        "fused_score": 0.030018,
+        "rerank_score": -1.6783
+      }
+    ],
+    "context_text": "[Doc 1: Lisinopril - Boxed Warning | Source: National Library of Medicine DailyMed] (URL: https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=4b2c1256-42d4-4a4b-8e2a-0a8870fb381b)\nDrug: Lisinopril\nSection: Boxed Warning\n\nWARNING: FETAL TOXICITY. When pregnancy is detected, discontinue Lisinopril as soon as possible. Drugs that act directly on the renin-angiotensin system can cause injury and death to the developing fetus.\n\n---\n\n[Doc 2: Lisinopril - Warnings & Precautions | Source: National Library of Medicine DailyMed] (URL: https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=4b2c1256-42d4-4a4b-8e2a-0a8870fb381b)\nDrug: Lisinopril\nSection: Warnings & Precautions\n\nAngioedema, anaphylaxis, hypotension in salt/volume depleted patients, renal impairment, hyperkalemia.\n\n---\n\n[Doc 3: Lisinopril - Indications & Usage | Source: National Library of Medicine DailyMed] (URL: https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=4b2c1256-42d4-4a4b-8e2a-0a8870fb381b)\nDrug: Lisinopril\nSection: Indications & Usage\n\nLisinopril is indicated for the treatment of hypertension in adults and children >= 6 years; adjunct therapy in heart failure; acute myocardial infarction within 24 hours.",
+    "latency_ms": 3164.67,
+    "reranker_status": "available",
+    "filters_applied": {},
+    "grounding": {
+      "status": "grounded",
+      "generation_allowed": true,
+      "evidence_count": 3,
+      "usable_evidence_count": 3,
+      "accepted_chunk_ids": [
+        "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_boxed_warning-c0",
+        "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_warnings___precautions-c0",
+        "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_indications___usage-c0"
+      ],
+      "provenance_valid": true,
+      "top_evidence_rank": 1,
+      "evidence_sources": [
+        "DailyMed"
+      ],
+      "evidence_documents": [
+        "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_boxed_warning",
+        "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_indications___usage",
+        "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_warnings___precautions"
+      ],
+      "evidence_sections": [
+        "Boxed Warning",
+        "Indications & Usage",
+        "Warnings & Precautions"
+      ],
+      "reason_codes": [
+        "EVIDENCE_SUFFICIENT"
+      ],
+      "warnings": [],
+      "conflict_detected": false,
+      "conflict_summary": null,
+      "policy_latency_ms": 0.581
+    },
+    "safety_assessment": {
+      "risk_category": "informational",
+      "is_emergency": false,
+      "emergency_message": null,
+      "is_injection": false,
+      "sanitized_query": "What are the boxed warnings and contraindications for Lisinopril according to FDA DailyMed?",
+      "requires_strict_grounding": false,
+      "warnings": []
+    }
+  },
+  "error": null
+}

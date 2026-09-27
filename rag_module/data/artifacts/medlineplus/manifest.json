@@ -1,0 +1,69 @@
+{
+  "source_id": "MedlinePlus",
+  "source_display_name": "MedlinePlus Health Topics (NLM / NIH)",
+  "publisher": "National Library of Medicine (NLM/NIH)",
+  "authority_level": "tier_1_federal_research",
+  "ingestion_timestamp": "2026-09-15T05:03:51.886058+00:00",
+  "duration_seconds": 0.005,
+  "corpus_version": "2.9",
+  "code_version": "rag_v2.4",
+  "document_count": 16,
+  "chunk_count": 16,
+  "embedding_model": "BAAI/bge-small-en",
+  "embedding_dimension": 384,
+  "chunking_config": {
+    "chunk_size_words": 250,
+    "overlap_words": 35,
+    "min_chunk_char_len": 40
+  },
+  "retrieval_config": {
+    "hybrid_rrf_k": 60,
+    "dense_k": 20,
+    "bm25_k": 20,
+    "reranker_model": "cross-encoder/ms-marco-MiniLM-L-6-v2"
+  },
+  "stats": {
+    "source_id": "MedlinePlus",
+    "source_name": "MedlinePlus Health Topics (NLM / NIH)",
+    "documents_seen": 16,
+    "documents_valid": 16,
+    "documents_rejected": 0,
+    "duplicates_removed": 0,
+    "documents_ingested": 16
+  },
+  "corpus_file": "corpus.json",
+  "chunks_file": "chunks.json",
+  "content_hash_summary": "0524b43706ea03cd52c804f9d98c9936479ab3bb3d112afd0344f466f84effd1",
+  "provenance_sample": [
+    {
+      "document_id": "mplus_type2_diabetes_overview",
+      "title": "Type 2 Diabetes - Overview",
+      "url": "https://medlineplus.gov/diabetestype2.html",
+      "hash": "8aa1bad64768"
+    },
+    {
+      "document_id": "mplus_type2_diabetes_symptoms",
+      "title": "Type 2 Diabetes - Symptoms",
+      "url": "https://medlineplus.gov/diabetestype2.html",
+      "hash": "fc44df943397"
+    },
+    {
+      "document_id": "mplus_type2_diabetes_diagnosis",
+      "title": "Type 2 Diabetes - Diagnosis",
+      "url": "https://medlineplus.gov/diabetestype2.html",
+      "hash": "80f2469bec4f"
+    },
+    {
+      "document_id": "mplus_type2_diabetes_management_and_treatment",
+      "title": "Type 2 Diabetes - Management and Treatment",
+      "url": "https://medlineplus.gov/diabetestype2.html",
+      "hash": "464c4baee5e5"
+    },
+    {
+      "document_id": "mplus_hypertension_overview",
+      "title": "High Blood Pressure (Hypertension) - Overview",
+      "url": "https://medlineplus.gov/highbloodpressure.html",
+      "hash": "583c19e5b68b"
+    }
+  ]
+}

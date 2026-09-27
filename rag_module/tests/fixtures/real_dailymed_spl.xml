@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="urn:hl7-org:v3">
+  <id root="4b2c1256-42d4-4a4b-8e2a-0a8870fb381b"/>
+  <code code="34391-3" displayName="HUMAN PRESCRIPTION DRUG LABEL"/>
+  <title>ZESTRIL (lisinopril) tablet</title>
+  <effectiveTime value="20230515"/>
+  <setId root="4b2c1256-42d4-4a4b-8e2a-0a8870fb381b"/>
+  <versionNumber value="12"/>
+  <author>
+    <assignedEntity>
+      <representedOrganization>
+        <name>AstraZeneca Pharmaceuticals LP</name>
+      </representedOrganization>
+    </assignedEntity>
+  </author>
+  <component>
+    <structuredBody>
+      <component>
+        <section>
+          <id root="sec-boxed-warning-001"/>
+          <code code="34066-1" displayName="BOXED WARNING SECTION"/>
+          <title>WARNING: FETAL TOXICITY</title>
+          <text>When pregnancy is detected, discontinue ZESTRIL as soon as possible. Drugs that act directly on the renin-angiotensin system can cause injury and death to the developing fetus.</text>
+        </section>
+      </component>
+      <component>
+        <section>
+          <id root="sec-indications-001"/>
+          <code code="34067-9" displayName="INDICATIONS &amp; USAGE SECTION"/>
+          <title>1 INDICATIONS AND USAGE</title>
+          <text>ZESTRIL is an angiotensin converting enzyme (ACE) inhibitor indicated for treatment of hypertension in adult patients and pediatric patients 6 years of age and older, and adjunctive therapy in heart failure.</text>
+        </section>
+      </component>
+      <component>
+        <section>
+          <id root="sec-dosage-001"/>
+          <code code="34068-7" displayName="DOSAGE &amp; ADMINISTRATION SECTION"/>
+          <title>2 DOSAGE AND ADMINISTRATION</title>
+          <text>Hypertension: Initial adult dose is 10 mg once daily. Titrate up to 40 mg daily based on blood pressure goals. Heart Failure: Initial dose is 5 mg once daily with diuretics.</text>
+        </section>
+      </component>
+      <component>
+        <section>
+          <id root="sec-contraindications-001"/>
+          <code code="34070-3" displayName="CONTRAINDICATIONS SECTION"/>
+          <title>4 CONTRAINDICATIONS</title>
+          <text>History of angioedema related to previous ACE inhibitor treatment, hereditary or idiopathic angioedema, and concomitant use with aliskiren in patients with diabetes.</text>
+        </section>
+      </component>
+      <component>
+        <section>
+          <id root="sec-warnings-001"/>
+          <code code="42232-9" displayName="WARNINGS AND PRECAUTIONS SECTION"/>
+          <title>5 WARNINGS AND PRECAUTIONS</title>
+          <text>Angioedema and Anaphylactoid Reactions: Discontinue ZESTRIL immediately. Impaired Renal Function: Monitor serum creatinine. Hyperkalemia: Monitor serum potassium periodically.</text>
+        </section>
+      </component>
+    </structuredBody>
+  </component>
+</document>

@@ -1,0 +1,91 @@
+{
+  "source_id": "combined",
+  "source_display_name": "Multi-Source Unified Knowledge Base",
+  "timestamp": "2026-09-15T05:03:51.921679+00:00",
+  "corpus_version": "2.6",
+  "document_count": 236,
+  "chunk_count": 236,
+  "sources": [
+    "DailyMed",
+    "MedlinePlus",
+    "ICMR",
+    "MoHFW_STG",
+    "RxNorm"
+  ],
+  "source_breakdown": {
+    "DailyMed": {
+      "document_count": 188,
+      "chunk_count": 188,
+      "stats": {
+        "source_id": "DailyMed",
+        "source_name": "National Library of Medicine DailyMed",
+        "documents_seen": 188,
+        "documents_valid": 188,
+        "documents_rejected": 0,
+        "duplicates_removed": 0,
+        "documents_ingested": 188
+      }
+    },
+    "MedlinePlus": {
+      "document_count": 16,
+      "chunk_count": 16,
+      "stats": {
+        "source_id": "MedlinePlus",
+        "source_name": "MedlinePlus Health Topics (NLM / NIH)",
+        "documents_seen": 16,
+        "documents_valid": 16,
+        "documents_rejected": 0,
+        "duplicates_removed": 0,
+        "documents_ingested": 16
+      }
+    },
+    "ICMR": {
+      "document_count": 8,
+      "chunk_count": 8,
+      "stats": {
+        "source_id": "ICMR",
+        "source_name": "Indian Council of Medical Research Clinical Guidelines",
+        "documents_seen": 8,
+        "documents_valid": 8,
+        "documents_rejected": 0,
+        "duplicates_removed": 0,
+        "documents_ingested": 8
+      }
+    },
+    "MoHFW_STG": {
+      "document_count": 4,
+      "chunk_count": 4,
+      "stats": {
+        "source_id": "MoHFW_STG",
+        "source_name": "Ministry of Health & Family Welfare Standard Treatment Guidelines",
+        "documents_seen": 4,
+        "documents_valid": 4,
+        "documents_rejected": 0,
+        "duplicates_removed": 0,
+        "documents_ingested": 4
+      }
+    },
+    "RxNorm": {
+      "document_count": 20,
+      "chunk_count": 20,
+      "stats": {
+        "source_id": "RxNorm",
+        "source_name": "RxNorm Normalized Prescribable Clinical Terminology",
+        "documents_seen": 20,
+        "documents_valid": 20,
+        "documents_rejected": 0,
+        "duplicates_removed": 0,
+        "documents_ingested": 20
+      }
+    }
+  },
+  "embedding_model": "BAAI/bge-small-en",
+  "embedding_dimension": 384,
+  "chunking_config": {
+    "chunk_size_words": 250,
+    "overlap_words": 35,
+    "min_chunk_char_len": 40
+  },
+  "corpus_file": "corpus.json",
+  "chunks_file": "chunks.json"
+}

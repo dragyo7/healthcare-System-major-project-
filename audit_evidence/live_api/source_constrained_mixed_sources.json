@@ -1,0 +1,163 @@
+{
+  "endpoint": "/rag/query",
+  "status_code": 200,
+  "latency_sec": 1.705,
+  "timestamp": "2026-09-15T06:01:37.479582+00:00",
+  "request": {
+    "query": "According to ICMR and DailyMed, what is the protocol for diabetic ketoacidosis and Metformin dosage?",
+    "top_k": 5
+  },
+  "response": {
+    "query": "According to ICMR and DailyMed, what is the protocol for diabetic ketoacidosis and Metformin dosage?",
+    "retrieval_mode": "hybrid",
+    "total_evidence": 5,
+    "evidence": [
+      {
+        "rank": 1,
+        "score": 1.722059,
+        "source_id": "ICMR",
+        "source_name": "Indian Council of Medical Research Clinical Guidelines",
+        "publisher": "Indian Council of Medical Research (ICMR, Govt of India)",
+        "document_id": "icmr_icmr_t2dm_2023_stepwise_pharmacotherapy",
+        "chunk_id": "icmr_icmr_t2dm_2023_stepwise_pharmacotherapy-c0",
+        "title": "ICMR Guidelines for Management of Type 2 Diabetes in India - Step-Wise Pharmacotherapy & Treatment Algorithm",
+        "section": "Step-Wise Pharmacotherapy & Treatment Algorithm",
+        "medical_domain": "endocrinology",
+        "source_url": "https://main.icmr.nic.in/content/icmr-guidelines-management-type-2-diabetes",
+        "text": "ICMR Clinical Guideline: ICMR Guidelines for Management of Type 2 Diabetes in India (2023)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: Step-Wise Pharmacotherapy & Treatment Algorithm (Page 28)\n\nStep 1: Metformin is the undisputed first-line pharmacological agent for all patients with Type 2 Diabetes without contraindications (eGFR >= 30 mL/min). Titrate starting from 500 mg daily to 1000-2000 mg daily with meals.\nStep 2: If HbA1c remains > 7.0% after 3 months of monotherapy, add a second oral agent based on patient comorbidities: In patients with atherosclerotic cardiovascular disease or diabetic kidney disease (microalbuminuria / eGFR 30-60), add an SGLT2 inhibitor (empagliflozin, dapagliflozin) or GLP-1 receptor agonist; in cost-sensitive primary care, add a second-generation sulfonylurea (glimepiride, gliclazide) with education on hypoglycemia.\nStep 3: Triple oral therapy or early initiation of basal insulin if HbA1c > 9.0% with symptomatic hyperglycemia.",
+        "dense_score": 0.8704,
+        "bm25_score": 8.9861,
+        "fused_score": 0.031319,
+        "rerank_score": 1.7221
+      },
+      {
+        "rank": 2,
+        "score": -1.848633,
+        "source_id": "MedlinePlus",
+        "source_name": "MedlinePlus Health Topics (NLM / NIH)",
+        "publisher": "National Library of Medicine (NLM/NIH)",
+        "document_id": "mplus_type2_diabetes_management_and_treatment",
+        "chunk_id": "mplus_type2_diabetes_management_and_treatment-c0",
+        "title": "Type 2 Diabetes - Management and Treatment",
+        "section": "Management and Treatment",
+        "medical_domain": "endocrinology",
+        "source_url": "https://medlineplus.gov/diabetestype2.html",
+        "text": "Topic: Type 2 Diabetes\nSection: Management and Treatment\nPublisher: National Library of Medicine (NLM/NIH)\n\nManagement includes lifestyle modifications (healthy diet, physical activity, weight management), regular blood sugar monitoring, and pharmacological therapy. Metformin is the standard first-line medication for type 2 diabetes. Other drug classes include SGLT2 inhibitors, GLP-1 receptor agonists, DPP-4 inhibitors, sulfonylureas, and insulin. Target HbA1c for most non-pregnant adults is below 7.0%.",
+        "dense_score": 0.8493,
+        "bm25_score": 11.0285,
+        "fused_score": 0.032002,
+        "rerank_score": -1.8486
+      },
+      {
+        "rank": 3,
+        "score": -2.972672,
+        "source_id": "MoHFW_STG",
+        "source_name": "Ministry of Health & Family Welfare Standard Treatment Guidelines",
+        "publisher": "Ministry of Health and Family Welfare (Govt of India)",
+        "document_id": "mohfw_mohfw_stg_diabetes_screening_and_initial_management",
+        "chunk_id": "mohfw_mohfw_stg_diabetes_screening_and_initial_management-c0",
+        "title": "MoHFW Standard Treatment Guideline: Type 2 Diabetes Mellitus - Standard Clinical Protocol at Sub-Centre and PHC",
+        "section": "Standard Clinical Protocol at Sub-Centre and PHC",
+        "medical_domain": "endocrinology",
+        "source_url": "https://clinicalestablishments.gov.in/stg/diabetes.pdf",
+        "text": "MoHFW Standard Treatment Guideline: MoHFW Standard Treatment Guideline: Type 2 Diabetes Mellitus\nFacility Level: Primary Health Centre and Community Health Centre Level\nSection: Standard Clinical Protocol at Sub-Centre and PHC (Page 3)\nPublisher: Ministry of Health and Family Welfare (Govt of India)\n\nUniversal screening for all individuals >= 30 years using Community Based Assessment Checklist (CBAC) under National NCD Program. If Fasting Blood Sugar >= 126 mg/dL or Random Blood Sugar >= 200 mg/dL: Initiate medical nutrition therapy and Tab Metformin 500 mg orally twice daily with meals. Monitor blood glucose monthly. Maintain foot care inspection at every clinical visit to prevent diabetic foot ulcers.",
+        "dense_score": 0.8445,
+        "bm25_score": 9.4735,
+        "fused_score": 0.03101,
+        "rerank_score": -2.9727
+      },
+      {
+        "rank": 4,
+        "score": -4.259377,
+        "source_id": "DailyMed",
+        "source_name": "National Library of Medicine DailyMed",
+        "publisher": "U.S. National Library of Medicine / FDA",
+        "document_id": "dailymed_6623f03b-18a8-48b6-9bb2-16a7f0521e66_warnings___precautions",
+        "chunk_id": "dailymed_6623f03b-18a8-48b6-9bb2-16a7f0521e66_warnings___precautions-c0",
+        "title": "Empagliflozin - Warnings & Precautions",
+        "section": "Warnings & Precautions",
+        "medical_domain": "pharmacology",
+        "source_url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=6623f03b-18a8-48b6-9bb2-16a7f0521e66",
+        "text": "Drug: Empagliflozin\nSection: Warnings & Precautions\n\nDiabetic Ketoacidosis (Euglycemic DKA): Can occur with normal blood glucose levels; withhold empagliflozin prior to surgery. Volume depletion and hypotension. Urosepsis and Pyelonephritis. Fournier's Gangrene (necrotizing fasciitis of perineum). Genital mycotic infections.",
+        "dense_score": 0.8356,
+        "bm25_score": 11.835,
+        "fused_score": 0.030835,
+        "rerank_score": -4.2594
+      },
+      {
+        "rank": 5,
+        "score": -6.20934,
+        "source_id": "ICMR",
+        "source_name": "Indian Council of Medical Research Clinical Guidelines",
+        "publisher": "Indian Council of Medical Research (ICMR, Govt of India)",
+        "document_id": "icmr_icmr_antimicrobial_2022_antimicrobial_stewardship_principles",
+        "chunk_id": "icmr_icmr_antimicrobial_2022_antimicrobial_stewardship_principles-c0",
+        "title": "ICMR National Treatment Guidelines for Antimicrobial Use in Infectious Diseases - Core Principles of Rational Antimicrobial Use",
+        "section": "Core Principles of Rational Antimicrobial Use",
+        "medical_domain": "antimicrobial_stewardship",
+        "source_url": "https://main.icmr.nic.in/content/national-treatment-guidelines-antimicrobial-use",
+        "text": "ICMR Clinical Guideline: ICMR National Treatment Guidelines for Antimicrobial Use in Infectious Diseases (2022)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: Core Principles of Rational Antimicrobial Use (Page 5)\n\nEmpiric antimicrobial therapy should be based on local institutional antibiograms and disease severity. Collect appropriate microbiological specimens prior to starting antibiotics. De-escalate from broad-spectrum to narrow-spectrum antibiotics once culture and susceptibility results are available. Reserve 'Access', 'Watch', and 'Reserve' categories as per WHO/ICMR classifications. Strict restriction on indiscriminate use of carbapenems, colistin, and vancomycin in outpatient settings.",
+        "dense_score": 0.8208,
+        "bm25_score": 9.3147,
+        "fused_score": 0.029274,
+        "rerank_score": -6.2093
+      }
+    ],
+    "context_text": "[Doc 1: ICMR Guidelines for Management of Type 2 Diabetes in India - Step-Wise Pharmacotherapy & Treatment Algorithm | Source: Indian Council of Medical Research Clinical Guidelines] (URL: https://main.icmr.nic.in/content/icmr-guidelines-management-type-2-diabetes)\nICMR Clinical Guideline: ICMR Guidelines for Management of Type 2 Diabetes in India (2023)\nIssuing Body: Indian Council of Medical Research (ICMR, Govt of India)\nSection: Step-Wise Pharmacotherapy & Treatment Algorithm (Page 28)\n\nStep 1: Metformin is the undisputed first-line pharmacological agent for all patients with Type 2 Diabetes without contraindications (eGFR >= 30 mL/min). Titrate starting from 500 mg daily to 1000-2000 mg daily with meals.\nStep 2: If HbA1c remains > 7.0% after 3 months of monotherapy, add a second oral agent based on patient comorbidities: In patients with atherosclerotic cardiovascular disease or diabetic kidney disease (microalbuminuria / eGFR 30-60), add an SGLT2 inhibitor (empagliflozin, dapagliflozin) or GLP-1 receptor agonist; in cost-sensitive primary care, add a second-generation sulfonylurea (glimepiride, gliclazide) with education on hypoglycemia.\nStep 3: Triple oral therapy or early initiation of basal insulin if HbA1c > 9.0% with symptomatic hyperglycemia.\n\n---\n\n[Doc 2: Type 2 Diabetes - Management and Treatment | Source: MedlinePlus Health Topics (NLM / NIH)] (URL: https://medlineplus.gov/diabetestype2.html)\nTopic: Type 2 Diabetes\nSection: Management and Treatment\nPublisher: National Library of Medicine (NLM/NIH)\n\nManagement includes lifestyle modifications (healthy diet, physical activity, weight management), regular blood sugar monitoring, and pharmacological therapy. Metformin is the standard first-line medication for type 2 diabetes. Other drug classes include SGLT2 inhibitors, GLP-1 receptor agonists, DPP-4 inhibitors, sulfonylureas, and insulin. Target HbA1c for most non-pregnant adults is below 7.0%.\n\n---\n\n[Doc 3: MoHFW Standard Treatment Guideline: Type 2 Diabetes Mellitus - Standard Clinical Protocol at Sub-Centre and PHC | Source: Ministry of Health & Family Welfare Standard Treatment Guidelines] (URL: https://clinicalestablishments.gov.in/stg/diabetes.pdf)\nMoHFW Standard Treatment Guideline: MoHFW Standard Treatment Guideline: Type 2 Diabetes Mellitus\nFacility Level: Primary Health Centre and Community Health Centre Level\nSection: Standard Clinical Protocol at Sub-Centre and PHC (Page 3)\nPublisher: Ministry of Health and Family Welfare (Govt of India)\n\nUniversal screening for all individuals >= 30 years using Community Based Assessment Checklist (CBAC) under National NCD Program. If Fasting Blood Sugar >= 126 mg/dL or Random Blood Sugar >= 200 mg/dL: Initiate medical nutrition therapy and Tab Metformin 500 mg orally twice daily with meals. Monitor blood glucose monthly. Maintain foot care inspection at every clinical visit to prevent diabetic foot ulcers.",
+    "latency_ms": 1699.11,
+    "reranker_status": "available",
+    "filters_applied": {},
+    "grounding": {
+      "status": "grounded",
+      "generation_allowed": true,
+      "evidence_count": 5,
+      "usable_evidence_count": 5,
+      "accepted_chunk_ids": [
+        "icmr_icmr_t2dm_2023_stepwise_pharmacotherapy-c0",
+        "mplus_type2_diabetes_management_and_treatment-c0",
+        "mohfw_mohfw_stg_diabetes_screening_and_initial_management-c0",
+        "dailymed_6623f03b-18a8-48b6-9bb2-16a7f0521e66_warnings___precautions-c0",
+        "icmr_icmr_antimicrobial_2022_antimicrobial_stewardship_principles-c0"
+      ],
+      "provenance_valid": true,
+      "top_evidence_rank": 1,
+      "evidence_sources": [
+        "DailyMed",
+        "ICMR",
+        "MedlinePlus",
+        "MoHFW_STG"
+      ],
+      "evidence_documents": [
+        "dailymed_6623f03b-18a8-48b6-9bb2-16a7f0521e66_warnings___precautions",
+        "icmr_icmr_antimicrobial_2022_antimicrobial_stewardship_principles",
+        "icmr_icmr_t2dm_2023_stepwise_pharmacotherapy",
+        "mohfw_mohfw_stg_diabetes_screening_and_initial_management",
+        "mplus_type2_diabetes_management_and_treatment"
+      ],
+      "evidence_sections": [
+        "Core Principles of Rational Antimicrobial Use",
+        "Management and Treatment",
+        "Standard Clinical Protocol at Sub-Centre and PHC",
+        "Step-Wise Pharmacotherapy & Treatment Algorithm",
+        "Warnings & Precautions"
+      ],
+      "reason_codes": [
+        "EVIDENCE_SUFFICIENT"
+      ],
+      "warnings": [],
+      "conflict_detected": false,
+      "conflict_summary": null,
+      "policy_latency_ms": 1.263
+    },
+    "safety_assessment": {
+      "risk_category": "medication_safety",
+      "is_emergency": false,
+      "emergency_message": null,
+      "is_injection": false,
+      "sanitized_query": "According to ICMR and DailyMed, what is the protocol for diabetic ketoacidosis and Metformin dosage?",
+      "requires_strict_grounding": true,
+      "warnings": []
+    }
+  },
+  "error": null
+}

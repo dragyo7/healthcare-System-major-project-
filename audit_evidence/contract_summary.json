@@ -1,0 +1,261 @@
+[
+  {
+    "tag": "valid_request",
+    "endpoint": "/rag/query",
+    "payload": {
+      "query": "Metformin contraindications"
+    },
+    "status_code": 200,
+    "response": {
+      "query": "Metformin contraindications",
+      "retrieval_mode": "hybrid",
+      "total_evidence": 5,
+      "evidence": [
+        {
+          "rank": 1,
+          "score": 7.354435,
+          "source_id": "DailyMed",
+          "source_name": "National Library of Medicine DailyMed",
+          "publisher": "U.S. National Library of Medicine / FDA",
+          "document_id": "dailymed_060d40e4-b778-43d9-9596-f9478f773489_contraindications",
+          "chunk_id": "dailymed_060d40e4-b778-43d9-9596-f9478f773489_contraindications-c0",
+          "title": "Metformin - Contraindications",
+          "section": "Contraindications",
+          "medical_domain": "pharmacology",
+          "source_url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=060d40e4-b778-43d9-9596-f9478f773489",
+          "text": "Drug: Metformin\nSection: Contraindications\n\nSevere renal impairment (eGFR < 30 mL/min/1.73m2), metabolic acidosis, acute or chronic DKA.",
+          "dense_score": 0.9151,
+          "bm25_score": 6.1741,
+          "fused_score": 0.032787,
+          "rerank_score": 7.3544
+        },
+        {
+          "rank": 2,
+          "score": 3.791994,
+          "source_id": "DailyMed",
+          "source_name": "National Library of Medicine DailyMed",
+          "publisher": "U.S. National Library of Medicine / FDA",
+          "document_id": "dailymed_060d40e4-b778-43d9-9596-f9478f773489_use_in_specific_populations",
+          "chunk_id": "dailymed_060d40e4-b778-43d9-9596-f9478f773489_use_in_specific_populations-c0",
+          "title": "Metformin - Use in Specific Populations",
+          "section": "Use in Specific Populations",
+          "medical_domain": "pharmacology",
+          "source_url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=060d40e4-b778-43d9-9596-f9478f773489",
+          "text": "Drug: Metformin\nSection: Use in Specific Populations\n\nRenal Impairment: Contraindicated in eGFR < 30 mL/min.",
+          "dense_score": 0.8965,
+          "bm25_score": 3.8104,
+          "fused_score": 0.031514,
+          "rerank_score": 3.792
+        },
+        {
+          "rank": 3,
+          "score": 0.592093,
+          "source_id": "DailyMed",
+          "source_name": "National Library of Medicine DailyMed",
+          "publisher": "U.S. National Library of Medicine / FDA",
+          "document_id": "dailymed_060d40e4-b778-43d9-9596-f9478f773489_adverse_reactions",
+          "chunk_id": "dailymed_060d40e4-b778-43d9-9596-f9478f773489_adverse_reactions-c0",
+          "title": "Metformin - Adverse Reactions",
+          "section": "Adverse Reactions",
+          "medical_domain": "pharmacology",
+          "source_url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=060d40e4-b778-43d9-9596-f9478f773489",
+          "text": "Drug: Metformin\nSection: Adverse Reactions\n\nDiarrhea, nausea, vomiting, flatulence, abdominal pain, asthenia, metallic taste.",
+          "dense_score": 0.8848,
+          "bm25_score": 3.885,
+          "fused_score": 0.03125,
+          "rerank_score": 0.5921
+        },
+        {
+          "rank": 4,
+          "score": 0.135709,
+          "source_id": "DailyMed",
+          "source_name": "National Library of Medicine DailyMed",
+          "publisher": "U.S. National Library of Medicine / FDA",
+          "document_id": "dailymed_060d40e4-b778-43d9-9596-f9478f773489_warnings___precautions",
+          "chunk_id": "dailymed_060d40e4-b778-43d9-9596-f9478f773489_warnings___precautions-c0",
+          "title": "Metformin - Warnings & Precautions",
+          "section": "Warnings & Precautions",
+          "medical_domain": "pharmacology",
+          "source_url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=060d40e4-b778-43d9-9596-f9478f773489",
+          "text": "Drug: Metformin\nSection: Warnings & Precautions\n\nLactic acidosis, iodinated contrast imaging (hold metformin), Vitamin B12 deficiency (monitor every 2-3 years).",
+          "dense_score": 0.8728,
+          "bm25_score": 4.7788,
+          "fused_score": 0.031054,
+          "rerank_score": 0.1357
+        },
+        {
+          "rank": 5,
+          "score": -2.416483,
+          "source_id": "DailyMed",
+          "source_name": "National Library of Medicine DailyMed",
+          "publisher": "U.S. National Library of Medicine / FDA",
+          "document_id": "dailymed_6623f03b-18a8-48b6-9bb2-16a7f0521e66_contraindications",
+          "chunk_id": "dailymed_6623f03b-18a8-48b6-9bb2-16a7f0521e66_contraindications-c0",
+          "title": "Empagliflozin - Contraindications",
+          "section": "Contraindications",
+          "medical_domain": "pharmacology",
+          "source_url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=6623f03b-18a8-48b6-9bb2-16a7f0521e66",
+          "text": "Drug: Empagliflozin\nSection: Contraindications\n\nHypersensitivity; patients on dialysis.",
+          "dense_score": 0.8835,
+          "bm25_score": 3.2774,
+          "fused_score": 0.02967,
+          "rerank_score": -2.4165
+        }
+      ],
+      "context_text": "[Doc 1: Metformin - Contraindications | Source: National Library of Medicine DailyMed] (URL: https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=060d40e4-b778-43d9-9596-f9478f773489)\nDrug: Metformin\nSection: Contraindications\n\nSevere renal impairment (eGFR < 30 mL/min/1.73m2), metabolic acidosis, acute or chronic DKA.\n\n---\n\n[Doc 2: Metformin - Use in Specific Populations | Source: National Library of Medicine DailyMed] (URL: https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=060d40e4-b778-43d9-9596-f9478f773489)\nDrug: Metformin\nSection: Use in Specific Populations\n\nRenal Impairment: Contraindicated in eGFR < 30 mL/min.\n\n---\n\n[Doc 3: Metformin - Adverse Reactions | Source: National Library of Medicine DailyMed] (URL: https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=060d40e4-b778-43d9-9596-f9478f773489)\nDrug: Metformin\nSection: Adverse Reactions\n\nDiarrhea, nausea, vomiting, flatulence, abdominal pain, asthenia, metallic taste.",
+      "latency_ms": 2085.86,
+      "reranker_status": "available",
+      "filters_applied": {},
+      "grounding": {
+        "status": "grounded",
+        "generation_allowed": true,
+        "evidence_count": 5,
+        "usable_evidence_count": 5,
+        "accepted_chunk_ids": [
+          "dailymed_060d40e4-b778-43d9-9596-f9478f773489_contraindications-c0",
+          "dailymed_060d40e4-b778-43d9-9596-f9478f773489_use_in_specific_populations-c0",
+          "dailymed_060d40e4-b778-43d9-9596-f9478f773489_adverse_reactions-c0",
+          "dailymed_060d40e4-b778-43d9-9596-f9478f773489_warnings___precautions-c0",
+          "dailymed_6623f03b-18a8-48b6-9bb2-16a7f0521e66_contraindications-c0"
+        ],
+        "provenance_valid": true,
+        "top_evidence_rank": 1,
+        "evidence_sources": [
+          "DailyMed"
+        ],
+        "evidence_documents": [
+          "dailymed_060d40e4-b778-43d9-9596-f9478f773489_adverse_reactions",
+          "dailymed_060d40e4-b778-43d9-9596-f9478f773489_contraindications",
+          "dailymed_060d40e4-b778-43d9-9596-f9478f773489_use_in_specific_populations",
+          "dailymed_060d40e4-b778-43d9-9596-f9478f773489_warnings___precautions",
+          "dailymed_6623f03b-18a8-48b6-9bb2-16a7f0521e66_contraindications"
+        ],
+        "evidence_sections": [
+          "Adverse Reactions",
+          "Contraindications",
+          "Use in Specific Populations",
+          "Warnings & Precautions"
+        ],
+        "reason_codes": [
+          "EVIDENCE_SUFFICIENT"
+        ],
+        "warnings": [],
+        "conflict_detected": false,
+        "conflict_summary": null,
+        "policy_latency_ms": 0.35
+      },
+      "safety_assessment": {
+        "risk_category": "informational",
+        "is_emergency": false,
+        "emergency_message": null,
+        "is_injection": false,
+        "sanitized_query": "Metformin contraindications",
+        "requires_strict_grounding": false,
+        "warnings": []
+      }
+    }
+  },
+  {
+    "tag": "missing_field",
+    "endpoint": "/rag/query",
+    "payload": {
+      "top_k": 3
+    },
+    "status_code": 400,
+    "response": {
+      "error": "ValidationError",
+      "message": "query: Field required"
+    }
+  },
+  {
+    "tag": "wrong_type_top_k",
+    "endpoint": "/rag/query",
+    "payload": {
+      "query": "Metformin",
+      "top_k": "three"
+    },
+    "status_code": 400,
+    "response": {
+      "error": "ValidationError",
+      "message": "top_k: Input should be a valid integer, unable to parse string as an integer"
+    }
+  },
+  {
+    "tag": "empty_query",
+    "endpoint": "/rag/query",
+    "payload": {
+      "query": ""
+    },
+    "status_code": 400,
+    "response": {
+      "error": "ValidationError",
+      "message": "query: String should have at least 1 character"
+    }
+  },
+  {
+    "tag": "whitespace_query",
+    "endpoint": "/rag/query",
+    "payload": {
+      "query": "   \n\t  "
+    },
+    "status_code": 400,
+    "response": {
+      "error": "ValidationError",
+      "message": "query: Value error, Query cannot be empty or whitespace-only."
+    }
+  },
+  {
+    "tag": "oversized_query",
+    "endpoint": "/rag/query",
+    "payload": {
+      "query": "Metformin * 1000"
+    },
+    "status_code": 400,
+    "response": {
+      "error": "ValidationError",
+      "message": "query: String should have at most 2000 characters"
+    }
+  },
+  {
+    "tag": "valid_chat",
+    "endpoint": "/chat",
+    "payload": {
+      "query": "Metformin dosage"
+    },
+    "status_code": 500,
+    "response": null
+  },
+  {
+    "tag": "missing_field_chat",
+    "endpoint": "/chat",
+    "payload": {
+      "top_k": 5
+    },
+    "status_code": 500,
+    "response": {
+      "detail": "RAG execution failed: 1 validation error for RAGQueryRequest\nquery\n  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.13/v/string_type"
+    }
+  },
+  {
+    "tag": "empty_message_chat",
+    "endpoint": "/chat",
+    "payload": {
+      "query": ""
+    },
+    "status_code": 500,
+    "response": {
+      "detail": "RAG execution failed: 1 validation error for RAGQueryRequest\nquery\n  String should have at least 1 character [type=string_too_short, input_value='', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/string_too_short"
+    }
+  },
+  {
+    "tag": "whitespace_message_chat",
+    "endpoint": "/chat",
+    "payload": {
+      "query": "   "
+    },
+    "status_code": 500,
+    "response": {
+      "detail": "RAG execution failed: 1 validation error for RAGQueryRequest\nquery\n  Value error, Query cannot be empty or whitespace-only. [type=value_error, input_value='   ', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/value_error"
+    }
+  }
+]

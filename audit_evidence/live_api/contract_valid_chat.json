@@ -1,0 +1,11 @@
+{
+  "endpoint": "/chat",
+  "status_code": 500,
+  "latency_sec": 0.0,
+  "timestamp": "2026-09-15T06:01:30.679191+00:00",
+  "request": {
+    "query": "Metformin dosage"
+  },
+  "response": null,
+  "error": "timed out"
+}

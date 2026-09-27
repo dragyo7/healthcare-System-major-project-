@@ -1,0 +1,595 @@
+[
+  {
+    "id": "pharm_q01_lisinopril_boxed",
+    "category": "boxed_warnings",
+    "query": "What is the black box warning regarding pregnancy for Lisinopril?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_boxed_warning",
+    "expected_drug": "Lisinopril",
+    "expected_sections": [
+      "Boxed Warning"
+    ],
+    "difficulty": "easy",
+    "notes": "Direct query on fetal toxicity black box warning of lisinopril."
+  },
+  {
+    "id": "pharm_q02_lisinopril_dose",
+    "category": "dosage_and_administration",
+    "query": "What is the initial adult starting dose of Lisinopril for hypertension?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_dosage___administration",
+    "expected_drug": "Lisinopril",
+    "expected_sections": [
+      "Dosage & Administration"
+    ],
+    "difficulty": "easy",
+    "notes": "Specific initial starting dose of 10 mg once daily."
+  },
+  {
+    "id": "pharm_q03_lisinopril_contra",
+    "category": "contraindications",
+    "query": "What are the contraindications for taking Lisinopril?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb381b_contraindications",
+    "expected_drug": "Lisinopril",
+    "expected_sections": [
+      "Contraindications"
+    ],
+    "difficulty": "medium",
+    "notes": "Contraindications including history of angioedema and aliskiren co-administration in diabetes."
+  },
+  {
+    "id": "pharm_q04_amlodipine_ind",
+    "category": "indications",
+    "query": "What are the FDA approved indications for Norvasc (amlodipine)?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_c1f7b8a2-9382-4112-9c1e-1284a7df1930_indications___usage",
+    "expected_drug": "Amlodipine",
+    "expected_sections": [
+      "Indications & Usage"
+    ],
+    "difficulty": "easy",
+    "notes": "Trade name Norvasc queried for hypertension and CAD indications."
+  },
+  {
+    "id": "pharm_q05_amlodipine_simva_interaction",
+    "category": "drug_interactions",
+    "query": "Why must simvastatin dose be restricted when co-administered with amlodipine?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_c1f7b8a2-9382-4112-9c1e-1284a7df1930_drug_interactions",
+    "expected_drug": "Amlodipine",
+    "expected_sections": [
+      "Drug Interactions"
+    ],
+    "difficulty": "hard",
+    "notes": "Amlodipine increases simvastatin exposure (limit simvastatin to 20 mg daily)."
+  },
+  {
+    "id": "pharm_q06_atorvastatin_contra",
+    "category": "contraindications",
+    "query": "Is Lipitor contraindicated during pregnancy and active liver disease?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_7823f03b-18a8-48b6-9bb2-16a7f0521e29_contraindications",
+    "expected_drug": "Atorvastatin",
+    "expected_sections": [
+      "Contraindications"
+    ],
+    "difficulty": "easy",
+    "notes": "Direct check on atorvastatin contraindications in pregnancy and active liver disease."
+  },
+  {
+    "id": "pharm_q07_atorvastatin_rhabdo",
+    "category": "warnings",
+    "query": "What are the clinical warnings regarding rhabdomyolysis and myopathy for atorvastatin?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_7823f03b-18a8-48b6-9bb2-16a7f0521e29_warnings___precautions",
+    "expected_drug": "Atorvastatin",
+    "expected_sections": [
+      "Warnings & Precautions"
+    ],
+    "difficulty": "medium",
+    "notes": "Myopathy, rhabdomyolysis, and CPK monitoring warnings."
+  },
+  {
+    "id": "pharm_q08_losartan_renal_dose",
+    "category": "dosage_and_administration",
+    "query": "What is the recommended starting dose of Losartan for diabetic nephropathy?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_893c5d67-5511-477a-a43b-748956eb012a_dosage___administration",
+    "expected_drug": "Losartan",
+    "expected_sections": [
+      "Dosage & Administration"
+    ],
+    "difficulty": "medium",
+    "notes": "Initial dose is 50 mg once daily titrated to 100 mg."
+  },
+  {
+    "id": "pharm_q09_metoprolol_abrupt_cessation",
+    "category": "boxed_warnings",
+    "query": "What happens if Lopressor (metoprolol) is abruptly discontinued according to its boxed warning?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_319a2b5e-3841-4820-94d3-7d84a1e948c2_boxed_warning",
+    "expected_drug": "Metoprolol Tartrate",
+    "expected_sections": [
+      "Boxed Warning"
+    ],
+    "difficulty": "easy",
+    "notes": "Exacerbation of angina and myocardial infarction upon abrupt cessation."
+  },
+  {
+    "id": "pharm_q10_metoprolol_bronchospasm",
+    "category": "contraindications",
+    "query": "Why is metoprolol used with caution or contraindicated in severe bronchospastic disease?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_319a2b5e-3841-4820-94d3-7d84a1e948c2_warnings___precautions",
+    "expected_drug": "Metoprolol Tartrate",
+    "expected_sections": [
+      "Warnings & Precautions",
+      "Contraindications"
+    ],
+    "difficulty": "medium",
+    "notes": "Beta-blockade inhibits bronchodilation in asthma/COPD."
+  },
+  {
+    "id": "pharm_q11_hctz_electrolytes",
+    "category": "adverse_reactions",
+    "query": "What electrolyte disturbances are commonly caused by Hydrochlorothiazide?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_902d1847-b284-47c3-8822-4217ea948123_warnings___precautions",
+    "expected_drug": "Hydrochlorothiazide",
+    "expected_sections": [
+      "Warnings & Precautions",
+      "Adverse Reactions"
+    ],
+    "difficulty": "medium",
+    "notes": "Hypokalemia, hyponatremia, hypochloremia, and hyperuricemia."
+  },
+  {
+    "id": "pharm_q12_hctz_anuria",
+    "category": "contraindications",
+    "query": "In what renal condition is Microzide (hydrochlorothiazide) completely contraindicated?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_902d1847-b284-47c3-8822-4217ea948123_contraindications",
+    "expected_drug": "Hydrochlorothiazide",
+    "expected_sections": [
+      "Contraindications"
+    ],
+    "difficulty": "easy",
+    "notes": "Anuria is absolute contraindication."
+  },
+  {
+    "id": "pharm_q13_metformin_lactic_acidosis",
+    "category": "boxed_warnings",
+    "query": "What are the primary risk factors for Metformin-associated lactic acidosis described in its black box warning?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_6a38bf54-6815-4672-bd88-a400a4023730_boxed_warning",
+    "expected_drug": "Metformin",
+    "expected_sections": [
+      "Boxed Warning"
+    ],
+    "difficulty": "easy",
+    "notes": "Renal impairment, iodinated contrast, hypoxic states, alcohol excess, age >= 65."
+  },
+  {
+    "id": "pharm_q14_metformin_egfr_cutoff",
+    "category": "contraindications",
+    "query": "What is the exact eGFR threshold below which Metformin is contraindicated?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_6a38bf54-6815-4672-bd88-a400a4023730_contraindications",
+    "expected_drug": "Metformin",
+    "expected_sections": [
+      "Contraindications"
+    ],
+    "difficulty": "medium",
+    "notes": "eGFR below 30 mL/min/1.73 m2 is absolute contraindication."
+  },
+  {
+    "id": "pharm_q15_glipizide_g6pd",
+    "category": "warnings",
+    "query": "Why can glipizide cause hemolytic anemia in patients with G6PD deficiency?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_415b3e67-d812-4217-a129-873b88fe3101_warnings___precautions",
+    "expected_drug": "Glipizide",
+    "expected_sections": [
+      "Warnings & Precautions"
+    ],
+    "difficulty": "hard",
+    "notes": "Sulfonylurea-induced hemolysis in G6PD deficiency."
+  },
+  {
+    "id": "pharm_q16_empagliflozin_fournier",
+    "category": "warnings",
+    "query": "What rare but life-threatening genital/perineal bacterial infection is warned on Jardiance (empagliflozin)?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_e938bf11-7392-4112-9844-32b8a7df1942_warnings___precautions",
+    "expected_drug": "Empagliflozin",
+    "expected_sections": [
+      "Warnings & Precautions"
+    ],
+    "difficulty": "medium",
+    "notes": "Necrotizing fasciitis of the perineum (Fournier's Gangrene)."
+  },
+  {
+    "id": "pharm_q17_empagliflozin_hf_indication",
+    "category": "indications",
+    "query": "What cardiovascular and heart failure indications are approved for Empagliflozin?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_e938bf11-7392-4112-9844-32b8a7df1942_indications___usage",
+    "expected_drug": "Empagliflozin",
+    "expected_sections": [
+      "Indications & Usage"
+    ],
+    "difficulty": "easy",
+    "notes": "Reduction of cardiovascular death and hospitalization in heart failure."
+  },
+  {
+    "id": "pharm_q18_amoxicillin_dose_ent",
+    "category": "dosage_and_administration",
+    "query": "What is the adult dosage of Amoxicillin for severe ear, nose, and throat bacterial infections?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_3b29c54e-4821-4192-bc91-2834b9fa8211_dosage___administration",
+    "expected_drug": "Amoxicillin",
+    "expected_sections": [
+      "Dosage & Administration"
+    ],
+    "difficulty": "easy",
+    "notes": "875 mg every 12 hours or 500 mg every 8 hours."
+  },
+  {
+    "id": "pharm_q19_amoxicillin_allopurinol_interaction",
+    "category": "drug_interactions",
+    "query": "What adverse effect is increased when Amoxicillin is co-administered with allopurinol?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_3b29c54e-4821-4192-bc91-2834b9fa8211_drug_interactions",
+    "expected_drug": "Amoxicillin",
+    "expected_sections": [
+      "Drug Interactions"
+    ],
+    "difficulty": "medium",
+    "notes": "Substantially increases incidence of skin rashes."
+  },
+  {
+    "id": "pharm_q20_azithromycin_qt_warning",
+    "category": "warnings",
+    "query": "What cardiac arrhythmia risk is associated with Azithromycin (Zithromax)?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_7823f03b-18a8-48b6-9bb2-16a7f0521e88_warnings___precautions",
+    "expected_drug": "Azithromycin",
+    "expected_sections": [
+      "Warnings & Precautions"
+    ],
+    "difficulty": "easy",
+    "notes": "QT interval prolongation and torsades de pointes risk."
+  },
+  {
+    "id": "pharm_q21_azithromycin_zpak_dosing",
+    "category": "dosage_and_administration",
+    "query": "What is the 5-day Z-Pak dosing schedule for community-acquired pneumonia?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_7823f03b-18a8-48b6-9bb2-16a7f0521e88_dosage___administration",
+    "expected_drug": "Azithromycin",
+    "expected_sections": [
+      "Dosage & Administration"
+    ],
+    "difficulty": "easy",
+    "notes": "500 mg on Day 1, followed by 250 mg daily on Days 2 through 5."
+  },
+  {
+    "id": "pharm_q22_cipro_tendon_warning",
+    "category": "boxed_warnings",
+    "query": "What are the disabling and potentially irreversible serious reactions in Ciprofloxacin's boxed warning?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_184b29c5-8421-4192-bc91-2834b9fa8233_boxed_warning",
+    "expected_drug": "Ciprofloxacin",
+    "expected_sections": [
+      "Boxed Warning"
+    ],
+    "difficulty": "easy",
+    "notes": "Tendinitis, tendon rupture, peripheral neuropathy, and CNS toxicities."
+  },
+  {
+    "id": "pharm_q23_cipro_tizanidine_contra",
+    "category": "contraindications",
+    "query": "Why is concomitant administration of Ciprofloxacin with tizanidine contraindicated?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_184b29c5-8421-4192-bc91-2834b9fa8233_contraindications",
+    "expected_drug": "Ciprofloxacin",
+    "expected_sections": [
+      "Contraindications",
+      "Drug Interactions"
+    ],
+    "difficulty": "medium",
+    "notes": "Potent CYP1A2 inhibition leads to severe hypotension and sedation."
+  },
+  {
+    "id": "pharm_q24_doxycycline_teeth_warning",
+    "category": "special_populations",
+    "query": "Why should Doxycycline be avoided during tooth development in children under 8 years of age?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb3899_warnings___precautions",
+    "expected_drug": "Doxycycline",
+    "expected_sections": [
+      "Warnings & Precautions",
+      "Use in Specific Populations"
+    ],
+    "difficulty": "easy",
+    "notes": "Permanent tooth discoloration (yellow-gray-brown) and enamel hypoplasia."
+  },
+  {
+    "id": "pharm_q25_doxycycline_esophageal_advice",
+    "category": "dosage_and_administration",
+    "query": "How should Doxycycline be taken with fluids to avoid esophageal ulceration?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_4b2c1256-42d4-4a4b-8e2a-0a8870fb3899_dosage___administration",
+    "expected_drug": "Doxycycline",
+    "expected_sections": [
+      "Dosage & Administration"
+    ],
+    "difficulty": "medium",
+    "notes": "Administer with adequate fluids to wash down the capsule and prevent esophageal irritation."
+  },
+  {
+    "id": "pharm_q26_synthroid_weight_loss_boxed",
+    "category": "boxed_warnings",
+    "query": "What does Synthroid's black box warning state about using thyroid hormone for obesity or weight reduction?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_f1a23890-83b4-4217-9102-1284a7df1944_boxed_warning",
+    "expected_drug": "Levothyroxine",
+    "expected_sections": [
+      "Boxed Warning"
+    ],
+    "difficulty": "easy",
+    "notes": "Not for treatment of obesity or weight loss; larger doses produce serious toxicity."
+  },
+  {
+    "id": "pharm_q27_synthroid_admin_timing",
+    "category": "dosage_and_administration",
+    "query": "What is the proper timing and administration method for oral Levothyroxine tablets?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_f1a23890-83b4-4217-9102-1284a7df1944_dosage___administration",
+    "expected_drug": "Levothyroxine",
+    "expected_sections": [
+      "Dosage & Administration"
+    ],
+    "difficulty": "easy",
+    "notes": "Once daily on empty stomach 30 to 60 minutes before breakfast with full glass of water."
+  },
+  {
+    "id": "pharm_q28_synthroid_calcium_iron_interaction",
+    "category": "drug_interactions",
+    "query": "How many hours apart must Levothyroxine and calcium carbonate or ferrous sulfate be taken?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_f1a23890-83b4-4217-9102-1284a7df1944_drug_interactions",
+    "expected_drug": "Levothyroxine",
+    "expected_sections": [
+      "Drug Interactions"
+    ],
+    "difficulty": "medium",
+    "notes": "Separate administration by at least 4 hours due to binding and reduced absorption."
+  },
+  {
+    "id": "pharm_q29_prednisone_hpa_suppression",
+    "category": "warnings",
+    "query": "Why must long-term Prednisone therapy be tapered gradually rather than stopped abruptly?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_71829a2b-3841-4820-94d3-7d84a1e948c5_warnings___precautions",
+    "expected_drug": "Prednisone",
+    "expected_sections": [
+      "Warnings & Precautions",
+      "Dosage & Administration"
+    ],
+    "difficulty": "easy",
+    "notes": "To prevent HPA axis suppression and secondary acute adrenocortical insufficiency."
+  },
+  {
+    "id": "pharm_q30_prednisone_nsaid_interaction",
+    "category": "drug_interactions",
+    "query": "What gastrointestinal risk increases when Prednisone is combined with NSAIDs like ibuprofen?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_71829a2b-3841-4820-94d3-7d84a1e948c5_drug_interactions",
+    "expected_drug": "Prednisone",
+    "expected_sections": [
+      "Drug Interactions"
+    ],
+    "difficulty": "easy",
+    "notes": "Increased risk of gastrointestinal ulceration and bleeding."
+  },
+  {
+    "id": "pharm_q31_gabapentin_respiratory_depression",
+    "category": "warnings",
+    "query": "What warning does Gabapentin carry regarding serious respiratory depression when combined with opioids?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_41829a2b-3841-4820-94d3-7d84a1e948c6_warnings___precautions",
+    "expected_drug": "Gabapentin",
+    "expected_sections": [
+      "Warnings & Precautions"
+    ],
+    "difficulty": "medium",
+    "notes": "Life-threatening hypoventilation when co-administered with CNS depressants or opioids."
+  },
+  {
+    "id": "pharm_q32_gabapentin_moa",
+    "category": "clinical_pharmacology",
+    "query": "What is the molecular mechanism of action of Gabapentin in the central nervous system?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_41829a2b_3841_4820_94d3_7d84a1e948c6_clinical_pharmacology",
+    "expected_drug": "Gabapentin",
+    "expected_sections": [
+      "Clinical Pharmacology"
+    ],
+    "difficulty": "hard",
+    "notes": "Binds to alpha-2-delta subunit of voltage-gated calcium channels in CNS."
+  },
+  {
+    "id": "pharm_q33_levetiracetam_sv2a",
+    "category": "clinical_pharmacology",
+    "query": "What synaptic vesicle protein does Keppra (levetiracetam) selectively bind to?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_51829a2b_3841_4820_94d3_7d84a1e948c7_clinical_pharmacology",
+    "expected_drug": "Levetiracetam",
+    "expected_sections": [
+      "Clinical Pharmacology"
+    ],
+    "difficulty": "hard",
+    "notes": "Binds selectively to synaptic vesicle protein 2A (SV2A)."
+  },
+  {
+    "id": "pharm_q34_levetiracetam_psych_effects",
+    "category": "adverse_reactions",
+    "query": "What behavioral abnormalities and psychiatric symptoms can be caused by levetiracetam?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_51829a2b-3841-4820-94d3-7d84a1e948c7_warnings___precautions",
+    "expected_drug": "Levetiracetam",
+    "expected_sections": [
+      "Warnings & Precautions",
+      "Adverse Reactions"
+    ],
+    "difficulty": "medium",
+    "notes": "Irritability, aggression, agitation, anger, depression, and psychosis."
+  },
+  {
+    "id": "pharm_q35_albuterol_eib_dosing",
+    "category": "dosage_and_administration",
+    "query": "How many puffs of Albuterol HFA should be taken prior to exercise to prevent exercise-induced bronchospasm?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_61829a2b-3841-4820-94d3-7d84a1e948c8_dosage___administration",
+    "expected_drug": "Albuterol",
+    "expected_sections": [
+      "Dosage & Administration"
+    ],
+    "difficulty": "easy",
+    "notes": "2 inhalations (180 mcg) 15 to 30 minutes before exercise."
+  },
+  {
+    "id": "pharm_q36_fluticasone_oral_rinse",
+    "category": "dosage_and_administration",
+    "query": "Why must patients rinse their mouth with water without swallowing after inhaling Flovent (fluticasone)?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_71829a2b-3841-4820-94d3-7d84a1e948c9_dosage___administration",
+    "expected_drug": "Fluticasone Propionate",
+    "expected_sections": [
+      "Dosage & Administration",
+      "Warnings & Precautions"
+    ],
+    "difficulty": "easy",
+    "notes": "To reduce the risk of oropharyngeal candidiasis (oral thrush)."
+  },
+  {
+    "id": "pharm_q37_fluticasone_ritonavir_interaction",
+    "category": "drug_interactions",
+    "query": "Why should Flovent (fluticasone) co-administration with ritonavir be avoided?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_71829a2b-3841-4820-94d3-7d84a1e948c9_drug_interactions",
+    "expected_drug": "Fluticasone Propionate",
+    "expected_sections": [
+      "Drug Interactions"
+    ],
+    "difficulty": "hard",
+    "notes": "Strong CYP3A4 inhibition by ritonavir leads to Cushing's syndrome and adrenal suppression."
+  },
+  {
+    "id": "pharm_q38_omeprazole_clopidogrel_interaction",
+    "category": "drug_interactions",
+    "query": "Why is the combination of Prilosec (omeprazole) and clopidogrel avoided in cardiology?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_81829a2b-3841-4820-94d3-7d84a1e948ca_drug_interactions",
+    "expected_drug": "Omeprazole",
+    "expected_sections": [
+      "Drug Interactions"
+    ],
+    "difficulty": "hard",
+    "notes": "Omeprazole inhibits CYP2C19, reducing active clopidogrel metabolite and antiplatelet efficacy."
+  },
+  {
+    "id": "pharm_q39_pantoprazole_long_term_fracture",
+    "category": "warnings",
+    "query": "What bone fracture and mineral deficiency risks are associated with long-term Protonix (pantoprazole) therapy?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_91829a2b-3841-4820-94d3-7d84a1e948cb_warnings___precautions",
+    "expected_drug": "Pantoprazole",
+    "expected_sections": [
+      "Warnings & Precautions"
+    ],
+    "difficulty": "medium",
+    "notes": "Osteoporosis-related fractures, hypomagnesemia, and Vitamin B12 deficiency."
+  },
+  {
+    "id": "pharm_q40_ondansetron_apomorphine_contra",
+    "category": "contraindications",
+    "query": "Why is Zofran (ondansetron) strictly contraindicated with apomorphine?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_a1829a2b-3841-4820-94d3-7d84a1e948cc_contraindications",
+    "expected_drug": "Ondansetron",
+    "expected_sections": [
+      "Contraindications",
+      "Drug Interactions"
+    ],
+    "difficulty": "hard",
+    "notes": "Profound hypotension and loss of consciousness."
+  },
+  {
+    "id": "pharm_q41_tramadol_cyp2d6_boxed",
+    "category": "boxed_warnings",
+    "query": "What does Tramadol's boxed warning state about ultra-rapid CYP2D6 metabolizers in pediatric patients?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_b1829a2b-3841-4820-94d3-7d84a1e948cd_boxed_warning",
+    "expected_drug": "Tramadol",
+    "expected_sections": [
+      "Boxed Warning"
+    ],
+    "difficulty": "medium",
+    "notes": "Ultra-rapid CYP2D6 metabolism leads to life-threatening respiratory depression and death."
+  },
+  {
+    "id": "pharm_q42_tramadol_seizure_risk",
+    "category": "warnings",
+    "query": "Why does Tramadol carry a specific warning regarding seizure risk when combined with antidepressants?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_b1829a2b-3841-4820-94d3-7d84a1e948cd_warnings___precautions",
+    "expected_drug": "Tramadol",
+    "expected_sections": [
+      "Warnings & Precautions"
+    ],
+    "difficulty": "medium",
+    "notes": "Lowers seizure threshold; concomitant use with SSRIs/TCAs increases seizure risk."
+  },
+  {
+    "id": "pharm_q43_sertraline_suicide_boxed",
+    "category": "boxed_warnings",
+    "query": "What black box warning is issued for Zoloft (sertraline) regarding suicidal thoughts in children and young adults?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_c1829a2b-3841-4820-94d3-7d84a1e948ce_boxed_warning",
+    "expected_drug": "Sertraline",
+    "expected_sections": [
+      "Boxed Warning"
+    ],
+    "difficulty": "easy",
+    "notes": "Antidepressants increase risk of suicidal thoughts and behaviors in pediatric and young adult patients."
+  },
+  {
+    "id": "pharm_q44_sertraline_maoi_contra",
+    "category": "contraindications",
+    "query": "How many days must elapse between discontinuing an MAOI and initiating Zoloft (sertraline)?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_c1829a2b-3841-4820-94d3-7d84a1e948ce_contraindications",
+    "expected_drug": "Sertraline",
+    "expected_sections": [
+      "Contraindications"
+    ],
+    "difficulty": "medium",
+    "notes": "At least 14 days must elapse to avoid fatal serotonin syndrome."
+  },
+  {
+    "id": "pharm_q45_duloxetine_hepatic_warning",
+    "category": "warnings",
+    "query": "Why is Cymbalta (duloxetine) avoided in patients with chronic liver disease or substantial alcohol use?",
+    "expected_source_id": "DailyMed",
+    "expected_document_id": "dailymed_d1829a2b-3841-4820-94d3-7d84a1e948cf_warnings___precautions",
+    "expected_drug": "Duloxetine",
+    "expected_sections": [
+      "Warnings & Precautions"
+    ],
+    "difficulty": "medium",
+    "notes": "Cases of hepatic failure, sometimes fatal, reported in post-marketing studies."
+  }
+]

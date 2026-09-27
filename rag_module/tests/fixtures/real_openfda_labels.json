@@ -1,0 +1,136 @@
+{
+  "meta": {
+    "disclaimer": "Do not rely on openFDA to make decisions regarding medical care. While we make every effort to ensure that data is accurate, you should assume all results are unvalidated.",
+    "terms": "https://open.fda.gov/terms/",
+    "license": "https://open.fda.gov/license/",
+    "last_updated": "2024-05-20",
+    "results": {
+      "skip": 0,
+      "limit": 3,
+      "total": 3
+    }
+  },
+  "results": [
+    {
+      "id": "openfda-lisinopril-001",
+      "set_id": "4b2c1256-42d4-4a4b-8e2a-0a8870fb381b",
+      "version": "12",
+      "effective_time": "20230515",
+      "openfda": {
+        "application_number": ["NDA019777"],
+        "brand_name": ["ZESTRIL", "PRINIVIL"],
+        "generic_name": ["LISINOPRIL"],
+        "manufacturer_name": ["AstraZeneca Pharmaceuticals LP"],
+        "product_ndc": ["0310-0130"],
+        "product_type": ["HUMAN PRESCRIPTION DRUG"],
+        "route": ["ORAL"],
+        "substance_name": ["LISINOPRIL"],
+        "rxcui": ["314076"],
+        "spl_id": ["4b2c1256-42d4-4a4b-8e2a-0a8870fb381b"],
+        "spl_set_id": ["4b2c1256-42d4-4a4b-8e2a-0a8870fb381b"],
+        "package_ndc": ["0310-0130-10"],
+        "pharm_class_epc": ["Angiotensin Converting Enzyme Inhibitor [EPC]"],
+        "pharm_class_moa": ["Angiotensin-converting Enzyme Inhibitors [MoA]"]
+      },
+      "boxed_warning": [
+        "WARNING: FETAL TOXICITY - When pregnancy is detected, discontinue ZESTRIL as soon as possible. Drugs that act directly on the renin-angiotensin system can cause injury and death to the developing fetus."
+      ],
+      "indications_and_usage": [
+        "ZESTRIL is an angiotensin converting enzyme (ACE) inhibitor indicated for: Treatment of hypertension in adult patients and pediatric patients 6 years of age and older; Adjunctive therapy in heart failure in patients not responding adequately to diuretics and digitalis; Treatment of acute myocardial infarction within 24 hours of onset."
+      ],
+      "dosage_and_administration": [
+        "Hypertension: Initial adult dose is 10 mg once daily. Dosage may be adjusted up to 40 mg daily based on clinical response. Heart failure: Initial dose 5 mg once daily with diuretics. Target dose is 20 to 40 mg once daily."
+      ],
+      "contraindications": [
+        "ZESTRIL is contraindicated in patients with a history of angioedema related to previous ACE inhibitor treatment, hereditary or idiopathic angioedema, and concomitant use with aliskiren in patients with diabetes."
+      ],
+      "warnings_and_cautions": [
+        "Angioedema and Anaphylactoid Reactions: Discontinue ZESTRIL immediately. Impaired Renal Function: Monitor serum creatinine. Hyperkalemia: Monitor serum potassium periodically."
+      ],
+      "adverse_reactions": [
+        "Most common adverse reactions (incidence >=2%) are headache, dizziness, dry cough, postural effects, and diarrhea."
+      ],
+      "drug_interactions": [
+        "Dual inhibition of renin-angiotensin system with ARBs or aliskiren increases hypotension and hyperkalemia risk. NSAIDs may diminish antihypertensive effect. Lithium toxicity may increase with concomitant ACE inhibitor use."
+      ]
+    },
+    {
+      "id": "openfda-metformin-002",
+      "set_id": "9a3e2b1c-8f4d-4e2a-9c3b-1d7e5f8a0b2c",
+      "version": "8",
+      "effective_time": "20230810",
+      "openfda": {
+        "application_number": ["NDA020357"],
+        "brand_name": ["GLUCOPHAGE", "FORTAMET"],
+        "generic_name": ["METFORMIN HYDROCHLORIDE"],
+        "manufacturer_name": ["Bristol-Myers Squibb Company"],
+        "product_ndc": ["0087-6060"],
+        "product_type": ["HUMAN PRESCRIPTION DRUG"],
+        "route": ["ORAL"],
+        "substance_name": ["METFORMIN HYDROCHLORIDE"],
+        "rxcui": ["860975"],
+        "spl_id": ["9a3e2b1c-8f4d-4e2a-9c3b-1d7e5f8a0b2c"],
+        "spl_set_id": ["9a3e2b1c-8f4d-4e2a-9c3b-1d7e5f8a0b2c"],
+        "package_ndc": ["0087-6060-05"],
+        "pharm_class_epc": ["Biguanide [EPC]"]
+      },
+      "boxed_warning": [
+        "WARNING: LACTIC ACIDOSIS - Post-marketing cases of metformin-associated lactic acidosis have resulted in death, hypothermia, hypotension, and resistant bradyarrhythmias. Assess renal function prior to initiation."
+      ],
+      "indications_and_usage": [
+        "GLUCOPHAGE is a biguanide indicated as an adjunct to diet and exercise to improve glycemic control in adults and pediatric patients 10 years of age and older with type 2 diabetes mellitus."
+      ],
+      "dosage_and_administration": [
+        "Starting dose: 500 mg orally twice daily or 850 mg once daily with meals. Increase in increments of 500 mg weekly or 850 mg every 2 weeks up to maximum recommended dose of 2550 mg per day."
+      ],
+      "contraindications": [
+        "Severe renal impairment (eGFR below 30 mL/min/1.73 m2). Known hypersensitivity to metformin. Acute or chronic metabolic acidosis, including diabetic ketoacidosis."
+      ],
+      "warnings_and_cautions": [
+        "Lactic acidosis: Assess patients with metabolic acidosis promptly. Vitamin B12 deficiency: Monitor hematologic parameters annually."
+      ],
+      "adverse_reactions": [
+        "Most common adverse reactions (>5%) are diarrhea, nausea, vomiting, abdominal bloating, flatulence, and anorexia."
+      ]
+    },
+    {
+      "id": "openfda-atorvastatin-003",
+      "set_id": "3f8a1c9e-4b2d-4e7a-8c1b-9a5d3f2e0b1c",
+      "version": "15",
+      "effective_time": "20231102",
+      "openfda": {
+        "application_number": ["NDA020702"],
+        "brand_name": ["LIPITOR"],
+        "generic_name": ["ATORVASTATIN CALCIUM"],
+        "manufacturer_name": ["Pfizer Laboratories Div Pfizer Inc"],
+        "product_ndc": ["0071-0155"],
+        "product_type": ["HUMAN PRESCRIPTION DRUG"],
+        "route": ["ORAL"],
+        "substance_name": ["ATORVASTATIN CALCIUM"],
+        "rxcui": ["617314"],
+        "spl_id": ["3f8a1c9e-4b2d-4e7a-8c1b-9a5d3f2e0b1c"],
+        "spl_set_id": ["3f8a1c9e-4b2d-4e7a-8c1b-9a5d3f2e0b1c"],
+        "package_ndc": ["0071-0155-23"],
+        "pharm_class_epc": ["HMG-CoA Reductase Inhibitor [EPC]"]
+      },
+      "indications_and_usage": [
+        "LIPITOR is indicated as an adjunct to diet to reduce elevated total cholesterol, LDL-C, apo B, and triglycerides in patients with primary hyperlipidemia and to reduce the risk of MI and stroke in patients with cardiovascular disease."
+      ],
+      "dosage_and_administration": [
+        "Starting dose: 10 to 20 mg once daily. Daily dose range: 10 to 80 mg once daily. Individualize according to target lipid goals."
+      ],
+      "contraindications": [
+        "Active liver disease or unexplained persistent elevations of hepatic transaminases. Hypersensitivity to any component. Pregnancy and lactation."
+      ],
+      "warnings_and_cautions": [
+        "Myopathy and Rhabdomyolysis: Discontinue if markedly elevated CPK levels occur. Monitor liver enzymes before initiating therapy."
+      ],
+      "adverse_reactions": [
+        "Most common adverse reactions (incidence >=2%) are nasopharyngitis, arthralgia, diarrhea, pain in extremity, and urinary tract infection."
+      ],
+      "drug_interactions": [
+        "Strong CYP3A4 inhibitors significantly increase atorvastatin plasma concentration and rhabdomyolysis risk. Fibrates and cyclosporine also increase myopathy risk."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,820 @@
+[
+  {
+    "document_id": "rxnorm_6809",
+    "source_id": "RxNorm",
+    "source_name": "RxNorm Normalized Prescribable Clinical Terminology",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "RxNorm Concept: Metformin Oral Tablet (RxCUI: 6809)",
+    "content": "Medication Concept: Metformin Oral Tablet\nRxCUI: 6809\nActive Ingredient: metformin\nBrand / Trade Names: Glucophage, Fortamet, Glycomet\nDosage Form: Oral Tablet\nStrength: 500 mg, 850 mg, 1000 mg\nTherapeutic Class: Biguanide Antidiabetic\nAuthority: National Library of Medicine (NLM/NIH)",
+    "source_url": "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=6809",
+    "document_type": "drug_monograph",
+    "evidence_role": "terminology_concept",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "pharmacology",
+    "section": "Clinical Concept Summary",
+    "section_id": "concept_summary",
+    "parent_document_id": null,
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "bb076e77bb5019c3199fd52254db0f482731a23788b3bb178054719cb2d38a9d",
+    "entities": [
+      "metformin",
+      "Glucophage",
+      "Fortamet",
+      "Glycomet"
+    ],
+    "version": "2026-02",
+    "retrieved_at": "2026-09-15T05:03:51.893905+00:00",
+    "content_hash": "bb076e77bb5019c3199fd52254db0f482731a23788b3bb178054719cb2d38a9d",
+    "metadata": {
+      "rxcui": "6809",
+      "canonical_name": "Metformin Oral Tablet",
+      "ingredient": "metformin",
+      "brand_names": [
+        "Glucophage",
+        "Fortamet",
+        "Glycomet"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "500 mg, 850 mg, 1000 mg",
+      "therapeutic_class": "Biguanide Antidiabetic"
+    }
+  },
+  {
+    "document_id": "rxnorm_29046",
+    "source_id": "RxNorm",
+    "source_name": "RxNorm Normalized Prescribable Clinical Terminology",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "RxNorm Concept: Lisinopril Oral Tablet (RxCUI: 29046)",
+    "content": "Medication Concept: Lisinopril Oral Tablet\nRxCUI: 29046\nActive Ingredient: lisinopril\nBrand / Trade Names: Zestril, Prinivil\nDosage Form: Oral Tablet\nStrength: 5 mg, 10 mg, 20 mg, 40 mg\nTherapeutic Class: ACE Inhibitor\nAuthority: National Library of Medicine (NLM/NIH)",
+    "source_url": "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=29046",
+    "document_type": "drug_monograph",
+    "evidence_role": "terminology_concept",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "pharmacology",
+    "section": "Clinical Concept Summary",
+    "section_id": "concept_summary",
+    "parent_document_id": null,
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "ac2027a491df01cc571fc5dccf100c22622897286acefae23f1f14d77db8b250",
+    "entities": [
+      "lisinopril",
+      "Zestril",
+      "Prinivil"
+    ],
+    "version": "2026-02",
+    "retrieved_at": "2026-09-15T05:03:51.893905+00:00",
+    "content_hash": "ac2027a491df01cc571fc5dccf100c22622897286acefae23f1f14d77db8b250",
+    "metadata": {
+      "rxcui": "29046",
+      "canonical_name": "Lisinopril Oral Tablet",
+      "ingredient": "lisinopril",
+      "brand_names": [
+        "Zestril",
+        "Prinivil"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "5 mg, 10 mg, 20 mg, 40 mg",
+      "therapeutic_class": "ACE Inhibitor"
+    }
+  },
+  {
+    "document_id": "rxnorm_17767",
+    "source_id": "RxNorm",
+    "source_name": "RxNorm Normalized Prescribable Clinical Terminology",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "RxNorm Concept: Amlodipine Oral Tablet (RxCUI: 17767)",
+    "content": "Medication Concept: Amlodipine Oral Tablet\nRxCUI: 17767\nActive Ingredient: amlodipine\nBrand / Trade Names: Norvasc, Amlong\nDosage Form: Oral Tablet\nStrength: 2.5 mg, 5 mg, 10 mg\nTherapeutic Class: Calcium Channel Blocker\nAuthority: National Library of Medicine (NLM/NIH)",
+    "source_url": "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=17767",
+    "document_type": "drug_monograph",
+    "evidence_role": "terminology_concept",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "pharmacology",
+    "section": "Clinical Concept Summary",
+    "section_id": "concept_summary",
+    "parent_document_id": null,
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "5baae9fc92c77d4fde8ed2b92a87c7c07feaaf1fad466ac4afe477358a44d547",
+    "entities": [
+      "amlodipine",
+      "Norvasc",
+      "Amlong"
+    ],
+    "version": "2026-02",
+    "retrieved_at": "2026-09-15T05:03:51.893905+00:00",
+    "content_hash": "5baae9fc92c77d4fde8ed2b92a87c7c07feaaf1fad466ac4afe477358a44d547",
+    "metadata": {
+      "rxcui": "17767",
+      "canonical_name": "Amlodipine Oral Tablet",
+      "ingredient": "amlodipine",
+      "brand_names": [
+        "Norvasc",
+        "Amlong"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "2.5 mg, 5 mg, 10 mg",
+      "therapeutic_class": "Calcium Channel Blocker"
+    }
+  },
+  {
+    "document_id": "rxnorm_83367",
+    "source_id": "RxNorm",
+    "source_name": "RxNorm Normalized Prescribable Clinical Terminology",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "RxNorm Concept: Atorvastatin Oral Tablet (RxCUI: 83367)",
+    "content": "Medication Concept: Atorvastatin Oral Tablet\nRxCUI: 83367\nActive Ingredient: atorvastatin\nBrand / Trade Names: Lipitor, Atorva\nDosage Form: Oral Tablet\nStrength: 10 mg, 20 mg, 40 mg, 80 mg\nTherapeutic Class: HMG-CoA Reductase Inhibitor\nAuthority: National Library of Medicine (NLM/NIH)",
+    "source_url": "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=83367",
+    "document_type": "drug_monograph",
+    "evidence_role": "terminology_concept",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "pharmacology",
+    "section": "Clinical Concept Summary",
+    "section_id": "concept_summary",
+    "parent_document_id": null,
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "6e33e67319db95a7f5a1feee6377a5c830c6267a64b0625a1255cf78bd7076be",
+    "entities": [
+      "atorvastatin",
+      "Lipitor",
+      "Atorva"
+    ],
+    "version": "2026-02",
+    "retrieved_at": "2026-09-15T05:03:51.894906+00:00",
+    "content_hash": "6e33e67319db95a7f5a1feee6377a5c830c6267a64b0625a1255cf78bd7076be",
+    "metadata": {
+      "rxcui": "83367",
+      "canonical_name": "Atorvastatin Oral Tablet",
+      "ingredient": "atorvastatin",
+      "brand_names": [
+        "Lipitor",
+        "Atorva"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "10 mg, 20 mg, 40 mg, 80 mg",
+      "therapeutic_class": "HMG-CoA Reductase Inhibitor"
+    }
+  },
+  {
+    "document_id": "rxnorm_11289",
+    "source_id": "RxNorm",
+    "source_name": "RxNorm Normalized Prescribable Clinical Terminology",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "RxNorm Concept: Warfarin Oral Tablet (RxCUI: 11289)",
+    "content": "Medication Concept: Warfarin Oral Tablet\nRxCUI: 11289\nActive Ingredient: warfarin\nBrand / Trade Names: Coumadin, Jantoven\nDosage Form: Oral Tablet\nStrength: 1 mg, 2 mg, 2.5 mg, 5 mg\nTherapeutic Class: Anticoagulant\nAuthority: National Library of Medicine (NLM/NIH)",
+    "source_url": "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=11289",
+    "document_type": "drug_monograph",
+    "evidence_role": "terminology_concept",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "pharmacology",
+    "section": "Clinical Concept Summary",
+    "section_id": "concept_summary",
+    "parent_document_id": null,
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "385cb5ae6c16b1efc23815787cfffbfb4feeaa7a343eb787232406c80369bdf8",
+    "entities": [
+      "warfarin",
+      "Coumadin",
+      "Jantoven"
+    ],
+    "version": "2026-02",
+    "retrieved_at": "2026-09-15T05:03:51.894906+00:00",
+    "content_hash": "385cb5ae6c16b1efc23815787cfffbfb4feeaa7a343eb787232406c80369bdf8",
+    "metadata": {
+      "rxcui": "11289",
+      "canonical_name": "Warfarin Oral Tablet",
+      "ingredient": "warfarin",
+      "brand_names": [
+        "Coumadin",
+        "Jantoven"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "1 mg, 2 mg, 2.5 mg, 5 mg",
+      "therapeutic_class": "Anticoagulant"
+    }
+  },
+  {
+    "document_id": "rxnorm_1191",
+    "source_id": "RxNorm",
+    "source_name": "RxNorm Normalized Prescribable Clinical Terminology",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "RxNorm Concept: Aspirin Oral Tablet (RxCUI: 1191)",
+    "content": "Medication Concept: Aspirin Oral Tablet\nRxCUI: 1191\nActive Ingredient: aspirin\nBrand / Trade Names: Bayer Aspirin, Ecotrin, Disprin\nDosage Form: Oral Tablet\nStrength: 81 mg, 325 mg, 500 mg\nTherapeutic Class: Antiplatelet / Analgesic\nAuthority: National Library of Medicine (NLM/NIH)",
+    "source_url": "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=1191",
+    "document_type": "drug_monograph",
+    "evidence_role": "terminology_concept",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "pharmacology",
+    "section": "Clinical Concept Summary",
+    "section_id": "concept_summary",
+    "parent_document_id": null,
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "05cd77807ca1b7a2eb22205afe1976f0cfdf53651e10165209d78d5551654ca0",
+    "entities": [
+      "aspirin",
+      "Bayer Aspirin",
+      "Ecotrin",
+      "Disprin"
+    ],
+    "version": "2026-02",
+    "retrieved_at": "2026-09-15T05:03:51.894906+00:00",
+    "content_hash": "05cd77807ca1b7a2eb22205afe1976f0cfdf53651e10165209d78d5551654ca0",
+    "metadata": {
+      "rxcui": "1191",
+      "canonical_name": "Aspirin Oral Tablet",
+      "ingredient": "aspirin",
+      "brand_names": [
+        "Bayer Aspirin",
+        "Ecotrin",
+        "Disprin"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "81 mg, 325 mg, 500 mg",
+      "therapeutic_class": "Antiplatelet / Analgesic"
+    }
+  },
+  {
+    "document_id": "rxnorm_5640",
+    "source_id": "RxNorm",
+    "source_name": "RxNorm Normalized Prescribable Clinical Terminology",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "RxNorm Concept: Ibuprofen Oral Tablet (RxCUI: 5640)",
+    "content": "Medication Concept: Ibuprofen Oral Tablet\nRxCUI: 5640\nActive Ingredient: ibuprofen\nBrand / Trade Names: Advil, Motrin, Brufen\nDosage Form: Oral Tablet\nStrength: 200 mg, 400 mg, 600 mg, 800 mg\nTherapeutic Class: NSAID\nAuthority: National Library of Medicine (NLM/NIH)",
+    "source_url": "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=5640",
+    "document_type": "drug_monograph",
+    "evidence_role": "terminology_concept",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "pharmacology",
+    "section": "Clinical Concept Summary",
+    "section_id": "concept_summary",
+    "parent_document_id": null,
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "5d6dd88476a5874cbd9fb56efbf1946f48ad59ec9a1def93d43d98a9cd747dde",
+    "entities": [
+      "ibuprofen",
+      "Advil",
+      "Motrin",
+      "Brufen"
+    ],
+    "version": "2026-02",
+    "retrieved_at": "2026-09-15T05:03:51.894906+00:00",
+    "content_hash": "5d6dd88476a5874cbd9fb56efbf1946f48ad59ec9a1def93d43d98a9cd747dde",
+    "metadata": {
+      "rxcui": "5640",
+      "canonical_name": "Ibuprofen Oral Tablet",
+      "ingredient": "ibuprofen",
+      "brand_names": [
+        "Advil",
+        "Motrin",
+        "Brufen"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "200 mg, 400 mg, 600 mg, 800 mg",
+      "therapeutic_class": "NSAID"
+    }
+  },
+  {
+    "document_id": "rxnorm_161",
+    "source_id": "RxNorm",
+    "source_name": "RxNorm Normalized Prescribable Clinical Terminology",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "RxNorm Concept: Acetaminophen (Paracetamol) Oral Tablet (RxCUI: 161)",
+    "content": "Medication Concept: Acetaminophen (Paracetamol) Oral Tablet\nRxCUI: 161\nActive Ingredient: paracetamol\nBrand / Trade Names: Tylenol, Panadol, Crocin, Calpol, Dolo 650\nDosage Form: Oral Tablet\nStrength: 325 mg, 500 mg, 650 mg\nTherapeutic Class: Analgesic / Antipyretic\nAuthority: National Library of Medicine (NLM/NIH)",
+    "source_url": "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=161",
+    "document_type": "drug_monograph",
+    "evidence_role": "terminology_concept",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "pharmacology",
+    "section": "Clinical Concept Summary",
+    "section_id": "concept_summary",
+    "parent_document_id": null,
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "d2594610884c5642ec1b72ef06fe571f199678a44b22e839d56b839f1fa13912",
+    "entities": [
+      "paracetamol",
+      "Tylenol",
+      "Panadol",
+      "Crocin",
+      "Calpol",
+      "Dolo 650"
+    ],
+    "version": "2026-02",
+    "retrieved_at": "2026-09-15T05:03:51.894906+00:00",
+    "content_hash": "d2594610884c5642ec1b72ef06fe571f199678a44b22e839d56b839f1fa13912",
+    "metadata": {
+      "rxcui": "161",
+      "canonical_name": "Acetaminophen (Paracetamol) Oral Tablet",
+      "ingredient": "paracetamol",
+      "brand_names": [
+        "Tylenol",
+        "Panadol",
+        "Crocin",
+        "Calpol",
+        "Dolo 650"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "325 mg, 500 mg, 650 mg",
+      "therapeutic_class": "Analgesic / Antipyretic"
+    }
+  },
+  {
+    "document_id": "rxnorm_723",
+    "source_id": "RxNorm",
+    "source_name": "RxNorm Normalized Prescribable Clinical Terminology",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "RxNorm Concept: Amoxicillin Oral Capsule (RxCUI: 723)",
+    "content": "Medication Concept: Amoxicillin Oral Capsule\nRxCUI: 723\nActive Ingredient: amoxicillin\nBrand / Trade Names: Amoxil, Moxatag, Novamox\nDosage Form: Oral Capsule\nStrength: 250 mg, 500 mg, 875 mg\nTherapeutic Class: Penicillin Antibacterial\nAuthority: National Library of Medicine (NLM/NIH)",
+    "source_url": "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=723",
+    "document_type": "drug_monograph",
+    "evidence_role": "terminology_concept",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "pharmacology",
+    "section": "Clinical Concept Summary",
+    "section_id": "concept_summary",
+    "parent_document_id": null,
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "22b527b3abdf33c1a2222b6dde6857c8be535aca30a3074e2e46156cab53a2c3",
+    "entities": [
+      "amoxicillin",
+      "Amoxil",
+      "Moxatag",
+      "Novamox"
+    ],
+    "version": "2026-02",
+    "retrieved_at": "2026-09-15T05:03:51.894906+00:00",
+    "content_hash": "22b527b3abdf33c1a2222b6dde6857c8be535aca30a3074e2e46156cab53a2c3",
+    "metadata": {
+      "rxcui": "723",
+      "canonical_name": "Amoxicillin Oral Capsule",
+      "ingredient": "amoxicillin",
+      "brand_names": [
+        "Amoxil",
+        "Moxatag",
+        "Novamox"
+      ],
+      "dosage_form": "Oral Capsule",
+      "strength": "250 mg, 500 mg, 875 mg",
+      "therapeutic_class": "Penicillin Antibacterial"
+    }
+  },
+  {
+    "document_id": "rxnorm_18631",
+    "source_id": "RxNorm",
+    "source_name": "RxNorm Normalized Prescribable Clinical Terminology",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "RxNorm Concept: Azithromycin Oral Tablet (RxCUI: 18631)",
+    "content": "Medication Concept: Azithromycin Oral Tablet\nRxCUI: 18631\nActive Ingredient: azithromycin\nBrand / Trade Names: Zithromax, Z-Pak, Azithral\nDosage Form: Oral Tablet\nStrength: 250 mg, 500 mg\nTherapeutic Class: Macrolide Antibacterial\nAuthority: National Library of Medicine (NLM/NIH)",
+    "source_url": "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=18631",
+    "document_type": "drug_monograph",
+    "evidence_role": "terminology_concept",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "pharmacology",
+    "section": "Clinical Concept Summary",
+    "section_id": "concept_summary",
+    "parent_document_id": null,
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "3ff59941873de19e9335654c69f4e129f755b40b1040c4b216e8628acd1e4e92",
+    "entities": [
+      "azithromycin",
+      "Zithromax",
+      "Z-Pak",
+      "Azithral"
+    ],
+    "version": "2026-02",
+    "retrieved_at": "2026-09-15T05:03:51.894906+00:00",
+    "content_hash": "3ff59941873de19e9335654c69f4e129f755b40b1040c4b216e8628acd1e4e92",
+    "metadata": {
+      "rxcui": "18631",
+      "canonical_name": "Azithromycin Oral Tablet",
+      "ingredient": "azithromycin",
+      "brand_names": [
+        "Zithromax",
+        "Z-Pak",
+        "Azithral"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "250 mg, 500 mg",
+      "therapeutic_class": "Macrolide Antibacterial"
+    }
+  },
+  {
+    "document_id": "rxnorm_10582",
+    "source_id": "RxNorm",
+    "source_name": "RxNorm Normalized Prescribable Clinical Terminology",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "RxNorm Concept: Levothyroxine Oral Tablet (RxCUI: 10582)",
+    "content": "Medication Concept: Levothyroxine Oral Tablet\nRxCUI: 10582\nActive Ingredient: levothyroxine\nBrand / Trade Names: Synthroid, Levoxyl, Thyronorm, Eltroxin\nDosage Form: Oral Tablet\nStrength: 25 mcg, 50 mcg, 75 mcg, 100 mcg\nTherapeutic Class: Thyroid Hormone\nAuthority: National Library of Medicine (NLM/NIH)",
+    "source_url": "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=10582",
+    "document_type": "drug_monograph",
+    "evidence_role": "terminology_concept",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "pharmacology",
+    "section": "Clinical Concept Summary",
+    "section_id": "concept_summary",
+    "parent_document_id": null,
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "26ab8eb792f3d1bbf327e1b9b228662d9fcacbe6d2b42981f457646e27c25b02",
+    "entities": [
+      "levothyroxine",
+      "Synthroid",
+      "Levoxyl",
+      "Thyronorm",
+      "Eltroxin"
+    ],
+    "version": "2026-02",
+    "retrieved_at": "2026-09-15T05:03:51.894906+00:00",
+    "content_hash": "26ab8eb792f3d1bbf327e1b9b228662d9fcacbe6d2b42981f457646e27c25b02",
+    "metadata": {
+      "rxcui": "10582",
+      "canonical_name": "Levothyroxine Oral Tablet",
+      "ingredient": "levothyroxine",
+      "brand_names": [
+        "Synthroid",
+        "Levoxyl",
+        "Thyronorm",
+        "Eltroxin"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "25 mcg, 50 mcg, 75 mcg, 100 mcg",
+      "therapeutic_class": "Thyroid Hormone"
+    }
+  },
+  {
+    "document_id": "rxnorm_7646",
+    "source_id": "RxNorm",
+    "source_name": "RxNorm Normalized Prescribable Clinical Terminology",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "RxNorm Concept: Omeprazole Delayed-Release Capsule (RxCUI: 7646)",
+    "content": "Medication Concept: Omeprazole Delayed-Release Capsule\nRxCUI: 7646\nActive Ingredient: omeprazole\nBrand / Trade Names: Prilosec, Omez\nDosage Form: Oral Capsule\nStrength: 20 mg, 40 mg\nTherapeutic Class: Proton Pump Inhibitor\nAuthority: National Library of Medicine (NLM/NIH)",
+    "source_url": "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=7646",
+    "document_type": "drug_monograph",
+    "evidence_role": "terminology_concept",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "pharmacology",
+    "section": "Clinical Concept Summary",
+    "section_id": "concept_summary",
+    "parent_document_id": null,
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "21dee0a7367f5317c063b495836a92c22c555984e8e10a24fd72c9888f5939ea",
+    "entities": [
+      "omeprazole",
+      "Prilosec",
+      "Omez"
+    ],
+    "version": "2026-02",
+    "retrieved_at": "2026-09-15T05:03:51.894906+00:00",
+    "content_hash": "21dee0a7367f5317c063b495836a92c22c555984e8e10a24fd72c9888f5939ea",
+    "metadata": {
+      "rxcui": "7646",
+      "canonical_name": "Omeprazole Delayed-Release Capsule",
+      "ingredient": "omeprazole",
+      "brand_names": [
+        "Prilosec",
+        "Omez"
+      ],
+      "dosage_form": "Oral Capsule",
+      "strength": "20 mg, 40 mg",
+      "therapeutic_class": "Proton Pump Inhibitor"
+    }
+  },
+  {
+    "document_id": "rxnorm_5224",
+    "source_id": "RxNorm",
+    "source_name": "RxNorm Normalized Prescribable Clinical Terminology",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "RxNorm Concept: Losartan Oral Tablet (RxCUI: 5224)",
+    "content": "Medication Concept: Losartan Oral Tablet\nRxCUI: 5224\nActive Ingredient: losartan\nBrand / Trade Names: Cozaar, Losacar\nDosage Form: Oral Tablet\nStrength: 25 mg, 50 mg, 100 mg\nTherapeutic Class: Angiotensin Receptor Blocker\nAuthority: National Library of Medicine (NLM/NIH)",
+    "source_url": "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=5224",
+    "document_type": "drug_monograph",
+    "evidence_role": "terminology_concept",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "pharmacology",
+    "section": "Clinical Concept Summary",
+    "section_id": "concept_summary",
+    "parent_document_id": null,
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "3fa4f2375ad7602c1ef8d5ce232f38a2782692e1d258daf60ca03007f45bfcb4",
+    "entities": [
+      "losartan",
+      "Cozaar",
+      "Losacar"
+    ],
+    "version": "2026-02",
+    "retrieved_at": "2026-09-15T05:03:51.894906+00:00",
+    "content_hash": "3fa4f2375ad7602c1ef8d5ce232f38a2782692e1d258daf60ca03007f45bfcb4",
+    "metadata": {
+      "rxcui": "5224",
+      "canonical_name": "Losartan Oral Tablet",
+      "ingredient": "losartan",
+      "brand_names": [
+        "Cozaar",
+        "Losacar"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "25 mg, 50 mg, 100 mg",
+      "therapeutic_class": "Angiotensin Receptor Blocker"
+    }
+  },
+  {
+    "document_id": "rxnorm_341248",
+    "source_id": "RxNorm",
+    "source_name": "RxNorm Normalized Prescribable Clinical Terminology",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "RxNorm Concept: Telmisartan Oral Tablet (RxCUI: 341248)",
+    "content": "Medication Concept: Telmisartan Oral Tablet\nRxCUI: 341248\nActive Ingredient: telmisartan\nBrand / Trade Names: Micardis, Telma\nDosage Form: Oral Tablet\nStrength: 20 mg, 40 mg, 80 mg\nTherapeutic Class: Angiotensin Receptor Blocker\nAuthority: National Library of Medicine (NLM/NIH)",
+    "source_url": "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=341248",
+    "document_type": "drug_monograph",
+    "evidence_role": "terminology_concept",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "pharmacology",
+    "section": "Clinical Concept Summary",
+    "section_id": "concept_summary",
+    "parent_document_id": null,
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "49498e02a0ab8a679a2adc9b8c30d17640a7cf32020cfdcb34391915bc63c64f",
+    "entities": [
+      "telmisartan",
+      "Micardis",
+      "Telma"
+    ],
+    "version": "2026-02",
+    "retrieved_at": "2026-09-15T05:03:51.894906+00:00",
+    "content_hash": "49498e02a0ab8a679a2adc9b8c30d17640a7cf32020cfdcb34391915bc63c64f",
+    "metadata": {
+      "rxcui": "341248",
+      "canonical_name": "Telmisartan Oral Tablet",
+      "ingredient": "telmisartan",
+      "brand_names": [
+        "Micardis",
+        "Telma"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "20 mg, 40 mg, 80 mg",
+      "therapeutic_class": "Angiotensin Receptor Blocker"
+    }
+  },
+  {
+    "document_id": "rxnorm_6918",
+    "source_id": "RxNorm",
+    "source_name": "RxNorm Normalized Prescribable Clinical Terminology",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "RxNorm Concept: Metoprolol Tartrate Oral Tablet (RxCUI: 6918)",
+    "content": "Medication Concept: Metoprolol Tartrate Oral Tablet\nRxCUI: 6918\nActive Ingredient: metoprolol\nBrand / Trade Names: Lopressor, Betaloc\nDosage Form: Oral Tablet\nStrength: 25 mg, 50 mg, 100 mg\nTherapeutic Class: Beta-Blocker\nAuthority: National Library of Medicine (NLM/NIH)",
+    "source_url": "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=6918",
+    "document_type": "drug_monograph",
+    "evidence_role": "terminology_concept",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "pharmacology",
+    "section": "Clinical Concept Summary",
+    "section_id": "concept_summary",
+    "parent_document_id": null,
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "58eb19b6a19ecc7fcdc98d54bdfbc66ce016af2226d8718ff726ad62bc4e3fc8",
+    "entities": [
+      "metoprolol",
+      "Lopressor",
+      "Betaloc"
+    ],
+    "version": "2026-02",
+    "retrieved_at": "2026-09-15T05:03:51.894906+00:00",
+    "content_hash": "58eb19b6a19ecc7fcdc98d54bdfbc66ce016af2226d8718ff726ad62bc4e3fc8",
+    "metadata": {
+      "rxcui": "6918",
+      "canonical_name": "Metoprolol Tartrate Oral Tablet",
+      "ingredient": "metoprolol",
+      "brand_names": [
+        "Lopressor",
+        "Betaloc"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "25 mg, 50 mg, 100 mg",
+      "therapeutic_class": "Beta-Blocker"
+    }
+  },
+  {
+    "document_id": "rxnorm_1373458",
+    "source_id": "RxNorm",
+    "source_name": "RxNorm Normalized Prescribable Clinical Terminology",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "RxNorm Concept: Empagliflozin Oral Tablet (RxCUI: 1373458)",
+    "content": "Medication Concept: Empagliflozin Oral Tablet\nRxCUI: 1373458\nActive Ingredient: empagliflozin\nBrand / Trade Names: Jardiance, Gibtulio\nDosage Form: Oral Tablet\nStrength: 10 mg, 25 mg\nTherapeutic Class: SGLT2 Inhibitor\nAuthority: National Library of Medicine (NLM/NIH)",
+    "source_url": "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=1373458",
+    "document_type": "drug_monograph",
+    "evidence_role": "terminology_concept",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "pharmacology",
+    "section": "Clinical Concept Summary",
+    "section_id": "concept_summary",
+    "parent_document_id": null,
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "b93a592a955d00a619eccffb337d536877c9f4979d306549cace5530891be74c",
+    "entities": [
+      "empagliflozin",
+      "Jardiance",
+      "Gibtulio"
+    ],
+    "version": "2026-02",
+    "retrieved_at": "2026-09-15T05:03:51.894906+00:00",
+    "content_hash": "b93a592a955d00a619eccffb337d536877c9f4979d306549cace5530891be74c",
+    "metadata": {
+      "rxcui": "1373458",
+      "canonical_name": "Empagliflozin Oral Tablet",
+      "ingredient": "empagliflozin",
+      "brand_names": [
+        "Jardiance",
+        "Gibtulio"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "10 mg, 25 mg",
+      "therapeutic_class": "SGLT2 Inhibitor"
+    }
+  },
+  {
+    "document_id": "rxnorm_1488564",
+    "source_id": "RxNorm",
+    "source_name": "RxNorm Normalized Prescribable Clinical Terminology",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "RxNorm Concept: Dapagliflozin Oral Tablet (RxCUI: 1488564)",
+    "content": "Medication Concept: Dapagliflozin Oral Tablet\nRxCUI: 1488564\nActive Ingredient: dapagliflozin\nBrand / Trade Names: Farxiga, Forxiga\nDosage Form: Oral Tablet\nStrength: 5 mg, 10 mg\nTherapeutic Class: SGLT2 Inhibitor\nAuthority: National Library of Medicine (NLM/NIH)",
+    "source_url": "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=1488564",
+    "document_type": "drug_monograph",
+    "evidence_role": "terminology_concept",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "pharmacology",
+    "section": "Clinical Concept Summary",
+    "section_id": "concept_summary",
+    "parent_document_id": null,
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "0b24777fbf0072df79052a11db648af62147ed18f60d67e77bda16b1f4a76674",
+    "entities": [
+      "dapagliflozin",
+      "Farxiga",
+      "Forxiga"
+    ],
+    "version": "2026-02",
+    "retrieved_at": "2026-09-15T05:03:51.894906+00:00",
+    "content_hash": "0b24777fbf0072df79052a11db648af62147ed18f60d67e77bda16b1f4a76674",
+    "metadata": {
+      "rxcui": "1488564",
+      "canonical_name": "Dapagliflozin Oral Tablet",
+      "ingredient": "dapagliflozin",
+      "brand_names": [
+        "Farxiga",
+        "Forxiga"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "5 mg, 10 mg",
+      "therapeutic_class": "SGLT2 Inhibitor"
+    }
+  },
+  {
+    "document_id": "rxnorm_5955",
+    "source_id": "RxNorm",
+    "source_name": "RxNorm Normalized Prescribable Clinical Terminology",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "RxNorm Concept: Sitagliptin Oral Tablet (RxCUI: 5955)",
+    "content": "Medication Concept: Sitagliptin Oral Tablet\nRxCUI: 5955\nActive Ingredient: sitagliptin\nBrand / Trade Names: Januvia, Janumet\nDosage Form: Oral Tablet\nStrength: 25 mg, 50 mg, 100 mg\nTherapeutic Class: DPP-4 Inhibitor\nAuthority: National Library of Medicine (NLM/NIH)",
+    "source_url": "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=5955",
+    "document_type": "drug_monograph",
+    "evidence_role": "terminology_concept",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "pharmacology",
+    "section": "Clinical Concept Summary",
+    "section_id": "concept_summary",
+    "parent_document_id": null,
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "b7f52102cc629f0223696ce667bd104bc05b25d891978dc444a0a7ab687d34bb",
+    "entities": [
+      "sitagliptin",
+      "Januvia",
+      "Janumet"
+    ],
+    "version": "2026-02",
+    "retrieved_at": "2026-09-15T05:03:51.894906+00:00",
+    "content_hash": "b7f52102cc629f0223696ce667bd104bc05b25d891978dc444a0a7ab687d34bb",
+    "metadata": {
+      "rxcui": "5955",
+      "canonical_name": "Sitagliptin Oral Tablet",
+      "ingredient": "sitagliptin",
+      "brand_names": [
+        "Januvia",
+        "Janumet"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "25 mg, 50 mg, 100 mg",
+      "therapeutic_class": "DPP-4 Inhibitor"
+    }
+  },
+  {
+    "document_id": "rxnorm_4815",
+    "source_id": "RxNorm",
+    "source_name": "RxNorm Normalized Prescribable Clinical Terminology",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "RxNorm Concept: Glipizide Oral Tablet (RxCUI: 4815)",
+    "content": "Medication Concept: Glipizide Oral Tablet\nRxCUI: 4815\nActive Ingredient: glipizide\nBrand / Trade Names: Glucotrol\nDosage Form: Oral Tablet\nStrength: 5 mg, 10 mg\nTherapeutic Class: Sulfonylurea Antidiabetic\nAuthority: National Library of Medicine (NLM/NIH)",
+    "source_url": "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=4815",
+    "document_type": "drug_monograph",
+    "evidence_role": "terminology_concept",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "pharmacology",
+    "section": "Clinical Concept Summary",
+    "section_id": "concept_summary",
+    "parent_document_id": null,
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "44e636eb3297920f465a413c53e1d4aa4dc2c9de7610ff17869d641fe43da4d3",
+    "entities": [
+      "glipizide",
+      "Glucotrol"
+    ],
+    "version": "2026-02",
+    "retrieved_at": "2026-09-15T05:03:51.894906+00:00",
+    "content_hash": "44e636eb3297920f465a413c53e1d4aa4dc2c9de7610ff17869d641fe43da4d3",
+    "metadata": {
+      "rxcui": "4815",
+      "canonical_name": "Glipizide Oral Tablet",
+      "ingredient": "glipizide",
+      "brand_names": [
+        "Glucotrol"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "5 mg, 10 mg",
+      "therapeutic_class": "Sulfonylurea Antidiabetic"
+    }
+  },
+  {
+    "document_id": "rxnorm_25789",
+    "source_id": "RxNorm",
+    "source_name": "RxNorm Normalized Prescribable Clinical Terminology",
+    "publisher": "National Library of Medicine (NLM/NIH)",
+    "title": "RxNorm Concept: Glimepiride Oral Tablet (RxCUI: 25789)",
+    "content": "Medication Concept: Glimepiride Oral Tablet\nRxCUI: 25789\nActive Ingredient: glimepiride\nBrand / Trade Names: Amaryl, Glimy\nDosage Form: Oral Tablet\nStrength: 1 mg, 2 mg, 3 mg, 4 mg\nTherapeutic Class: Sulfonylurea Antidiabetic\nAuthority: National Library of Medicine (NLM/NIH)",
+    "source_url": "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=25789",
+    "document_type": "drug_monograph",
+    "evidence_role": "terminology_concept",
+    "provenance_status": "VERIFIED",
+    "medical_domain": "pharmacology",
+    "section": "Clinical Concept Summary",
+    "section_id": "concept_summary",
+    "parent_document_id": null,
+    "page_number": null,
+    "publication_date": "",
+    "language": "en",
+    "checksum": "388d8078117a152876fafe58242827eb74aefd029af0d2688d31399d63724b98",
+    "entities": [
+      "glimepiride",
+      "Amaryl",
+      "Glimy"
+    ],
+    "version": "2026-02",
+    "retrieved_at": "2026-09-15T05:03:51.894906+00:00",
+    "content_hash": "388d8078117a152876fafe58242827eb74aefd029af0d2688d31399d63724b98",
+    "metadata": {
+      "rxcui": "25789",
+      "canonical_name": "Glimepiride Oral Tablet",
+      "ingredient": "glimepiride",
+      "brand_names": [
+        "Amaryl",
+        "Glimy"
+      ],
+      "dosage_form": "Oral Tablet",
+      "strength": "1 mg, 2 mg, 3 mg, 4 mg",
+      "therapeutic_class": "Sulfonylurea Antidiabetic"
+    }
+  }
+]

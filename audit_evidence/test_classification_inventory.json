@@ -1,0 +1,575 @@
+{
+  "total_test_functions": 112,
+  "total_test_files": 10,
+  "category_counts": {
+    "LIVE_API": 56,
+    "PRODUCTION_INDEX": 0,
+    "REAL_DATA": 10,
+    "UNIT": 34,
+    "FIXTURE": 0,
+    "MOCK": 6,
+    "INTEGRATION": 6
+  },
+  "test_list": [
+    {
+      "file": "test_adversarial_rag.py",
+      "test_name": "test_01_empty_and_whitespace_queries",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_adversarial_rag.py",
+      "test_name": "test_02_oversized_query_rejection",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_adversarial_rag.py",
+      "test_name": "test_03_invalid_retrieval_modes",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_adversarial_rag.py",
+      "test_name": "test_04_invalid_top_k_bounds",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_adversarial_rag.py",
+      "test_name": "test_05_filter_sanitization_and_empty_list_handling",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_adversarial_rag.py",
+      "test_name": "test_06_nonexistent_filters_yield_safe_abstention",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_adversarial_rag.py",
+      "test_name": "test_07_nonexistent_section_filter",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_adversarial_rag.py",
+      "test_name": "test_08_prompt_injection_attempts_sanitized",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_adversarial_rag.py",
+      "test_name": "test_09_acute_crisis_queries_intercepted",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_adversarial_rag.py",
+      "test_name": "test_10_out_of_domain_queries_abstain",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_adversarial_rag.py",
+      "test_name": "test_11_context_builder_near_duplicate_deduplication",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_adversarial_rag.py",
+      "test_name": "test_12_context_builder_token_budget_truncation",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_adversarial_rag.py",
+      "test_name": "test_13_zero_state_leakage_between_consecutive_requests",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_adversarial_rag.py",
+      "test_name": "test_14_multithreaded_concurrent_requests",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_adversarial_rag.py",
+      "test_name": "test_15_api_malformed_json_returns_clean_400",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_adversarial_rag.py",
+      "test_name": "test_16_api_extra_fields_forbidden",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_dailymed_pilot.py",
+      "test_name": "test_twenty_five_labels_ingested",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_dailymed_pilot.py",
+      "test_name": "test_section_extraction_coverage",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_dailymed_pilot.py",
+      "test_name": "test_drug_entity_extraction",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_dailymed_pilot.py",
+      "test_name": "test_full_provenance_to_citation_flow",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_dailymed_pilot.py",
+      "test_name": "test_dailymed_filter_isolation",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_dailymed_pilot.py",
+      "test_name": "test_medquad_filter_isolation",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_dailymed_pilot.py",
+      "test_name": "test_benchmark_schema_and_categories",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_dailymed_pilot.py",
+      "test_name": "test_malformed_xml_rejection",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_dailymed_pilot.py",
+      "test_name": "test_empty_query_graceful_return",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_dailymed_pilot.py",
+      "test_name": "test_unknown_drug_allowlist_rejection",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_dailymed_pilot.py",
+      "test_name": "test_metric_formula_edge_cases",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_dailymed_pilot.py",
+      "test_name": "test_chunker_oversized_section_splitting",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_extensible_architecture.py",
+      "test_name": "test_valid_document_creation",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_extensible_architecture.py",
+      "test_name": "test_document_validation_errors",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_extensible_architecture.py",
+      "test_name": "test_serialization_roundtrip",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_extensible_architecture.py",
+      "test_name": "test_deterministic_sha256",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_extensible_architecture.py",
+      "test_name": "test_registry_contains_medquad_sources",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_extensible_architecture.py",
+      "test_name": "test_registry_contains_planned_sources_as_disabled",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_extensible_architecture.py",
+      "test_name": "test_register_custom_source",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_extensible_architecture.py",
+      "test_name": "test_medquad_adapter_synthetic_fixture",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_extensible_architecture.py",
+      "test_name": "test_dailymed_drug_label_adapter_fixture",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_extensible_architecture.py",
+      "test_name": "test_openfda_adapter_fixture",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_extensible_architecture.py",
+      "test_name": "test_guideline_adapter_fixture",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_extensible_architecture.py",
+      "test_name": "test_deduplication_removes_identical_content",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_extensible_architecture.py",
+      "test_name": "test_chunking_knowledge_document",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_extensible_architecture.py",
+      "test_name": "test_bm25_source_and_domain_filtering",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_incremental_indexer.py",
+      "test_name": "test_first_build_encodes_all_chunks",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_incremental_indexer.py",
+      "test_name": "test_identical_sync_reuses_all_chunks",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_incremental_indexer.py",
+      "test_name": "test_single_chunk_addition",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_incremental_indexer.py",
+      "test_name": "test_single_chunk_modification",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_incremental_indexer.py",
+      "test_name": "test_persisted_cache_reload",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_rag_pipeline.py",
+      "test_name": "test_chunking_overlap_bounded",
+      "category": "MOCK"
+    },
+    {
+      "file": "test_rag_pipeline.py",
+      "test_name": "test_bm25_exact_matching",
+      "category": "MOCK"
+    },
+    {
+      "file": "test_rag_pipeline.py",
+      "test_name": "test_context_builder_deduplication",
+      "category": "MOCK"
+    },
+    {
+      "file": "test_rag_pipeline.py",
+      "test_name": "test_emergency_triage_guardrails",
+      "category": "MOCK"
+    },
+    {
+      "file": "test_rag_pipeline.py",
+      "test_name": "test_prompt_injection_sanitization",
+      "category": "MOCK"
+    },
+    {
+      "file": "test_rag_pipeline.py",
+      "test_name": "test_end_to_end_mock_pipeline",
+      "category": "MOCK"
+    },
+    {
+      "file": "test_source_adapters_real.py",
+      "test_name": "test_real_dailymed_five_monographs_extraction",
+      "category": "REAL_DATA"
+    },
+    {
+      "file": "test_source_adapters_real.py",
+      "test_name": "test_real_dailymed_spl_xml_parsing",
+      "category": "REAL_DATA"
+    },
+    {
+      "file": "test_source_adapters_real.py",
+      "test_name": "test_dailymed_allowlist_filtering",
+      "category": "REAL_DATA"
+    },
+    {
+      "file": "test_source_adapters_real.py",
+      "test_name": "test_real_openfda_api_parsing",
+      "category": "REAL_DATA"
+    },
+    {
+      "file": "test_source_adapters_real.py",
+      "test_name": "test_openfda_boxed_warning_extraction",
+      "category": "REAL_DATA"
+    },
+    {
+      "file": "test_source_adapters_real.py",
+      "test_name": "test_structured_guideline_parsing",
+      "category": "REAL_DATA"
+    },
+    {
+      "file": "test_source_adapters_real.py",
+      "test_name": "test_full_pipeline_provenance_retention",
+      "category": "REAL_DATA"
+    },
+    {
+      "file": "test_source_adapters_real.py",
+      "test_name": "test_orchestrator_manifest_generation",
+      "category": "REAL_DATA"
+    },
+    {
+      "file": "test_source_adapters_real.py",
+      "test_name": "test_malformed_sources_handling",
+      "category": "REAL_DATA"
+    },
+    {
+      "file": "test_source_adapters_real.py",
+      "test_name": "test_invalid_xml_error_handling",
+      "category": "REAL_DATA"
+    },
+    {
+      "file": "test_source_extensibility.py",
+      "test_name": "test_dynamic_source_registration",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_source_extensibility.py",
+      "test_name": "test_ingestion_orchestration_of_new_source",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_source_extensibility.py",
+      "test_name": "test_combine_multi_source_and_retrieval_filtering",
+      "category": "UNIT"
+    },
+    {
+      "file": "test_v26_benchmark_rigor.py",
+      "test_name": "test_benchmark_size_and_categories",
+      "category": "INTEGRATION"
+    },
+    {
+      "file": "test_v26_benchmark_rigor.py",
+      "test_name": "test_query_id_uniqueness",
+      "category": "INTEGRATION"
+    },
+    {
+      "file": "test_v26_benchmark_rigor.py",
+      "test_name": "test_ground_truth_integrity",
+      "category": "INTEGRATION"
+    },
+    {
+      "file": "test_v26_benchmark_rigor.py",
+      "test_name": "test_leakage_audit_pass",
+      "category": "INTEGRATION"
+    },
+    {
+      "file": "test_v26_benchmark_rigor.py",
+      "test_name": "test_ndcg_math",
+      "category": "INTEGRATION"
+    },
+    {
+      "file": "test_v26_benchmark_rigor.py",
+      "test_name": "test_failure_analyzer_categories",
+      "category": "INTEGRATION"
+    },
+    {
+      "file": "test_v27_service_api.py",
+      "test_name": "test_01_service_initialization_against_production_index",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v27_service_api.py",
+      "test_name": "test_02_dense_retrieval_mode",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v27_service_api.py",
+      "test_name": "test_03_bm25_retrieval_mode",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v27_service_api.py",
+      "test_name": "test_04_hybrid_retrieval_mode",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v27_service_api.py",
+      "test_name": "test_05_hybrid_rerank_mode_fallback_disclosure",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v27_service_api.py",
+      "test_name": "test_06_source_filter_dailymed",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v27_service_api.py",
+      "test_name": "test_07_domain_filter_pharmacology",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v27_service_api.py",
+      "test_name": "test_08_section_filter",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v27_service_api.py",
+      "test_name": "test_09_invalid_query_validation",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v27_service_api.py",
+      "test_name": "test_10_invalid_top_k_validation",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v27_service_api.py",
+      "test_name": "test_11_invalid_mode_validation",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v27_service_api.py",
+      "test_name": "test_12_provenance_and_citation_preservation",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v27_service_api.py",
+      "test_name": "test_13_no_raw_faiss_bm25_leakage",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v27_service_api.py",
+      "test_name": "test_14_context_builder_integration",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v27_service_api.py",
+      "test_name": "test_15_api_health_endpoint",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v27_service_api.py",
+      "test_name": "test_16_api_readiness_endpoint",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v27_service_api.py",
+      "test_name": "test_17_api_post_rag_query_success",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v27_service_api.py",
+      "test_name": "test_18_api_validation_error_handling",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v27_service_api.py",
+      "test_name": "test_19_api_compatibility_retrieve_endpoint",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v28_grounding_policy.py",
+      "test_name": "test_01_valid_evidence_provenance",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v28_grounding_policy.py",
+      "test_name": "test_02_missing_mandatory_fields",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v28_grounding_policy.py",
+      "test_name": "test_03_empty_text_content_rejected",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v28_grounding_policy.py",
+      "test_name": "test_04_emergency_query_interception",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v28_grounding_policy.py",
+      "test_name": "test_05_prompt_injection_sanitization",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v28_grounding_policy.py",
+      "test_name": "test_06_medication_safety_categorization",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v28_grounding_policy.py",
+      "test_name": "test_07_zero_evidence_insufficient_grounding",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v28_grounding_policy.py",
+      "test_name": "test_08_strong_evidence_grounded_decision",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v28_grounding_policy.py",
+      "test_name": "test_09_weak_evidence_evaluation",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v28_grounding_policy.py",
+      "test_name": "test_10_conflict_detection_contradictory_evidence",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v28_grounding_policy.py",
+      "test_name": "test_11_service_retrieve_includes_grounding_decision",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v28_grounding_policy.py",
+      "test_name": "test_12_service_emergency_interception",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v28_grounding_policy.py",
+      "test_name": "test_13_api_rag_query_exposes_grounding_contract",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v28_grounding_policy.py",
+      "test_name": "test_14_api_health_version_updated",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v28_grounding_policy.py",
+      "test_name": "test_15_grounding_evaluation_suite_run",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v28_grounding_policy.py",
+      "test_name": "test_16_provenance_missing_individual_mandatory_fields",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v28_grounding_policy.py",
+      "test_name": "test_17_provenance_optional_source_url",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v28_grounding_policy.py",
+      "test_name": "test_18_provenance_invalid_data_types",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v28_grounding_policy.py",
+      "test_name": "test_19_context_suppressed_when_generation_blocked",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v28_grounding_policy.py",
+      "test_name": "test_20_context_populated_when_generation_allowed",
+      "category": "LIVE_API"
+    },
+    {
+      "file": "test_v28_grounding_policy.py",
+      "test_name": "test_21_weak_evidence_strict_mode_blocks_generation",
+      "category": "LIVE_API"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+[
+  {
+    "description": "Missing drug identity and content",
+    "drug_name": "",
+    "sections": {}
+  },
+  {
+    "description": "Short empty content",
+    "drug_name": "Test Drug",
+    "sections": {
+      "indications_and_usage": "none"
+    }
+  },
+  {
+    "description": "Corrupt non-string fields",
+    "drug_name": 12345,
+    "sections": null
+  },
+  {
+    "description": "Missing all IDs",
+    "content": "A valid length text but missing all other canonical identification attributes completely."
+  }
+]

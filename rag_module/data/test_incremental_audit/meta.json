@@ -1,0 +1,26 @@
+[
+  {
+    "chunk_id": "chunk_a1",
+    "doc_id": "doc1",
+    "source_id": "DailyMed",
+    "title": "Doc 1",
+    "section": "Sec 1",
+    "text": "Lisinopril is an ACE inhibitor for hypertension."
+  },
+  {
+    "chunk_id": "chunk_a2",
+    "doc_id": "doc2",
+    "source_id": "DailyMed",
+    "title": "Doc 2",
+    "section": "Sec 2",
+    "text": "Metformin causes lactic acidosis in eGFR < 30 mL/min."
+  },
+  {
+    "chunk_id": "chunk_a4",
+    "doc_id": "doc4",
+    "source_id": "DailyMed",
+    "title": "Doc 4",
+    "section": "Sec 4",
+    "text": "Ciprofloxacin carries a boxed warning for tendonitis."
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "corpus_name": "golden_236_regression_baseline",
+  "description": "Frozen 236-chunk golden baseline for backwards-compatible regression testing.",
+  "vector_count": 236,
+  "embedding_model": "BAAI/bge-small-en",
+  "embedding_dimension": 384,
+  "max_context_window_tokens": 512,
+  "query_prefix": "Represent this sentence for searching relevant passages: ",
+  "similarity_metric": "METRIC_INNER_PRODUCT (Cosine similarity with L2-normalized vectors)",
+  "hashes": {
+    "index_v2.bin": "74dbf0d74aaffc46d0e5002c5bc03b2580545b74e72838756dacf37e75cf4eda",
+    "meta_v2.json": "3d03b7652817cd470cac23a2fc777cbe29ca06c7677429e31bb7f482fdaa4606",
+    "meta_v2.pkl": "d9dd998d62da79c5d25a1f3bf895a1f18281a5ffb5d60062938e0f91432bf95a",
+    "bm25_index.pkl": "52652c1106cae4229d7555717633604ae837fed5182f4aa8b3e9097273d95071"
+  },
+  "locked_at": "2026-09-15T13:41:49.385625+00:00"
+}

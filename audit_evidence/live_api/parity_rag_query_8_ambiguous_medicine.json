@@ -1,0 +1,119 @@
+{
+  "endpoint": "/rag/query",
+  "status_code": 200,
+  "latency_sec": 2.93,
+  "timestamp": "2026-09-15T06:00:20.774154+00:00",
+  "request": {
+    "query": "Can I take aspirin with blood pressure medication?",
+    "top_k": 3
+  },
+  "response": {
+    "query": "Can I take aspirin with blood pressure medication?",
+    "retrieval_mode": "hybrid",
+    "total_evidence": 3,
+    "evidence": [
+      {
+        "rank": 1,
+        "score": -4.053759,
+        "source_id": "DailyMed",
+        "source_name": "National Library of Medicine DailyMed",
+        "publisher": "U.S. National Library of Medicine / FDA",
+        "document_id": "dailymed_184b2c12-55d4-4a4b-8e2a-0a8870fb381b_drug_interactions",
+        "chunk_id": "dailymed_184b2c12-55d4-4a4b-8e2a-0a8870fb381b_drug_interactions-c0",
+        "title": "Aspirin - Drug Interactions",
+        "section": "Drug Interactions",
+        "medical_domain": "pharmacology",
+        "source_url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=184b2c12-55d4-4a4b-8e2a-0a8870fb381b",
+        "text": "Drug: Aspirin\nSection: Drug Interactions\n\nAnticoagulants (warfarin, heparin, apixaban): Major synergistic bleeding risk. NSAIDs (ibuprofen): Interferes with antiplatelet action and increases GI toxicity. Methotrexate: Severe toxicity.",
+        "dense_score": 0.8727,
+        "bm25_score": 4.8213,
+        "fused_score": 0.030622,
+        "rerank_score": -4.0538
+      },
+      {
+        "rank": 2,
+        "score": -5.043909,
+        "source_id": "DailyMed",
+        "source_name": "National Library of Medicine DailyMed",
+        "publisher": "U.S. National Library of Medicine / FDA",
+        "document_id": "dailymed_184b2c12-55d4-4a4b-8e2a-0a8870fb381b_contraindications",
+        "chunk_id": "dailymed_184b2c12-55d4-4a4b-8e2a-0a8870fb381b_contraindications-c0",
+        "title": "Aspirin - Contraindications",
+        "section": "Contraindications",
+        "medical_domain": "pharmacology",
+        "source_url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=184b2c12-55d4-4a4b-8e2a-0a8870fb381b",
+        "text": "Drug: Aspirin\nSection: Contraindications\n\nAspirin-exacerbated respiratory disease (aspirin triad: asthma, nasal polyps, rhinitis); active peptic ulcer; bleeding disorders; children/teens with viral infections (Reye's syndrome).",
+        "dense_score": 0.8499,
+        "bm25_score": 6.0824,
+        "fused_score": 0.030769,
+        "rerank_score": -5.0439
+      },
+      {
+        "rank": 3,
+        "score": -5.192861,
+        "source_id": "RxNorm",
+        "source_name": "RxNorm Normalized Prescribable Clinical Terminology",
+        "publisher": "National Library of Medicine (NLM/NIH)",
+        "document_id": "rxnorm_1191",
+        "chunk_id": "rxnorm_1191-c0",
+        "title": "RxNorm Concept: Aspirin Oral Tablet (RxCUI: 1191)",
+        "section": "Clinical Concept Summary",
+        "medical_domain": "pharmacology",
+        "source_url": "https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=1191",
+        "text": "Medication Concept: Aspirin Oral Tablet\nRxCUI: 1191\nActive Ingredient: aspirin\nBrand / Trade Names: Bayer Aspirin, Ecotrin, Disprin\nDosage Form: Oral Tablet\nStrength: 81 mg, 325 mg, 500 mg\nTherapeutic Class: Antiplatelet / Analgesic\nAuthority: National Library of Medicine (NLM/NIH)",
+        "dense_score": 0.8468,
+        "bm25_score": 6.7074,
+        "fused_score": 0.031025,
+        "rerank_score": -5.1929
+      }
+    ],
+    "context_text": "[Doc 1: Aspirin - Drug Interactions | Source: National Library of Medicine DailyMed] (URL: https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=184b2c12-55d4-4a4b-8e2a-0a8870fb381b)\nDrug: Aspirin\nSection: Drug Interactions\n\nAnticoagulants (warfarin, heparin, apixaban): Major synergistic bleeding risk. NSAIDs (ibuprofen): Interferes with antiplatelet action and increases GI toxicity. Methotrexate: Severe toxicity.\n\n---\n\n[Doc 2: Aspirin - Contraindications | Source: National Library of Medicine DailyMed] (URL: https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=184b2c12-55d4-4a4b-8e2a-0a8870fb381b)\nDrug: Aspirin\nSection: Contraindications\n\nAspirin-exacerbated respiratory disease (aspirin triad: asthma, nasal polyps, rhinitis); active peptic ulcer; bleeding disorders; children/teens with viral infections (Reye's syndrome).\n\n---\n\n[Doc 3: RxNorm Concept: Aspirin Oral Tablet (RxCUI: 1191) | Source: RxNorm Normalized Prescribable Clinical Terminology] (URL: https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=1191)\nMedication Concept: Aspirin Oral Tablet\nRxCUI: 1191\nActive Ingredient: aspirin\nBrand / Trade Names: Bayer Aspirin, Ecotrin, Disprin\nDosage Form: Oral Tablet\nStrength: 81 mg, 325 mg, 500 mg\nTherapeutic Class: Antiplatelet / Analgesic\nAuthority: National Library of Medicine (NLM/NIH)",
+    "latency_ms": 2922.65,
+    "reranker_status": "available",
+    "filters_applied": {},
+    "grounding": {
+      "status": "grounded",
+      "generation_allowed": true,
+      "evidence_count": 3,
+      "usable_evidence_count": 3,
+      "accepted_chunk_ids": [
+        "dailymed_184b2c12-55d4-4a4b-8e2a-0a8870fb381b_drug_interactions-c0",
+        "dailymed_184b2c12-55d4-4a4b-8e2a-0a8870fb381b_contraindications-c0",
+        "rxnorm_1191-c0"
+      ],
+      "provenance_valid": true,
+      "top_evidence_rank": 1,
+      "evidence_sources": [
+        "DailyMed",
+        "RxNorm"
+      ],
+      "evidence_documents": [
+        "dailymed_184b2c12-55d4-4a4b-8e2a-0a8870fb381b_contraindications",
+        "dailymed_184b2c12-55d4-4a4b-8e2a-0a8870fb381b_drug_interactions",
+        "rxnorm_1191"
+      ],
+      "evidence_sections": [
+        "Clinical Concept Summary",
+        "Contraindications",
+        "Drug Interactions"
+      ],
+      "reason_codes": [
+        "EVIDENCE_SUFFICIENT"
+      ],
+      "warnings": [],
+      "conflict_detected": false,
+      "conflict_summary": null,
+      "policy_latency_ms": 0.573
+    },
+    "safety_assessment": {
+      "risk_category": "informational",
+      "is_emergency": false,
+      "emergency_message": null,
+      "is_injection": false,
+      "sanitized_query": "Can I take aspirin with blood pressure medication?",
+      "requires_strict_grounding": false,
+      "warnings": []
+    }
+  },
+  "error": null
+}
