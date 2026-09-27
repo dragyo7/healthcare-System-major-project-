@@ -1,84 +1,107 @@
-# CURRENT STATE — MODULAR CLINICAL DECISION SUPPORT (CDS) PLATFORM
+# CURRENT STATE — MODULAR CLINICAL DECISION SUPPORT (CDS) SYSTEM
 
-## 1. Executive Status
-
-* **Repository**: `https://github.com/dragyo7/healthcare-System-major-project-`
-* **Current Branch**: `feature/rag-v2-foundation`
-* **RAG Backend Status**: **FROZEN at `497a547` (v2.10 Hardened Baseline)**.
-  * Backend & API regression tests: **VERIFIED** (190 passed, 2 skipped, 0 failed in 202s).
-  * Request Contract: Clean minimal `{ "query": "..." }` with centralized defaults and backward-compatible full payload support.
-  * Safety & Grounding: Early prompt injection interception (`prompt_injection_blocked`), Lipitor $\to$ Atorvastatin canonical generic normalization, emergency triage bypass (100% intercepted), and deterministic fail-closed verification.
-  * Active Runtime Corpus: **2,204 Authentic Production Chunks** (`GET /health` reports `indexed_chunks_count: 2204`).
-  * Archived Regression Baseline: **236 Golden Baseline Chunks** (`data/indices/golden_236/`).
-* **Frontend Status**: **ACTIVE INTEGRATION**.
-  * Stack: React 19 + Vite 8 + Tailwind CSS v4 (`http://127.0.0.1:5173`).
-  * Target: Doctor Dashboard $\to$ Doctor AI Assistant connected to backend `/chat`.
-* **Platform Integration Status**: **IN PROGRESS**.
-  * Phase 1: Working RAG Backend Checkpoint & Push.
-  * Phase 2: Doctor Dashboard & Real RAG Chatbot Frontend Integration.
+**Last Updated**: 2026-09-27  
+**Branch**: `feature/rag-v2-foundation` (Ready for merge to `main`)  
+**RAG Core Baseline**: Commit `066f7a4` (Frozen)  
+**RAG API Hardening**: Commit `497a547` (Frozen)  
+**Doctor Frontend Integration**: Commit `a825690` (Integrated)  
+**Final E2E Validation & Polish**: Commit `893155a` (Verified)
 
 ---
 
-## 2. Feature & Component Implementation Matrix
-
-| Component / Layer | Implementation File | Verification Status | Forensic Evidence / Invariant |
-| :--- | :--- | :--- | :--- |
-| **CDS Assistant UI** | `frontend/src/pages/Common/CDSAssistant.jsx` | **IMPLEMENTED (Browser E2E Pending)** | Interactive clinical query interface with grounded markdown synthesis, provenance badges, citations, emergency alerts, and diagnostic trace drawer. |
-| **RAG API Client** | `frontend/src/api/ragApi.js` | **VERIFIED (Build & Contract)** | Strongly-typed client covering `/health`, `/ready`, `/chat`, `/rag/query`, and `/rag/trace` with 35s timeout and error interceptors. |
-| **Drug Checker UI** | `frontend/src/pages/Patient/DrugChecker.jsx` | **IMPLEMENTED (Browser E2E Pending)** | Monograph lookup interface for drug interactions, boxed warnings, and contraindications. |
-| **Modular Boundaries** | `frontend/src/modules/` | **VERIFIED (Code Structure)** | Clean adapter structure established for `multilingual/translationAdapter.js`, `knowledgeBases/registryAdapter.js`, and `multimodal/ocrAdapter.js`. |
-| **Production Knowledge Base** | `data/normalized/expanded_production_chunks.json` | **VERIFIED (100%)** | 2,204 authentic chunks (DailyMed: 2,176, ICMR: 8, MoHFW: 4, MedlinePlus: 16). 0 empty, 0 duplicate, 0 synthetic chunks in production. |
-| **Active Production Index** | `data/indices/production/` & `rag_module/data/faiss_index/` | **VERIFIED & ACTIVE** | FAISS IndexFlatIP (2,204 vectors, 384D). BM25 index and metadata active. |
-| **Golden 236 Baseline Archive**| `data/indices/golden_236/` | **VERIFIED & ARCHIVED**| 236-chunk golden regression baseline preserved. |
-| **Provenance Validator** | `rag_module/safety/provenance_validator.py` | **VERIFIED (100%)** | 2,204 / 2,204 production chunks pass complete cryptographic & metadata lineage audit (`invalid = 0`). |
-| **Model Specification Lock** | `data/manifests/model_index_lock.json` | **VERIFIED & LOCKED** | Dense Model: `BAAI/bge-small-en` (Embedding Dimension: 384, Max Context Window: 512 tokens, L2-normalized, Inner Product similarity). |
-| **Cross-Encoder Reranker** | `rag_module/reranking/cross_encoder_reranker.py` | **VERIFIED & LOCKED** | `cross-encoder/ms-marco-MiniLM-L-6-v2` lazy-loaded on first inference request with pass-through fallback. |
-| **Evidence Policy Engine** | `rag_module/safety/evidence_policy.py` | **VERIFIED (Frozen)** | Deterministic grounding evaluator generating auditable `GroundingDecision` contracts with boundary-safe clinical entity verification. |
-| **Entity Grounding & Abstention** | `rag_module/safety/evidence_policy.py` | **VERIFIED (Frozen)** | Enforces fail-closed abstention (`generation_allowed = False`) on unsupported clinical entities and out-of-domain queries. |
-| **Emergency Guardrail** | `rag_module/safety/guardrails.py` | **VERIFIED (Frozen)** | Deterministic pre-retrieval triage for acute life-threatening symptoms (chest pain, stroke, breathing crises). 100% interception with Indian helplines (112, 108, 102). |
-| **Prompt Injection Defense** | `rag_module/safety/guardrails.py` | **VERIFIED (Frozen)** | Sanitizes control characters and delimiters; retrieved text treated strictly as passive data/evidence, never instructions. |
-| **FastAPI Backend & API Contract** | `rag_module/api.py` | **VERIFIED (Frozen)** | Exposes `/chat`, `/rag/query`, `/retrieve`, `/debug/rag/trace`, `/health`, `/ready`. OpenAPI 3.1.0 verified. |
-| **RAG Regression Test Suite** | `rag_module/tests/` | **VERIFIED** | **156 passed, 2 skipped, 0 failed** in ~112s. |
+## 1. What is the Project?
+A 4th-year Major Project: a **Modular, AI-Powered Clinical Decision Support (CDS) System** engineered to provide evidence-grounded, citation-backed medical intelligence with deterministic safety guardrails. It integrates multi-source clinical literature retrieval (RAG), rule-based medication safety screening (`drug_module`), prescription entity extraction (`prescription_module`), and a role-based clinical web portal (`frontend`).
 
 ---
 
-## 3. Production Corpus Characterization & Integrity
-
-* **Total Active Production Chunks**: 2,204
-* **Source Distribution**:
-  * **DailyMed (FDA SPL Monographs)**: 2,176 chunks (98.73%)
-  * **ICMR (Clinical Management Guidelines)**: 8 chunks (0.36%)
-  * **MoHFW (Standard Treatment Guidelines)**: 4 chunks (0.18%)
-  * **MedlinePlus (Health Topics)**: 16 chunks (0.73%)
-* **Data Hygiene**:
-  * Empty chunks: 0
-  * Missing URLs / publishers: 0
-  * Exact duplicates: 0
-  * Normalized duplicates: 0
-  * Quarantined chunks: 0
-  * Synthetic chunks in production: 0
-* **Ingestion Adapters vs Active Corpus**:
-  * Ingestion adapters exist in `rag_module/ingestion/adapters/` for DailyMed, MedQuAD, openFDA, and Clinical Guidelines.
-  * Only indexed and validated chunks reside in the active vector index (currently 2,204 chunks). Adapters are decoupled ingestion pipelines, not necessarily loaded into production retrieval.
+## 2. What is Currently Implemented?
+* **Evidence RAG Engine (`rag_module`)**:
+  * Dual-index hybrid retriever combining dense `BAAI/bge-small-en` (384D, FAISS IndexFlatIP) and sparse lexical `BM25Okapi`.
+  * Reciprocal Rank Fusion (`RRF k=60`) and second-stage cross-encoder reranker (`cross-encoder/ms-marco-MiniLM-L-6-v2`) with lazy loading and pass-through fallback.
+  * Deterministic safety guardrails: Pre-retrieval emergency triage interceptor (`guardrails.py`) and early prompt-injection neutralizer (`guardrails.py`).
+  * Canonical Clinical Entity Normalizer (`normalize_clinical_entities`) handling generic aliases (e.g., *Lipitor $\to$ Atorvastatin*).
+  * Deterministic `EvidencePolicyEngine`: Enforces fail-closed boundaries on unindexed entities (`abstained_policy`) and out-of-domain queries.
+  * Local LLM Generator (`TinyLlama-1.1B-Chat-v1.0`) paired with deterministic `AnswerGroundingVerifier` extracting atomic clinical claims and verifying unigram/token recall against retrieved context.
+  * Production Corpus: 2,204 authentic DailyMed monographs (2,176), ICMR guidelines (8), MoHFW guidelines (4), and MedlinePlus topics (16).
+* **Medication Safety Engine (`drug_module`)**:
+  * Rule-based drug-drug interaction checker (8 clinical rules) and SIDER adverse effect profile lookups (20 drug profiles).
+* **Prescription Extraction Engine (`prescription_module`)**:
+  * Regex and rule-based entity extractor parsing drug name, dosage strength, form, frequency, route, and duration from free-text prescriptions.
+* **Clinical Web Portal (`frontend`)**:
+  * React 19 + Vite 8 + Tailwind CSS v4 portal with role-based navigation (Doctor, Patient, Pharmacist).
+  * Doctor Dashboard featuring an interactive CDS Assistant card, quick clinical stats, and navigation.
+  * Full conversational CDS Assistant (`CDSAssistant.jsx`) with Markdown streaming, source cards, and dynamic safety status banners.
 
 ---
 
-## 4. Current Development Sequence
+## 3. What is Frozen?
+**The RAG Core & Safety Backend is HARD FROZEN** (Baseline Commits `066f7a4` and `497a547`).
+* **DO NOT MODIFY**:
+  * FAISS vector index (2,204 chunks) and embedding configuration (`BAAI/bge-small-en`, 384D).
+  * BM25 sparse index and RRF fusion ($k=60$).
+  * Cross-encoder reranker weights and thresholds.
+  * Evidence policy rules, entity isolation, and fail-closed abstention logic.
+  * Deterministic answer grounding verifier contracts and claim extraction logic.
+  * Pre-retrieval emergency triage and prompt-injection interception rules.
+  * Golden regression archive (`data/indices/golden_236/`).
 
-The active engineering path follows this progression:
+---
 
-```text
-RAG v2.10 (FROZEN at 497a547)
-    ↓
-Frontend Doctor Dashboard + Real RAG Chatbot Integration (Active Milestone)
-    ↓
-Unified public API surface (Gateway aggregating RAG, Drug Safety, Prescription)
-    ↓
-Drug Safety integration (Live interaction checks & SIDER adverse effects)
-    ↓
-Prescription integration (Free-text extraction to structured dosing)
-    ↓
-CDS orchestration (Prescription → Interaction screen → RAG evidence verification)
-    ↓
-Patient / EHR context layer (Allergies, conditions, renal function if required)
-```
+## 4. What is Currently Integrated?
+* **Doctor UI $\to$ Live RAG API Integration**:
+  * `frontend/src/api/ragApi.js` communicates directly with backend `POST /chat` on port 8000 using minimal `{ "query": "..." }` contract (with 90s CPU timeout support).
+  * `frontend/src/pages/Common/CDSAssistant.jsx` renders live answers, citation cards, and dynamic safety status badges (`✓ VERIFIED CLINICAL EVIDENCE`, `⚠️ EVIDENCE POLICY ABSTENTION`, `🚨 EMERGENCY TRIAGE INTERCEPTED`, `🛡️ SECURITY BLOCK`).
+  * Zero mock or hardcoded medical answers in `frontend/src`.
+  * Demo clinician authentication flow (`doctor@medai.com` / `password123`) enabled for instant evaluation.
+
+---
+
+## 5. What Has Been Tested?
+1. **Full Python RAG Regression Suite**:
+   * Command: `python -m pytest rag_module/tests/ -v`
+   * Result: **190 passed, 2 skipped** (offline fixtures), **0 failed** (100% passing).
+2. **Frontend Production Build**:
+   * Command: `cd frontend && npm run build`
+   * Result: **Clean build in < 7s** (`dist/` generated with zero errors).
+3. **Hard E2E 8-Query Field-by-Field Matrix**:
+   * Metformin (Grounded), Ciprofloxacin (Withheld), Lipitor (Brand normalized $\to$ Withheld), Imaginaryzol (Abstained), Bleach Ingestion (Emergency diverted), Prompt Injection (Security blocked), Lisinopril Partial (Grounded), Lisinopril Dosage (Withheld).
+   * Verified 100% fidelity between backend flags and rendered UI state.
+
+---
+
+## 6. What are the Current Metrics?
+Evaluated on the frozen 100-query clinical benchmark:
+* **Safety & Integrity**:
+  * Emergency Triage Interception: **4/4 (100.0%)**
+  * Prompt Injection Neutralization: **4/4 (100.0%)**
+  * Out-of-Domain Rejection: **4/4 (100.0%)**
+  * Unknown Entity Safe Abstention: **6/6 (100.0%)**
+  * Unsupported Claim Leakage: **0 / 100 (0.0%)**
+  * Hallucination Leakage: **0 / 100 (0.0%)**
+  * Citation Validity: **156 / 156 (100.0%)**
+* **Retrieval Performance** ($N=88$ evaluated non-diverted queries):
+  * Recall@1: **51.14%** (45/88)
+  * Recall@5: **54.55%** (48/88)
+  * Recall@10: **54.55%** (48/88)
+  * MRR: **0.5265**
+* **Generation & Abstention Dynamics**:
+  * Correct Abstention Rate: **100.0%** (18/18)
+  * False Abstention Rate: **35.37%** (29/82, due to local TinyLlama preambles triggering fail-closed verifier interception).
+
+---
+
+## 7. What are the Known Limitations?
+1. **Compact Local Generator (`TinyLlama-1.1B-Chat`)**:
+   * Occasionally outputs conversational preambles (e.g., *"Based on the provided DailyMed text..."*), which the deterministic verifier flags as ungrounded, withholding the answer fail-closed.
+2. **Reranker Cold-Start**:
+   * `cross-encoder/ms-marco-MiniLM-L-6-v2` is lazy-loaded on the first query to preserve memory, causing an initial ~1.5s cold-start before settling to sub-second inference.
+3. **Corpus Coverage**:
+   * Active index contains 2,204 chunks covering high-priority primary care, cardiovascular, and endocrine medications. Queries regarding unindexed entities trigger safe policy abstentions.
+
+---
+
+## 8. What is the Immediate Next Task?
+**Consolidate and merge `feature/rag-v2-foundation` into `main`**, then begin **Phase 2: CDS Platform Integration**:
+1. **Task 1: Unified CDS Gateway**: Mount `drug_module` and `prescription_module` endpoints into a unified API router on port 8000.
+2. **Task 2: Frontend Drug Checker Live Integration**: Wire `DrugChecker.jsx` to live drug interaction checking (`/check-interaction`) and side effects (`/check-side-effects`).
+3. **Task 3: Prescription-to-Safety Workflow in CDS Assistant**: Enable free-text prescription parsing, automatic drug interaction screening, and 1-click clinical guideline RAG lookup.

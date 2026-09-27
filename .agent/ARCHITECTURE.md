@@ -1,102 +1,116 @@
-# SYSTEM ARCHITECTURE — HEALTHCARE PLATFORM
+# SYSTEM ARCHITECTURE — HEALTHCARE CDS PLATFORM
 
-## 1. System Overview & Component Topology
+## 1. End-to-End System Topology
 
-The platform follows a modular, service-oriented architecture designed to separate deterministic extraction and validation from probabilistic semantic retrieval.
+The platform separates client presentation, API gateway services, and the frozen RAG medical intelligence pipeline into clearly bounded, audit-traceable boundaries.
 
 ```mermaid
 flowchart TD
-    subgraph ClientLayer [Client & Gateway Layer]
-        UI["Web Frontend (Vite / React / HTML)"]
-        API["FastAPI Application Services (rag_module/api.py)"]
+    subgraph FrontendBoundary [1. Frontend Presentation Layer (React + Vite)]
+        UI["Doctor UI / CDS Assistant (CDSAssistant.jsx)"]
+        CLIENT["Frontend API Client (ragApi.js)"]
+        UI --> CLIENT
     end
 
-    subgraph ServiceBoundary [Service Layer Boundary (V2.8)]
-        SVC["RAGService (rag_module/service.py)\n- Typed Validation (RAGQueryRequest)\n- Filtering (Source, Domain, Section)\n- Error Masking (No Leaked Paths)\n- Observability & Metrics (Latency)"]
-        SAFETY["QuerySafetyEngine (rag_module/safety/query_safety.py)\n- Emergency Query Intercept\n- Injection / Prompt Sanitization\n- Risk Categorization"]
-        POLICY["EvidencePolicyEngine (rag_module/safety/evidence_policy.py)\n- Lexical & Semantic Grounding Validation\n- Pairwise Clinical Contradiction Detection\n- Deterministic Abstention Boundary"]
-        PROV["ProvenanceValidator (rag_module/safety/provenance_validator.py)\n- 9-Field Provenance Integrity Audit\n- Zero Clinical Attribution Fabrication"]
+    subgraph APIBoundary [2. API Gateway Layer (FastAPI on Port 8000)]
+        GATEWAY["FastAPI Application (rag_module/api.py)"]
+        CHAT_EP["POST /chat (Minimal { query } & Full Payloads)"]
+        CLIENT -->|HTTP / JSON| GATEWAY
+        GATEWAY --> CHAT_EP
     end
 
-    subgraph CoreModules [Core Intelligence Modules]
-        PM["prescription_module\n(Rule-based NLP & Regex Extraction)"]
-        DM["drug_module\n(Standard Drug Master & Catalog)"]
-        RAG["rag_module (V2.8)\n(Evidence Ingestion, Hybrid Retrieval, Grounding & Policy)"]
+    subgraph RAGBoundary [3. Medical RAG Pipeline (rag_pipeline.py)]
+        PIPELINE["MedicalRAGPipeline.query()"]
+        CHAT_EP --> PIPELINE
+
+        subgraph SafetyBoundary [4. Pre-Retrieval Safety Interceptors (guardrails.py)]
+            EMERGENCY{"Emergency Triage Intercept?"}
+            INJECTION{"Prompt Injection Intercept?"}
+            NORMALIZER["Clinical Entity Normalizer (e.g. Lipitor → Atorvastatin)"]
+            
+            PIPELINE --> EMERGENCY
+            EMERGENCY -->|Yes: Acute Crisis| EM_RESP["Emergency Protocol Response\n(Bypasses Retrieval & LLM)"]
+            EMERGENCY -->|No| INJECTION
+            INJECTION -->|Yes: System Prompt Attack| SEC_RESP["Security Block Response\n(Bypasses Retrieval & LLM)"]
+            INJECTION -->|No| NORMALIZER
+        end
+
+        subgraph RetrievalBoundary [5. Multi-Source Hybrid Retrieval]
+            DENSE["Dense Search (FAISS IndexFlatIP, 384D BGE)"]
+            SPARSE["Lexical Search (BM25Okapi)"]
+            RRF["Reciprocal Rank Fusion (k=60)"]
+            RERANK["Cross-Encoder Reranker\n(ms-marco-MiniLM-L-6-v2 / Pass-Through)"]
+
+            NORMALIZER --> DENSE & SPARSE
+            DENSE & SPARSE --> RRF --> RERANK
+        end
+
+        subgraph EvidenceBoundary [6. Evidence Policy & Entity Isolation (evidence_policy.py)]
+            POLICY{"Evidence Policy Engine\n(Entity Match & Thresholds)"}
+            RERANK --> POLICY
+            POLICY -->|Entity Unknown / OOD| ABSTAIN_RESP["Fail-Closed Policy Abstention\n(generation_allowed = False)"]
+        end
+
+        subgraph GenerationBoundary [7. Generation & Grounding Verification]
+            CTX["Context Builder (Formatted Monograph Chunks)"]
+            GEN["Local LLM Generator (TinyLlama-1.1B-Chat)"]
+            VERIFIER{"Answer Grounding Verifier\n(Claim Extraction & N-Gram Grounding)"}
+
+            POLICY -->|Evidence Sufficient| CTX --> GEN --> VERIFIER
+            VERIFIER -->|Unverified Claims / Hallucination| WITHHELD_RESP["Withheld Answer (Fail-Closed)"]
+            VERIFIER -->|Verified Claims| VERIFIED_RESP["Verified Attributed Response"]
+        end
     end
 
-    subgraph DataAndIndexes [Data & Index Stores]
-        PKB["Pharmacology & Medical Corpus\n(DailyMed, MedQuAD, openFDA)"]
-        VDB["FAISS Vector Index (BGE Dense)"]
-        LDB["BM25 Inverted Lexical Index"]
+    subgraph ClientRendering [8. UI Response Rendering]
+        RENDER["React State & UI Badges\n(Verified, Abstention, Emergency, or Security)"]
+        EM_RESP & SEC_RESP & ABSTAIN_RESP & WITHHELD_RESP & VERIFIED_RESP -->|JSON Response| GATEWAY
+        GATEWAY -->|HTTP 200 OK| CLIENT --> RENDER
     end
-
-    UI --> API
-    API --> SVC
-    SVC --> SAFETY
-    SVC --> RAG
-    RAG --> POLICY
-    POLICY --> PROV
-    API --> PM
-    API --> DM
-
-    PM -->|Extracted Entities| SVC
-    DM -->|Standardized Synonyms| SVC
-
-    PKB --> RAG
-    RAG --> VDB
-    RAG --> LDB
 ```
 
 ---
 
-## 2. Core Modules & Responsibilities
+## 2. System Architectural Boundaries
 
-### 2.1 `prescription_module`
-* **Purpose**: Parse unstructured clinical prescription text and extract standardized prescription entities.
-* **Pipeline**:
-  1. Input clinical text $\to$ Text normalizer.
-  2. Rule-based Regex and EntityRuler matcher $\to$ Drug name, dosage strength, form, frequency, duration, route.
-  3. Output structured medication payload (`drug_name`, `dosage`, `frequency`, `duration`).
+### 2.1 Frontend Boundary (`frontend/`)
+* **Technology**: React 19, Vite 8, Tailwind CSS v4.
+* **Component Focus**:
+  * `CDSAssistant.jsx`: Interactive clinical chat interface with Markdown rendering, dynamic safety badge display, and citation evidence cards.
+  * `ragApi.js`: Typed API client with 90-second timeout to handle local CPU model cold starts and error interceptors.
+* **Invariant**: The frontend makes **zero independent clinical safety decisions** and contains **no mock or hardcoded medical answers**. All statuses, badges, and texts derive directly from backend API responses.
 
-### 2.2 `drug_module`
-* **Purpose**: Master pharmacological reference repository and vocabulary normalizer.
-* **Capabilities**: Generic-to-brand mapping, ATC classification cross-reference, formulation verification.
+### 2.2 API Gateway Boundary (`rag_module/api.py`)
+* **Technology**: FastAPI 0.110+, Pydantic v2.
+* **Endpoints**:
+  * `POST /chat`: Unified entry point accepting minimal `{ "query": "..." }` or full legacy configuration payloads.
+  * `GET /health` & `GET /ready`: Health check and model readiness monitoring.
+  * `POST /rag/query`: Advanced programmatic retrieval and generation endpoint.
+* **Invariant**: Standardizes pipeline exceptions into clean HTTP responses, shielding internal filesystem paths and model weights.
 
-### 2.3 `rag_module` (V2.8 Grounding, Evidence Policy & Safety Foundation)
-* **Purpose**: Modular evidence retrieval engine providing verified clinical literature and drug monographs through a decoupled service boundary, guarded by deterministic evidence policies and provenance audits.
-* **Service Contract**: `RAGService.retrieve(request: RAGQueryRequest) -> RAGQueryResponse` exposing structured `EvidenceItem` objects with 100% audited provenance, explicit `GroundingDecision` contracts, and zero raw index handles.
-* **Architecture**: Self-contained ingestion adapters, canonical `KnowledgeDocument`/`KnowledgeChunk` data contracts, dual-index hybrid retrieval (FAISS Dense + BM25 Lexical via RRF), deterministic `EvidencePolicyEngine` with safe abstention (`generation_allowed = False`), `ProvenanceValidator`, `QuerySafetyEngine`, and context assembly with citations.
+### 2.3 Safety Boundary (`rag_module/safety/guardrails.py`)
+* **Components**:
+  * `EmergencyTriageInterceptor`: Pattern-matches acute, life-threatening symptoms (e.g., chest pain, poison ingestion, breathing arrest). If matched, bypasses retrieval and generation immediately.
+  * `PromptInjectionDefense`: Identifies prompt manipulation, system prompt extraction, and instruction overriding, neutralizing the request early.
+  * `EntityNormalizer`: Standardizes common commercial brand names to canonical generic entities (e.g., *Lipitor $\to$ Atorvastatin*) before retrieval.
 
----
+### 2.4 Evidence & Policy Boundary (`rag_module/safety/evidence_policy.py`)
+* **Components**:
+  * `EvidencePolicyEngine`: Evaluates whether retrieved chunks actually ground the target clinical entities.
+  * Deterministic reason codes (`OK_GROUNDED`, `OUT_OF_DOMAIN`, `UNKNOWN_ENTITY`, `INSUFFICIENT_EVIDENCE`).
+* **Invariant**: Strictly fail-closed. If an entity is not indexed in the production corpus, `generation_allowed` is set to `False` and an explicit abstention response is returned.
 
-## 3. Data Flow & Inter-Module Integration
-
-### Clinical Inquiry Workflow
-1. **Prescription Parsing**: User enters prescription text (e.g., *"Metformin 500mg PO BID with meals"*). `prescription_module` extracts structured dosage/drug entities.
-2. **Entity Harmonization**: `drug_module` resolves the generic entity name and flags relevant interaction categories.
-3. **Query Safety Triage**: `QuerySafetyEngine` screens for acute crises (e.g., severe anaphylaxis, acute overdose) and prompt injections. Emergency queries immediately return emergency protocols and block generation.
-4. **Evidence Retrieval via Service**: `RAGService.retrieve()` executes hybrid retrieval (Dense + BM25) filtered by `source_filter=['DailyMed']` and `domain_filter=['pharmacology']`.
-5. **Evidence Policy & Provenance Audit**: `EvidencePolicyEngine` and `ProvenanceValidator` audit the retrieved chunks for 9-field provenance completeness, lexical/semantic grounding thresholds, and pairwise contradiction markers.
-6. **Grounding Decision & Abstention**: Evaluates grounding status (`GROUNDED`, `WEAK_EVIDENCE`, `INSUFFICIENT_EVIDENCE`, `CONFLICTING_EVIDENCE`) and assigns explicit machine-readable reason codes (`OK_GROUNDED`, `OUT_OF_DOMAIN`, `CONTRADICTORY_EVIDENCE`, etc.).
-7. **Context Construction & Citation**: If generation is allowed, retrieved chunks are formatted into citation-bearing context strings with full provenance metadata (`source_id`, `chunk_id`, `section`, `source_url`) without raw index leakage.
-
----
-
-## 4. Separation of Concerns & Safety Boundary
-
-| Responsibility | Owning Subsystem | Rationale |
-| :--- | :--- | :--- |
-| **Deterministic Extraction** | `prescription_module` | Regex and exact vocabulary matching guarantee reproducible entity extraction without LLM hallucinations. |
-| **Drug Vocabulary Authority** | `drug_module` | Centralized drug catalog prevents terminology divergence across modules. |
-| **Service & Validation Boundary** | `rag_module/service.py` | Strict typed contracts and error hierarchy prevent internal state or index leakage. |
-| **Evidence Grounding & Policy** | `rag_module/safety/` | Deterministic policy checks prevent ungrounded or contradictory clinical claims from reaching generation. |
-| **Provenance Integrity** | `rag_module/safety/provenance_validator.py` | Mandates 9-field provenance audit and forbids fabrication of missing metadata. |
-| **Clinical Decision Logic** | **Physician / Clinician** | The system acts as reference intelligence; human clinician remains the sole decision authority. |
+### 2.5 Generation & Grounding Boundary (`rag_module/safety/grounding_verifier.py`)
+* **Components**:
+  * `TinyLlama-1.1B-Chat-v1.0`: Local compact generator invoked with temperature 0.1.
+  * `AnswerGroundingVerifier`: Deconstructs generated answers into atomic factual claims, verifying each proposition against retrieved DailyMed chunks.
+* **Invariant**: If any candidate claim lacks lexical grounding or unigram support in the retrieved context, the answer is safely withheld (`withheld_verification_failure`).
 
 ---
 
-## 5. Current Architecture vs. Planned Integration
+## 3. Separation of Modules in Repository
 
-* **Current State (V2.8)**: Production-oriented RAG foundation with deterministic evidence policy, safe abstention, provenance validation, emergency query triage, typed `GroundingDecision` contracts, thin FastAPI endpoints, and 85/85 passing tests.
-* **Target State (V2.9+)**: Direct API integration where `prescription_module` output triggers automated `RAGService.retrieve()` safety and contraindication evidence lookups.
-
+The repository houses three independent modules that will be unified under a CDS Gateway in the upcoming phase:
+1. **`rag_module/`**: Evidence retrieval and grounding (Frozen at v2.10).
+2. **`drug_module/`**: Deterministic drug-drug interaction and adverse effect screening (DrugBank & SIDER).
+3. **`prescription_module/`**: Deterministic regex and rule-based prescription information extraction.

@@ -1,312 +1,119 @@
-# RAG MODULE V2.6-A — TECHNICAL ARCHITECTURE SPECIFICATION
+# RAG MODULE V2.10 — TECHNICAL ARCHITECTURE SPECIFICATION (FROZEN)
 
-## 1. End-to-End Pipeline Architecture
+> **STATUS: RAG V2.10 IS HARD FROZEN**  
+> **Baseline Commits**: `066f7a4` (Core Freeze) & `497a547` (API Hardening)  
+> **Notice**: The RAG backend architecture, index structure, embeddings, verifier logic, and safety guardrails are permanently frozen. Future improvements must NOT be silently added to this architecture.
 
-The `rag_module` is a modular, evidence-grounded clinical retrieval and generation pipeline.
+---
+
+## 1. High-Level Subsystem Architecture
+
+The `rag_module` is a modular, provenance-preserving medical evidence retrieval and generation pipeline designed with strict fail-closed safety.
 
 ```mermaid
 flowchart TD
-    subgraph IngestionStage [Multi-Source Knowledge Ingestion & Indexing]
-        RAW_DM["DailyMed SPL (231 Drugs, 14 Classes)"]
-        RAW_MQ["MedQuAD NIH (16,358 Clean Docs)"]
-        RAW_FDA["openFDA Regulatory Safety API"]
-
-        ADP_DM["DailyMedAdapter"]
-        ADP_MQ["MedQuADAdapter"]
-        ADP_FDA["OpenFDAAdapter"]
-        ADP_FUT["Dynamic Source Adapters (Extensible)"]
-
-        REG["SourceRegistry (Metadata & Authority)"]
-        ORCH["IngestionOrchestrator"]
-
-        DOCS["Canonical KnowledgeDocuments\n(18,534 Docs across 14 Clinical Domains)"]
-        CHK["Semantic Chunker (SemanticChunker)\n(250 words, 35 overlap, Content Hash)"]
-        CHKS["Canonical KnowledgeChunks (26,143 Chunks)"]
-
-        EMB["BGE-small-en Embedder\n(384-d float32, Unit Normalized)"]
-
-        subgraph ArtifactsStorage [Source-Isolated & Combined Artifacts]
-            ART_DM["artifacts/dailymed/\n(2,176 Chunks, FAISS + BM25)"]
-            ART_MQ["artifacts/medquad/\n(23,967 Chunks, Manifest)"]
-            ART_COMB["artifacts/combined/\n(26,143 Chunks, FAISS + BM25)"]
-        end
-
-        RAW_DM --> ADP_DM
-        RAW_MQ --> ADP_MQ
-        RAW_FDA --> ADP_FDA
-        ADP_DM & ADP_MQ & ADP_FDA & ADP_FUT --> ORCH
-        REG -.-> ORCH
-        ORCH --> DOCS --> CHK --> CHKS
-        CHKS --> EMB
-        EMB --> ART_DM & ART_COMB
-        CHKS --> ART_DM & ART_COMB
+    QUERY["Clinical Query"]
+    
+    subgraph Layer1 [1. Pre-Retrieval Safety & Triage]
+        EMERGENCY{"Emergency Triage?"}
+        INJECTION{"Prompt Injection?"}
+        NORM["Clinical Entity Normalizer\n(Lipitor → Atorvastatin)"]
+        QUERY --> EMERGENCY
+        EMERGENCY -->|Acute Symptoms| EM_RET["Emergency Diversion Protocol"]
+        EMERGENCY -->|Non-Emergency| INJECTION
+        INJECTION -->|System Attack| INJ_RET["Security Neutralization Block"]
+        INJECTION -->|Safe Query| NORM
     end
 
-    subgraph RetrievalStage [Query & Multi-Source Hybrid Retrieval]
-        Q["User / Clinical Query"]
-        GUARD["Safety Guardrails\n(Emergency Intercept & Out-of-Domain Filter)"]
-
-        D_SRCH["Dense Search (FAISS IndexFlatIP)\nCosine Similarity Top-20"]
-        L_SRCH["Lexical Search (BM25Okapi)\nKeyword Matching Top-20"]
-        FILT["Source & Domain Isolation Filter\n(source_filter=['DailyMed'] / ['medquad_nih'])"]
-
-        RRF["Reciprocal Rank Fusion (RRF k=60)\nFused Score Formulation"]
-        RERANK["Cross-Encoder Reranker\n(bge-reranker-small / Fallback Pass-Through)"]
-
-        Q --> GUARD --> D_SRCH & L_SRCH
-        D_SRCH & L_SRCH --> FILT --> RRF --> RERANK
+    subgraph Layer2 [2. Hybrid Multi-Source Retrieval]
+        DENSE["Dense Retriever (FAISS IndexFlatIP)\nBAAI/bge-small-en (384-d, L2 Norm)"]
+        SPARSE["Lexical Retriever (BM25Okapi)\nExact Term & Dosage Matching"]
+        RRF["Reciprocal Rank Fusion (k=60)"]
+        RERANK["Cross-Encoder Reranker\n(ms-marco-MiniLM-L-6-v2)"]
+        
+        NORM --> DENSE & SPARSE
+        DENSE & SPARSE --> RRF --> RERANK
     end
 
-    subgraph GenerationStage [Context & Grounded Generation]
-        CTX["Context Builder (ContextBuilder)\n(Formatted Provenance & Citations)"]
-        LLM["Language Model Generation\n(TinyLlama-1.1B / Clinical Generator)"]
-        OUT["Attributed Response with Source URLs & Sections"]
+    subgraph Layer3 [3. Evidence Policy & Entity Isolation]
+        POLICY["EvidencePolicyEngine\n(Entity Overlap, Domain, Density)"]
+        RERANK --> POLICY
+        POLICY -->|Unknown Entity / Insufficient| ABSTAIN["Fail-Closed Abstention\n(generation_allowed = False)"]
+    end
 
-        RERANK --> CTX --> LLM --> OUT
+    subgraph Layer4 [4. Grounded Generation & Claim Verification]
+        CTX["Context Builder\n(Attributed DailyMed Monograph Chunks)"]
+        LLM["Compact Generator\n(TinyLlama-1.1B-Chat-v1.0)"]
+        VERIFY["AnswerGroundingVerifier\n(Atomic Claim Extraction & Unigram Verification)"]
+        
+        POLICY -->|Evidence Grounded| CTX --> LLM --> VERIFY
+        VERIFY -->|Unsupported Claims| WITHHOLD["Withheld Verification Failure"]
+        VERIFY -->|Verified Claims| OUTPUT["Verified Grounded Response"]
     end
 ```
 
 ---
 
-## 2. Knowledge Ingestion Architecture
+## 2. Component Specifications
 
-### 2.1 Canonical Data Contracts (`rag_module/knowledge/document_model.py`)
+### 2.1 Embedding & Vector Search
+* **Dense Embedding Model**: `BAAI/bge-small-en`
+  * Vector dimension: 384 dimensions.
+  * Context window: 512 tokens.
+  * Normalization: L2 unit normalized.
+  * Index structure: `faiss.IndexFlatIP` (exact inner product similarity, corresponding to cosine distance).
+* **Sparse Lexical Search**: `BM25Okapi` (`rank-bm25`)
+  * Tokenization: Lowercase alphanumeric regex tokenization.
+  * Purpose: Captures exact clinical terminology, brand aliases, and specific dosing integers (e.g., *"10 mg"* vs *"40 mg"*) where dense models suffer semantic blur.
+* **Hybrid Merge Formulation**: Reciprocal Rank Fusion ($k=60$)
+  $$RRF(d) = \sum_{m \in \{Dense, BM25\}} \frac{1}{k + \text{rank}_m(d)}$$
+* **Second-Stage Reranker**: `cross-encoder/ms-marco-MiniLM-L-6-v2`
+  * Architecture: Cross-attention over concatenated `(query, passage)` pairs.
+  * Memory Management: Lazy-loaded into CPU/GPU memory on first query inference; includes graceful pass-through fallback if weights cannot be loaded.
 
-#### `KnowledgeDocument`
-Represents an atomic medical document extracted from an authoritative source.
-* `document_id`: Unique identifier (e.g., `dailymed_4b2c1256..._boxed_warning`).
-* `source_id`: Source identifier (e.g., `DailyMed`, `medquad_nih`, `openFDA`).
-* `source_name`: Full descriptive name (e.g., `National Library of Medicine DailyMed`).
-* `publisher`: Authoritative publisher (e.g., `U.S. National Library of Medicine / FDA`).
-* `title`: Canonical document title.
-* `content`: Full textual content.
-* `document_type`: Enum (`drug_monograph`, `qa_pair`, `clinical_guideline`, `reference_article`).
-* `medical_domain`: Domain (`pharmacology`, `general_medicine`, `pediatrics`, `oncology`, etc.).
-* `section`: Clinical section name (*Boxed Warning, Indications, Dosage & Administration, Contraindications, Warnings, Adverse Reactions, Drug Interactions, Specific Populations, Overdosage, Clinical Pharmacology*).
-* `source_url`: Verifiable web link.
-* `content_hash`: SHA-256 digest of content for exact deduplication.
-* `metadata`: Key-value payload (generic name, brand names, active ingredient, NDC code, SPL set ID).
+### 2.2 Production Knowledge Corpus
+* **Total Active Production Chunks**: 2,204 chunks
+  * **DailyMed (FDA SPL Monographs)**: 2,176 chunks (98.73%) — Primary authoritative drug monograph evidence.
+  * **MedlinePlus (Health Topics)**: 16 chunks (0.73%) — Patient-facing primary care overviews.
+  * **ICMR (Clinical Management Guidelines)**: 8 chunks (0.36%) — Standard Indian clinical guidelines.
+  * **MoHFW (Standard Treatment Guidelines)**: 4 chunks (0.18%) — Ministry of Health treatment standards.
+* **Role of External Knowledge Sources**:
+  * **RxNorm**: Normalization-only vocabulary resource (used to map brand aliases and generic spellings; not indexed as free-text retrieval chunks).
+  * **DrugBank & SIDER**: Separate `drug_module` data source for interaction matrices and side-effect profiles (not indexed inside FAISS).
 
-#### `KnowledgeChunk`
-Represents an individual retrieval unit generated by `SemanticChunker`.
-* `chunk_id`: Standardized chunk key (`<document_id>-c<index>`).
-* Inherits all parent document provenance attributes.
-* `text`: Passage-formatted text with contextual header (`Drug: ...\nSection: ...\n\n...`).
-* `chunk_index`, `word_count`, `char_count`, `content_hash`.
+### 2.3 Deterministic Safety Interceptors
+* **Emergency Triage Interceptor (`guardrails.py`)**:
+  * Evaluates clinical queries for acute life-threatening situations (e.g., acute poisoning, caustic ingestion, chest pain, stroke symptoms, acute suicidal crisis).
+  * Immediately diverts to emergency triage protocols without performing vector retrieval or invoking language generation.
+* **Prompt-Injection Neutralizer (`guardrails.py`)**:
+  * Pattern-matches adversarial delimiters, system prompt leaks (`"ignore previous instructions"`, `"print system prompt"`).
+  * Halts query execution before retrieval, returning a security block response.
+* **Clinical Entity Normalizer**:
+  * Resolves commercial brand names to canonical generic names (e.g., *Lipitor $\to$ Atorvastatin*, *Tylenol $\to$ Acetaminophen*) ensuring high-relevance retrieval even when brand names are queried.
 
-### 2.2 Source Adapter Engine (`rag_module/ingestion/adapters/`)
-* **`BaseSourceAdapter`**: Abstract base defining `load_raw()`, `normalize_document()`, `validate_document()`, `deduplicate()`, `generate_manifest()`, and `run()`.
-* **`SourceRegistry`**: Central declarative registry tracking active and extensible adapters.
-* **`IngestionOrchestrator`**: Coordinates multi-source extraction, validation, chunking, artifact serialization, and `combine_sources()` aggregation.
+### 2.4 Evidence Policy Engine (`evidence_policy.py`)
+* Evaluates retrieved candidate chunks against the extracted target entity.
+* Evaluates lexical overlap, entity mention presence, and clinical domain constraints.
+* Enforces **fail-closed abstention** (`generation_allowed = False`) when:
+  1. The queried entity is not indexed in the corpus (`UNKNOWN_ENTITY` / `abstained_policy`).
+  2. The retrieved evidence is insufficient or conflicting (`INSUFFICIENT_EVIDENCE`).
+  3. The query is entirely outside the clinical scope (`OUT_OF_DOMAIN`).
 
----
-
-## 3. Retrieval Architecture
-
-### 3.1 Dual-Index Deployment Pattern
-1. **Source-Isolated DailyMed Index** (`artifacts/dailymed/`):
-   * Dedicated FAISS vector index ($N=2,176$) and BM25 index.
-   * Tailored for high-speed, zero-noise prescription safety queries ($<1$ ms latency).
-2. **Unified Production Index** (`rag_module/data/faiss_index/`):
-   * Comprehensive multi-source FAISS vector index ($N=26,143$) and BM25 index.
-   * Supports global medical search with optional `source_filter` and `domain_filter`.
-
-### 3.2 Dense Semantic Retrieval (`rag_module/retrieval/dense_retriever.py`)
-* **Embedding Model**: `BAAI/bge-small-en` (384 dimensions).
-* **Query Formatting**: Prefixed with `Represent this sentence for searching relevant passages: ` as specified by BGE model guidelines.
-* **Vector Index**: `faiss.IndexFlatIP` calculating exact inner product over $L_2$-normalized vectors (equivalent to exact cosine similarity).
-
-### 3.3 Lexical Retrieval (`rag_module/retrieval/bm25_retriever.py`)
-* **Algorithm**: BM25Okapi ($k_1=1.5, b=0.75$).
-* **Tokenizer**: Custom medical tokenizer preserving numbers, dosages, hyphens, and drug codes: `\b[a-zA-Z0-9_-]+\b`.
-* **Inverted Index**: Memory-resident frequency counters with Robertson-Spärck Jones IDF scoring.
-
-### 3.4 Hybrid Fusion (`rag_module/retrieval/hybrid_retriever.py`)
-* **Fusion Formulation**: Reciprocal Rank Fusion (RRF) with constant $k=60$:
-  $$\text{RRF\_Score}(d) = \sum_{m \in \{\text{Dense}, \text{BM25}\}} \frac{w_m}{k + \text{rank}_m(d)}$$
-* **Candidate Pool**: Retrieves top-20 candidates from Dense and top-20 from BM25, returning top-$K$ fused candidates.
-
-### 3.5 Cross-Encoder Reranker (`rag_module/reranking/cross_encoder_reranker.py`)
-* **Model**: `BAAI/bge-reranker-small`.
-* **Fallback Behavior**: If weights are missing, automatically executes graceful pass-through ranking (`FALLBACK / NOT EXECUTED`) without crashing.
+### 2.5 Generator & Deterministic Grounding Verifier
+* **Generator**: `TinyLlama-1.1B-Chat-v1.0`
+  * System prompt enforces strict attribution to retrieved DailyMed monograph chunks.
+* **Answer Grounding Verifier (`grounding_verifier.py`)**:
+  * Deconstructs generated candidate text into atomic propositions.
+  * Evaluates unigram and semantic token recall of each claim against the retrieved evidence text.
+  * **Output States**:
+    * `grounded`: 100% of propositions verified against evidence.
+    * `partially_grounded`: Sub-claims verified; ungrounded preambles pruned safely.
+    * `withheld_verification_failure`: Generator produced ungrounded facts or hallucinated numbers; answer is withheld fail-closed and replaced with safe clinical guidance.
 
 ---
 
-## 4. Context Assembly, Citations & Provenance Flow
+## 3. Invariant Safety Guarantees
 
-### Provenance Survival Lifecycle
-$$\text{Source Raw SPL/XML} \longrightarrow \text{KnowledgeDocument} \longrightarrow \text{KnowledgeChunk} \longrightarrow \text{FAISS/BM25} \longrightarrow \text{ContextBuilder} \longrightarrow \text{Citation}$$
-
-### Output Context Format (`rag_module/context/context_builder.py`)
-```markdown
-[Doc 1: Lisinopril - Boxed Warning | Section: Boxed Warning | Source: DailyMed]
-URL: https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=4b2c1256...
-Drug: Lisinopril
-Section: Boxed Warning
-
-WARNING: FETAL TOXICITY. When pregnancy is detected, discontinue Lisinopril...
-```
-
----
-
-## 5. RAG Service & Grounding Layer (V2.8)
-
-### 5.1 Architectural Role & Service Boundary
-The `RAGService` (`rag_module/service.py`) encapsulates query safety triage, hybrid retrieval, post-filtering, deterministic evidence policy evaluation, 9-field provenance validation, context formatting, and latency measurement into a strictly typed boundary.
-
-```mermaid
-flowchart TD
-    Client["Client / API Route"] -->|"RAGQueryRequest"| Service["RAGService"]
-
-    subgraph SafetyTriage [Pre-Retrieval Safety]
-        Service -->|"1. Screen Query"| Safety["QuerySafetyEngine"]
-        Safety -->|"Emergency / Injection?"| Check1{"Is Emergency?"}
-        Check1 -->|Yes| FastFail["Return Emergency Guidance\ngeneration_allowed=False"]
-    end
-
-    subgraph RetrievalCore [Multi-Source Hybrid Retrieval]
-        Check1 -->|No| Retrievers["Dense / BM25 / Hybrid Search"]
-        Retrievers --> Filters["Post-Filtering (Source, Domain, Section)"]
-        Filters --> Reranker["Cross-Encoder Reranker / Fallback"]
-    end
-
-    subgraph GroundingPolicy [Deterministic Grounding & Evidence Policy]
-        Reranker -->|"Retrieved EvidenceItems"| Policy["EvidencePolicyEngine"]
-        Policy -->|"Verify 9 Fields"| Prov["ProvenanceValidator"]
-        Policy -->|"Pairwise Contradiction Check"| Conflict["Conflict Detection"]
-        Policy -->|"Evaluate Thresholds"| GroundCheck["GroundingStatus Decision"]
-    end
-
-    subgraph ContextAssembly [Context Construction & Output]
-        GroundCheck -->|"Grounded / Allowed"| Ctx["ContextBuilder (XML Formatted)"]
-        GroundCheck -->|"Abstain / Blocked"| EmptyCtx["Context Blocked / Empty"]
-        Ctx & EmptyCtx & FastFail -->|"RAGQueryResponse"| Resp["Structured Audit Response"]
-    end
-```
-
-### 5.2 Service Request & Response Contracts
-
-#### `RAGQueryRequest`
-* `query: str` (1-2000 chars, non-empty, stripped)
-* `mode: RetrievalMode` (`"dense"`, `"bm25"`, `"hybrid"`, `"hybrid_rerank"`)
-* `top_k: int` (1-100, default 5)
-* `source_filter: Optional[List[str]]` (e.g. `["DailyMed"]`)
-* `domain_filter: Optional[List[str]]` (e.g. `["pharmacology"]`)
-* `section_filter: Optional[List[str]]` (e.g. `["indications & usage", "boxed warning"]`)
-
-#### `GroundingDecision`
-* `status: GroundingStatus` (`"GROUNDED"`, `"WEAK_EVIDENCE"`, `"INSUFFICIENT_EVIDENCE"`, `"CONFLICTING_EVIDENCE"`)
-* `generation_allowed: bool` (Explicit machine-readable boolean gate for downstream generators)
-* `reason_codes: List[GroundingReasonCode]` (e.g., `["OK_GROUNDED"]`, `["OUT_OF_DOMAIN", "LOW_RETRIEVAL_SCORES"]`, `["CONTRADICTORY_EVIDENCE"]`)
-* `evidence_count: int`, `usable_evidence_count: int`
-* `provenance_valid: bool`, `provenance_status: ProvenanceStatus` (`"VALID"`, `"PARTIALLY_IDENTIFIED"`, `"INVALID"`)
-* `evidence_sources: List[str]`, `evidence_documents: List[str]`, `evidence_sections: List[str]`
-* `warnings: List[str]`
-* `contradiction_detected: bool`, `contradiction_details: Optional[str]`
-* `policy_latency_ms: float`
-
-#### `EvidenceItem`
-Structured clinical evidence item with 100% provenance retention and zero internal index objects:
-* `rank: int`, `score: float`
-* `source_id: str`, `source_name: str`, `publisher: str`
-* `document_id: str`, `chunk_id: str`, `title: str`, `section: str`, `medical_domain: str`, `source_url: str`, `text: str`
-* `dense_score: Optional[float]`, `bm25_score: Optional[float]`, `fused_score: Optional[float]`
-
-#### `RAGQueryResponse`
-* `query: str`, `retrieval_mode: str`, `total_evidence: int`
-* `evidence: List[EvidenceItem]`
-* `context_text: str` (XML-delimited formatted context if generation allowed, empty if abstained)
-* `latency_ms: float`, `reranker_status: str`, `filters_applied: Dict[str, Any]`
-* `grounding: Optional[GroundingDecision]`
-* `safety_assessment: Optional[QuerySafetyAssessment]`
-
-#### `RAGServiceHealth`
-* `status: str` (`"healthy"`, `"degraded"`, `"unready"`), `version: str` (`"2.8.0"`)
-* `service_ready: bool`, `index_ready: bool`, `indexed_chunks_count: int`, `embedding_model: str`
-* `dense_ready: bool`, `bm25_ready: bool`, `hybrid_ready: bool`, `reranker_status: str`
-
-### 5.3 Deterministic Evidence Policy & Safe Abstention Semantics
-1. **Out-of-Domain & Insufficient Retrieval**:
-   * If substantive query terms have $< 35\%$ overlap with retrieved chunks and BM25 score is 0, status is `INSUFFICIENT_EVIDENCE` (`OUT_OF_DOMAIN`) with `generation_allowed = False`.
-   * Distinguishes *"No relevant evidence was retrieved"* from *"The clinical statement is false."*
-2. **Provenance Verification**:
-   * Audits all 9 mandatory metadata fields (`source_id`, `source_name`, `publisher`, `document_id`, `chunk_id`, `title`, `section`, `medical_domain`, `source_url`).
-   * Missing required fields trigger `INVALID_PROVENANCE` and downgrade grounding status. Zero metadata is fabricated.
-3. **Contradiction Detection**:
-   * Scans retrieved chunks pairwise for mutually exclusive clinical terms (e.g. *contraindicated* vs *indicated*, *fetal toxicity* vs *safe*). If detected, status is `CONFLICTING_EVIDENCE` and generation is blocked.
-4. **Emergency Triage**:
-   * Acute crises (anaphylaxis, acute poisoning, severe chest pain) trigger immediate triage guidance and block unconstrained generation.
-
----
-
-## 6. Extensibility: How to Add a New Knowledge Source
-
-Adding a new medical knowledge source requires **zero modifications to retrieval or indexing core code**:
-1. Subclass `BaseSourceAdapter` in `rag_module/ingestion/adapters/<name>_adapter.py`.
-2. Implement `load_raw_data()` and `parse_and_normalize()` returning `KnowledgeDocument` instances.
-3. Register the source metadata in `SourceRegistry` via `SourceRegistry.register_source()`.
-4. Ingest via `IngestionOrchestrator.ingest_source("<name>")`.
-5. Combine and index seamlessly via `IngestionOrchestrator.combine_sources()`.
-6. Verified by integration test fixture: `rag_module/tests/test_source_extensibility.py`.
-
----
-
-## 7. Directory Layout & Key Files
-
-```
-rag_module/
-├── config/
-│   ├── rag_config.py             # Centralized configuration
-│   └── source_config_loader.py   # Declarative JSON sources config
-├── knowledge/
-│   ├── document_model.py         # KnowledgeDocument & KnowledgeChunk
-│   └── source_registry.py        # Central SourceRegistry
-├── ingestion/
-│   ├── base_adapter.py           # BaseSourceAdapter abstract contract
-│   ├── orchestrator.py           # IngestionOrchestrator (ingest & combine)
-│   └── adapters/
-│       ├── dailymed_adapter.py   # DailyMed 231-drug SPL monograph parser
-│       ├── medquad_adapter.py    # MedQuAD Q&A parser
-│       ├── openfda_adapter.py    # openFDA JSON parser
-│       └── guideline_adapter.py  # Guideline parser
-├── data/
-│   ├── artifacts/
-│   │   ├── dailymed/             # Isolated DailyMed corpus, chunks, FAISS, BM25, manifest
-│   │   ├── medquad/              # Isolated MedQuAD corpus, chunks, manifest
-│   │   ├── openfda/              # Isolated openFDA manifest
-│   │   └── combined/             # Multi-source combined corpus, chunks, FAISS, BM25, manifest
-│   ├── faiss_index/              # Production main unified FAISS & BM25 indexes
-│   └── dailymed_raw.json         # Raw 231 prescription drug monographs catalog
-├── chunking/
-│   └── semantic_chunker.py       # Sliding-window semantic chunker
-├── embeddings/
-│   └── bge_embedder.py           # BGE-small-en model manager
-├── indexing/
-│   └── faiss_indexer.py          # FAISS vector index builder
-├── retrieval/
-│   ├── dense_retriever.py        # Dense FAISS retriever
-│   ├── bm25_retriever.py         # BM25Okapi lexical retriever
-│   └── hybrid_retriever.py       # RRF hybrid fusion retriever
-├── reranking/
-│   └── cross_encoder_reranker.py # CrossEncoder with fallback
-├── context/
-│   └── context_builder.py        # Citation-bearing context constructor
-├── safety/
-│   ├── guardrails.py             # Legacy query validation & emergency filters
-│   ├── query_safety.py           # V2.8 QuerySafetyEngine (triage, risk categorization, sanitization)
-│   ├── provenance_validator.py   # V2.8 ProvenanceValidator (9-field audit & status)
-│   └── evidence_policy.py        # V2.8 EvidencePolicyEngine (grounding status, reason codes, contradiction)
-├── evaluation/
-│   ├── evaluator.py              # Quantitative benchmark runner
-│   ├── failure_analyzer.py       # 8-category retrieval failure analyzer
-│   ├── leakage_checker.py        # Contamination & leakage verifier
-│   ├── run_benchmark.py          # Formal 160-query benchmark runner
-│   ├── grounding_evaluator.py    # V2.8 Grounding & policy evaluation suite
-│   └── v26_benchmark_dataset.json# 160-query multi-source benchmark dataset
-├── service.py                    # V2.8 RAGService, request/response models & error hierarchy
-├── rag_pipeline.py               # Unified MedicalRAGPipeline
-├── api.py                        # FastAPI REST service (v2.8.0)
-└── tests/                        # 91 comprehensive unit & integration tests
-
-```
-
+1. **Zero Hallucination Leakage**: Unverified facts never bypass the verifier into the final response payload.
+2. **Zero Attribution Fabrication**: Every cited chunk includes authentic `source_id`, SPL SetID / NDC code, and section name.
+3. **Emergency Bypass Guarantee**: Emergency triage prompts are deterministically intercepted prior to retrieval.

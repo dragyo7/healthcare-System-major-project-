@@ -1,62 +1,59 @@
-# PROJECT CONTEXT — HEALTHCARE AI PLATFORM & RAG ENGINE
+# PROJECT CONTEXT — HEALTHCARE CLINICAL DECISION SUPPORT PLATFORM
 
 ## 1. Project Purpose & Scope
 
-This repository houses a **4th-year Computer Engineering major project**: an intelligent, evidence-grounded **Healthcare AI Platform**.
+This repository houses a **4th-Year Major Project**: a modular, safety-first **Clinical Decision Support (CDS) System**.
 
-The platform is designed to assist clinical workflows by combining deterministic rule-based medical extraction with a modular, provenance-preserving **Retrieval-Augmented Generation (RAG)** intelligence layer.
+The platform is designed to assist healthcare professionals and patients with evidence-grounded medical guidance, medication safety screening, and structured prescription analysis.
 
 ### Primary Objectives
-1. **Prescription Parsing & Entity Extraction**: Extract structured medication details (drug names, dosages, frequencies, routes, durations) from unstructured clinical text.
-2. **Evidence-Grounded Clinical Retrieval (RAG)**: Retrieve verified, authoritative medical literature and FDA-approved drug monographs to answer clinical inquiries with strict attribution.
-3. **Safety & Contraindication Verification**: Provide transparent evidence trails for dosage limits, drug-drug interactions, and boxed warnings.
+1. **Evidence-Grounded Clinical Intelligence (RAG)**: Retrieve authentic, citation-backed clinical guidelines and FDA monographs with strict fail-closed hallucination prevention.
+2. **Medication Safety & Interaction Engine (`drug_module`)**: Multi-drug interaction screening and adverse effect lookups based on verified pharmacological rules.
+3. **Prescription Parsing & Dosing Extraction (`prescription_module`)**: Deterministic extraction of medication details (drug name, strength, route, frequency, duration) from clinical notes.
+4. **Clinical Web Portal (`frontend`)**: Role-based interface for clinicians and patients featuring an interactive CDS Assistant and Drug Checker.
 
 ---
 
-## 2. Major Modules & System Scope
+## 2. Major Modules & Technology Stack
 
-The platform is organized into three core backend modules alongside a web user interface:
-
-| Module | Core Responsibility | Primary Technologies | Current Integration Status |
+| Module | Core Responsibility | Technology Stack | Baseline Status |
 | :--- | :--- | :--- | :--- |
-| **`rag_module`** | Knowledge ingestion, semantic/lexical retrieval, RRF fusion, context building, and LLM answer generation. | Python, BGE Embeddings, FAISS, BM25, FastAPI, HuggingFace Transformers | **Active Foundation (V2.5.1)** — Modular, audited, 42 tests passing. |
-| **`prescription_module`** | Rule-based and NLP extraction of prescription entities (drugs, strengths, frequencies, routes). | Python, spaCy / Regex / Rule-based NLP, FastAPI | **Active Baseline** — Independent module with standalone test suite. |
-| **`drug_module`** | Drug master catalog, synonym mapping, and pharmacological reference lookup. | Python, JSON data catalogs | **Active Baseline** — Reference data source for entities. |
-| **`frontend`** | Web user interface for prescription entry, interaction review, and RAG search. | JavaScript, HTML, CSS / React | **UI Prototype** — In active development. |
+| **`rag_module`** | Dual-index hybrid retrieval, cross-encoder reranking, emergency/injection safety guardrails, local LLM generation, and deterministic grounding verification. | Python 3.11+, PyTorch, BAAI/bge-small-en, FAISS (IndexFlatIP), rank-bm25, Cross-Encoder (`ms-marco-MiniLM-L-6-v2`), TinyLlama-1.1B, FastAPI | **v2.10 Frozen Baseline** (190 regression tests passing) |
+| **`drug_module`** | Rule-based drug-drug interaction detection, severity classification, and SIDER adverse reaction profiles. | Python, FastAPI, DrugBank rules, SIDER 4.1 dataset | **Implemented Baseline** (8 rules, 20 profiles) |
+| **`prescription_module`** | Deterministic regex and rule-based NLP entity extraction from free-text prescriptions into structured JSON dosing models. | Python, FastAPI, Regex rule engine, Pydantic | **Implemented Baseline** (FastAPI service) |
+| **`frontend`** | Role-based clinical web portal with Doctor Dashboard, interactive conversational CDS Assistant, and Drug Checker. | React 19, Vite 8, Tailwind CSS v4, Lucide React, Axios | **Integrated & E2E Verified** (Vite production build verified) |
+| **`data/`** | Production vector indices, DailyMed monographs, metadata archives, and medication interaction JSON rules. | FAISS binary index, Pickle metadata, JSON catalogs | **Production Locked** (2,204 chunks indexed) |
 
 ---
 
-## 3. Intended Users & Clinical Context
+## 3. Core Architectural Constraints & Safety Rules
 
-* **Primary Users**: Clinicians, pharmacists, healthcare researchers, and medical students seeking fast, attributed reference evidence during workflow tasks.
-* **Operational Boundary**: This system is an **engineering and research prototype**. It is **NOT** a certified medical device and is **NOT** intended for autonomous diagnostic or treatment decisions without physician oversight.
-
----
-
-## 4. Architectural Boundaries & Non-Goals
-
-### Critical Non-Goals
-* **No Autonomous Clinical Decision Making**: The RAG layer provides *evidence retrieval and context presentation*, not autonomous prescription modifications.
-* **No Unbounded General LLM Chat**: Queries outside medical and pharmacological domains or involving acute emergency crisis prompts are intercepted by safety guardrails.
-* **No Black-Box Retrieval**: Every retrieved chunk and generated response must preserve strict provenance (source ID, document ID, publisher, URL, section).
-
-### Subsystem Relationships
-```mermaid
-graph TD
-    User["Clinician / User Input"] --> Gateway["API Gateway / Frontend"]
-    Gateway --> PM["prescription_module (Entity Extraction)"]
-    Gateway --> RAG["rag_module (Evidence Retrieval & Grounding)"]
-    Gateway --> DM["drug_module (Drug Reference Catalog)"]
-    
-    PM -.->|Extracted Drug Entities| RAG
-    DM -.->|Standardized Drug Names| RAG
-    RAG --> Output["Attributed Clinical Context & Evidence Citations"]
-```
+1. **Deterministic Safety Before Generative Language**:
+   * All clinical safety checks (acute emergency triage, prompt injection defense, drug interaction alerts, entity existence) must be evaluated deterministically before generative LLMs are invoked.
+2. **Fail-Closed Clinical Policy**:
+   * When clinical evidence is absent, weak, contradictory, or out-of-domain, the system must deterministically abstain (`generation_allowed = False`) with machine-readable reason codes rather than guessing.
+3. **Strict Attribution & Provenance**:
+   * Every clinical claim presented to the clinician must trace to an authentic source monograph (DailyMed SPL Set ID, section title, and URL). Zero metadata fabrication is permitted.
+4. **Physician-in-the-Loop Constraint**:
+   * The platform is a clinical decision support prototype and does not replace licensed medical judgement or provide autonomous diagnostic decisions.
 
 ---
 
-## 5. Security, Privacy & Healthcare Compliance Baseline
+## 4. Key Terminology
 
-1. **Secret & Key Isolation**: No hardcoded API keys or proprietary credentials in codebase; environment variables managed via `.env`.
-2. **PII / PHI Handling**: System operates on de-identified prescription text and public medical literature (MedQuAD, DailyMed, openFDA).
-3. **Traceability & Grounding**: Context builder formats citations with source set IDs and clinical sections to prevent ungrounded model hallucination.
+* **CDS**: Clinical Decision Support.
+* **DailyMed**: Official FDA published package inserts and drug label monographs.
+* **SPL**: Structured Product Labeling (FDA format).
+* **RRF**: Reciprocal Rank Fusion ($k=60$) used to merge dense semantic and sparse lexical search results.
+* **Fail-Closed**: A safety design pattern where uncertainty or verification failure causes the system to safely withhold answers rather than risking hallucination.
+* **Grounding Decision**: A machine-readable evaluation contract determining whether generation is permitted based on retrieved evidence coverage.
+
+---
+
+## 5. Current High-Level Phase
+
+* **Phase 1: RAG v2.10 Core & Doctor Frontend Integration**: **COMPLETED & VERIFIED**.
+* **Phase 2: CDS Platform Integration (NEXT)**:
+  * Consolidated CDS Gateway.
+  * Live Drug Interaction Engine integration in frontend.
+  * Prescription parsing to safety screening workflow in CDS Assistant.

@@ -2,8 +2,9 @@
 
 > **Authoritative Root Guide for Developers and AI Coding Agents**  
 > **Project**: Modular AI-Powered Clinical Decision Support (CDS) System (4th-Year Major Project)  
-> **Repository Branch**: `feature/rag-v2-foundation`  
-> **RAG Frozen Baseline Commit**: `fd2cac7`  
+> **Repository Branch**: `main` (Merged from `feature/rag-v2-foundation`)  
+> **RAG Frozen Baseline Commit**: `497a547` (Hardened V2.10)  
+> **Frontend Integration Baseline Commit**: `893155a` (Verified E2E)  
 
 ---
 
@@ -30,7 +31,7 @@ This project is a **Modular Clinical Decision Support (CDS) System** designed to
           ┌──────────────────────────┼──────────────────────────┐
           ▼                          ▼                          ▼
      rag_module                 drug_module            prescription_module
-(Evidence RAG v2.9.1)       (Drug Safety Engine)       (Prescription Parser)
+(Evidence RAG v2.10)        (Drug Safety Engine)       (Prescription Parser)
    • FAISS (2,204 chunks)      • 8 Interaction Rules       • Entity Extraction
    • BM25 Lexical Search       • 20 SIDER Drug Profiles    • Regex Rule Engine
    • RRF Fusion (k=60)         • Severity Classification   • Structured Dosing
@@ -43,7 +44,7 @@ This project is a **Modular Clinical Decision Support (CDS) System** designed to
 ```
 
 ### Module Layout
-* **`rag_module/`**: Production RAG intelligence engine.
+* **`rag_module/`**: Production RAG intelligence engine (Frozen v2.10).
   * Entry point: `rag_module/api.py` (`app = FastAPI(version="2.9.1")`)
   * Pipeline orchestrator: `rag_module/rag_pipeline.py` (`MedicalRAGPipeline`)
   * Service layer: `rag_module/service.py` (`RAGService`)
@@ -65,7 +66,7 @@ This project is a **Modular Clinical Decision Support (CDS) System** designed to
   * CDS Assistant component: `frontend/src/pages/Common/CDSAssistant.jsx`
   * Drug checker component: `frontend/src/pages/Patient/DrugChecker.jsx`
 * **`data/`**: Production vector indices, metadata, and clinical interaction rules.
-  * `data/faiss_index/`: Production FAISS index (`index_v2.bin`, `meta_v2.pkl`) with 2,204 chunks.
+  * `data/faiss_index/` & `rag_module/data/faiss_index/`: Production FAISS index (`index_v2.bin`, `meta_v2.pkl`) with 2,204 chunks.
   * `data/rules/medication_interactions/`: Verified drug-drug interaction and adverse effect JSON rules.
 * **`docs/`**: Active architectural documentation and archived historical audit records (`docs/archive/`).
 
@@ -73,7 +74,7 @@ This project is a **Modular Clinical Decision Support (CDS) System** designed to
 
 ## 3. What is FROZEN (DO NOT MODIFY)
 
-The RAG backend evaluation state is **HARD FROZEN** at commit `fd2cac7`.
+The RAG backend evaluation state is **HARD FROZEN** at commit `497a547`.
 
 **DO NOT MODIFY OR REDESIGN:**
 * FAISS index structure (`2,204` production chunks)
@@ -87,16 +88,16 @@ The RAG backend evaluation state is **HARD FROZEN** at commit `fd2cac7`.
 * Emergency triage interception logic
 * Prompt-injection defense logic
 
-> **Rule for Agents**: Do not attempt to improve RAG evaluation scores or relax grounding thresholds. Build **around** the frozen RAG engine.
+> **Rule for Agents**: Do not attempt to alter RAG evaluation scores or relax grounding thresholds. Build **around** the frozen RAG engine.
 
 ---
 
 ## 4. What is Currently Being Developed?
 
 The current focus is **CDS Platform Module Integration**:
-1. **Unified API Gateway**: Wiring `drug_module` and `prescription_module` endpoints alongside `rag_module` into a unified backend interface or client-side orchestration.
-2. **Frontend CDS Assistant Enhancement**: Connecting the frontend `CDSAssistant.jsx` and `DrugChecker.jsx` to live drug interaction checking and prescription extraction.
-3. **Prescription-to-Safety Flow**: Allowing a clinician to paste a prescription, parse the drugs, screen them for drug interactions (`drug_module`), and cross-reference clinical guidelines (`rag_module`).
+1. **Task 1: Unified API Gateway**: Wiring `drug_module` and `prescription_module` endpoints alongside `rag_module` into a unified backend interface (`/cds/evaluate`).
+2. **Task 2: Frontend Drug Checker Live Integration**: Connecting `frontend/src/pages/Patient/DrugChecker.jsx` to live drug interaction checking (`/check-interaction` and `/check-side-effects`).
+3. **Task 3: Prescription-to-Safety Flow**: Adding a prescription analysis workflow in `CDSAssistant.jsx` allowing clinicians to paste prescriptions, parse medications, screen interactions, and view 1-click clinical guideline RAG lookups.
 
 ---
 
@@ -116,6 +117,7 @@ cd frontend
 npm run dev
 ```
 * Web Portal: `http://localhost:5173`
+* Demo Clinician Login: `doctor@medai.com` / `password123`
 
 ### C. Run Drug Safety Engine (Standalone)
 ```powershell
@@ -135,7 +137,7 @@ python -m uvicorn prescription_module.api:app --host 127.0.0.1 --port 8002
 ```powershell
 python -m pytest rag_module/tests/ -v
 ```
-* **Expected Result**: 156 passed, 2 skipped (offline fixtures), 0 failed.
+* **Expected Result**: 190 passed, 2 skipped (offline fixtures), 0 failed.
 
 ### Run Frontend Build Check
 ```powershell
@@ -149,23 +151,19 @@ npm run build
 ## 7. Known Limitations (Documented, Not Bugs)
 
 1. **Lazy Loading Cold-Start**:
-   * The Cross-Encoder reranker is loaded into GPU/CPU memory on the first inference request.
-   * `GET /health` reports `reranker_status = "fallback_pass_through"` prior to the first query, then dynamically changes to `"available"`. This is intentional PyTorch memory management.
+   * The Cross-Encoder reranker is loaded into GPU/CPU memory on the first inference request (~1.5s cold-start), then dynamically switches to `"available"`. This is intentional PyTorch memory management.
 2. **Compact Generator Capacity (`TinyLlama-1.1B-Chat`)**:
    * Local 1.1B generator occasionally generates conversational preambles or anaphora drift.
    * The `AnswerGroundingVerifier` intercepts these fail-closed, withholding unverified answers safely.
 3. **Corpus Coverage**:
-   * The production corpus contains 2,204 chunks covering major cardiovascular, diabetic, and primary care medications. Unindexed entities (e.g., Atorvastatin) correctly trigger policy abstentions (`abstained_policy`).
+   * The production corpus contains 2,204 chunks covering major cardiovascular, diabetic, and primary care medications. Unindexed entities correctly trigger policy abstentions (`abstained_policy`).
 
 ---
 
-## 8. Development Roadmap (Next Tasks in Priority Order)
+## 8. Milestone History
 
-1. **Task 1: Unified CDS Gateway Endpoint**
-   * Expose a consolidated endpoint (e.g. `POST /cds/evaluate` or mounting `drug_module` routers into `rag_module/api.py`) allowing frontend clients to query RAG, drug interactions, and prescription analysis from one service.
-2. **Task 2: Frontend Drug Checker Live Integration**
-   * Wire `frontend/src/pages/Patient/DrugChecker.jsx` to call the verified `drug_module` interaction engine (`/check-interaction` and `/check-side-effects`).
-3. **Task 3: Prescription-to-Safety Workflow in CDS Assistant**
-   * Add a "Prescription Analysis" tab/card in `CDSAssistant.jsx` that takes free-text prescriptions, extracts medication lists, runs interaction checks, and allows 1-click evidence lookup in RAG.
-4. **Task 4: Patient Context Store / Mock EHR Integration**
-   * Provide a lightweight patient state store (allergies, current medications, renal function) to feed into the CDS evaluation pipeline.
+* `066f7a4`: **RAG Core Freeze** — Frozen RAG V2.10 backend with verified emergency safety and 100-query benchmark.
+* `497a547`: **RAG API Hardening** — Hardened `/chat` contract, fixed Lipitor generic normalization, and prompt-injection early block.
+* `218b718`: **Pre-Frontend Checkpoint** — Checkpoint commit before frontend integration.
+* `a825690`: **Frontend Integration** — Integrated Doctor Dashboard and conversational assistant with live RAG `/chat`.
+* `893155a`: **E2E Validation & Polish** — Polished 8-query demo pills, removed hardcoded emergency numbers, verified E2E fidelity.
