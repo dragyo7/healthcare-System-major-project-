@@ -41,9 +41,14 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List
 
-from data_loader import load_drugbank, load_sider
-from interaction_engine import check_interactions
-from side_effect_engine import get_side_effects
+try:
+    from drug_module.data_loader import load_drugbank, load_sider
+    from drug_module.interaction_engine import check_interactions
+    from drug_module.side_effect_engine import get_side_effects
+except ImportError:
+    from data_loader import load_drugbank, load_sider
+    from interaction_engine import check_interactions
+    from side_effect_engine import get_side_effects
 
 app = FastAPI(title="Drug Safety API")
 

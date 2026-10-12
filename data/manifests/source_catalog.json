@@ -95,5 +95,24 @@
       "reason": "Synthetic micro-subset without clinical provenance, replaced by DailyMed FDA SPL Adverse Reactions (DS-002).",
       "status": "QUARANTINED"
     }
+  ],
+  "legacy_sources": [
+    {
+      "source_id": "MedQuAD",
+      "display_name": "MedQuAD Composite NIH Knowledge Base (V1 Baseline)",
+      "reason": "Legacy 47,441-chunk QA dataset replaced in V2.10 by curated 2,204-chunk DailyMed + ICMR + MoHFW + MedlinePlus corpus to eliminate non-grounded community QA hallucinations and enforce regulatory provenance.",
+      "status": "LEGACY_ARCHIVED"
+    }
+  ],
+  "future_sources": [
+    {
+      "source_id": "WHO_Guidelines",
+      "display_name": "World Health Organization Clinical Guidelines",
+      "publisher": "World Health Organization",
+      "authority_tier": "tier_1_public_health",
+      "source_type": "guideline_clearinghouse",
+      "status": "PLANNED_FUTURE_SOURCE",
+      "notes": "Supported via plugin adapter interface (tested via FakeFutureSourceAdapter); awaiting official WHO guideline JSON ingestion in future release."
+    }
   ]
 }

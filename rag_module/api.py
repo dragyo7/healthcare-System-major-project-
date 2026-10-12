@@ -47,14 +47,20 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:5175",
         "http://127.0.0.1:3000",
         "http://127.0.0.1:5173",
+        "http://127.0.0.1:5174",
+        "http://127.0.0.1:5175",
         "http://localhost:8080",
         "http://127.0.0.1:8080"
     ],
+    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$",
     allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS", "HEAD"],
+    allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 
@@ -288,6 +294,12 @@ def retrieve_endpoint(request: RAGQueryRequest):
     return service.retrieve(request)
 
 
+@app.options("/chat", tags=["Compatibility"])
+def options_chat_endpoint():
+    """Explicit OPTIONS preflight handler for /chat endpoint."""
+    return JSONResponse(status_code=200, content={"status": "ok"})
+
+
 @app.post("/chat", response_model=LegacyQueryResponse, tags=["Generation", "Clinical"])
 def chat_endpoint(request: ChatRequest):
     """
@@ -508,6 +520,14 @@ def rag_trace_endpoint(request: DiagnosticTraceRequest):
         "final_answer": final_answer,
         "citations": citations
     }
+
+
+# =====================================================================
+# Clinical Decision Support (CDS) Gateway Router (Phase 2 Integration)
+# =====================================================================
+from cds_module.router import router as cds_router
+
+app.include_router(cds_router)
 
 
 if __name__ == "__main__":

@@ -69,3 +69,16 @@ Thumbs.db
 *tempCodeRunnerFile.py
 
 .history/
+.runtime/
+
+# Local database dumps & backup files (Security: prevent accidental commit of DB state)
+scratch/*.sql
+scratch/*.log
+scratch/*.png
+scratch/*.jpg
+Dump*.sql
+**/Dump*.sql
+
+# Archives & bulky compressed backups
+*.zip
+*.traineddata
