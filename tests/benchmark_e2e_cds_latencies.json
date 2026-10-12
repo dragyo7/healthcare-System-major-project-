@@ -1,0 +1,139 @@
+{
+  "timestamp": "2026-10-12T19:47:47.323Z",
+  "results": {
+    "doctor_cds": {
+      "urgent_emergency": {
+        "count": 1,
+        "min": 40.94,
+        "p50": 40.94,
+        "p90": 40.94,
+        "p95": 40.94,
+        "max": 40.94,
+        "avg": 40.94,
+        "errorCount": 0
+      },
+      "malformed_request": {
+        "count": 1,
+        "min": 1.53,
+        "p50": 1.53,
+        "p90": 1.53,
+        "p95": 1.53,
+        "max": 1.53,
+        "avg": 1.53,
+        "errorCount": 0
+      },
+      "unauthorized_bola": {
+        "count": 1,
+        "min": 1.9,
+        "p50": 1.9,
+        "p90": 1.9,
+        "p95": 1.9,
+        "max": 1.9,
+        "avg": 1.9,
+        "errorCount": 0
+      },
+      "common_grounded": {
+        "count": 3,
+        "min": 23213.92,
+        "p50": 24455.03,
+        "p90": 26689.12,
+        "p95": 26689.12,
+        "max": 26689.12,
+        "avg": 24786.02,
+        "errorCount": 0
+      },
+      "insufficient_evidence": {
+        "count": 1,
+        "min": 354.23,
+        "p50": 354.23,
+        "p90": 354.23,
+        "p95": 354.23,
+        "max": 354.23,
+        "avg": 354.23,
+        "errorCount": 0
+      },
+      "multilingual_hi": {
+        "count": 1,
+        "min": 18534.64,
+        "p50": 18534.64,
+        "p90": 18534.64,
+        "p95": 18534.64,
+        "max": 18534.64,
+        "avg": 18534.64,
+        "errorCount": 0
+      }
+    },
+    "patient_post_discharge_cds": {
+      "urgent_emergency": {
+        "count": 1,
+        "min": 329.3,
+        "p50": 329.3,
+        "p90": 329.3,
+        "p95": 329.3,
+        "max": 329.3,
+        "avg": 329.3,
+        "errorCount": 0
+      },
+      "unauthorized_cross_patient_bola": {
+        "count": 1,
+        "min": 2.33,
+        "p50": 2.33,
+        "p90": 2.33,
+        "p95": 2.33,
+        "max": 2.33,
+        "avg": 2.33,
+        "errorCount": 0
+      },
+      "followup_educational": {
+        "count": 3,
+        "min": 23672.58,
+        "p50": 27928.91,
+        "p90": 28182.24,
+        "p95": 28182.24,
+        "max": 28182.24,
+        "avg": 26594.58,
+        "errorCount": 0
+      },
+      "insufficient_evidence": {
+        "count": 1,
+        "min": 417.73,
+        "p50": 417.73,
+        "p90": 417.73,
+        "p95": 417.73,
+        "max": 417.73,
+        "avg": 417.73,
+        "errorCount": 0
+      },
+      "multilingual_mr": {
+        "count": 1,
+        "min": 19769.35,
+        "p50": 19769.35,
+        "p90": 19769.35,
+        "p95": 19769.35,
+        "max": 19769.35,
+        "avg": 19769.35,
+        "errorCount": 0
+      }
+    },
+    "infrastructure_timings": {
+      "jwt_issuance_ms": {
+        "count": 50,
+        "min": 0.04,
+        "p50": 0.05,
+        "p90": 0.09,
+        "p95": 0.12,
+        "max": 0.23,
+        "avg": 0.06
+      },
+      "db_context_fetch_ms": {
+        "count": 20,
+        "min": 0.98,
+        "p50": 1.32,
+        "p90": 2.12,
+        "p95": 13.5,
+        "max": 13.5,
+        "avg": 1.9
+      }
+    }
+  }
+}

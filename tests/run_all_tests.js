@@ -33,6 +33,7 @@ const suites = [
   { name: "Patient Self-Service & Discharge Care", script: "scratch/test_patient_and_discharge.js" },
   { name: "Doctor Portal Clinical E2E", script: "scratch/test_doctor_portal_e2e.js" },
   { name: "Full-System Multi-Role Synthetic Journey", script: "scratch/test_full_system_multi_role_e2e.js" },
+  { name: "Adversarial Gateway & Security Invariants", script: "tests/test_adversarial_gateway_e2e.js" },
 ];
 
 console.log("==========================================================================");

@@ -1166,7 +1166,7 @@ const getDoctorReport = async (req, res) => {
 const evaluateDoctorCDS = async (req, res) => {
     try {
         const userId = req.user.user_id;
-        const { patient_id, clinical_query, query, candidate_medications, language } = req.body;
+        const { patient_id, clinical_query, query, candidate_medications, language } = req.body || {};
 
         const actualQuery = (clinical_query || query || "").trim();
         if (!actualQuery) {

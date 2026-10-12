@@ -1,0 +1,267 @@
+{
+  "timestamp": "2026-10-12T19:43:41Z",
+  "environment": {
+    "os": "Windows",
+    "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+    "model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+    "reranker": "cross-encoder/ms-marco-MiniLM-L-6-v2",
+    "embeddings": "BAAI/bge-small-en"
+  },
+  "summary_stats": {
+    "multilingual_processing_ms": {
+      "count": 6,
+      "min": 0.03,
+      "p50": 0.32,
+      "p90": 2.16,
+      "p95": 2.67,
+      "max": 3.18,
+      "avg": 0.84
+    },
+    "emergency_check_ms": {
+      "count": 6,
+      "min": 0.03,
+      "p50": 0.03,
+      "p90": 0.61,
+      "p95": 0.66,
+      "max": 0.71,
+      "avg": 0.23
+    },
+    "prompt_injection_check_ms": {
+      "count": 5,
+      "min": 0.01,
+      "p50": 0.03,
+      "p90": 0.1,
+      "p95": 0.12,
+      "max": 0.14,
+      "avg": 0.05
+    },
+    "query_analysis_ms": {
+      "count": 5,
+      "min": 0.18,
+      "p50": 0.6,
+      "p90": 5.07,
+      "p95": 6.36,
+      "max": 7.65,
+      "avg": 1.98
+    },
+    "dense_retrieval_ms": {
+      "count": 5,
+      "min": 15.7,
+      "p50": 28.96,
+      "p90": 36.61,
+      "p95": 37.32,
+      "max": 38.03,
+      "avg": 27.29
+    },
+    "bm25_retrieval_ms": {
+      "count": 5,
+      "min": 2.45,
+      "p50": 3.13,
+      "p90": 8.95,
+      "p95": 9.27,
+      "max": 9.6,
+      "avg": 5.22
+    },
+    "rrf_fusion_ms": {
+      "count": 5,
+      "min": 15.75,
+      "p50": 22.89,
+      "p90": 28.17,
+      "p95": 29.13,
+      "max": 30.09,
+      "avg": 22.99
+    },
+    "cross_encoder_rerank_ms": {
+      "count": 5,
+      "min": 149.74,
+      "p50": 372.06,
+      "p90": 733.44,
+      "p95": 782.81,
+      "max": 832.18,
+      "avg": 457.76
+    },
+    "entity_screening_ms": {
+      "count": 5,
+      "min": 0.0,
+      "p50": 0.15,
+      "p90": 0.27,
+      "p95": 0.28,
+      "max": 0.28,
+      "avg": 0.15
+    },
+    "evidence_policy_ms": {
+      "count": 5,
+      "min": 0.3,
+      "p50": 0.91,
+      "p90": 9.27,
+      "p95": 11.27,
+      "max": 13.28,
+      "avg": 3.68
+    },
+    "context_assembly_ms": {
+      "count": 4,
+      "min": 0.1,
+      "p50": 0.15,
+      "p90": 0.19,
+      "p95": 0.19,
+      "max": 0.19,
+      "avg": 0.15
+    },
+    "generator_ms": {
+      "count": 4,
+      "min": 21784.8,
+      "p50": 30772.07,
+      "p90": 34501.18,
+      "p95": 35225.4,
+      "max": 35949.61,
+      "avg": 29819.64
+    },
+    "grounding_verifier_ms": {
+      "count": 4,
+      "min": 4.66,
+      "p50": 8.59,
+      "p90": 13.27,
+      "p95": 13.45,
+      "max": 13.63,
+      "avg": 8.87
+    },
+    "total_pipeline_ms": {
+      "count": 6,
+      "min": 0.76,
+      "p50": 26419.29,
+      "p90": 34212.96,
+      "p95": 35546.34,
+      "max": 36879.73,
+      "avg": 20319.46
+    }
+  },
+  "detailed_runs": [
+    {
+      "query_type": "common_grounded",
+      "is_emergency": false,
+      "abstained": false,
+      "grounded": true,
+      "retrieved_chunks": 4,
+      "verification_status": "partially_grounded",
+      "timings_ms": {
+        "multilingual_processing_ms": 0.5846999993082136,
+        "emergency_check_ms": 0.5232000003161374,
+        "prompt_injection_check_ms": 0.14150000060908496,
+        "query_analysis_ms": 7.646799997019116,
+        "dense_retrieval_ms": 38.02679999716929,
+        "bm25_retrieval_ms": 7.971899998665322,
+        "rrf_fusion_ms": 15.754800002468983,
+        "cross_encoder_rerank_ms": 149.73810000083176,
+        "entity_screening_ms": 0.05379999856813811,
+        "evidence_policy_ms": 0.29770000037387945,
+        "context_assembly_ms": 0.1016000023810193,
+        "generator_ms": 30422.62859999755,
+        "grounding_verifier_ms": 4.6608999982709065,
+        "total_pipeline_ms": 30648.30360000269
+      }
+    },
+    {
+      "query_type": "complex_multipart",
+      "is_emergency": false,
+      "abstained": true,
+      "grounded": false,
+      "retrieved_chunks": 8,
+      "verification_status": "withheld",
+      "timings_ms": {
+        "multilingual_processing_ms": 0.0394000016967766,
+        "emergency_check_ms": 0.0380000019504223,
+        "prompt_injection_check_ms": 0.033700001949910074,
+        "query_analysis_ms": 1.2050000004819594,
+        "dense_retrieval_ms": 34.47849999793107,
+        "bm25_retrieval_ms": 9.60069999928237,
+        "rrf_fusion_ms": 25.282099999458296,
+        "cross_encoder_rerank_ms": 832.1838999981992,
+        "entity_screening_ms": 0.15139999959501438,
+        "evidence_policy_ms": 13.27820000005886,
+        "context_assembly_ms": 0.18950000230688602,
+        "generator_ms": 35949.61079999848,
+        "grounding_verifier_ms": 13.630800000100862,
+        "total_pipeline_ms": 36879.73459999921
+      }
+    },
+    {
+      "query_type": "insufficient_evidence",
+      "is_emergency": false,
+      "abstained": true,
+      "grounded": false,
+      "retrieved_chunks": 8,
+      "timings_ms": {
+        "multilingual_processing_ms": 0.02970000059576705,
+        "emergency_check_ms": 0.027499998395796865,
+        "prompt_injection_check_ms": 0.025400000595254824,
+        "query_analysis_ms": 0.6025000002409797,
+        "dense_retrieval_ms": 28.96110000074259,
+        "bm25_retrieval_ms": 2.952999999251915,
+        "rrf_fusion_ms": 30.094399997324217,
+        "cross_encoder_rerank_ms": 585.3210000022955,
+        "entity_screening_ms": 0.2553000012994744,
+        "evidence_policy_ms": 3.247599997848738,
+        "total_pipeline_ms": 651.524499997322
+      }
+    },
+    {
+      "query_type": "emergency_triage",
+      "is_emergency": true,
+      "abstained": false,
+      "grounded": false,
+      "timings_ms": {
+        "multilingual_processing_ms": 0.05059999966761097,
+        "emergency_check_ms": 0.7059000017761718,
+        "total_pipeline_ms": 0.7590000022901222
+      }
+    },
+    {
+      "query_type": "multilingual_hi",
+      "is_emergency": false,
+      "abstained": true,
+      "grounded": false,
+      "retrieved_chunks": 5,
+      "verification_status": "withheld",
+      "timings_ms": {
+        "multilingual_processing_ms": 3.184600001986837,
+        "emergency_check_ms": 0.028599999495781958,
+        "prompt_injection_check_ms": 0.01469999915570952,
+        "query_analysis_ms": 0.18120000095223077,
+        "dense_retrieval_ms": 15.695899997808738,
+        "bm25_retrieval_ms": 2.4477999977534637,
+        "rrf_fusion_ms": 20.92579999953159,
+        "cross_encoder_rerank_ms": 349.4724000011047,
+        "entity_screening_ms": 0.0024000000848900527,
+        "evidence_policy_ms": 0.905699998838827,
+        "context_assembly_ms": 0.17799999841372482,
+        "generator_ms": 21784.795999999915,
+        "grounding_verifier_ms": 12.425599998096004,
+        "total_pipeline_ms": 22190.27079999796
+      }
+    },
+    {
+      "query_type": "multilingual_mr",
+      "is_emergency": false,
+      "abstained": false,
+      "grounded": true,
+      "retrieved_chunks": 5,
+      "verification_status": "partially_grounded",
+      "timings_ms": {
+        "multilingual_processing_ms": 1.1378000017430168,
+        "emergency_check_ms": 0.03020000076503493,
+        "prompt_injection_check_ms": 0.014999997802078724,
+        "query_analysis_ms": 0.2674999996088445,
+        "dense_retrieval_ms": 19.266999999672407,
+        "bm25_retrieval_ms": 3.1251000000338536,
+        "rrf_fusion_ms": 22.889999996550614,
+        "cross_encoder_rerank_ms": 372.0623000008345,
+        "entity_screening_ms": 0.2826999989338219,
+        "evidence_policy_ms": 0.6833000006736256,
+        "context_assembly_ms": 0.130599997646641,
+        "generator_ms": 31121.5114000006,
+        "grounding_verifier_ms": 4.757299997436348,
+        "total_pipeline_ms": 31546.175600000424
+      }
+    }
+  ]
+}

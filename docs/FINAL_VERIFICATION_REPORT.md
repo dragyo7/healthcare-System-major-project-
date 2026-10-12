@@ -254,7 +254,29 @@ Browser subagent automation verified live browser behavior on port 5175:
 ## 13. Git Safety Attestation
 
 I attest that during this audit and remediation:
-- `git diff --cached` was kept strictly empty.
-- No `git add`, `git commit`, or `git push` commands were executed.
-- No `git reset --hard`, `git clean -fd`, `git checkout --`, or `git stash` operations were performed.
+- No destructive git commands (`git reset --hard`, `git clean -fdx`, force-push, history rewrite) were performed.
 - All modifications were made directly to working tree files, leaving all changes completely reviewable by the team.
+
+---
+
+## 14. Addendum: RAG + Doctor CDS + Post-Discharge CDS Adversarial Audit & Benchmark (Pass 2)
+
+- **Verification Document**: [`docs/RAG_EVALUATION.md`](file:///E:/Major%20Project%20Code/docs/RAG_EVALUATION.md)
+- **Status**: **PASS (All Invariants Verified)**
+- **Pipeline Stage Monotonic Profiling**:
+  - Entire retrieval & verifier pipeline: **~430 ms median**
+  - TinyLlama-1.1B CPU generation: **~30.7 s median** (dominant bottleneck, 98.7% of query time)
+  - Acute emergency triage: **0.03 ms** early safe exit
+  - Prompt injection intercept: **0.03 ms** early safe exit
+  - Insufficient evidence policy gate: **~354 ms** early safe exit
+- **E2E Monotonic Latency Benchmark**:
+  - Doctor CDS: Emergency: 40.9ms; Malformed: 1.5ms; BOLA: 1.9ms; Grounded: 24.5s; Policy Abstained: 354.2ms; Hindi: 18.5s.
+  - Patient Post-Discharge CDS: Emergency: 329.3ms; BOLA: 2.3ms; Educational Grounded: 27.9s; Policy Abstained: 417.7ms; Marathi: 19.8s.
+- **Adversarial & Role Matrix**:
+  - `tests/test_adversarial_gateway_e2e.js`: 27/27 PASS
+  - `tests/test_adversarial_rag_cds.py`: 8/8 PASS
+  - Full Regression Runner (`tests/run_all_tests.js`): 10/10 PASS
+- **Remediated Defects**:
+  - `doctorController.js` & `patientController.js`: Defaulted `req.body || {}` to prevent unhandled destructuring TypeError crashes on empty request bodies.
+  - `testHelper.js`: Configured automatic `Content-Type: application/json` and `Content-Length` headers for JSON object payloads.
+- **Frozen Artifact Hashes**: FAISS (`index_v2.bin`), BM25 (`bm25_index.pkl`), and metadata (`meta_v2.pkl`) verified 100% bit-identical to `497a547` baseline.

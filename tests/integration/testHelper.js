@@ -37,10 +37,27 @@ const DB_CONFIG = {
 
 function httpRequest(options, postData) {
   return new Promise((resolve, reject) => {
+    const headers = { ...(options && options.headers ? options.headers : {}) };
+    let payload = null;
+    if (postData) {
+      if (typeof postData === "object" && !Buffer.isBuffer(postData)) {
+        payload = JSON.stringify(postData);
+        if (!headers["Content-Type"] && !headers["content-type"]) {
+          headers["Content-Type"] = "application/json";
+        }
+      } else {
+        payload = postData;
+      }
+      if (!headers["Content-Length"] && !headers["content-length"]) {
+        headers["Content-Length"] = Buffer.byteLength(payload);
+      }
+    }
+
     const opts = {
       hostname: GATEWAY_HOST,
       port: GATEWAY_PORT,
       ...options,
+      headers
     };
     const req = http.request(opts, (res) => {
       let data = "";
@@ -59,12 +76,8 @@ function httpRequest(options, postData) {
       });
     });
     req.on("error", reject);
-    if (postData) {
-      if (typeof postData === "object" && !Buffer.isBuffer(postData)) {
-        req.write(JSON.stringify(postData));
-      } else {
-        req.write(postData);
-      }
+    if (payload) {
+      req.write(payload);
     }
     req.end();
   });
