@@ -18,7 +18,7 @@
 | **Package ID** | `com.abhyudaya.medai` | **Verified** in `AndroidManifest.xml` & `build.gradle` |
 | **Web Asset Root** | `frontend/dist` -> `frontend/android/app/src/main/assets/public` | **Synchronized via `npx cap sync android`** |
 | **Android Build Verification** | Gradle 8.14.3 + AGP 8.13.0 on OpenJDK 21 | **Verified (`BUILD SUCCESSFUL in 45s`, APK: 4.44 MB)** |
-| **Device Execution** | No physical device or emulator attached via ADB | **Reported Limitation (No physical target)** |
+| **Device Execution** | No physical device or emulator attached via ADB | **BLOCKED (No target attached; static and packaging verified)** |
 
 ---
 
@@ -105,12 +105,18 @@ The repository contains two distinct web application surfaces:
 
 ## 5. Security & Runtime Isolation
 
-1. **Crash Prevention on Missing Credentials**:
-   * Previously, unconfigured Supabase environment variables triggered client initialization exceptions.
-   * Hardened in `frontend/src/lib/supabase.js` with non-blocking local placeholder fallbacks, enabling offline demo mode without crashing.
+1. **Honest Handling of Optional Cloud Providers (`frontend/src/lib/supabase.js`)**:
+   * Removed all fake fallback domains (`https://placeholder-domain-local.supabase.co`) and speculative network calls.
+   * Exports `isSupabaseConfigured` boolean and returns null-safe fallback handlers.
+   * In local prototype mode without Supabase environment variables, the app boots without crashing or firing unroutable DNS requests.
+   * Local demo accounts (`doctor@medai.com`) function locally, while optional cloud-auth operations report an explicit configuration error.
 2. **Gateway Boundary**:
    * For mobile devices connected over Wi-Fi / LAN, `localhost:5000` points to the mobile device itself.
    * In a networked environment, `VITE_API_URL` must be set to the host machine's LAN IP (e.g., `http://192.168.1.X:5000`), never directly to MySQL (3306) or private FastAPI (8000).
+   * For USB-connected testing via ADB reverse proxy:
+     ```powershell
+     adb reverse tcp:5000 tcp:5000
+     ```
 3. **Sensitive Artifacts**:
    * No `local.properties`, keystores, passwords, or machine-specific SDK paths are committed to Git.
    * `build/` and asset outputs remain strictly gitignored.
@@ -133,4 +139,9 @@ cd android
 
 # Output APK location:
 # frontend\android\app\build\outputs\apk\debug\app-debug.apk
+
+# 4. Install onto attached Android device / emulator (when target is connected):
+adb devices -l
+adb install -r app\build\outputs\apk\debug\app-debug.apk
+adb reverse tcp:5000 tcp:5000
 ```

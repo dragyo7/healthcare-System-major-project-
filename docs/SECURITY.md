@@ -41,26 +41,29 @@ The system processes sensitive electronic health records and provides clinical d
 
 ---
 
-## 2. Role-Based Access Control (RBAC) Matrix
+## 2. Role-Based Access Control (RBAC) & Endpoint Authorization Matrix
 
-The backend enforces strict server-side role validation in middleware and controllers. Client-supplied roles in request bodies are ignored or rejected.
+The backend enforces strict server-side role validation in middleware (`authenticateDoctor`, `authenticateReceptionist`, `authenticatePatient`) and controllers. Client-supplied roles in request bodies are ignored or rejected.
 
-| Endpoint / Operation | Allowed Roles | Middleware & Enforcement Rule | Unauthorized Response |
-| :--- | :---: | :--- | :---: |
-| `POST /api/auth/doctor/login` | Any unauthenticated | Authenticates doctor credentials; verifies `role === 'doctor'` | `401 Unauthorized` |
-| `POST /api/auth/receptionist/login`| Any unauthenticated | Authenticates receptionist; verifies `role === 'receptionist'` | `401 Unauthorized` |
-| `POST /api/auth/patient/login` | Any unauthenticated | Authenticates patient; verifies `role === 'patient'` | `401 Unauthorized` |
-| `POST /api/auth/patient/signup`| Unauthenticated self-reg | Auto-forces `role = 'patient'`; rejects `role: 'doctor'\|'receptionist'` | `403 Forbidden` |
-| `POST /api/auth/patient/activate` | Token holder | Redeems single-use cryptographic token atomically | `400 Bad Request` |
-| `GET /api/doctor/patients` | Doctor | Token role must be `'doctor'` | `403 Forbidden` |
-| `POST /api/doctor/discharges` | Doctor | Token role must be `'doctor'`; creates post-discharge orders | `403 Forbidden` |
-| `POST /api/doctor/cds/evaluate` | Doctor | Evaluates clinical decision support with doctor clinical queries | `403 Forbidden` |
-| `POST /api/doctor/prescriptions/confirm-ocr` | Doctor | Explicit clinician sign-off on OCR candidate extractions | `403 Forbidden` |
-| `GET /api/receptionist/*` | Receptionist | Token role must be `'receptionist'`; administrative tasks only | `403 Forbidden` |
-| `GET /api/patient/profile` | Patient | Token role must be `'patient'`; scopes strictly to `req.user.user_id` | `403 Forbidden` |
-| `GET /api/patient/prescriptions` | Patient | Token role must be `'patient'`; returns only caller's prescriptions | `403 Forbidden` |
-| `GET /api/patient/discharges` | Patient | Token role must be `'patient'`; returns only caller's discharges | `403 Forbidden` |
-| `POST /api/patient/cds/educational`| Patient | Restricted post-discharge educational Q&A; no prescription changes | `403 Forbidden` |
+| Endpoint / Operation | Allowed Roles | Enforcement Mechanism | Unauthorized Response | Verified Test File |
+| :--- | :---: | :--- | :---: | :--- |
+| `POST /api/auth/doctor/login` | Unauthenticated | Authenticates doctor credentials; verifies `role === 'doctor'` | `401 Unauthorized` | `test_activation_and_role_mismatch.js` |
+| `POST /api/auth/receptionist/login`| Unauthenticated | Authenticates receptionist; verifies `role === 'receptionist'` | `401 Unauthorized` | `test_activation_and_role_mismatch.js` |
+| `POST /api/auth/patient/login` | Unauthenticated | Authenticates patient; verifies `role === 'patient'` | `401 Unauthorized` | `test_activation_and_role_mismatch.js` |
+| `POST /api/auth/patient/signup`| Unauthenticated | Forces `role = 'patient'`; rejects `role: 'doctor'\|'receptionist'` | `403 Forbidden` | `test_route_authorization_matrix.js` |
+| `POST /api/auth/patient/signup` (ID inject)| Unauthenticated | Rejects injected `user_id` or `patient_id` payloads | `400 Bad Request` | `test_route_authorization_matrix.js` |
+| `POST /api/auth/patient/activate` | Token holder | Redeems single-use cryptographic token atomically | `400 Bad Request` | `test_activation_and_role_mismatch.js` |
+| `GET /api/doctor/patients` | Doctor | Token role must be `'doctor'` | `401 / 403 Forbidden` | `test_route_authorization_matrix.js` |
+| `POST /api/doctor/discharge` | Doctor | Token role must be `'doctor'`; creates post-discharge orders | `401 / 403 Forbidden` | `test_route_authorization_matrix.js` |
+| `POST /api/doctor/cds` | Doctor | Evaluates clinical decision support with doctor clinical queries | `401 / 403 Forbidden` | `test_full_system_multi_role_e2e.js` |
+| `POST /api/doctor/prescriptions/upload-ocr` | Doctor | Multi-part OCR upload with magic-byte validation | `401 / 403 Forbidden` | `test_prescription_ocr_pipeline.js` |
+| `POST /api/doctor/prescriptions/confirm-ocr` | Doctor | Explicit clinician sign-off on OCR candidate extractions | `401 / 403 Forbidden` | `test_route_authorization_matrix.js` |
+| `GET /api/receptionist/patients` | Receptionist | Token role must be `'receptionist'`; administrative tasks only | `401 / 403 Forbidden` | `test_route_authorization_matrix.js` |
+| `GET /api/receptionist/appointments` | Receptionist | Token role must be `'receptionist'`; administrative scheduling | `401 / 403 Forbidden` | `test_receptionist_endpoints.js` |
+| `GET /api/patient/profile` | Patient | Token role must be `'patient'`; scopes strictly to `req.user.user_id` | `401 / 403 Forbidden` | `test_route_authorization_matrix.js` |
+| `GET /api/patient/prescriptions` | Patient | Token role must be `'patient'`; returns only caller's prescriptions | `401 / 403 Forbidden` | `test_route_authorization_matrix.js` |
+| `GET /api/patient/discharge` | Patient | Token role must be `'patient'`; returns only caller's active discharge | `401 / 403 Forbidden` | `test_route_authorization_matrix.js` |
+| `POST /api/patient/cds` | Patient | Restricted post-discharge educational Q&A; no prescription changes | `401 / 403 Forbidden` | `test_patient_and_discharge.js` |
 
 ---
 
@@ -68,7 +71,7 @@ The backend enforces strict server-side role validation in middleware and contro
 
 To prevent horizontal privilege escalation between patients:
 1. **Server-Derived Identity**: All patient database operations derive patient identity exclusively from the authenticated JWT claims (`req.user.user_id`).
-2. **Client Parameter Ignore/Sanitization**: Any client payload attempting to inject `patient_id`, `user_id`, or owner IDs is explicitly rejected or ignored by the controller.
+2. **Client Parameter Ignore/Sanitization**: Any client payload attempting to inject `patient_id`, `user_id`, or owner IDs in query parameters or request bodies is explicitly ignored or rejected by the controller.
 3. **Database Scoping Query Pattern**:
    ```sql
    -- Standard query pattern for patient data isolation
@@ -78,8 +81,9 @@ To prevent horizontal privilege escalation between patients:
    WHERE p.user_id = ?; -- Bound strictly to req.user.user_id
    ```
 4. **Cross-Patient Isolation Test Evidence**:
-   - Deterministic synthetic test suites (`test_patient_and_discharge.js`, `test_full_system_multi_role_e2e.js`) verify that Patient A cannot query, update, or inspect records belonging to Patient B.
-   - Modifying route parameters or query parameters yields either `403 Forbidden` or filters exclusively to the caller's records.
+   - `tests/integration/test_route_authorization_matrix.js` verifies that Patient A querying `GET /api/patient/profile?patient_id=<Patient_B_ID>` receives strictly Patient A's own profile and cannot inspect Patient B's records.
+   - `GET /api/patient/prescriptions?patient_id=<Patient_B_ID>` filters strictly to Patient A's own prescription regimens.
+   - Deterministic synthetic test suites (`test_patient_and_discharge.js`, `test_full_system_multi_role_e2e.js`) verify that cross-patient access yields either `403 Forbidden` or zero cross-patient records.
 
 ---
 

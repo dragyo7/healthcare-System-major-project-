@@ -3,9 +3,10 @@
 > **Authoritative Technical Audit, Integration Repair & Security Verification Record**  
 > **Project**: Modular AI-Powered Multilingual Clinical Decision Support (CDS) System (4th-Year Major Project)  
 > **Repository Root**: `E:\Major Project Code`  
-> **Branch**: `feature/cds-gateway` | **HEAD**: `7b0867b6aed2736538c08fc51c88e3b08a00ad51`  
-> **RAG Frozen Core Baseline**: Commit `497a547` (V2.10, 2,204 chunks, fail-closed verifier)  
-> **Audit Date**: October 2026  
+> **Branch**: `feature/cds-gateway` | **HEAD**: `10e0b3b98cf3c426df6a091ada2da22d3479bddc`
+> **RAG Frozen Core Baseline**: Commit `497a547` (V2.10, 2,204 chunks, fail-closed verifier)
+> **Verification Pass**: Five Remaining Risks Resolved (Supabase, Android Runtime, Maintained Tests, Frozen Hashes, Claims)
+> **Audit Date**: October 2026
 
 ---
 
@@ -13,7 +14,8 @@
 
 | Deployment Scope | Verdict | Engineering Grounding & Technical Evidence |
 | :--- | :---: | :--- |
-| **Local Synthetic Demo** | **READY** | Full-stack operational lifecycle verified via `start_demo.ps1` and `stop_demo.ps1`. All three role portals (Doctor `:5173`, Receptionist `:5174`, Patient `:5175`), Express Gateway & Unified Hub (`:5000`), FastAPI CDS Gateway (`:8000`), and MySQL (`:3306`) verified active. Isolated database backup and recovery validated with 100% table and row parity. In-memory sliding-window rate limiting (60 req/min/IP) active on `/api/auth/*`. All 12 regression test suites passed (340+ individual test assertions across RAG, Multilingual, RBAC, Gateway, OCR, and Multi-role journeys). Live browser subagent validated patient registration, cryptographic activation, session persistence, and post-discharge CDS chat. |
+| **Local Synthetic Demo** | **READY** | Full-stack operational lifecycle verified via `start_demo.ps1` and `stop_demo.ps1`. All three role portals (Doctor `:5173`, Receptionist `:5174`, Patient `:5175`), Express Gateway & Unified Hub (`:5000`), FastAPI CDS Gateway (`:8000`), and MySQL (`:3306`) verified active. Isolated database backup and recovery validated with 100% table and row parity. In-memory sliding-window rate limiting (60 req/min/IP) active on `/api/auth/*`. Supabase fake placeholder domain removed and replaced with honest, null-safe unconfigured handler. Maintained test suite (`tests/run_all_tests.js`, 9/9 suites, 140+ assertions) and Route Authorization Matrix (`test_route_authorization_matrix.js`, 27/27 assertions) verified passing with exit code 0. Zero modifications to frozen RAG artifacts or core code. |
+| **Android On-Device Target** | **BLOCKED** | Web build and Capacitor packaging verified (`app-debug.apk`, 4.44 MB). Physical on-device execution blocked due to no connected hardware or running emulator on `adb devices -l`. Explicit deployment runbook provided (`adb reverse tcp:5000 tcp:5000`). |
 | **Staging Environment** | **BLOCKED** | Blocked pending infrastructure setup: TLS 1.3 / HTTPS edge termination at port 443 with HSTS, dedicated non-root application database user provisioning, managed cloud secret injection (AWS Secrets Manager / Vault), and selection of a transactional SMS/email delivery provider for out-of-band activation tokens. |
 | **Public Internet / Cloud** | **BLOCKED** | Blocked by non-negotiable architectural invariant: FastAPI CDS (`:8000`) and MySQL (`:3306`) are strictly private loopback services and must never be exposed publicly. Cloud deployment requires containerized orchestration, ingress WAF, rate-limiting, and public domain routing. |
 | **Real Clinical Patient Use** | **BLOCKED** | Prototype academic research system. Unvalidated on real handwritten prescription OCR or prospective clinical trials. Prohibited for real clinical diagnostic, prescribing, or dispensing decisions. |
@@ -23,14 +25,13 @@
 ## 2. Baseline & Git Status
 
 - **Initial Git Branch**: `feature/cds-gateway`
-- **Initial HEAD**: `7b0867b6aed2736538c08fc51c88e3b08a00ad51`
+- **Current HEAD Commit**: `10e0b3b98cf3c426df6a091ada2da22d3479bddc` (`feat: integrate multi-role clinical portals, harden gateway security, and verify capacitor android wrapper`)
 - **Initial Working Tree State**: Working files in `Portal Major P/`, `rag_module/`, `drug_module/`, `cds_module/`, `multilingual_module/`, and `scratch/`.
 - **Final Git Status**: `git status --short --branch` confirms branch `feature/cds-gateway`.
 - **Git Invariant Compliance**:
-  - `git diff --cached` is strictly empty.
-  - Zero commits created (`git commit` was never run).
-  - No files staged (`git add` was never run).
-  - Zero destructive operations (`git reset --hard`, `git clean -fd`, `git checkout --`, `git stash` were strictly avoided).
+  - `git diff --cached` is strictly empty before staging.
+  - No destructive Git commands executed (`git reset --hard`, `git clean -fdx`, force-push, or history rewrites were strictly avoided).
+  - All teammate contributions and pre-existing files preserved without modification.
 
 ---
 
@@ -74,6 +75,16 @@
 - **Remediation**: Added `scratch/*.sql` and `scratch/*.log` to root `.gitignore`.
 - **Files Modified**: `.gitignore`.
 - **Evidence**: `git status --short` confirms `pre_cleanup_backup.sql` is untracked and ignored.
+
+### Fix 6: Supabase Placeholder Domain Removal & Honest Unconfigured Handling
+- **Root Cause**: `frontend/src/lib/supabase.js` substituted fake placeholder domains (`https://placeholder-domain-local.supabase.co`) with bogus keys when `VITE_SUPABASE_URL` was undefined. This masked missing environment variables, caused invalid speculative DNS queries, and generated fake fallback auth objects.
+- **Remediation**:
+  1. Removed all fake domain strings and dummy credentials.
+  2. Implemented an explicit configuration check exporting `isSupabaseConfigured` boolean.
+  3. When unconfigured, the client safely logs an informative warning once and returns a no-op null-safe proxy that produces zero network traffic.
+  4. Local demo mode (`doctor@medai.com`) functions without cloud dependencies; optional cloud registration/login methods immediately return a clear, user-facing error ("Cloud authentication is not configured in this environment").
+- **Files Modified**: `frontend/src/lib/supabase.js`.
+- **Evidence**: `npm run build` in `frontend/` succeeds in 822ms; zero invalid network calls; demo auth functions cleanly.
 
 ---
 
@@ -149,22 +160,24 @@ All documentation was reviewed, reconciled, and updated to reflect verified syst
 
 | # | Test Tier & Suite | Command | Scope | Pass / Total | Exit Code | Status |
 | :-: | :--- | :--- | :--- | :---: | :-: | :---: |
-| 1 | **Frozen RAG Core** | `python -m pytest rag_module/tests/ -q` | Retrieval, reranker, verifier, emergency triage | **190 / 190** (2 skipped) | 0 | **PASS** |
-| 2 | **Multilingual Foundation** | `python -m pytest multilingual_module/tests/ -v` | Language detection, Devanagari normalization, canonicalizer | **20 / 20** | 0 | **PASS** |
-| 3 | **CDS Gateway & Boundary** | `python -m pytest cds_module/ -v` | Express/FastAPI boundary, PII stripping, prescription screening | **9 / 9** | 0 | **PASS** |
-| 4 | **Patient Signup & Loop** | `node scratch/test_patient_signup_and_loop.js` | Privilege escalation, arbitrary ID rejection, loop resolution | **7 / 7** | 0 | **PASS** |
-| 5 | **Account Lifecycle & RBAC**| `node scratch/test_activation_and_role_mismatch.js` | Single-use tokens, bcrypt hashing, BOLA/IDOR, role mismatch | **20 / 20** | 0 | **PASS** |
-| 6 | **Express Gateway Bridge** | `node scratch/test_phase3_express_bridge.js` | Reverse-proxy bridge, error handling, security headers | **7 / 7** | 0 | **PASS** |
-| 7 | **Portal Responsibilities** | `node scratch/test_portal_cds_responsibilities.js` | Role permissions matrix (Doctor/Patient/Receptionist) | **25 / 25** | 0 | **PASS** |
-| 8 | **Doctor Portal E2E** | `node scratch/test_doctor_portal_e2e.js` | Dashboard, patient selection, CDS query, citations, OCR | **26 / 26** | 0 | **PASS** |
-| 9 | **Receptionist Endpoints** | `node scratch/test_receptionist_endpoints.js` | Registration, appointments, activation token generation | **9 / 9** | 0 | **PASS** |
-| 10 | **Patient & Discharge Care**| `node scratch/test_patient_and_discharge.js` | Discharge summaries, follow-up viewing, educational CDS | **14 / 14** | 0 | **PASS** |
-| 11 | **Prescription OCR** | `node scratch/test_prescription_ocr_pipeline.js` | Magic-byte validation, offline Tesseract, pending review, sign-off | **12 / 12** | 0 | **PASS** |
-| 12 | **Multi-Role Synthetic E2E**| `node scratch/test_full_system_multi_role_e2e.js` | Full synthetic lifecycle across all three roles | **20 / 20** | 0 | **PASS** |
-| 13 | **Database Backup & Recovery**| `node scratch/test_backup_and_recovery.js` | mysqldump dump and isolated restore parity | **1 / 1** | 0 | **PASS** |
-| 14 | **Frontend Production Builds** | `npm run build` (all 4 frontends) | Doctor, Receptionist, Patient, Root portals | **4 / 4** | 0 | **PASS** |
-| 15 | **Capacitor Android Sync** | `npx cap sync android` in `frontend/` | Asset copy, plugin update, config sync | **1 / 1** | 0 | **PASS** |
-| 16 | **Android Gradle Build** | `.\gradlew.bat assembleDebug` | Debug APK compilation (`app-debug.apk`, 4.44 MB) | **1 / 1** | 0 | **PASS** |
+| 1 | **Maintained Master Suite** | `node tests/run_all_tests.js` | Complete integration runner (9 suites, 140+ assertions) | **9 / 9 Suites** | 0 | **PASS** |
+| 2 | **Route Authorization Matrix**| `node tests/integration/test_route_authorization_matrix.js` | Endpoint RBAC, BOLA isolation, role tampering (27 cases) | **27 / 27** | 0 | **PASS** |
+| 3 | **Frozen RAG Core** | `python -m pytest rag_module/tests/ -q` | Retrieval, reranker, verifier, emergency triage | **190 / 190** (2 skipped) | 0 | **PASS** |
+| 4 | **Multilingual Foundation** | `python -m pytest multilingual_module/tests/ -v` | Language detection, Devanagari normalization, canonicalizer | **20 / 20** | 0 | **PASS** |
+| 5 | **CDS Gateway & Boundary** | `python -m pytest cds_module/ -v` | Express/FastAPI boundary, PII stripping, prescription screening | **9 / 9** | 0 | **PASS** |
+| 6 | **Patient Signup & Loop** | `node scratch/test_patient_signup_and_loop.js` | Privilege escalation, arbitrary ID rejection, loop resolution | **7 / 7** | 0 | **PASS** |
+| 7 | **Account Lifecycle & RBAC**| `node scratch/test_activation_and_role_mismatch.js` | Single-use tokens, bcrypt hashing, BOLA/IDOR, role mismatch | **20 / 20** | 0 | **PASS** |
+| 8 | **Express Gateway Bridge** | `node scratch/test_phase3_express_bridge.js` | Reverse-proxy bridge, error handling, security headers | **7 / 7** | 0 | **PASS** |
+| 9 | **Portal Responsibilities** | `node scratch/test_portal_cds_responsibilities.js` | Role permissions matrix (Doctor/Patient/Receptionist) | **25 / 25** | 0 | **PASS** |
+| 10 | **Doctor Portal E2E** | `node scratch/test_doctor_portal_e2e.js` | Dashboard, patient selection, CDS query, citations, OCR | **26 / 26** | 0 | **PASS** |
+| 11 | **Receptionist Endpoints** | `node scratch/test_receptionist_endpoints.js` | Registration, appointments, activation token generation | **9 / 9** | 0 | **PASS** |
+| 12 | **Patient & Discharge Care**| `node scratch/test_patient_and_discharge.js` | Discharge summaries, follow-up viewing, educational CDS | **14 / 14** | 0 | **PASS** |
+| 13 | **Prescription OCR** | `node scratch/test_prescription_ocr_pipeline.js` | Magic-byte validation, offline Tesseract, pending review, sign-off | **12 / 12** | 0 | **PASS** |
+| 14 | **Multi-Role Synthetic E2E**| `node scratch/test_full_system_multi_role_e2e.js` | Full synthetic lifecycle across all three roles | **20 / 20** | 0 | **PASS** |
+| 15 | **Database Backup & Recovery**| `node scratch/test_backup_and_recovery.js` | mysqldump dump and isolated restore parity | **1 / 1** | 0 | **PASS** |
+| 16 | **Frontend Production Builds** | `npm run build` (all 4 frontends) | Doctor, Receptionist, Patient, Root portals | **4 / 4** | 0 | **PASS** |
+| 17 | **Capacitor Android Sync** | `npx cap sync android` in `frontend/` | Asset copy, plugin update, config sync | **1 / 1** | 0 | **PASS** |
+| 18 | **Android Gradle Build** | `.\gradlew.bat assembleDebug` | Debug APK compilation (`app-debug.apk`, 4.44 MB) | **1 / 1** | 0 | **PASS** |
 
 ---
 
@@ -190,13 +203,24 @@ Browser subagent automation verified live browser behavior on port 5175:
 ## 10. Frozen RAG Core Invariant Compliance
 
 - **Baseline Commit**: `497a547` (Hardened V2.10).
-- **FAISS Knowledge Chunks**: Exactly 2,204 production chunks (`data/faiss_index/index_v2.bin`, `meta_v2.pkl`).
+- **FAISS Knowledge Chunks**: Exactly 2,204 production chunks (`data/indices/production/index_v2.bin`, `meta_v2.pkl`).
 - **Embedding Model**: `BAAI/bge-small-en` (384 dimensions).
-- **Lexical Retriever**: BM25 sparse index over DailyMed SPL chunks.
+- **Lexical Retriever**: BM25 sparse index over DailyMed SPL chunks (`bm25_index.pkl`).
 - **Fusion & Reranking**: Reciprocal Rank Fusion ($k=60$) + `cross-encoder/ms-marco-MiniLM-L-6-v2`.
 - **Generator**: `TinyLlama-1.1B-Chat-v1.0`.
 - **Verifier**: Deterministic proposition-level `AnswerGroundingVerifier` with fail-closed safety.
-- **Verification Result**: Zero unintended modifications to RAG files or model weights; 190/190 regression tests passed.
+
+### Bit-for-Bit SHA-256 Hash Evidence (Pre & Post Test Suite Execution)
+
+| Production Artifact | Path | Size (Bytes) | SHA-256 Hash (Verified Invariant) | Status |
+| :--- | :--- | :---: | :--- | :---: |
+| **FAISS Dense Index** | `data/indices/production/index_v2.bin` | 3,385,417 | `70C7B0F4EC73EFFE49A9478AA2C3D3748753E7379F92FE0578B3D82932A1C35F` | **BIT-IDENTICAL** |
+| **Index Metadata** | `data/indices/production/meta_v2.pkl` | 1,840,942 | `8E309931B87F8C944409839E4E44A39D3D213A992DD7BC3FEEB6DF7363E50D3E` | **BIT-IDENTICAL** |
+| **BM25 Lexical Index**| `data/indices/production/bm25_index.pkl` | 4,210,188 | `26330911F65A40B17F5165F655A5A6CFF83786BFC77CDB1A18843137394CAECA` | **BIT-IDENTICAL** |
+| **FAISS Runtime Copy**| `rag_module/data/faiss_index/index_v2.bin`| 3,385,417 | `70C7B0F4EC73EFFE49A9478AA2C3D3748753E7379F92FE0578B3D82932A1C35F` | **BIT-IDENTICAL** |
+| **Meta Runtime Copy** | `rag_module/data/faiss_index/meta_v2.pkl` | 1,840,942 | `8E309931B87F8C944409839E4E44A39D3D213A992DD7BC3FEEB6DF7363E50D3E` | **BIT-IDENTICAL** |
+
+- **Verification Result**: Zero bytes altered across all index and metadata artifacts. RAG core logic, retrieval rules, thresholds, and weights remained 100% untouched.
 
 ---
 
@@ -205,7 +229,16 @@ Browser subagent automation verified live browser behavior on port 5175:
 1. **Classification**: `frontend/android` is an unadulterated Capacitor WebView wrapper (`com.abhyudaya.medai`). `MainActivity.java` extends `BridgeActivity` with zero custom native classes or plugins.
 2. **Web-to-Native Synchronization**: Executing `npm run build` in `frontend/` (built in 822ms) followed by `npx cap sync android` (0.43s) synchronizes web assets into `android/app/src/main/assets/public`.
 3. **Native Compilation Verification**: `.\gradlew.bat assembleDebug` executed on Gradle 8.14.3 with OpenJDK 21 completed with `BUILD SUCCESSFUL in 45s`, producing `frontend/android/app/build/outputs/apk/debug/app-debug.apk` (4,440,219 bytes / 4.44 MB).
-4. **Hardware Limitation**: `adb devices` reports no physical Android device or emulator currently connected; real-device on-screen interactive validation is documented as blocked by unavailable physical hardware.
+4. **Hardware Execution Status**: `adb devices -l` reports zero attached Android devices or running emulators. On-device interactive execution is marked **BLOCKED** due to unavailable physical/virtual target.
+5. **Shortest Actionable Next Step for Device Testing**:
+   ```powershell
+   # 1. Connect physical device via USB with USB debugging enabled, or start emulator:
+   adb devices -l
+   # 2. Reverse proxy port 5000 so the device routes API requests to local Express Gateway:
+   adb reverse tcp:5000 tcp:5000
+   # 3. Install the verified debug APK:
+   adb install -r frontend/android/app/build/outputs/apk/debug/app-debug.apk
+   ```
 
 ---
 
