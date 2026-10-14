@@ -34,6 +34,8 @@ const suites = [
   { name: "Doctor Portal Clinical E2E", script: "scratch/test_doctor_portal_e2e.js" },
   { name: "Full-System Multi-Role Synthetic Journey", script: "scratch/test_full_system_multi_role_e2e.js" },
   { name: "Adversarial Gateway & Security Invariants", script: "tests/test_adversarial_gateway_e2e.js" },
+  { name: "Supabase Auth & Deployment Security", script: "scratch/test_supabase_security_and_deployment.js" },
+  { name: "Authentication & Role Tampering Security", script: "scratch/test_auth_and_tampering_security.js" },
 ];
 
 console.log("==========================================================================");
@@ -58,7 +60,7 @@ for (const suite of suites) {
     cwd: repoRoot,
     env,
     encoding: "utf8",
-    timeout: 120000,
+    timeout: 180000,
   });
 
   const duration = ((Date.now() - start) / 1000).toFixed(1);

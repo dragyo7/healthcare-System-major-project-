@@ -128,32 +128,26 @@ python -m uvicorn rag_module.api:app --host 127.0.0.1 --port 8000
 * Health Endpoint: `http://127.0.0.1:8000/health`
 * CDS Endpoint: `http://127.0.0.1:8000/cds/evaluate`
 
-### D. Run Doctor React Frontend (Port 5173)
+### D. Run Unified Healthcare Web Application (Port 5173)
 ```powershell
-cd "Portal Major P/Bhumi/Doctor portal/frontend"
+cd "frontend"
 npm run dev
 ```
-* Web Portal: `http://localhost:5173`
-* Synthetic Doctor Login: `doctor@gmail.com` [credentials redacted]
+* Primary Web Application Entry URL: `http://localhost:5173`
+* Unified Login: `http://localhost:5173/login`
+* Single-Use Account Activation: `http://localhost:5173/activate`
 
-### E. Run Receptionist React Frontend (Port 5174)
+### E. One-Command Master Startup Orchestrator
 ```powershell
-cd "Portal Major P/Ketki/receptionist_frontend"
-npm run dev
+# Run from repository root
+npm start
+# OR
+powershell -ExecutionPolicy Bypass -File ./scripts/start_platform.ps1
 ```
-* Web Portal: `http://localhost:5174`
-* Synthetic Receptionist Login: `receptionist@gmail.com` [credentials redacted]
-
-### F. Run Patient React Frontend (Port 5175)
-```powershell
-cd "Portal Major P/patient_frontend"
-npm run dev
-```
-* Web Portal: `http://localhost:5175`
-* Synthetic Patient Login: `aarav@gmail.com` [credentials redacted]
-* Account Activation URL: `http://localhost:5175/activate`
+Automatically verifies, starts, and health-checks MySQL (3306), FastAPI CDS Gateway (8000), Express EHR Backend (5000), and Unified Frontend (5173).
 
 ---
+
 
 ## 6. How to Test (Full Regression Suite)
 
@@ -243,3 +237,6 @@ npm run dev
 * [`docs/PROJECT_CONTEXT.md`](file:///E:/Major%20Project%20Code/docs/PROJECT_CONTEXT.md): Master engineering manual for developers & AI coding agents.
 * [`docs/DOCTOR_PORTAL_E2E_VERIFICATION.md`](file:///E:/Major%20Project%20Code/docs/DOCTOR_PORTAL_E2E_VERIFICATION.md): Comprehensive Doctor portal E2E verification report.
 * [`docs/MULTILINGUAL_ARCHITECTURE.md`](file:///E:/Major%20Project%20Code/docs/MULTILINGUAL_ARCHITECTURE.md): Cross-cutting multilingual architecture specification.
+* [`docs/ANDROID_EMULATOR_ACCEPTANCE_REPORT.md`](file:///E:/Major%20Project%20Code/docs/ANDROID_EMULATOR_ACCEPTANCE_REPORT.md): Canonical Android 15 emulator acceptance and mobile security audit report.
+* [`docs/SUPABASE_DEPLOYMENT_READINESS_REPORT.md`](file:///E:/Major%20Project%20Code/docs/SUPABASE_DEPLOYMENT_READINESS_REPORT.md): Canonical Supabase authentication, security boundary, and deployment readiness report.
+

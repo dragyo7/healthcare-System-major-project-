@@ -25,14 +25,17 @@ The system connects three role-specific portals (Doctor, Patient, Receptionist) 
 ## 2. Current Architecture
 
 ```text
-┌───────────────────────┐ ┌───────────────────────────┐ ┌────────────────────────┐
-│ Doctor React Frontend │ │ Receptionist Frontend     │ │ Patient React Frontend │
-│ (Port 5173 - Bhumi)   │ │ (Port 5174 - Ketki Adapt) │ │ (Port 5175 - New)      │
-└───────────┬───────────┘ └─────────────┬─────────────┘ └───────────┬────────────┘
-            │                           │                           │
-            └───────────────────────────┼───────────────────────────┘
-                                        │ HTTP (localhost:5000/api/*)
-                                        ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                    UNIFIED CDSS REACT WEB APPLICATION                        │
+│                   (Port 5173 - Canonical Root Frontend)                      │
+│  • /login — Unified 3-Role Authentication Entry Point                         │
+│  • /doctor/* — Clinician CDS Assistant, Patient Dossier & Prescriptions      │
+│  • /patient/* — Post-Discharge Recovery & Grounded Health Assistant          │
+│  • /receptionist/* — Front Desk Intake, Directory & Scheduling               │
+│  • /activate — Single-Use Cryptographic Account Activation                   │
+└──────────────────────────────────────┬───────────────────────────────────────┘
+                                       │ HTTP (localhost:5000/api/*)
+                                       ▼
                    ┌─────────────────────────────────────────┐
                    │          Express API Gateway            │  (Node.js on Port 5000)
                    │  • JWT Bearer Authentication (RBAC)     │
@@ -244,12 +247,17 @@ The current baseline is proven by the following automated test executions in the
 * **Receptionist Portal**: `http://localhost:5174` (Synthetic receptionist account: `receptionist@gmail.com` [credentials redacted from docs])
 * **Patient Portal**: `http://localhost:5175` (Synthetic patient account: `aarav@gmail.com` [credentials redacted from docs])
 * **Patient Account Activation**: `http://localhost:5175/activate` (Single-use token setup)
+* **Android Mobile Client (Capacitor)**: `com.abhyudaya.medai` on Pixel 8 (`emulator-5554`, Android 15 API 35)
 * **Express API Gateway**: `http://localhost:5000`
 * **FastAPI CDS Gateway**: `http://127.0.0.1:8000`
 * **MySQL Server**: `127.0.0.1:3306` (database: `rag_healthcare`, migrations 001–004 applied)
 
 ---
 
-## 14. Future Roadmap Summary
+## 14. Authoritative Verification Reports
 
-* **Phase 9**: Production Hardening, Containerized Deployment (`docker-compose.yml`), CI/CD Pipeline.
+* **Doctor Portal E2E**: [`docs/DOCTOR_PORTAL_E2E_VERIFICATION.md`](file:///E:/Major%20Project%20Code/docs/DOCTOR_PORTAL_E2E_VERIFICATION.md)
+* **Android Emulator Acceptance**: [`docs/ANDROID_EMULATOR_ACCEPTANCE_REPORT.md`](file:///E:/Major%20Project%20Code/docs/ANDROID_EMULATOR_ACCEPTANCE_REPORT.md)
+* **Supabase & Deployment Readiness**: [`docs/SUPABASE_DEPLOYMENT_READINESS_REPORT.md`](file:///E:/Major%20Project%20Code/docs/SUPABASE_DEPLOYMENT_READINESS_REPORT.md)
+
+

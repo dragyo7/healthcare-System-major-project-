@@ -251,28 +251,39 @@ def main():
     warmup_res = profile_query(pipeline, BENCHMARK_QUERIES[0])
     print(f"Warm-up complete: {warmup_res['timings_ms']['total_pipeline_ms']:.1f} ms")
 
-    # Measured runs
     print("\nRunning measured benchmark queries across representative clinical categories...")
-    results_by_stage: Dict[str, List[float]] = {}
     detailed_runs = []
 
     for item in BENCHMARK_QUERIES:
         print(f"Profiling [{item['type']}]: '{item['query'][:50]}...'")
         res = profile_query(pipeline, item)
         detailed_runs.append(res)
-        for stage, dur in res["timings_ms"].items():
-            if stage not in results_by_stage:
-                results_by_stage[stage] = []
-            results_by_stage[stage].append(dur)
 
-    print("\n==========================================================================")
-    print("                     STAGE LATENCY BREAKDOWN (ms)                         ")
-    print("==========================================================================")
-    summary_stats = {}
-    for stage, durs in results_by_stage.items():
-        stats = calculate_stats(durs)
-        summary_stats[stage] = stats
-        print(f"{stage:<30} | count={stats['count']:<2} | p50={stats['p50']:>8.2f} | p90={stats['p90']:>8.2f} | max={stats['max']:>8.2f}")
+    # Separate into rigorous statistical cohorts:
+    # Cohort 1: Full Generation Queries (where generator executes) -> Strictly Additive
+    # Cohort 2: Fast-Path Queries (Emergency Triage and Policy Abstention) -> Non-generation
+    full_gen_runs = [r for r in detailed_runs if "generator_ms" in r["timings_ms"]]
+    fast_exit_runs = [r for r in detailed_runs if "generator_ms" not in r["timings_ms"]]
+
+    def aggregate_cohort(runs: List[Dict[str, Any]], cohort_name: str):
+        print(f"\n==========================================================================")
+        print(f"         {cohort_name.upper()} (N={len(runs)}) - MONOTONIC STAGE TIMINGS (ms)")
+        print(f"==========================================================================")
+        stage_map: Dict[str, List[float]] = {}
+        for r in runs:
+            for s, dur in r["timings_ms"].items():
+                if s not in stage_map:
+                    stage_map[s] = []
+                stage_map[s].append(dur)
+        cohort_stats = {}
+        for s, durs in stage_map.items():
+            stats = calculate_stats(durs)
+            cohort_stats[s] = stats
+            print(f"{s:<30} | count={stats['count']:<2} | p50={stats['p50']:>8.2f} | p90={stats['p90']:>8.2f} | max={stats['max']:>8.2f}")
+        return cohort_stats
+
+    full_gen_stats = aggregate_cohort(full_gen_runs, "Cohort 1: Full Generation Pipeline (Additive)")
+    fast_exit_stats = aggregate_cohort(fast_exit_runs, "Cohort 2: Early Safe Fast-Path Exits")
 
     output_file = REPO_ROOT / "tests" / "benchmark_pipeline_stage_timings.json"
     with open(output_file, "w", encoding="utf-8") as f:
@@ -285,7 +296,8 @@ def main():
                 "reranker": "cross-encoder/ms-marco-MiniLM-L-6-v2",
                 "embeddings": "BAAI/bge-small-en"
             },
-            "summary_stats": summary_stats,
+            "cohort_1_full_generation_stats": full_gen_stats,
+            "cohort_2_fast_exit_stats": fast_exit_stats,
             "detailed_runs": detailed_runs
         }, f, indent=2)
 

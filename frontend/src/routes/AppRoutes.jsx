@@ -1,68 +1,90 @@
 import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
-import Splash from "../pages/Common/Splash";
-import Home from "../pages/Common/Home";
+// Auth & Access
 import Login from "../pages/Auth/Login";
+import Activate from "../pages/Auth/Activate";
 import Signup from "../pages/Auth/Signup";
 import ForgotPassword from "../pages/Auth/ForgotPassword";
-import EmailVerification from "../pages/Auth/EmailVerification";
 import ResetPassword from "../pages/Auth/ResetPassword";
-import DoctorDashboard from "../pages/Doctor/Dashboard";
-import PatientDashboard from "../pages/Patient/Dashboard";
-import NotFound from "../pages/Common/NotFound";
-import Unauthorized from "../pages/Common/Unauthorized";
-import ServerError from "../pages/Common/ServerError";
 
+// Route Guards & Layouts
 import ProtectedRoute from "../components/shared/ProtectedRoute";
 import GuestRoute from "../components/shared/GuestRoute";
 import RoleGuard from "../components/shared/RoleGuard";
 import DashboardLayout from "../layouts/DashboardLayout";
-import { ROUTES } from "../constants/routes";
 
-// Page Imports
-import Appointments from "../pages/Common/Appointments";
-import Settings from "../pages/Common/Settings";
-import Profile from "../pages/Common/Profile";
-import Patients from "../pages/Doctor/Patients";
-import Reports from "../pages/Doctor/Reports";
-import Records from "../pages/Patient/Records";
-import Vitals from "../pages/Patient/Vitals";
-import Prescription from "../pages/Patient/Prescription";
-import Chat from "../pages/Patient/Chat";
-import DrugChecker from "../pages/Patient/DrugChecker";
-import CDSAssistant from "../pages/Common/CDSAssistant";
-import Knowledge from "../pages/Doctor/Knowledge";
+// Doctor Workspace
+import DoctorDashboard from "../pages/Doctor/Dashboard";
+import DoctorPatients from "../pages/Doctor/Patients";
+import DoctorCDS from "../pages/Doctor/CDS";
+import DoctorPrescriptions from "../pages/Doctor/Prescriptions";
+import DoctorDischarge from "../pages/Doctor/Discharge";
+import DoctorAppointments from "../pages/Doctor/Appointments";
+import DoctorProfile from "../pages/Doctor/Profile";
+
+// Patient Workspace
+import PatientDashboard from "../pages/Patient/Dashboard";
+import PatientDischarge from "../pages/Patient/Discharge";
+import PatientAssistant from "../pages/Patient/Assistant";
+import PatientPrescriptions from "../pages/Patient/Prescriptions";
+import PatientMedicalHistory from "../pages/Patient/MedicalHistory";
+import PatientProfile from "../pages/Patient/Profile";
+
+// Receptionist Workspace
+import ReceptionistDashboard from "../pages/Receptionist/Dashboard";
+import ReceptionistPatients from "../pages/Receptionist/Patients";
+import ReceptionistAppointments from "../pages/Receptionist/Appointments";
+import ReceptionistDoctors from "../pages/Receptionist/Doctors";
+
+// Error Pages
+import NotFound from "../pages/Common/NotFound";
+import Unauthorized from "../pages/Common/Unauthorized";
+import ServerError from "../pages/Common/ServerError";
+
+function RootRedirect() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  const role = (user.role || "").toLowerCase();
+  if (role === "doctor") return <Navigate to="/doctor" replace />;
+  if (role === "patient") return <Navigate to="/patient" replace />;
+  if (role === "receptionist") return <Navigate to="/receptionist" replace />;
+
+  return <Navigate to="/login" replace />;
+}
 
 export default function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Onboarding & Splash */}
-        <Route path="/" element={<Splash />} />
-        <Route path="/home" element={<Home />} />
+        {/* Unified Intelligent Root Entry Point */}
+        <Route path="/" element={<RootRedirect />} />
 
-        {/* Top-Level Direct CDS Assistant Access (Public / Demo Demo Evaluation) */}
+        {/* Public & Guest Authentication Entry Points */}
         <Route
-          path="/cds"
-          element={
-            <DashboardLayout role="patient">
-              <CDSAssistant />
-            </DashboardLayout>
-          }
-        />
-
-        {/* Auth Pages wrapped in GuestRoute */}
-        <Route
-          path={ROUTES.LOGIN}
+          path="/login"
           element={
             <GuestRoute>
               <Login />
             </GuestRoute>
           }
         />
+        <Route path="/activate" element={<Activate />} />
         <Route
-          path={ROUTES.SIGNUP}
+          path="/signup"
           element={
             <GuestRoute>
               <Signup />
@@ -70,7 +92,7 @@ export default function AppRoutes() {
           }
         />
         <Route
-          path={ROUTES.FORGOT_PASSWORD}
+          path="/forgot-password"
           element={
             <GuestRoute>
               <ForgotPassword />
@@ -78,16 +100,7 @@ export default function AppRoutes() {
           }
         />
         <Route
-          path={ROUTES.VERIFY_EMAIL}
-          element={
-            <GuestRoute>
-              <EmailVerification />
-            </GuestRoute>
-          }
-        />
-
-        <Route
-          path={ROUTES.RESET_PASSWORD}
+          path="/reset-password"
           element={
             <ProtectedRoute>
               <ResetPassword />
@@ -95,7 +108,9 @@ export default function AppRoutes() {
           }
         />
 
-        {/* Protected Doctor Routes */}
+        {/* ------------------------------------------------------------- */}
+        {/* DOCTOR WORKSPACE: CLINICAL CDS & EHR MANAGEMENT               */}
+        {/* ------------------------------------------------------------- */}
         <Route
           path="/doctor"
           element={
@@ -109,36 +124,24 @@ export default function AppRoutes() {
           }
         />
         <Route
-          path="/doctor/cds-assistant"
-          element={
-            <ProtectedRoute>
-              <RoleGuard allowedRoles={["doctor"]}>
-                <DashboardLayout role="doctor">
-                  <CDSAssistant />
-                </DashboardLayout>
-              </RoleGuard>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/doctor/appointments"
-          element={
-            <ProtectedRoute>
-              <RoleGuard allowedRoles={["doctor"]}>
-                <DashboardLayout role="doctor">
-                  <Appointments />
-                </DashboardLayout>
-              </RoleGuard>
-            </ProtectedRoute>
-          }
-        />
-        <Route
           path="/doctor/patients"
           element={
             <ProtectedRoute>
               <RoleGuard allowedRoles={["doctor"]}>
                 <DashboardLayout role="doctor">
-                  <Patients />
+                  <DoctorPatients />
+                </DashboardLayout>
+              </RoleGuard>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/doctor/cds"
+          element={
+            <ProtectedRoute>
+              <RoleGuard allowedRoles={["doctor"]}>
+                <DashboardLayout role="doctor">
+                  <DoctorCDS />
                 </DashboardLayout>
               </RoleGuard>
             </ProtectedRoute>
@@ -150,31 +153,31 @@ export default function AppRoutes() {
             <ProtectedRoute>
               <RoleGuard allowedRoles={["doctor"]}>
                 <DashboardLayout role="doctor">
-                  <Reports />
+                  <DoctorPrescriptions />
                 </DashboardLayout>
               </RoleGuard>
             </ProtectedRoute>
           }
         />
         <Route
-          path="/doctor/knowledge"
+          path="/doctor/discharge"
           element={
             <ProtectedRoute>
               <RoleGuard allowedRoles={["doctor"]}>
                 <DashboardLayout role="doctor">
-                  <Knowledge />
+                  <DoctorDischarge />
                 </DashboardLayout>
               </RoleGuard>
             </ProtectedRoute>
           }
         />
         <Route
-          path="/doctor/settings"
+          path="/doctor/appointments"
           element={
             <ProtectedRoute>
               <RoleGuard allowedRoles={["doctor"]}>
                 <DashboardLayout role="doctor">
-                  <Settings />
+                  <DoctorAppointments />
                 </DashboardLayout>
               </RoleGuard>
             </ProtectedRoute>
@@ -186,26 +189,16 @@ export default function AppRoutes() {
             <ProtectedRoute>
               <RoleGuard allowedRoles={["doctor"]}>
                 <DashboardLayout role="doctor">
-                  <Profile />
-                </DashboardLayout>
-              </RoleGuard>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/doctor/chat"
-          element={
-            <ProtectedRoute>
-              <RoleGuard allowedRoles={["doctor"]}>
-                <DashboardLayout role="doctor">
-                  <Chat />
+                  <DoctorProfile />
                 </DashboardLayout>
               </RoleGuard>
             </ProtectedRoute>
           }
         />
 
-        {/* Protected Patient Routes */}
+        {/* ------------------------------------------------------------- */}
+        {/* PATIENT WORKSPACE: POST-DISCHARGE CARE & ASSISTANT           */}
+        {/* ------------------------------------------------------------- */}
         <Route
           path="/patient"
           element={
@@ -219,72 +212,24 @@ export default function AppRoutes() {
           }
         />
         <Route
-          path="/patient/cds-assistant"
+          path="/patient/discharge"
           element={
             <ProtectedRoute>
               <RoleGuard allowedRoles={["patient"]}>
                 <DashboardLayout role="patient">
-                  <CDSAssistant />
+                  <PatientDischarge />
                 </DashboardLayout>
               </RoleGuard>
             </ProtectedRoute>
           }
         />
         <Route
-          path="/patient/records"
+          path="/patient/assistant"
           element={
             <ProtectedRoute>
               <RoleGuard allowedRoles={["patient"]}>
                 <DashboardLayout role="patient">
-                  <Records />
-                </DashboardLayout>
-              </RoleGuard>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/patient/vitals"
-          element={
-            <ProtectedRoute>
-              <RoleGuard allowedRoles={["patient"]}>
-                <DashboardLayout role="patient">
-                  <Vitals />
-                </DashboardLayout>
-              </RoleGuard>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/patient/appointments"
-          element={
-            <ProtectedRoute>
-              <RoleGuard allowedRoles={["patient"]}>
-                <DashboardLayout role="patient">
-                  <Appointments />
-                </DashboardLayout>
-              </RoleGuard>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/patient/settings"
-          element={
-            <ProtectedRoute>
-              <RoleGuard allowedRoles={["patient"]}>
-                <DashboardLayout role="patient">
-                  <Settings />
-                </DashboardLayout>
-              </RoleGuard>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/patient/profile"
-          element={
-            <ProtectedRoute>
-              <RoleGuard allowedRoles={["patient"]}>
-                <DashboardLayout role="patient">
-                  <Profile />
+                  <PatientAssistant />
                 </DashboardLayout>
               </RoleGuard>
             </ProtectedRoute>
@@ -296,31 +241,83 @@ export default function AppRoutes() {
             <ProtectedRoute>
               <RoleGuard allowedRoles={["patient"]}>
                 <DashboardLayout role="patient">
-                  <Prescription />
+                  <PatientPrescriptions />
                 </DashboardLayout>
               </RoleGuard>
             </ProtectedRoute>
           }
         />
         <Route
-          path="/patient/chat"
+          path="/patient/history"
           element={
             <ProtectedRoute>
               <RoleGuard allowedRoles={["patient"]}>
                 <DashboardLayout role="patient">
-                  <Chat />
+                  <PatientMedicalHistory />
                 </DashboardLayout>
               </RoleGuard>
             </ProtectedRoute>
           }
         />
         <Route
-          path="/patient/drug-checker"
+          path="/patient/profile"
           element={
             <ProtectedRoute>
               <RoleGuard allowedRoles={["patient"]}>
                 <DashboardLayout role="patient">
-                  <DrugChecker />
+                  <PatientProfile />
+                </DashboardLayout>
+              </RoleGuard>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ------------------------------------------------------------- */}
+        {/* RECEPTIONIST WORKSPACE: ADMINISTRATIVE FRONT DESK COORDINATION */}
+        {/* ------------------------------------------------------------- */}
+        <Route
+          path="/receptionist"
+          element={
+            <ProtectedRoute>
+              <RoleGuard allowedRoles={["receptionist"]}>
+                <DashboardLayout role="receptionist">
+                  <ReceptionistDashboard />
+                </DashboardLayout>
+              </RoleGuard>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/receptionist/patients"
+          element={
+            <ProtectedRoute>
+              <RoleGuard allowedRoles={["receptionist"]}>
+                <DashboardLayout role="receptionist">
+                  <ReceptionistPatients />
+                </DashboardLayout>
+              </RoleGuard>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/receptionist/appointments"
+          element={
+            <ProtectedRoute>
+              <RoleGuard allowedRoles={["receptionist"]}>
+                <DashboardLayout role="receptionist">
+                  <ReceptionistAppointments />
+                </DashboardLayout>
+              </RoleGuard>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/receptionist/doctors"
+          element={
+            <ProtectedRoute>
+              <RoleGuard allowedRoles={["receptionist"]}>
+                <DashboardLayout role="receptionist">
+                  <ReceptionistDoctors />
                 </DashboardLayout>
               </RoleGuard>
             </ProtectedRoute>
@@ -328,8 +325,8 @@ export default function AppRoutes() {
         />
 
         {/* Error Pages */}
-        <Route path={ROUTES.UNAUTHORIZED} element={<Unauthorized />} />
-        <Route path={ROUTES.SERVER_ERROR} element={<ServerError />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="/server-error" element={<ServerError />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

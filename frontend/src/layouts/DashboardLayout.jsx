@@ -1,186 +1,153 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import Logo from "../components/shared/Logo";
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { LogOut, Sun, Moon, Menu, X, Shield, Sparkles } from "lucide-react";
+import { DOCTOR_NAV, PATIENT_NAV, RECEPTIONIST_NAV } from "../constants/navigation";
+import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../hooks/useTheme";
 import { useMediaQuery } from "../hooks/useMediaQuery";
-import { DOCTOR_NAV, PATIENT_NAV } from "../constants/navigation";
-import { ROUTES } from "../constants/routes";
-import { useAuth } from "../contexts/AuthContext";
-import { mockNotificationService } from "../services/mock/mockNotificationService";
-import { mockPatientService } from "../services/mock/mockPatientService";
-import { mockDoctorService } from "../services/mock/mockDoctorService";
-import { getDB } from "../services/mock/db";
 import Sidebar from "../components/layout/Sidebar";
-import Navbar from "../components/layout/Navbar";
 
-export default function DashboardLayout({ children, role = "patient" }) {
+export default function DashboardLayout({ children, role }) {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
-  const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [isNotifOpen, setIsNotifOpen] = useState(false);
-  const [profile, setProfile] = useState(null);
+  const currentRole = role || user?.role || "doctor";
+  let navigation = DOCTOR_NAV;
+  let workspaceTitle = "Clinician Workspace";
+  let badgeColor = "bg-blue-500/10 text-blue-600 border-blue-500/20";
+  let roleIcon = "🩺";
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState({ patients: [], appointments: [], reports: [] });
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-
-  const navigation = role === "doctor" ? DOCTOR_NAV : PATIENT_NAV;
-
-  useEffect(() => {
-    async function loadData() {
-      if (user?.id) {
-        const profService = role === "doctor" ? mockDoctorService : mockPatientService;
-        const prof = await profService.getProfile(user.id);
-        setProfile(prof);
-
-        const notifs = await mockNotificationService.getNotifications(user.id);
-        setNotifications(notifs);
-        const count = await mockNotificationService.getUnreadCount(user.id);
-        setUnreadCount(count);
-      }
-    }
-    loadData();
-    const interval = setInterval(loadData, 4000);
-    return () => clearInterval(interval);
-  }, [user, role]);
+  if (currentRole === "patient") {
+    navigation = PATIENT_NAV;
+    workspaceTitle = "Patient Care Portal";
+    badgeColor = "bg-emerald-500/10 text-emerald-600 border-emerald-500/20";
+    roleIcon = "🏥";
+  } else if (currentRole === "receptionist") {
+    navigation = RECEPTIONIST_NAV;
+    workspaceTitle = "Administrative Front Desk";
+    badgeColor = "bg-purple-500/10 text-purple-600 border-purple-500/20";
+    roleIcon = "📋";
+  }
 
   const handleLogout = async () => {
     await signOut();
-    navigate(ROUTES.LOGIN);
-  };
-
-  const handleMarkAsRead = async (id) => {
-    await mockNotificationService.markAsRead(id);
-    if (user?.id) {
-      setNotifications(await mockNotificationService.getNotifications(user.id));
-      setUnreadCount(await mockNotificationService.getUnreadCount(user.id));
-    }
-  };
-
-  const handleMarkAllRead = async () => {
-    if (user?.id) {
-      await mockNotificationService.markAllAsRead(user.id);
-      setNotifications(await mockNotificationService.getNotifications(user.id));
-      setUnreadCount(0);
-    }
-  };
-
-  const handleSearchChange = (e) => {
-    const query = e.target.value;
-    setSearchQuery(query);
-    if (!query.trim()) {
-      setSearchResults({ patients: [], appointments: [], reports: [] });
-      setIsSearchOpen(false);
-      return;
-    }
-
-    const db = getDB();
-    const queryLower = query.toLowerCase();
-
-    const patients = Object.entries(db.profiles)
-      .filter(([id, p]) => p.age !== undefined && p.name.toLowerCase().includes(queryLower))
-      .map(([id, p]) => ({ id, name: p.name }));
-
-    const appointments = db.appointments
-      .filter(
-        (a) =>
-          (a.doctorId === user?.id || a.patientId === user?.id) &&
-          (a.patientName.toLowerCase().includes(queryLower) ||
-            a.doctorName.toLowerCase().includes(queryLower) ||
-            a.reason.toLowerCase().includes(queryLower))
-      );
-
-    const reports = db.reports
-      .filter((r) =>
-        role === "doctor"
-          ? r.title.toLowerCase().includes(queryLower)
-          : r.patientId === user?.id && r.title.toLowerCase().includes(queryLower)
-      );
-
-    setSearchResults({ patients, appointments, reports });
-    setIsSearchOpen(true);
+    navigate("/login");
   };
 
   return (
-    <div className="min-h-screen w-full flex bg-slate-50 dark:bg-slate-950">
-      {isDesktop && (
-        <aside className="w-64 border-r border-slate-200/80 bg-white/70 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-900/50 flex flex-col sticky top-0 h-screen">
-          <div className="h-16 flex items-center px-6 border-b border-slate-100 dark:border-slate-800">
-            <Logo />
-          </div>
-          <div className="flex-1 overflow-y-auto py-4">
-            <Sidebar navigation={navigation} />
-          </div>
-        </aside>
-      )}
-
-      <AnimatePresence>
-        {!isDesktop && isSidebarOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsSidebarOpen(false)}
-              className="fixed inset-0 z-40 bg-slate-950/40 backdrop-blur-xs"
-            />
-            <motion.aside
-              initial={{ x: "-100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "-100%" }}
-              className="fixed top-0 bottom-0 left-0 w-72 z-50 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col"
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col antialiased text-slate-800 dark:text-slate-100">
+      {/* Top Application Header */}
+      <header className="h-16 border-b border-slate-200/80 bg-white/80 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-900/80 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30 shadow-xs">
+        <div className="flex items-center gap-3">
+          {!isDesktop && (
+            <button
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="h-10 w-10 flex items-center justify-center rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+              aria-label="Toggle menu"
             >
-              <div className="h-16 flex items-center justify-between px-6 border-b border-slate-100 dark:border-slate-800">
-                <Logo />
-                <button
-                  onClick={() => setIsSidebarOpen(false)}
-                  className="h-10 w-10 flex items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-              <div className="flex-1 overflow-y-auto py-4">
+              <Menu className="h-5 w-5" />
+            </button>
+          )}
+
+          <Link to="/" className="flex items-center gap-2.5 select-none">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-primary-600 to-indigo-600 flex items-center justify-center text-white font-bold shadow-md shadow-primary-500/20 text-base">
+              CDSS
+            </div>
+            <div className="hidden sm:flex flex-col">
+              <span className="font-bold text-sm tracking-tight text-slate-900 dark:text-white leading-tight">
+                CDSS Healthcare
+              </span>
+              <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                Clinical Intelligence Platform
+              </span>
+            </div>
+          </Link>
+
+          <div className="hidden md:flex items-center ml-4">
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${badgeColor}`}>
+              <span>{roleIcon}</span>
+              <span>{workspaceTitle}</span>
+            </span>
+          </div>
+        </div>
+
+        {/* User Info & Actions */}
+        <div className="flex items-center gap-3">
+          <div className="hidden sm:flex flex-col text-right">
+            <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
+              {user?.name || user?.full_name || "Authorized User"}
+            </span>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">
+              {user?.email || (user?.role ? `${user.role.toUpperCase()} Session` : "")}
+            </span>
+          </div>
+
+          <button
+            onClick={toggleTheme}
+            className="h-9 w-9 flex items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors"
+            title="Toggle theme"
+          >
+            {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
+
+          <button
+            onClick={handleLogout}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:text-rose-400 dark:hover:bg-rose-900/60 border border-rose-200 dark:border-rose-900 transition-all cursor-pointer"
+            title="Sign out of current session"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Sign Out</span>
+          </button>
+        </div>
+      </header>
+
+      {/* Main Body */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Desktop Sidebar */}
+        {isDesktop && (
+          <aside className="w-64 border-r border-slate-200/80 bg-white/60 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-900/60 shrink-0 flex flex-col justify-between overflow-y-auto">
+            <Sidebar navigation={navigation} />
+            <div className="p-4 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 flex items-center gap-1.5 justify-center">
+              <Shield className="h-3.5 w-3.5 text-emerald-500" />
+              <span>Frozen RAG v2.10 • RBAC Enforced</span>
+            </div>
+          </aside>
+        )}
+
+        {/* Mobile Sidebar Overlay */}
+        {!isDesktop && isSidebarOpen && (
+          <div className="fixed inset-0 z-40 flex">
+            <div
+              className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs"
+              onClick={() => setIsSidebarOpen(false)}
+            />
+            <div className="relative w-64 max-w-xs bg-white dark:bg-slate-900 h-full shadow-2xl flex flex-col justify-between z-50 p-2">
+              <div>
+                <div className="flex items-center justify-between p-3 border-b border-slate-100 dark:border-slate-800">
+                  <span className="font-bold text-xs uppercase tracking-wider text-slate-400">
+                    {workspaceTitle}
+                  </span>
+                  <button
+                    onClick={() => setIsSidebarOpen(false)}
+                    className="p-1 text-slate-500 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
                 <Sidebar navigation={navigation} onItemClick={() => setIsSidebarOpen(false)} />
               </div>
-            </motion.aside>
-          </>
+              <div className="p-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 text-center">
+                Express Port 5000 Active
+              </div>
+            </div>
+          </div>
         )}
-      </AnimatePresence>
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <Navbar
-          isDesktop={isDesktop}
-          onMenuClick={() => setIsSidebarOpen(true)}
-          searchQuery={searchQuery}
-          handleSearchChange={handleSearchChange}
-          isSearchOpen={isSearchOpen}
-          setIsSearchOpen={setIsSearchOpen}
-          searchResults={searchResults}
-          role={role}
-          isDark={isDark}
-          toggleTheme={toggleTheme}
-          unreadCount={unreadCount}
-          isNotifOpen={isNotifOpen}
-          setIsNotifOpen={setIsNotifOpen}
-          notifications={notifications}
-          handleMarkAsRead={handleMarkAsRead}
-          handleMarkAllRead={handleMarkAllRead}
-          profile={profile}
-          user={user}
-          isProfileOpen={isProfileOpen}
-          setIsProfileOpen={setIsProfileOpen}
-          handleLogout={handleLogout}
-        />
-
-        <main className="flex-1 p-4 lg:p-8 overflow-y-auto">
+        {/* Workspace Content */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
           {children}
         </main>
       </div>

@@ -48,7 +48,51 @@ app.use(express.urlencoded({ extended: true, limit: "2mb" }));
 // Unified Portal Hub and Health endpoints
 app.get("/", getHub);
 app.get("/hub", getHub);
+app.get("/health", getHealth);
 app.get("/api/health", getHealth);
+
+// Standalone CDS Chat & RAG Gateway Bridge
+app.post("/chat", async (req, res) => {
+    try {
+        const query = req.body?.query || req.body?.clinical_query;
+        if (!query) {
+            return res.status(400).json({ message: "query is required" });
+        }
+        const response = await fetch("http://127.0.0.1:8000/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(req.body)
+        });
+        const data = await response.json();
+        return res.status(response.status).json(data);
+    } catch (err) {
+        return res.status(502).json({ message: "CDS Gateway unavailable", error: err.message });
+    }
+});
+
+app.get("/ready", async (req, res) => {
+    try {
+        const response = await fetch("http://127.0.0.1:8000/ready");
+        const data = await response.json();
+        return res.status(response.status).json(data);
+    } catch (err) {
+        return res.status(502).json({ message: "CDS Gateway unavailable", error: err.message });
+    }
+});
+
+app.post("/rag/query", async (req, res) => {
+    try {
+        const response = await fetch("http://127.0.0.1:8000/rag/query", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(req.body)
+        });
+        const data = await response.json();
+        return res.status(response.status).json(data);
+    } catch (err) {
+        return res.status(502).json({ message: "CDS Gateway unavailable", error: err.message });
+    }
+});
 
 app.use("/api/auth", authRoutes);
 app.use("/api/doctor", doctorRoutes);

@@ -82,3 +82,8 @@ Dump*.sql
 # Archives & bulky compressed backups
 *.zip
 *.traineddata
+
+# Test uploads & local scratch data
+scratch/mysql_data/
+**/uploads/prescriptions/*
+scratch/window_dump.xml

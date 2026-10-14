@@ -1,229 +1,260 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
-import AuthLayout from "../../components/layout/AuthLayout";
-import Input from "../../components/ui/Input";
-import Button from "../../components/ui/Button";
+import { Lock, Mail, Eye, EyeOff, ShieldCheck, Sparkles, ArrowRight, CheckCircle2 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
-import { validateEmail } from "../../utils/validators";
-import { ROUTES } from "../../constants/routes";
 
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { signIn, resendVerification } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
+  const { signIn } = useAuth();
+
+  const [role, setRole] = useState("doctor");
+  const [email, setEmail] = useState("doctor@gmail.com");
+  const [password, setPassword] = useState("doctor123");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
   const [error, setError] = useState("");
-  const [showResend, setShowResend] = useState(false);
-  const [resendLoading, setResendLoading] = useState(false);
-  const [resendSuccess, setResendSuccess] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
-    const savedEmail = localStorage.getItem("medai_remembered_email");
-    if (savedEmail) {
-      setEmail(savedEmail);
-      setRememberMe(true);
-    }
-  }, []);
-
-  useEffect(() => {
     const params = new URLSearchParams(location.search);
-    if (params.get("verified") === "true") {
-      setSuccessMessage("Your email has been verified successfully. You can now sign in.");
+    if (params.get("activated") === "true") {
+      setSuccessMessage("Your patient account has been successfully activated! Please log in.");
+      setRole("patient");
+      setEmail("aarav@gmail.com");
+      setPassword("");
     }
   }, [location]);
+
+  const handleRoleChange = (selectedRole) => {
+    setRole(selectedRole);
+    setError("");
+    if (selectedRole === "doctor") {
+      setEmail("doctor@gmail.com");
+      setPassword("doctor123");
+    } else if (selectedRole === "patient") {
+      setEmail("aarav@gmail.com");
+      setPassword("patient123");
+    } else if (selectedRole === "receptionist") {
+      setEmail("receptionist@gmail.com");
+      setPassword("receptionist123");
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email || !password) {
-      setError("Please fill in all fields");
+      setError("Please provide both email and password.");
       return;
     }
-    if (!validateEmail(email)) {
-      setError("Invalid email format");
-      return;
-    }
-    
+
     setError("");
-    setSuccessMessage("");
-    setResendSuccess("");
-    setShowResend(false);
     setIsLoading(true);
 
     try {
-      const { error: authError, data } = await signIn(email, password);
-      if (authError) throw authError;
+      const { data } = await signIn(email, password, role);
+      const userRole = data?.user?.role || role;
 
-      if (rememberMe) {
-        localStorage.setItem("medai_remembered_email", email);
-      } else {
-        localStorage.removeItem("medai_remembered_email");
-      }
-
-      const userRole = data?.user?.role || "patient";
       if (userRole === "doctor") {
-        navigate(ROUTES.DOCTOR_DASHBOARD);
+        navigate("/doctor");
+      } else if (userRole === "receptionist") {
+        navigate("/receptionist");
       } else {
-        navigate(ROUTES.PATIENT_DASHBOARD);
+        navigate("/patient");
       }
     } catch (err) {
-      const errMsg = err?.message || "Authentication failed. Please verify credentials.";
-      setError(errMsg);
-      if (errMsg.toLowerCase().includes("verify your email") || errMsg.toLowerCase().includes("email not confirmed")) {
-        setShowResend(true);
-      }
+      setError(err?.message || "Authentication failed. Please check credentials.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleResendVerification = async () => {
-    if (!email) {
-      setError("Please enter your email address first");
-      return;
-    }
-    setResendLoading(true);
-    setResendSuccess("");
-    try {
-      const { error: resendErr } = await resendVerification(email);
-      if (resendErr) throw resendErr;
-      setResendSuccess("Verification email has been resent successfully!");
-      setError("");
-      setShowResend(false);
-    } catch (err) {
-      setError(err?.message || "Failed to resend verification email.");
-    } finally {
-      setResendLoading(false);
-    }
-  };
-
   return (
-    <AuthLayout
-      title="Welcome back"
-      subtitle="Sign in to your secure healthcare portal"
-    >
-      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-        {error && (
-          <div className="rounded-xl bg-red-50 p-3.5 text-sm font-medium text-red-600 dark:bg-red-950/30 dark:text-red-400 flex flex-col gap-2">
-            <span>{error}</span>
-            {showResend && (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-slate-100 antialiased">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center px-4">
+        <div className="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-gradient-to-tr from-primary-600 to-indigo-500 shadow-xl shadow-primary-500/20 text-white font-extrabold text-2xl mb-4">
+          CDSS
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+          Clinical Decision Support
+        </h1>
+        <p className="mt-2 text-sm text-slate-400">
+          Unified Healthcare Platform • Role-Based Authentication
+        </p>
+      </div>
+
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
+        <div className="bg-slate-900/80 backdrop-blur-xl py-8 px-6 shadow-2xl rounded-2xl sm:px-10 border border-slate-800">
+          {/* Role Selection Tabs */}
+          <div className="flex rounded-xl bg-slate-800/80 p-1 mb-6 border border-slate-700/60">
+            <button
+              type="button"
+              onClick={() => handleRoleChange("doctor")}
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                role === "doctor"
+                  ? "bg-primary-600 text-white shadow-md"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <span>🩺</span>
+              <span>Doctor</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleRoleChange("patient")}
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                role === "patient"
+                  ? "bg-emerald-600 text-white shadow-md"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <span>🏥</span>
+              <span>Patient</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleRoleChange("receptionist")}
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                role === "receptionist"
+                  ? "bg-purple-600 text-white shadow-md"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <span>📋</span>
+              <span>Receptionist</span>
+            </button>
+          </div>
+
+          {/* Messages */}
+          {successMessage && (
+            <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 shrink-0" />
+              <span>{successMessage}</span>
+            </div>
+          )}
+
+          {error && (
+            <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs">
+              {error}
+            </div>
+          )}
+
+          {/* Form */}
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                Email Address
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="name@example.com"
+                  className="block w-full pl-10 pr-3 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-hidden focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="••••••••"
+                  className="block w-full pl-10 pr-10 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-hidden focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={`w-full py-3 px-4 rounded-xl text-sm font-bold text-white shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                role === "doctor"
+                  ? "bg-primary-600 hover:bg-primary-500 shadow-primary-600/30"
+                  : role === "patient"
+                  ? "bg-emerald-600 hover:bg-emerald-500 shadow-emerald-600/30"
+                  : "bg-purple-600 hover:bg-purple-500 shadow-purple-600/30"
+              }`}
+            >
+              {isLoading ? (
+                <span>Authenticating with Express...</span>
+              ) : (
+                <>
+                  <span>Sign In as {role.charAt(0).toUpperCase() + role.slice(1)}</span>
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Quick Demo Credentials Bar */}
+          <div className="mt-6 pt-5 border-t border-slate-800">
+            <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 text-center">
+              Verified Synthetic Demo Accounts
+            </span>
+            <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
-                onClick={handleResendVerification}
-                disabled={resendLoading}
-                className="text-left text-xs font-bold underline hover:text-red-800 dark:hover:text-red-300 cursor-pointer self-start"
+                onClick={() => handleRoleChange("doctor")}
+                className="p-2 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 text-left text-[11px] transition-colors cursor-pointer"
               >
-                {resendLoading ? "Resending..." : "Resend Verification Email"}
+                <div className="font-bold text-primary-400">🩺 Doctor</div>
+                <div className="text-slate-400 truncate">doctor@gmail.com</div>
               </button>
-            )}
+              <button
+                type="button"
+                onClick={() => handleRoleChange("patient")}
+                className="p-2 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 text-left text-[11px] transition-colors cursor-pointer"
+              >
+                <div className="font-bold text-emerald-400">🏥 Patient</div>
+                <div className="text-slate-400 truncate">aarav@gmail.com</div>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleRoleChange("receptionist")}
+                className="p-2 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 text-left text-[11px] transition-colors cursor-pointer"
+              >
+                <div className="font-bold text-purple-400">📋 Receptionist</div>
+                <div className="text-slate-400 truncate">receptionist@...</div>
+              </button>
+            </div>
           </div>
-        )}
 
-        {resendSuccess && (
-          <div className="rounded-xl bg-green-50 p-3.5 text-sm font-medium text-green-600 dark:bg-green-950/30 dark:text-green-400">
-            {resendSuccess}
+          {/* Patient Activation Link */}
+          <div className="mt-6 pt-4 border-t border-slate-800/80 text-center">
+            <Link
+              to="/activate"
+              className="text-xs font-semibold text-slate-400 hover:text-primary-400 transition-colors inline-flex items-center gap-1.5"
+            >
+              <span>🔑 Received an activation link from reception?</span>
+              <span className="text-primary-400 underline">Activate Account</span>
+            </Link>
           </div>
-        )}
-
-        {successMessage && (
-          <div className="rounded-xl bg-green-50 p-3.5 text-sm font-medium text-green-600 dark:bg-green-950/30 dark:text-green-400">
-            {successMessage}
-          </div>
-        )}
-
-        <Input
-          id="email"
-          label="Email Address"
-          type="email"
-          placeholder="doctor@medai.com"
-          icon={Mail}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-
-        <div className="relative">
-          <Input
-            id="password"
-            label="Password"
-            type={showPassword ? "text" : "password"}
-            placeholder="••••••••"
-            icon={Lock}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-4 top-[38px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
-          >
-            {showPassword ? (
-              <EyeOff className="h-5 w-5" />
-            ) : (
-              <Eye className="h-5 w-5" />
-            )}
-          </button>
         </div>
 
-        <div className="flex items-center justify-between">
-          <label className="flex items-center gap-2 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-              className="h-4 w-4 rounded-sm border-slate-300 text-primary-600 focus:ring-primary-500"
-            />
-            <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
-              Remember me
-            </span>
-          </label>
-          <Link
-            to={ROUTES.FORGOT_PASSWORD}
-            className="text-sm font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors"
-          >
-            Forgot Password?
-          </Link>
+        {/* Security Invariant Footer */}
+        <div className="mt-4 text-center text-xs text-slate-500 flex items-center justify-center gap-1.5">
+          <ShieldCheck className="h-4 w-4 text-emerald-500" />
+          <span>Server-Side RBAC • Express Gateway Port 5000</span>
         </div>
-
-        <Button type="submit" isLoading={isLoading} className="w-full mt-2">
-          Sign In
-        </Button>
-
-        {/* Quick Demo Access Pill for Evaluators */}
-        <div className="mt-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
-          <div>
-            <span className="font-bold text-slate-700 dark:text-slate-300 block">Demo Clinician Account:</span>
-            <span className="text-[11px] text-slate-500 font-mono">doctor@medai.com • password123</span>
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              setEmail("doctor@medai.com");
-              setPassword("password123");
-            }}
-            className="px-2.5 py-1 rounded-lg bg-primary-50 dark:bg-primary-950/60 text-primary-700 dark:text-primary-300 font-bold border border-primary-200 dark:border-primary-800 hover:bg-primary-100 transition-colors cursor-pointer text-xs"
-          >
-            Auto Fill
-          </button>
-        </div>
-
-        <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-3 select-none">
-          Don't have an account?{" "}
-          <Link
-            to={ROUTES.SIGNUP}
-            className="font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors"
-          >
-            Create Account
-          </Link>
-        </p>
-      </form>
-    </AuthLayout>
+      </div>
+    </div>
   );
 }

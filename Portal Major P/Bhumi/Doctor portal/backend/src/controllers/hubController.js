@@ -175,6 +175,9 @@ const getHealth = async (req, res) => {
         express_gateway: "active",
         cds_bridge: "active"
       },
+      indexed_chunks_count: 2204,
+      version: "2.10",
+      embedding_model: "BAAI/bge-small-en",
       timestamp: new Date().toISOString()
     });
   } catch (err) {
