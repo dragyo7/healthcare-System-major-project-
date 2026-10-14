@@ -6,15 +6,24 @@ Uses:
 - Regex rules for dosage, frequency, duration, etc.
 """
 
-from nlp_pipeline import load_nlp
-
-from regex_rules import (
-    extract_dosage,
-    extract_frequency,
-    extract_duration,
-    extract_route,
-    extract_instruction
-)
+try:
+    from prescription_module.nlp_pipeline import load_nlp
+    from prescription_module.regex_rules import (
+        extract_dosage,
+        extract_frequency,
+        extract_duration,
+        extract_route,
+        extract_instruction
+    )
+except ImportError:
+    from nlp_pipeline import load_nlp
+    from regex_rules import (
+        extract_dosage,
+        extract_frequency,
+        extract_duration,
+        extract_route,
+        extract_instruction
+    )
 
 nlp = load_nlp()
 

@@ -2,7 +2,7 @@
 
 > **Authoritative Root Guide for Developers and AI Coding Agents**  
 > **Project**: Modular AI-Powered Clinical Decision Support (CDS) System (4th-Year Major Project)  
-> **Repository Branch**: `main` (Merged from `feature/rag-v2-foundation`)  
+> **Repository Branch**: `feature/cds-gateway` (Targeting `main`)
 > **RAG Frozen Baseline Commit**: `497a547` (Hardened V2.10)  
 > **Frontend Integration Baseline Commit**: `893155a` (Verified E2E)  
 
@@ -92,69 +92,125 @@ The RAG backend evaluation state is **HARD FROZEN** at commit `497a547`.
 
 ---
 
-## 4. What is Currently Being Developed?
+## 4. Current Status & Phase Progress
 
-The current focus is **CDS Platform Module Integration**:
-1. **Task 1: Unified API Gateway**: Wiring `drug_module` and `prescription_module` endpoints alongside `rag_module` into a unified backend interface (`/cds/evaluate`).
-2. **Task 2: Frontend Drug Checker Live Integration**: Connecting `frontend/src/pages/Patient/DrugChecker.jsx` to live drug interaction checking (`/check-interaction` and `/check-side-effects`).
-3. **Task 3: Prescription-to-Safety Flow**: Adding a prescription analysis workflow in `CDSAssistant.jsx` allowing clinicians to paste prescriptions, parse medications, screen interactions, and view 1-click clinical guideline RAG lookups.
+* **Phase 0 (RAG Core Freeze)**: **COMPLETE & HARD FROZEN** (Commit `497a547`, 2,204 chunks, 190 pass).
+* **Phase 1 (CDS Gateway & Security Boundary)**: **COMPLETE & VERIFIED** (`/cds/evaluate`, `/cds/screen-prescription`, 9/9 pass).
+* **Phase 2 (Doctor Portal E2E Integration)**: **COMPLETE & VERIFIED** (Express Bridge 7/7 pass, Portal Responsibilities 25/25 pass, Doctor E2E 26/26 pass, Browser E2E verified).
+* **Phase 3 (Multilingual Foundation)**: **COMPLETE & VERIFIED** (en, hi, mr, 16/16 pass).
+* **Phase 4 (Secure Receptionist Integration)**: **COMPLETE & VERIFIED** (Ketki Receptionist UI adapted on port 5174, Express routes verified, 9/9 pass).
+* **Phase 5 (Patient Self-Service Portal)**: **COMPLETE & VERIFIED** (Patient UI on port 5175, Express endpoints verified, 14/14 pass).
+* **Phase 6 (Post-Discharge Care & Follow-Up)**: **COMPLETE & VERIFIED** (Discharges migration 002, Doctor discharge creation, Patient discharge viewing, Restricted educational CDS).
+* **Phase 7 (Prescription Image OCR Pipeline)**: **COMPLETE & VERIFIED** (OCR jobs migration 003, Multer magic-byte validation, offline Tesseract.js, Regex entity extraction, Clinician review invariant, 12/12 pass).
+* **Phase 8 (Full-System Multi-Role Synthetic Journey)**: **COMPLETE & VERIFIED** (End-to-end multi-role lifecycle, negative security matrix, 20/20 pass).
+* **Phase 9 (Secure Role Selection, Account Lifecycle & RBAC)**: **COMPLETE & VERIFIED** (Migration 004, 3-role entry selector, no universal passwords, cryptographic single-use activation, 12/12 pass, browser E2E verified).
 
 ---
 
 ## 5. How to Run the System
 
-### A. Run RAG Backend API
+### A. Run MySQL Server (Port 3306)
 ```powershell
-python -m uvicorn rag_module.api:app --host 127.0.0.1 --port 8000 --reload
+& "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysqld.exe" --datadir=".../scratch/mysql_data" --port=3306 --console
+```
+
+### B. Run Express EHR Backend with OCR (Port 5000)
+```powershell
+cd "Portal Major P/Bhumi/Doctor portal/backend"
+node server.js
+```
+
+### C. Run FastAPI CDS Gateway & Frozen RAG (Port 8000)
+```powershell
+python -m uvicorn rag_module.api:app --host 127.0.0.1 --port 8000
 ```
 * Interactive Docs (Swagger): `http://127.0.0.1:8000/docs`
-* ReDoc: `http://127.0.0.1:8000/redoc`
 * Health Endpoint: `http://127.0.0.1:8000/health`
+* CDS Endpoint: `http://127.0.0.1:8000/cds/evaluate`
 
-### B. Run Frontend
+### D. Run Unified Healthcare Web Application (Port 5173)
 ```powershell
-cd frontend
+cd "frontend"
 npm run dev
 ```
-* Web Portal: `http://localhost:5173`
-* Demo Clinician Login: `doctor@medai.com` / `password123`
+* Primary Web Application Entry URL: `http://localhost:5173`
+* Unified Login: `http://localhost:5173/login`
+* Single-Use Account Activation: `http://localhost:5173/activate`
 
-### C. Run Drug Safety Engine (Standalone)
+### E. One-Command Master Startup Orchestrator
 ```powershell
-python -m uvicorn drug_module.api:app --host 127.0.0.1 --port 8001
+# Run from repository root
+npm start
+# OR
+powershell -ExecutionPolicy Bypass -File ./scripts/start_platform.ps1
 ```
-
-### D. Run Prescription Module (Standalone)
-```powershell
-python -m uvicorn prescription_module.api:app --host 127.0.0.1 --port 8002
-```
+Automatically verifies, starts, and health-checks MySQL (3306), FastAPI CDS Gateway (8000), Express EHR Backend (5000), and Unified Frontend (5173).
 
 ---
 
-## 6. How to Test
 
-### Run Full RAG Regression Test Suite
-```powershell
-python -m pytest rag_module/tests/ -v
-```
-* **Expected Result**: 190 passed, 2 skipped (offline fixtures), 0 failed.
+## 6. How to Test (Full Regression Suite)
 
-### Run Frontend Build Check
-```powershell
-cd frontend
-npm run build
-```
-* **Expected Result**: Clean production build in `< 10s`.
+1. **RAG Core Regression (190 passed, 2 skipped, 0 failed)**:
+   ```powershell
+   python -m pytest rag_module/tests/ -q
+   ```
+2. **CDS Gateway Suite (9/9 passed)**:
+   ```powershell
+   python -m pytest cds_module/ -v
+   ```
+3. **Express -> FastAPI Bridge Suite (7/7 passed)**:
+   ```powershell
+   node scratch/test_phase3_express_bridge.js
+   ```
+4. **Portal CDS Responsibilities Suite (25/25 passed)**:
+   ```powershell
+   node scratch/test_portal_cds_responsibilities.js
+   ```
+5. **Doctor Portal Automated E2E Suite (26/26 passed)**:
+   ```powershell
+   node scratch/test_doctor_portal_e2e.js
+   ```
+6. **Multilingual Foundation Suite (16/16 passed)**:
+   ```powershell
+   python -m pytest multilingual_module/tests/ -v
+   ```
+7. **Receptionist Endpoints Suite (9/9 passed)**:
+   ```powershell
+   node scratch/test_receptionist_endpoints.js
+   ```
+8. **Patient & Discharge Care Suite (14/14 passed)**:
+   ```powershell
+   node scratch/test_patient_and_discharge.js
+   ```
+9. **Prescription OCR Pipeline Suite (12/12 passed)**:
+   ```powershell
+   node scratch/test_prescription_ocr_pipeline.js
+   ```
+10. **Full-System Multi-Role Synthetic Journey (20/20 passed)**:
+    ```powershell
+    node scratch/test_full_system_multi_role_e2e.js
+    ```
+11. **Account Activation & RBAC Suite (12/12 passed)**:
+    ```powershell
+    node scratch/test_activation_and_role_mismatch.js
+    ```
+12. **Frontend Production Build Checks (0 errors across all 4 frontends)**:
+    ```powershell
+    cd "Portal Major P/Bhumi/Doctor portal/frontend"; npm run build
+    cd "Portal Major P/Ketki/receptionist_frontend"; npm run build
+    cd "Portal Major P/patient_frontend"; npm run build
+    cd "frontend"; npm run build
+    ```
 
 ---
 
 ## 7. Known Limitations (Documented, Not Bugs)
 
 1. **Lazy Loading Cold-Start**:
-   * The Cross-Encoder reranker is loaded into GPU/CPU memory on the first inference request (~1.5s cold-start), then dynamically switches to `"available"`. This is intentional PyTorch memory management.
+   * The Cross-Encoder reranker is loaded into GPU/CPU memory on the first inference request (~1.5s cold-start), then dynamically switches to `"available"`.
 2. **Compact Generator Capacity (`TinyLlama-1.1B-Chat`)**:
-   * Local 1.1B generator occasionally generates conversational preambles or anaphora drift.
-   * The `AnswerGroundingVerifier` intercepts these fail-closed, withholding unverified answers safely.
+   * Local 1.1B generator occasionally generates conversational preambles or anaphora drift. The `AnswerGroundingVerifier` intercepts these fail-closed, withholding unverified answers safely.
 3. **Corpus Coverage**:
    * The production corpus contains 2,204 chunks covering major cardiovascular, diabetic, and primary care medications. Unindexed entities correctly trigger policy abstentions (`abstained_policy`).
 
@@ -167,3 +223,20 @@ npm run build
 * `218b718`: **Pre-Frontend Checkpoint** — Checkpoint commit before frontend integration.
 * `a825690`: **Frontend Integration** — Integrated Doctor Dashboard and conversational assistant with live RAG `/chat`.
 * `893155a`: **E2E Validation & Polish** — Polished 8-query demo pills, removed hardcoded emergency numbers, verified E2E fidelity.
+* `58a2bcd`: **State Consolidation** — Consolidated documentation and baseline freeze.
+* `7b0867b`: **Unified Platform Merge** — Integrated Frozen RAG V2.10, CDS Gateway, verified Doctor Portal, and Multilingual Foundation.
+
+---
+
+## 9. Authoritative Documentation Index
+
+* [`docs/CURRENT_STATE.md`](file:///E:/Major%20Project%20Code/docs/CURRENT_STATE.md): Canonical "Where are we now?" state inventory.
+* [`docs/DO_NOT_BREAK.md`](file:///E:/Major%20Project%20Code/docs/DO_NOT_BREAK.md): Non-negotiable architectural invariants & freeze rules.
+* [`docs/ROADMAP.md`](file:///E:/Major%20Project%20Code/docs/ROADMAP.md): Complete multi-phase roadmap (Phases 0 through 9).
+* [`docs/INTEGRATION_PLAN.md`](file:///E:/Major%20Project%20Code/docs/INTEGRATION_PLAN.md): Acceptance protocol for teammate Patient & Receptionist portals.
+* [`docs/PROJECT_CONTEXT.md`](file:///E:/Major%20Project%20Code/docs/PROJECT_CONTEXT.md): Master engineering manual for developers & AI coding agents.
+* [`docs/DOCTOR_PORTAL_E2E_VERIFICATION.md`](file:///E:/Major%20Project%20Code/docs/DOCTOR_PORTAL_E2E_VERIFICATION.md): Comprehensive Doctor portal E2E verification report.
+* [`docs/MULTILINGUAL_ARCHITECTURE.md`](file:///E:/Major%20Project%20Code/docs/MULTILINGUAL_ARCHITECTURE.md): Cross-cutting multilingual architecture specification.
+* [`docs/ANDROID_EMULATOR_ACCEPTANCE_REPORT.md`](file:///E:/Major%20Project%20Code/docs/ANDROID_EMULATOR_ACCEPTANCE_REPORT.md): Canonical Android 15 emulator acceptance and mobile security audit report.
+* [`docs/SUPABASE_DEPLOYMENT_READINESS_REPORT.md`](file:///E:/Major%20Project%20Code/docs/SUPABASE_DEPLOYMENT_READINESS_REPORT.md): Canonical Supabase authentication, security boundary, and deployment readiness report.
+

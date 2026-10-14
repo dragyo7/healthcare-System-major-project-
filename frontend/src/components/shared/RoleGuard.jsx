@@ -15,7 +15,13 @@ export default function RoleGuard({ children, allowedRoles }) {
     return <Navigate to={ROUTES.LOGIN} replace />;
   }
 
-  const userRole = user?.user_metadata?.role || user?.role || "patient";
+  // Security Invariant: Local demo sessions are strictly prohibited in production builds
+  if (user?.isLocalDemo && !import.meta.env.DEV) {
+    return <Navigate to={ROUTES.LOGIN} replace />;
+  }
+
+  // Security Invariant: Never evaluate unverified caller-controlled user_metadata.
+  const userRole = user?.role || "patient";
 
   if (!allowedRoles.includes(userRole)) {
     return <Navigate to={ROUTES.UNAUTHORIZED} replace />;

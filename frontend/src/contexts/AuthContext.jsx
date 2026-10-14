@@ -1,133 +1,130 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { supabase } from "../lib/supabase";
-import {
-  signUp as signUpService,
-  signIn as signInService,
-  signOut as signOutService,
-  resendVerification as resendVerificationService,
-  resetPassword as resetPasswordService,
-  updatePassword as updatePasswordService,
-} from "../services/auth/authService";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { authApi } from "../api/authApi";
 
 const AuthContext = createContext();
 
-const mapSupabaseUser = (sbUser) => {
+export function mapSupabaseUser(sbUser) {
   if (!sbUser) return null;
+  const serverAssignedRole = sbUser.app_metadata?.role;
+  const role = (serverAssignedRole === "doctor" || serverAssignedRole === "receptionist") ? serverAssignedRole : "patient";
   return {
-    ...sbUser,
     id: sbUser.id,
     email: sbUser.email,
-    name: sbUser.user_metadata?.full_name || sbUser.user_metadata?.name || "User",
-    role: sbUser.user_metadata?.role || "patient",
-    verified: !!sbUser.email_confirmed_at,
+    name: sbUser.user_metadata?.full_name || sbUser.email?.split("@")[0] || "User",
+    role,
+    verified: sbUser.user_metadata?.email_verified ?? true,
+    ...sbUser,
   };
-};
+}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const demoUser = localStorage.getItem("medai_demo_user");
-    if (demoUser) {
-      try {
-        setUser(JSON.parse(demoUser));
-        setLoading(false);
-        return;
-      } catch (e) {}
-    }
+    try {
+      const storedToken = localStorage.getItem("cdss_token") || localStorage.getItem("token") || localStorage.getItem("patient_token") || localStorage.getItem("receptionist_token");
+      const storedUser = localStorage.getItem("cdss_user");
+      const storedRole = localStorage.getItem("cdss_role");
 
-    const hash = window.location.hash || "";
-    if (hash.includes("type=signup") || (hash.includes("access_token") && hash.includes("type=signup"))) {
-      setLoading(true);
-      supabase.auth.signOut().then(() => {
-        window.location.hash = "";
-        window.location.href = "/login?verified=true";
-      });
-      return;
-    }
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(mapSupabaseUser(session?.user ?? null));
-      setLoading(false);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (window.location.hash.includes("type=signup")) return;
-
-      if (session?.user) {
-        setUser(mapSupabaseUser(session.user));
-      } else {
-        const stored = localStorage.getItem("medai_demo_user");
-        if (!stored) setUser(null);
+      if (storedToken && storedUser && storedRole) {
+        const parsedUser = JSON.parse(storedUser);
+        setUser({
+          ...parsedUser,
+          token: storedToken,
+          role: storedRole,
+        });
       }
+    } catch (e) {
+      console.warn("Failed to restore session from localStorage:", e);
+      localStorage.removeItem("cdss_token");
+      localStorage.removeItem("cdss_user");
+      localStorage.removeItem("cdss_role");
+    } finally {
       setLoading(false);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
+    }
   }, []);
 
-  const signIn = async (email, password) => {
-    // 1. Direct local verification for demo accounts (ensures reliable testing offline / during evaluation)
-    if (email === "doctor@medai.com" && password === "password123") {
-      const mockDoc = {
-        id: "u-doc-1",
-        email: "doctor@medai.com",
-        name: "Dr. Alexander Ross",
-        role: "doctor",
-        verified: true,
-      };
-      setUser(mockDoc);
-      localStorage.setItem("medai_demo_user", JSON.stringify(mockDoc));
-      return { data: { user: mockDoc } };
+  const signIn = async (email, password, selectedRole = "doctor") => {
+    let result = null;
+
+    if (selectedRole === "doctor") {
+      result = await authApi.loginDoctor(email, password);
+    } else if (selectedRole === "patient") {
+      result = await authApi.loginPatient(email, password);
+    } else if (selectedRole === "receptionist") {
+      result = await authApi.loginReceptionist(email, password);
+    } else {
+      // Auto-detect role
+      try {
+        result = await authApi.loginDoctor(email, password);
+      } catch (docErr) {
+        try {
+          result = await authApi.loginReceptionist(email, password);
+        } catch (recErr) {
+          result = await authApi.loginPatient(email, password);
+        }
+      }
     }
 
-    // 2. Supabase Cloud authentication
-    const res = await signInService(email, password);
-    if (!res.error && res.data?.user) {
-      setUser(mapSupabaseUser(res.data.user));
+    if (!result?.token || !result?.user) {
+      throw new Error("Invalid authentication credentials");
     }
-    return res;
-  };
 
-  const signUp = async (email, password, metadata) => {
-    return await signUpService(email, password, metadata);
+    const role = result.user.role || selectedRole;
+    const authUser = {
+      ...result.user,
+      token: result.token,
+      role,
+    };
+
+    // Store authoritative tokens and keys
+    localStorage.setItem("cdss_token", result.token);
+    localStorage.setItem("cdss_role", role);
+    localStorage.setItem("cdss_user", JSON.stringify(authUser));
+
+    // Backward-compatibility keys for legacy teammate submodules
+    localStorage.setItem("token", result.token);
+    if (role === "doctor") {
+      localStorage.setItem("doctor", JSON.stringify(result.user));
+    } else if (role === "patient") {
+      localStorage.setItem("patient_token", result.token);
+    } else if (role === "receptionist") {
+      localStorage.setItem("receptionist_token", result.token);
+      localStorage.setItem("receptionist_user", JSON.stringify(result.user));
+    }
+
+    setUser(authUser);
+    return { data: { user: authUser } };
   };
 
   const signOut = async () => {
-    localStorage.removeItem("medai_demo_user");
-    const res = await signOutService();
-    if (!res.error) {
-      setUser(null);
-    }
-    return res;
+    localStorage.removeItem("cdss_token");
+    localStorage.removeItem("cdss_role");
+    localStorage.removeItem("cdss_user");
+    localStorage.removeItem("token");
+    localStorage.removeItem("doctor");
+    localStorage.removeItem("patient_token");
+    localStorage.removeItem("receptionist_token");
+    localStorage.removeItem("receptionist_user");
+    setUser(null);
+    return { success: true };
   };
 
-  const resetPassword = async (email) => {
-    return await resetPasswordService(email);
-  };
-
-  const resendVerification = async (email) => {
-    return await resendVerificationService(email);
-  };
-
-  const updatePassword = async (password) => {
-    return await updatePasswordService(password);
+  const activateAccount = async (token, password) => {
+    return await authApi.activatePatient(token, password);
   };
 
   return (
     <AuthContext.Provider
       value={{
         user,
+        role: user?.role,
+        token: user?.token,
         loading,
         signIn,
-        signUp,
         signOut,
-        resetPassword,
-        resendVerification,
-        updatePassword,
+        activateAccount,
       }}
     >
       {children}
@@ -136,5 +133,9 @@ export function AuthProvider({ children }) {
 }
 
 export function useAuth() {
-  return useContext(AuthContext);
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 }

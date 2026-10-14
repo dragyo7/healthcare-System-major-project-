@@ -1,0 +1,361 @@
+{
+  "results": [
+    {
+      "step": "Step 4",
+      "testName": "Doctor A Login",
+      "expected": "200",
+      "actual": "200",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 4",
+      "testName": "Doctor B Login",
+      "expected": "200",
+      "actual": "200",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 4",
+      "testName": "Distinct Doctor A Profile",
+      "expected": "1",
+      "actual": "1",
+      "status": "PASS",
+      "details": "Dr. Alice Smith"
+    },
+    {
+      "step": "Step 4",
+      "testName": "Distinct Doctor B Profile",
+      "expected": "2",
+      "actual": "2",
+      "status": "PASS",
+      "details": "Dr. Bob Jones"
+    },
+    {
+      "step": "Step 5",
+      "testName": "Doctor A -> Patient A (Legitimate)",
+      "expected": "200",
+      "actual": "200",
+      "status": "PASS",
+      "details": "Patient Alice Patient"
+    },
+    {
+      "step": "Step 5",
+      "testName": "Doctor A -> Patient B (Unauthorized)",
+      "expected": "403",
+      "actual": "403",
+      "status": "PASS",
+      "details": "0 bytes leaked"
+    },
+    {
+      "step": "Step 5",
+      "testName": "Doctor B -> Patient A (Unauthorized Reverse)",
+      "expected": "403",
+      "actual": "403",
+      "status": "PASS",
+      "details": "0 bytes leaked"
+    },
+    {
+      "step": "Step 5",
+      "testName": "Doctor B -> Patient B (Legitimate)",
+      "expected": "200",
+      "actual": "200",
+      "status": "PASS",
+      "details": "Patient Bob Patient"
+    },
+    {
+      "step": "Step 5",
+      "testName": "Doctor A -> Patient A Prescriptions (Legitimate)",
+      "expected": "200",
+      "actual": "200",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 5",
+      "testName": "Doctor A -> Patient B Prescriptions (Unauthorized)",
+      "expected": "403",
+      "actual": "403",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 6",
+      "testName": "Doctor A -> Appointment B Status (Cross-Doctor Unauthorized)",
+      "expected": "403",
+      "actual": "403",
+      "status": "PASS",
+      "details": "DB status: scheduled"
+    },
+    {
+      "step": "Step 6",
+      "testName": "Doctor B -> Appointment B Status (Legitimate)",
+      "expected": "200",
+      "actual": "200",
+      "status": "PASS",
+      "details": "DB status: completed"
+    },
+    {
+      "step": "Step 7",
+      "testName": "Doctor A -> Prescription B PDF (Cross-Doctor Unauthorized)",
+      "expected": "403",
+      "actual": "403",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 7",
+      "testName": "Doctor B -> Prescription B PDF (Legitimate)",
+      "expected": "200",
+      "actual": "200",
+      "status": "PASS",
+      "details": "application/pdf"
+    },
+    {
+      "step": "Step 7",
+      "testName": "Doctor B -> Prescription A PDF (Cross-Doctor Unauthorized Reverse)",
+      "expected": "403",
+      "actual": "403",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 8",
+      "testName": "Doctor A -> Report B (Cross-Doctor Unauthorized)",
+      "expected": "403",
+      "actual": "403",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 8",
+      "testName": "Doctor B -> Report B (Legitimate)",
+      "expected": "200",
+      "actual": "200",
+      "status": "PASS",
+      "details": "application/pdf"
+    },
+    {
+      "step": "Step 8",
+      "testName": "Doctor B -> Report A (Cross-Doctor Unauthorized Reverse)",
+      "expected": "403",
+      "actual": "403",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 8",
+      "testName": "Unauthenticated Report Access",
+      "expected": "401",
+      "actual": "401",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 8",
+      "testName": "Invalid Report ID (999999)",
+      "expected": "404",
+      "actual": "404",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 8",
+      "testName": "Old Public Static Path Bypass",
+      "expected": "404",
+      "actual": "404",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 8",
+      "testName": "Path Traversal Protection",
+      "expected": "403",
+      "actual": "403",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 9",
+      "testName": "Appointment Manufacturing Bypass Prevention",
+      "expected": "403",
+      "actual": "403",
+      "status": "PASS",
+      "details": "DB count before: 1, after: 1"
+    },
+    {
+      "step": "Step 10",
+      "testName": "Prescription Manufacturing Bypass Prevention",
+      "expected": "403",
+      "actual": "403",
+      "status": "PASS",
+      "details": "DB count before: 1, after: 1"
+    },
+    {
+      "step": "Step 11",
+      "testName": "Doctor A Patient List Isolation",
+      "expected": "1 (Patient 1 only)",
+      "actual": "1",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 11",
+      "testName": "Doctor B Patient List Isolation",
+      "expected": "1 (Patient 2 only)",
+      "actual": "1",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 13",
+      "testName": "GET /profile",
+      "expected": "200",
+      "actual": "200",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 13",
+      "testName": "PUT /profile",
+      "expected": "200",
+      "actual": "200",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 13",
+      "testName": "GET /dashboard",
+      "expected": "200",
+      "actual": "200",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 13",
+      "testName": "GET /patients",
+      "expected": "200",
+      "actual": "200",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 13",
+      "testName": "GET /patients/:patientId",
+      "expected": "200",
+      "actual": "200",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 13",
+      "testName": "GET /patients/:patientId/prescriptions",
+      "expected": "200",
+      "actual": "200",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 13",
+      "testName": "GET /appointments",
+      "expected": "200",
+      "actual": "200",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 13",
+      "testName": "POST /appointments (Authorized)",
+      "expected": "201",
+      "actual": "201",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 13",
+      "testName": "PUT /appointments/:appointmentId/status (Authorized)",
+      "expected": "200",
+      "actual": "200",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 13",
+      "testName": "POST /prescriptions (Authorized)",
+      "expected": "201",
+      "actual": "201",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 13",
+      "testName": "GET /prescriptions/:prescriptionId/pdf (Authorized)",
+      "expected": "200",
+      "actual": "200",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 13",
+      "testName": "GET /reports/:reportId (Authorized)",
+      "expected": "200",
+      "actual": "200",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 13",
+      "testName": "GET /schedule",
+      "expected": "200",
+      "actual": "200",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 13",
+      "testName": "POST /schedule (Authorized)",
+      "expected": "201",
+      "actual": "201",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 13",
+      "testName": "DELETE /schedule/:scheduleId (Authorized)",
+      "expected": "200",
+      "actual": "200",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 13",
+      "testName": "GET /followups (Safe Isolation)",
+      "expected": "501",
+      "actual": "501",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "step": "Step 13",
+      "testName": "POST /followups (Safe Isolation)",
+      "expected": "501",
+      "actual": "501",
+      "status": "PASS",
+      "details": ""
+    }
+  ],
+  "finalCounts": {
+    "appointments": 7,
+    "doctor_schedule": 8,
+    "doctors": 1,
+    "medical_history": 2,
+    "medical_reports": 2,
+    "patients": 2,
+    "prescription_medicines": 9,
+    "prescriptions": 8,
+    "symptoms": 2,
+    "users": 3
+  },
+  "allPassed": true
+}

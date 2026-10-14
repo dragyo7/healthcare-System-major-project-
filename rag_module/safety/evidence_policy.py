@@ -147,6 +147,7 @@ GENERAL_CLINICAL_TERMS = {
     "capsule", "capsules", "test", "tests", "testing", "care", "health", "target", "targets",
     "fasting", "level", "levels", "glucose", "icmr", "mohfw", "dailymed", "fda", "stg",
     "pharmacology", "pharmacological", "pharmacokinetics", "pharmacodynamic", "pharmacodynamics",
+    "mechanism", "mechanisms", "action", "actions",
     "absorption", "kinetics", "metabolism", "excretion", "clearance", "plasma", "serum",
     "concentration", "concentrations", "mg", "ml", "oral", "intravenous", "injection",
     "maximum", "max", "minimum", "min", "daily", "schedule", "routine", "emergency", "urgent", "attention",

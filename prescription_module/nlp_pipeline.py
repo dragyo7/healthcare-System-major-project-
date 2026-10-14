@@ -13,7 +13,7 @@ import json
 from pathlib import Path
 import spacy
 
-DATA_FILE = Path("data/drug_list.json")
+DATA_FILE = Path(__file__).resolve().parent / "data" / "drug_list.json"
 
 
 def load_drug_list():

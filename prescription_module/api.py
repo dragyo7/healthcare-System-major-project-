@@ -1,7 +1,10 @@
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
-from extractor import analyze_prescription
+try:
+    from prescription_module.extractor import analyze_prescription
+except ImportError:
+    from extractor import analyze_prescription
 
 app = FastAPI(
     title="Prescription Information Extraction API",

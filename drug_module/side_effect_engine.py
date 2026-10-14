@@ -38,10 +38,12 @@ except ImportError:
 
 
 
-def fetch_openfda_side_effects(drug: str):
+def fetch_openfda_side_effects(drug: str, enable_live: bool = True):
     """
-    Fetch side effects from openFDA API
+    Fetch side effects from openFDA API with timeout handling.
     """
+    if not enable_live:
+        return []
 
     url = "https://api.fda.gov/drug/event.json"
 
@@ -53,7 +55,7 @@ def fetch_openfda_side_effects(drug: str):
     effects = set()
 
     try:
-        response = requests.get(url, params=params, timeout=5)
+        response = requests.get(url, params=params, timeout=3)
 
         if response.status_code != 200:
             return []
@@ -71,32 +73,34 @@ def fetch_openfda_side_effects(drug: str):
                     effects.add(effect.lower())
 
     except Exception as e:
-        print("openFDA error:", e)
+        # Graceful fallback on network timeout/offline
         return []
 
     return list(effects)
 
 
-def get_side_effects(drug: str, side_effects_dict: dict) -> dict:
+def get_side_effects(drug: str, side_effects_dict: dict, enable_live_fda: bool = True) -> dict:
     """
-    Combine SIDER + openFDA
+    Combine verified DailyMed/SIDER rulebase with optional openFDA live adverse event augmentation.
     """
-
     normalized_drug = normalize_drug_name(drug)
 
-    # SIDER effects
+    # Verified DailyMed / SIDER rulebase effects
     sider_effects = side_effects_dict.get(normalized_drug, [])
 
-    # openFDA effects
-    fda_effects = fetch_openfda_side_effects(normalized_drug)
+    # Optional live openFDA effects
+    fda_effects = fetch_openfda_side_effects(normalized_drug, enable_live=enable_live_fda)
 
     # Merge + limit
     combined = list(set(sider_effects + fda_effects))[:15]
 
+    source_label = "DailyMed / SIDER + openFDA (Live)" if fda_effects else "DailyMed / SIDER (Verified Rulebase)"
+
     return {
         "drug": normalized_drug,
         "side_effects": combined,
-        "source": "SIDER + openFDA"
+        "source": source_label,
+        "live_fda_augmented": bool(fda_effects)
     }
 
 

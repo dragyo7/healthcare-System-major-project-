@@ -234,7 +234,8 @@ class AnswerGroundingVerifier:
             "children", "target", "evidence", "passage", "treatment", "therapy", "use", "administration",
             "it", "this", "these", "there", "note", "care", "medication", "drug", "agent", "product", "according",
             "provided", "side", "per", "as", "reactions", "effects", "boxed", "can", "could", "may", "might", "will", "would", "shall", "should",
-            "titration", "adjustment", "monitoring", "discontinuation", "intake", "evaluation"
+            "titration", "adjustment", "monitoring", "discontinuation", "intake", "evaluation",
+            "symptom", "symptoms", "given"
         }
 
         # 1. Subject extraction (generic active agent or noun phrase)
@@ -248,7 +249,9 @@ class AnswerGroundingVerifier:
         )
         if of_match:
             cand = of_match.group(1).strip()
-            if cand.lower() not in NON_SUBJECT_WORDS:
+            if " - " in cand:
+                cand = cand.split(" - ")[0].strip()
+            if cand.lower() not in NON_SUBJECT_WORDS and not (cand and cand[0].isdigit()):
                 subject = cand
 
         # Pattern A1: "maximum dose for adults of X", "dose in adults of X", "effects in patients of X"
@@ -260,7 +263,9 @@ class AnswerGroundingVerifier:
             )
             if ext_of_match:
                 cand = ext_of_match.group(1).strip()
-                if cand.lower() not in NON_SUBJECT_WORDS and not cand.lower().startswith(("adult", "pediatric", "child", "elder")):
+                if " - " in cand:
+                    cand = cand.split(" - ")[0].strip()
+                if cand.lower() not in NON_SUBJECT_WORDS and not cand.lower().startswith(("adult", "pediatric", "child", "elder")) and not (cand and cand[0].isdigit()):
                     subject = cand
 
         # Pattern B: "The usual initial starting dose of X..."
@@ -272,7 +277,9 @@ class AnswerGroundingVerifier:
             )
             if subj_match:
                 candidate = subj_match.group(1).strip()
-                if candidate.lower() not in NON_SUBJECT_WORDS:
+                if " - " in candidate:
+                    candidate = candidate.split(" - ")[0].strip()
+                if candidate.lower() not in NON_SUBJECT_WORDS and not (candidate and candidate[0].isdigit()):
                     subject = candidate
 
         # Pattern C: "X is indicated...", "X decreases...", "X is a vitamin"
@@ -280,8 +287,10 @@ class AnswerGroundingVerifier:
             direct_match = re.match(r'^([a-zA-Z0-9_/-]+(?:\s+and\s+[a-zA-Z0-9_/-]+(?:\s+potassium)?|\s+[a-zA-Z0-9_/-]+)?)\s+(?:is|are|decreases|increases|reduces|improves|prevents|causes|works|acts|should|can|may)', clean_text, re.IGNORECASE)
             if direct_match:
                 candidate = direct_match.group(1).strip()
+                if " - " in candidate:
+                    candidate = candidate.split(" - ")[0].strip()
                 cand_words = set(candidate.lower().split())
-                if candidate.lower() not in NON_SUBJECT_WORDS and not cand_words.issubset(NON_SUBJECT_WORDS):
+                if candidate.lower() not in NON_SUBJECT_WORDS and not cand_words.issubset(NON_SUBJECT_WORDS) and not (candidate and candidate[0].isdigit()):
                     subject = candidate
 
         # Pattern D: Pharmaceutical nomenclature suffix pattern (-ol, -il, -in, -an, -ide, -ate, etc.)
@@ -477,6 +486,16 @@ class AnswerGroundingVerifier:
         c = claim_entity.lower().strip()
         e = evidence_entity.lower().strip()
 
+        # Clean section header suffixes (e.g. ' - Indications and Usage', ' - Warnings and Precautions')
+        if " - " in c:
+            c = c.split(" - ")[0].strip()
+        if " - " in e:
+            e = e.split(" - ")[0].strip()
+
+        section_suffix = r'\s+(?:indications(?:\s+and\s+usage)?|usage|contraindications|warnings(?:\s+and\s+precautions)?|precautions|adverse\s+reactions|clinical\s+pharmacology|dosage|dosing|boxed\s+warning).*$'
+        c = re.sub(section_suffix, '', c, flags=re.IGNORECASE).strip()
+        e = re.sub(section_suffix, '', e, flags=re.IGNORECASE).strip()
+
         if not c or not e:
             return True
 
@@ -583,7 +602,8 @@ class AnswerGroundingVerifier:
             "medication", "drug", "agent", "product", "side", "effect", "effects", "adverse",
             "reaction", "reactions", "treatment", "therapy", "use", "dose", "dosage", "evidence",
             "passage", "text", "information", "guideline", "guidelines", "patient", "patients",
-            "most", "more", "least"
+            "most", "more", "least", "symptom", "symptoms", "these symptoms", "given", "the given passage",
+            "given passage", "the passage", "these effects", "these side effects", "these reactions"
         }
         all_evidence_entities = [self._extract_entity_from_evidence(c) for c in evidence_chunks if isinstance(c, dict)]
         if not prop.subject or prop.subject.lower() in generic_subject_terms:

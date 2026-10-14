@@ -1,178 +1,223 @@
 import React, { useState, useEffect } from "react";
-import { Heart, Activity, Flame, Calendar, ArrowRight, Clipboard, FileText } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import PageHeader from "../../components/shared/PageHeader";
-import StatCard from "../../components/shared/StatCard";
-import Card from "../../components/shared/Card";
-import SectionTitle from "../../components/shared/SectionTitle";
-import Button from "../../components/ui/Button";
+import { Link } from "react-router-dom";
+import { patientApi } from "../../api/patientApi";
 import { useAuth } from "../../contexts/AuthContext";
-import { mockDashboardService } from "../../services/mock/mockDashboardService";
-import { mockHistoryService } from "../../services/mock/mockHistoryService";
-import { mockAppointmentService } from "../../services/mock/mockAppointmentService";
-import { mockPrescriptionService } from "../../services/mock/mockPrescriptionService";
+import {
+  FileText,
+  Calendar,
+  Pill,
+  Bot,
+  AlertTriangle,
+  ArrowRight,
+  Clock,
+  ShieldAlert,
+  Loader2,
+  CheckCircle2,
+} from "lucide-react";
 
 export default function PatientDashboard() {
   const { user } = useAuth();
-  const navigate = useNavigate();
-  const [stats, setStats] = useState([]);
-  const [history, setHistory] = useState([]);
-  const [nextApt, setNextApt] = useState(null);
-  const [latestPresc, setLatestPresc] = useState(null);
-  const [latestReport, setLatestReport] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [dashboard, setDashboard] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    async function load() {
-      if (user?.id) {
-        const statsData = await mockDashboardService.getPatientStats(user.id);
-        setStats(statsData);
-
-        const histData = await mockHistoryService.getMedicalHistory(user.id);
-        setHistory(histData.slice(0, 3));
-
-        const apts = await mockAppointmentService.getAppointments("patient", user.id);
-        const scheduled = apts.filter((a) => a.status === "scheduled");
-        if (scheduled.length > 0) {
-          setNextApt(scheduled[0]);
-        }
-
-        const prescs = await mockPrescriptionService.getPrescriptions(user.id);
-        if (prescs.length > 0) {
-          setLatestPresc(prescs[0]);
-        }
-
-        const reports = await mockHistoryService.getReports(user.id);
-        if (reports.length > 0) {
-          setLatestReport(reports[0]);
-        }
+    async function loadData() {
+      try {
+        const res = await patientApi.getDashboard();
+        setDashboard(res);
+      } catch (err) {
+        setError(err.message || "Failed to load patient dashboard.");
+      } finally {
+        setLoading(false);
       }
-      setIsLoading(false);
     }
-    load();
-  }, [user]);
+    loadData();
+  }, []);
 
-  const iconMap = [Heart, Activity, Flame];
-
-  if (isLoading) {
-    return <div className="text-center p-8">Loading Personal Health Index...</div>;
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[350px] space-y-3">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">Loading patient health overview...</p>
+      </div>
+    );
   }
 
-  return (
-    <div className="flex flex-col gap-6 select-none animate-fadeIn">
-      <PageHeader
-        title="Personal Health Index"
-        subtitle="Review your biometric telemetry logs, diagnostic records, and prescriptions."
-      />
+  const activeDischarge = dashboard?.active_discharge;
+  const appointments = dashboard?.upcoming_appointments || [];
+  const prescriptions = dashboard?.recent_prescriptions || [];
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        {stats.map((stat, index) => (
-          <StatCard
-            key={stat.title}
-            title={stat.title}
-            value={stat.value}
-            icon={iconMap[index % iconMap.length]}
-            description={stat.description}
-          />
-        ))}
+  return (
+    <div className="space-y-6">
+      {/* Welcome Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            Welcome, {dashboard?.patient_name || user?.name || "Patient"}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Personal Health Overview & Post-Discharge Care Summary
+          </p>
+        </div>
+        <Link
+          to="/patient/assistant"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition shadow-sm w-fit"
+        >
+          <Bot className="w-4 h-4" />
+          Ask Post-Discharge Assistant
+        </Link>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 flex flex-col gap-6">
-          <Card className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <SectionTitle>Next Consultation Slot</SectionTitle>
-              <Link to="/patient/appointments" className="text-xs font-bold text-primary-600 hover:text-primary-700 flex items-center gap-1">
-                Manage Calendar <ArrowRight className="h-3 w-3" />
-              </Link>
-            </div>
-            {nextApt ? (
-              <div className="flex items-center justify-between p-4 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/30">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-50 dark:bg-primary-950/20 text-primary-600">
-                    <Calendar className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-slate-900 dark:text-white">{nextApt.doctorName}</h4>
-                    <p className="text-xs text-slate-500 mt-0.5">{nextApt.date} at {nextApt.time} - {nextApt.reason}</p>
-                  </div>
-                </div>
-                <Button size="sm" variant="ghost" onClick={() => navigate("/patient/chat")}>
-                  Ask Doctor
-                </Button>
-              </div>
-            ) : (
-              <p className="text-sm text-slate-500">No appointments scheduled currently.</p>
-            )}
-          </Card>
+      {error && (
+        <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm flex items-center gap-3">
+          <AlertTriangle className="w-5 h-5 shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
 
-          <Card className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <SectionTitle>Latest Diagnostic File</SectionTitle>
-              <Link to="/patient/records" className="text-xs font-bold text-primary-600 hover:text-primary-700 flex items-center gap-1">
-                View All Records <ArrowRight className="h-3 w-3" />
-              </Link>
-            </div>
-            {latestReport ? (
-              <div className="flex flex-col gap-2 p-4 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/30">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-slate-400" /> {latestReport.title}
-                  </h4>
-                  <span className="text-[10px] bg-green-50 text-green-700 font-semibold px-2 py-0.5 rounded-full">
-                    {latestReport.status}
+      {/* Emergency Advisory Banner */}
+      <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-foreground flex items-start gap-3">
+        <ShieldAlert className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+        <div className="text-xs space-y-1">
+          <p className="font-bold text-amber-700 dark:text-amber-400">
+            Medical Advisory & Emergency Notice
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            This platform is an AI-augmented decision support assistant grounded in clinical guidelines.
+            If you experience severe chest tightness, sudden shortness of breath, severe dizziness, or confusion,
+            immediately dial <strong>108 / 112</strong> or proceed to the nearest emergency room.
+          </p>
+        </div>
+      </div>
+
+      {/* Active Discharge Alert */}
+      {activeDischarge ? (
+        <div className="rounded-xl border-l-4 border-l-primary border-t border-r border-b border-border bg-card p-5 shadow-sm space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+              <FileText className="w-5 h-5 text-primary" />
+              Active Discharge Episode Follow-up
+            </h3>
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+              Discharged on {activeDischarge.discharge_date ? new Date(activeDischarge.discharge_date).toLocaleDateString() : "Recent"}
+            </span>
+          </div>
+
+          <p className="text-sm text-foreground">
+            <strong>Diagnosis:</strong> {activeDischarge.diagnosis}
+          </p>
+
+          <div className="p-3 rounded-lg bg-muted/60 text-xs text-foreground space-y-1">
+            <p className="font-semibold text-muted-foreground">Primary Care Instructions:</p>
+            <p className="line-clamp-2">{activeDischarge.discharge_instructions}</p>
+          </div>
+
+          {activeDischarge.follow_up_date && (
+            <p className="text-xs font-semibold text-sky-600 dark:text-sky-400 flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5" />
+              Follow-up Scheduled: {new Date(activeDischarge.follow_up_date).toLocaleDateString()}
+              {activeDischarge.follow_up_instructions && ` (${activeDischarge.follow_up_instructions})`}
+            </p>
+          )}
+
+          <div className="pt-2">
+            <Link
+              to="/patient/discharge"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+            >
+              View Full Discharge Directives & Warning Signs
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
+      ) : (
+        <div className="rounded-xl border border-border bg-card p-5 text-xs text-muted-foreground text-center">
+          No hospital discharge records currently found for your patient profile.
+        </div>
+      )}
+
+      {/* Two Column Grid: Appointments & Prescriptions */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Appointments */}
+        <div className="rounded-xl border border-border bg-card p-5 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-primary" />
+              Upcoming Clinical Appointments
+            </h3>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-semibold">
+              {appointments.length}
+            </span>
+          </div>
+
+          {appointments.length > 0 ? (
+            <div className="space-y-3">
+              {appointments.map((app, idx) => (
+                <div key={idx} className="p-3 rounded-lg border border-border/60 bg-background flex items-center justify-between gap-3 text-xs">
+                  <div>
+                    <p className="font-semibold text-foreground">Dr. {app.doctor_name}</p>
+                    <p className="text-muted-foreground">{app.specialization || "Clinical Consultation"}</p>
+                    <p className="text-muted-foreground flex items-center gap-1 mt-1">
+                      <Clock className="w-3 h-3 text-primary" />
+                      {app.appointment_date ? new Date(app.appointment_date).toLocaleDateString() : ""} at {app.start_time || "Scheduled"}
+                    </p>
+                  </div>
+                  <span className={`px-2 py-1 rounded text-[11px] font-semibold uppercase ${
+                    app.status === "completed" ? "bg-emerald-500/10 text-emerald-600" :
+                    app.status === "cancelled" ? "bg-destructive/10 text-destructive" :
+                    "bg-primary/10 text-primary"
+                  }`}>
+                    {app.status || "confirmed"}
                   </span>
                 </div>
-                <p className="text-xs text-slate-500">Logged on {latestReport.date}</p>
-                <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 italic border-t border-slate-100/50 pt-2 dark:border-slate-800/50">
-                  {latestReport.notes}
-                </p>
-              </div>
-            ) : (
-              <p className="text-sm text-slate-500">No diagnostic reports uploaded yet.</p>
-            )}
-          </Card>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground py-4 text-center">
+              No upcoming appointments scheduled.
+            </p>
+          )}
         </div>
 
-        <div className="flex flex-col gap-6">
-          <Card className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <SectionTitle>Recent Medication</SectionTitle>
-              <Link to="/patient/prescriptions" className="text-xs font-bold text-primary-600 hover:text-primary-700 flex items-center gap-1">
-                View All <ArrowRight className="h-3 w-3" />
-              </Link>
-            </div>
-            {latestPresc ? (
-              <div className="p-3 rounded-xl border border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/30">
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white">{latestPresc.medication}</h4>
-                <p className="text-xs text-slate-500 mt-0.5">{latestPresc.dosage}</p>
-                <p className="text-[10px] text-slate-400 mt-2">Dr. {latestPresc.doctorName}</p>
-              </div>
-            ) : (
-              <p className="text-sm text-slate-500">No prescriptions issued.</p>
-            )}
-          </Card>
+        {/* Prescriptions */}
+        <div className="rounded-xl border border-border bg-card p-5 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+              <Pill className="w-4 h-4 text-primary" />
+              Active Medication & Prescriptions
+            </h3>
+            <Link to="/patient/prescriptions" className="text-xs text-primary hover:underline font-semibold">
+              View All ({prescriptions.length})
+            </Link>
+          </div>
 
-          <Card className="flex flex-col gap-4">
-            <SectionTitle>Clinical History</SectionTitle>
-            {history.length === 0 ? (
-              <p className="text-sm text-slate-500">No health history log.</p>
-            ) : (
-              <div className="flex flex-col gap-3">
-                {history.map((hist) => (
-                  <div key={hist.id} className="flex justify-between items-center text-xs pb-2 border-b border-slate-100 dark:border-slate-800 last:border-0 last:pb-0">
-                    <div>
-                      <p className="font-semibold text-slate-800 dark:text-slate-200">{hist.condition}</p>
-                      <p className="text-[10px] text-slate-400">Diagnosed: {hist.diagnosedDate}</p>
-                    </div>
-                    <span className="bg-primary-50 text-primary-700 font-semibold px-2 py-0.5 rounded-full text-[10px]">
-                      {hist.status}
-                    </span>
+          {prescriptions.length > 0 ? (
+            <div className="space-y-3">
+              {prescriptions.slice(0, 3).map((rx, idx) => (
+                <div key={idx} className="p-3 rounded-lg border border-border/60 bg-background flex items-center justify-between gap-3 text-xs">
+                  <div>
+                    <p className="font-semibold text-foreground">{rx.diagnosis || "Medical Consultation"}</p>
+                    <p className="text-muted-foreground">Prescribed by Dr. {rx.doctor_name || "Physician"}</p>
+                    <p className="text-muted-foreground mt-0.5">
+                      Date: {rx.prescription_date ? new Date(rx.prescription_date).toLocaleDateString() : "Recent"}
+                    </p>
                   </div>
-                ))}
-              </div>
-            )}
-          </Card>
+                  <Link
+                    to="/patient/prescriptions"
+                    className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground"
+                    title="View Rx details"
+                  >
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground py-4 text-center">
+              No active prescription records found.
+            </p>
+          )}
         </div>
       </div>
     </div>

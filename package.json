@@ -1,4 +1,13 @@
 {
+  "name": "modular-ai-clinical-decision-support-system",
+  "version": "2.10.0",
+  "description": "Modular AI-Powered Clinical Decision Support System with Frozen RAG, Deterministic Safety, and Unified Multi-Role EHR Platform",
+  "scripts": {
+    "start": "powershell -ExecutionPolicy Bypass -File ./scripts/start_platform.ps1",
+    "test": "node tests/run_all_tests.js",
+    "test:rag": "python -m pytest rag_module/tests/ -q",
+    "build": "cd frontend && npm run build"
+  },
   "dependencies": {
     "@capacitor/cli": "^8.4.2",
     "@capacitor/core": "^8.4.2",
