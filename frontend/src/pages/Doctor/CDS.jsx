@@ -2,17 +2,25 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Sparkles, User, AlertTriangle, ShieldCheck, Pill, ArrowRight, Send, CheckCircle2, AlertOctagon, BookOpen, Globe2 } from "lucide-react";
 import { doctorApi } from "../../api/doctorApi";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 export default function DoctorCDS() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { language: globalLanguage, setLanguage: setGlobalLanguage } = useLanguage();
 
   const [patients, setPatients] = useState([]);
   const [selectedPatientId, setSelectedPatientId] = useState(1);
   const [patientDossier, setPatientDossier] = useState(null);
   const [clinicalQuery, setClinicalQuery] = useState("");
   const [candidateMeds, setCandidateMeds] = useState("");
-  const [language, setLanguage] = useState("auto");
+  const [language, setLanguage] = useState(globalLanguage && globalLanguage !== "en" ? globalLanguage : "auto");
+
+  useEffect(() => {
+    if (globalLanguage && globalLanguage !== "en") {
+      setLanguage(globalLanguage);
+    }
+  }, [globalLanguage]);
 
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState(null);

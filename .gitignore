@@ -76,6 +76,7 @@ scratch/*.sql
 scratch/*.log
 scratch/*.png
 scratch/*.jpg
+scratch/*.json
 Dump*.sql
 **/Dump*.sql
 

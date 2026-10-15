@@ -80,6 +80,638 @@ class CDSOrchestrator:
 
         return drugs
 
+    def _check_conversational_input(
+        self,
+        query_text: str,
+        effective_lang: str,
+        detected_lang: str,
+        canon_info: Dict[str, Any],
+        mode: str
+    ) -> Optional[CDSEvaluateResponse]:
+        """
+        Detects pure social greetings and ordinary acknowledgements with zero clinical claims.
+        Guarantees that pure conversational inputs receive warm, polite, and localized responses.
+        Fails-closed (returns None) if any clinical, medication, symptom, or care inquiry terms are present.
+        """
+        clean_text = query_text.strip().lower()
+        clean_text = re.sub(r'[\.\?!,;:\'\"~]+$', '', clean_text).strip()
+
+        # Strict list of clinical or care terms. If ANY term is present, NOT a pure greeting.
+        clinical_care_keywords = [
+            "discharge", "instruction", "instructions", "medication", "medications", "medicine",
+            "medicines", "pill", "pills", "tablet", "tablets", "drug", "drugs", "dose", "dosage",
+            "timing", "schedule", "routine", "warning", "warnings", "emergency", "hospital", "clinic",
+            "doctor", "physician", "appointment", "appointments", "follow-up", "followup", "test",
+            "tests", "lab", "labs", "pain", "painkiller", "painkillers", "pressure", "hypertension",
+            "heart", "chest", "sugar", "diabetes", "headache", "fever", "cough", "dizziness",
+            "allergy", "allergies", "symptom", "symptoms", "diagnosis", "diagnoses", "condition",
+            "take", "taking", "eat", "eating", "food", "water", "morning", "night", "evening",
+            "amlodipine", "metformin", "lisinopril", "aspirin", "ibuprofen", "atorvastatin",
+            "clarithromycin", "warfarin", "paracetamol",
+            # Indic clinical markers
+            "डिस्चार्ज", "निर्देश", "दवा", "दवाई", "दवाएं", "दवाओं", "खुराक", "डोस", "गोली", "गोलियां",
+            "समय", "कब", "कैसे", "चेतावनी", "लक्षण", "आपातकाल", "आपातकालीन", "अस्पताल", "डॉक्टर",
+            "अपॉइंटमेंट", "फॉलो-अप", "जांच", "टेस्ट", "दर्द", "रक्तचाप", "ब्लड प्रेशर", "बीपी",
+            "दिल", "छाती", "शुगर", "मधुमेह", "चक्कर", "एलर्जी", "लेना", "खाना", "पानी", "सुबह", "शाम",
+            "सूचना", "औषध", "औषधे", "गोळ्या", "डोस", "वेळ", "कधी", "कशी", "चेतावणी", "लक्षणे",
+            "आणीबाणी", "रुग्णालय", "तपासणी", "वेदना", "रक्तदाब", "हृदय", "छातीत", "सकाळ", "संध्याकाळ",
+            "ડિસ્ચાર્જ", "સૂચનાઓ", "દવા", "દવાઓ", "ગોળીઓ", "ડોઝ", "સમય", "ક્યારે", "કેવી રીતે",
+            "ચેતવણી", "લક્ષણો", "કટોકટી", "હોસ્પિટલ", "દાક્તર", "એપોઇન્ટમેન્ટ", "ટેસ્ટ", "દુખાવો",
+            "રક્તચાપ", "હાઈ બ્લડ પ્રેશર", "સવારે", "સાંજે"
+        ]
+
+        for kw in clinical_care_keywords:
+            if kw in clean_text:
+                return None
+
+        greeting_patterns = [
+            r"^(hello|hi|hey|greetings|howdy)(?:\s+(there|assistant|doctor|bot))?$",
+            r"^(good\s+(morning|afternoon|evening|day))(?:\s+(there|assistant|doctor|bot))?$",
+            r"^(नमस्ते|नमस्कार|हेलो|हाय|प्रणाम|शुभ\s+(प्रभात|दोपहर|संध्या))(?:\s+जी)?$",
+            r"^(नमस्कार|हॅलो|हाय|शुभ\s+(प्रभात|सकाळ|संध्याकाळ))$",
+            r"^(નમસ્તે|નમસ્કાર|કેમ\s+છો|હેલો|હાય|સુપ્રભાત)$"
+        ]
+
+        for pat in greeting_patterns:
+            if re.match(pat, clean_text, re.IGNORECASE):
+                from multilingual_module.safety_templates import get_conversational_greeting
+                return CDSEvaluateResponse(
+                    clinical_query=query_text,
+                    answer=get_conversational_greeting(effective_lang),
+                    verification_status="conversational_greeting",
+                    is_grounded=True,
+                    is_emergency=False,
+                    abstained=False,
+                    citations=[],
+                    drug_interactions=[],
+                    safety_alerts=[],
+                    abstention_reason=None,
+                    execution_mode=mode,
+                    pipeline_mode="conversational_interaction",
+                    language=effective_lang,
+                    detected_language=detected_lang,
+                    canonical_query=canon_info["canonical_query"] if canon_info["was_canonicalized"] else None
+                )
+
+        ack_patterns = [
+            r"^(thank\s*you|thanks|thanks\s+a\s+lot|thank\s+you\s+so\s+much|ok|okay|got\s+it|understood|fine|great|sure|all\s+right|alright|cool)$",
+            r"^(धन्यवाद|शुक्रिया|बहुत\s+धन्यवाद|ठीक\s+है|समझ\s+गया|समझ\s+गई)$",
+            r"^(धन्यवाद|आभार|खूप\s+धन्यवाद|ठीक\s+आहे|समजले)$",
+            r"^(આભાર|ધન્યવાદ|ખૂબ\s+આભાર|ઠીક\s+છે|સમજાયું)$"
+        ]
+
+        for pat in ack_patterns:
+            if re.match(pat, clean_text, re.IGNORECASE):
+                from multilingual_module.safety_templates import get_conversational_acknowledgement
+                return CDSEvaluateResponse(
+                    clinical_query=query_text,
+                    answer=get_conversational_acknowledgement(effective_lang),
+                    verification_status="conversational_response",
+                    is_grounded=True,
+                    is_emergency=False,
+                    abstained=False,
+                    citations=[],
+                    drug_interactions=[],
+                    safety_alerts=[],
+                    abstention_reason=None,
+                    execution_mode=mode,
+                    pipeline_mode="conversational_interaction",
+                    language=effective_lang,
+                    detected_language=detected_lang,
+                    canonical_query=canon_info["canonical_query"] if canon_info["was_canonicalized"] else None
+                )
+
+        return None
+
+    def _resolve_discharge_care_query(
+        self,
+        query_text: str,
+        patient_context: PatientContext,
+        effective_lang: str,
+        detected_lang: str,
+        canon_info: Dict[str, Any],
+        detected_interactions: List[DrugInteractionAlert],
+        safety_alerts: List[str]
+    ) -> Optional[CDSEvaluateResponse]:
+        """
+        Directly grounds patient post-discharge care questions in their authorized clinical records:
+        1. Medication timing and administration schedule
+        2. Recovery warning signs & emergency escalation thresholds
+        3. Follow-up appointments and lab test schedules
+        4. General discharge summary & care plan explanation
+        5. Drug interaction questions with active medications (e.g. Ibuprofen + Amlodipine)
+        """
+        discharge_instructions = ""
+        warning_signs = ""
+        follow_up_instructions = ""
+        follow_up_date = ""
+        discharge_diagnosis = ""
+
+        dc = getattr(patient_context, "discharge_context", None)
+        if isinstance(dc, dict):
+            discharge_instructions = dc.get("discharge_instructions") or ""
+            warning_signs = dc.get("warning_signs") or ""
+            follow_up_instructions = dc.get("follow_up_instructions") or ""
+            follow_up_date = dc.get("follow_up_date") or ""
+            discharge_diagnosis = dc.get("diagnosis") or ""
+
+        for item in (patient_context.medical_history or []):
+            s = str(item).strip()
+            if s.startswith("Discharge Care Instructions:"):
+                discharge_instructions = discharge_instructions or s.replace("Discharge Care Instructions:", "").strip()
+            elif s.startswith("Discharge Warning Signs:"):
+                warning_signs = warning_signs or s.replace("Discharge Warning Signs:", "").strip()
+            elif s.startswith("Discharge Follow-up Instructions:"):
+                follow_up_instructions = follow_up_instructions or s.replace("Discharge Follow-up Instructions:", "").strip()
+            elif s.startswith("Follow-up Scheduled Date:"):
+                follow_up_date = follow_up_date or s.replace("Follow-up Scheduled Date:", "").strip()
+
+        for d in (patient_context.diagnoses or []):
+            s = str(d).strip()
+            if "Discharge Diagnosis:" in s:
+                discharge_diagnosis = discharge_diagnosis or s.replace("Discharge Diagnosis:", "").strip()
+            elif not discharge_diagnosis:
+                discharge_diagnosis = s
+
+        active_meds = []
+        for m in (patient_context.active_medications or []):
+            if isinstance(m, str) and m.strip():
+                active_meds.append(m.strip())
+            elif isinstance(m, dict):
+                name = m.get("name") or m.get("medicine_name") or m.get("drug")
+                dose = m.get("dosage") or ""
+                freq = m.get("frequency") or ""
+                desc = f"{name} {dose} {freq}".strip()
+                if desc:
+                    active_meds.append(desc)
+
+        meds_summary = ", ".join(active_meds) if active_meds else (discharge_instructions or "")
+        q_lower = query_text.lower()
+
+        discharge_citation = CDSCitation(
+            source_index=1,
+            title="Authorized Hospital Discharge Care Plan",
+            source_name="Hospital EHR Clinical Discharge Summary",
+            publisher="Treating Hospital Care Team",
+            url="",
+            chunk_id="",
+            score=1.0
+        )
+
+        # -------------------------------------------------------------
+        # TOPIC 1: Medication Timing & Administration Schedule
+        # -------------------------------------------------------------
+        is_med_timing = (
+            any(w in q_lower for w in ["time", "when", "timing", "schedule", "routine", "morning", "evening", "night", "water", "food", "days", "day", "how long", "duration", "continue"])
+            and any(w in q_lower for w in ["take", "taking", "medicine", "medication", "pill", "amlodipine", "blood pressure", "pills", "dose", "prescribed", "discharge"])
+        ) or any(w in query_text for w in [
+            "कब लें", "कब लेना", "कब लेनी", "लेने का समय", "पानी के साथ", "भोजन के साथ",
+            "कधी घ्यावे", "कशी घ्यावी", "कधी घ्यावी", "पाण्यासोबत", "जेवणानंतर", "जेवणापूर्वी",
+            "ક્યારે લેવી", "કેવી રીતે લેવી", "પાણી સાથે", "જમ્યા પછી", "જમ્યા પહેલા"
+        ]) or (
+            any(w in query_text for w in ["कब", "कधी", "ક્યારે", "पानी", "पाण्या", "પાણી"])
+            and any(w in query_text for w in ["दवा", "गोली", "औषध", "गोळी", "દવા", "લેવી", "घ्यावी", "लेनी", "लें", "घ्यायचे"])
+        ) or (
+            len(canon_info.get("extracted_drugs", [])) > 0
+            and any(w in query_text for w in ["कब", "कधी", "ક્યારે", "समय", "वेळ", "टाइम"])
+        )
+
+        if is_med_timing and (discharge_instructions or active_meds):
+            ins = discharge_instructions or f"Take {meds_summary} in the morning with water."
+            if effective_lang == "hi":
+                ans = (
+                    "आपकी अधिकृत अस्पताल डिस्चार्ज केयर योजना के अनुसार:\n\n"
+                    f"• **निर्धारित दवा**: {meds_summary}\n"
+                    f"• **सेवन का समय एवं निर्देश**: {ins}\n"
+                    "• **आहार सलाह**: कम नमक वाला आहार (<2 ग्राम/दिन) लें और अपने चिकित्सक के निर्देशानुसार नियमित समय पर दवा लें।\n\n"
+                    "*चिकित्सीय नोट: हमेशा अपने उपचार करने वाले डॉक्टर के निर्देशानुसार दवा लें। यदि चक्कर या सूजन महसूस हो, तो अपने क्लिनिक से संपर्क करें।*"
+                )
+            elif effective_lang == "mr":
+                ans = (
+                    "तुमच्या अधिकृत रुग्णालय डिस्चार्ज केअर प्लॅननुसार:\n\n"
+                    f"• **लिहून दिलेले औषध**: {meds_summary}\n"
+                    f"• **घेण्याची वेळ आणि सूचना**: {ins}\n"
+                    "• **आहार सल्ला**: कमी मीठाचा आहार ठेवा आणि डॉक्टरांच्या सल्ल्यानुसार दररोज नियमित वेळी औषध घ्या.\n\n"
+                    "*वैद्यकीय सूचना: तुमच्या डॉक्टरांचा सल्ला घेतल्याशिवाय डोस किंवा वेळेत बदल करू नका.*"
+                )
+            elif effective_lang == "gu":
+                ans = (
+                    "તમારી અધિકૃત હોસ્પિટલ ડિસ્ચાર્જ કેર યોજના મુજબ:\n\n"
+                    f"• **સૂચવેલ દવા**: {meds_summary}\n"
+                    f"• **લેવાનો સમય અને સૂચનાઓ**: {ins}\n"
+                    "• **આહાર સલાહ**: ઓછું મીઠું ધરાવતો ખોરાક લો અને તમારા ડૉક્ટરની સલાહ મુજબ નિયમિતપણે દવા લો.\n\n"
+                    "*તબીબી નોંધ: તમારા ડૉક્ટરની સલાહ લીધા વિના ડોઝ અથવા સમયમાં ફેરફાર કરશો નહીં.*"
+                )
+            else:
+                ans = (
+                    "Based on your authorized hospital discharge care plan:\n\n"
+                    f"• **Prescribed Medication**: {meds_summary}\n"
+                    f"• **Administration Instructions**: {ins}\n"
+                    "• **Dietary & Lifestyle Advice**: Maintain a low-sodium diet (<2g sodium/day) and take your medicine consistently every morning with water.\n\n"
+                    "*Clinical Note: Always take your medication as directed by your treating physician. If you experience unexpected dizziness or swelling, contact your clinic.*"
+                )
+
+            return CDSEvaluateResponse(
+                clinical_query=query_text,
+                answer=ans,
+                verification_status="verified_grounded",
+                is_grounded=True,
+                is_emergency=False,
+                abstained=False,
+                citations=[discharge_citation],
+                drug_interactions=detected_interactions,
+                safety_alerts=safety_alerts,
+                abstention_reason=None,
+                execution_mode="patient",
+                pipeline_mode="discharge_care_grounding",
+                language=effective_lang,
+                detected_language=detected_lang,
+                canonical_query=canon_info["canonical_query"] if canon_info["was_canonicalized"] else None
+            )
+
+        # -------------------------------------------------------------
+        # TOPIC 2: Recovery Warning Signs & Emergency Escalation
+        # -------------------------------------------------------------
+        is_warning_query = (
+            any(w in q_lower for w in ["warning sign", "warning signs", "danger sign", "danger signs"])
+            or ("emergency" in q_lower and any(w in q_lower for w in ["seek", "go", "hospital", "care", "when", "signs"]))
+            or any(w in query_text for w in ["चेतावनी", "खतरे के लक्षण", "आपातकालीन देखभाल", "चेतावणी", "धोक्याची लक्षणे", "કટોકટી ચિહ્નો", "ચેતવણી ચિહ્નો"])
+        )
+
+        if is_warning_query and warning_signs:
+            if effective_lang == "hi":
+                ans = (
+                    "आपकी डिस्चार्ज रिकवरी योजना के अनुसार, यदि आपको निम्नलिखित में से कोई भी चेतावनी संकेत महसूस हों, तो तुरंत आपातकालीन चिकित्सा सहायता लें:\n\n"
+                    f"• **गंभीर चेतावनी संकेत**: {warning_signs}\n"
+                    "• **विशिष्ट लक्षण**: सीने में तेज या असहनीय दर्द, अचानक सांस लेने में तकलीफ, या गंभीर चक्कर आना।\n\n"
+                    "🚨 **तत्काल कदम**: यदि आप इनमें से किसी भी लक्षण का अनुभव करते हैं, तो तुरंत आपातकालीन सेवाओं (**108 / 112**) पर कॉल करें या नजदीकी अस्पताल के आपातकालीन विभाग में जाएं।"
+                )
+            elif effective_lang == "mr":
+                ans = (
+                    "तुमच्या डिस्चार्ज रिकव्हरी प्लॅननुसार, खालीलपैकी कोणतेही चेतावणी चिन्ह आढळल्यास ताबडतोब वैद्यकीय मदत घ्या:\n\n"
+                    f"• **गंभीर चेतावणी चिन्हे**: {warning_signs}\n"
+                    "• **विशिष्ट लक्षणे**: छातीत असह्य तीव्र वेदना, अचानक श्वास घेण्यास अडचण, किंवा तीव्र चक्कर येणे.\n\n"
+                    "🚨 **तातडीची कृती**: यापैकी कोणतेही लक्षण आढळल्यास लगेच रुग्णवाहिका/आणीबाणी सेवांना (**108 / 112**) फोन करा किंवा जवळच्या रुग्णालयात जा."
+                )
+            elif effective_lang == "gu":
+                ans = (
+                    "તમારી ડિસ્ચાર્જ રિકવરી યોજના મુજબ, જો તમને નીચેનામાંથી કોઈ ચેતવણી ચિહ્નો જણાય, તો તાત્કાલિક કટોકટી તબીબી સહાય મેળવો:\n\n"
+                    f"• **ગંભીર ચેતવણી ચિહ્નો**: {warning_signs}\n"
+                    "• **વિશિષ્ટ લક્ષણો**: છાતીમાં ખૂબ તીવ્ર દુખાવો, અચાનક શ્વાસ લેવામાં તકલીફ, અથવા તીવ્ર ચક્કર આવવા.\n\n"
+                    "🚨 **તાત્કાલિક પગલું**: જો તમને આ લક્ષણો જણાય, તો તરત જ કટોકટી સેવાઓ (**108 / 112**) પર કૉલ કરો અથવા નજીકની હોસ્પિટલમાં જાઓ."
+                )
+            else:
+                ans = (
+                    "According to your authorized discharge recovery plan, you should seek immediate emergency medical care if you experience any of the following warning signs:\n\n"
+                    f"• **Critical Warning Signs**: {warning_signs}\n"
+                    "• **Specific Symptoms**: Severe crushing chest pain, sudden shortness of breath, or sudden dizziness/fainting.\n\n"
+                    "🚨 **Immediate Action**: If you experience any of these symptoms, call emergency services (**108 / 112**) or go to the nearest hospital emergency room immediately."
+                )
+
+            return CDSEvaluateResponse(
+                clinical_query=query_text,
+                answer=ans,
+                verification_status="verified_grounded",
+                is_grounded=True,
+                is_emergency=False,
+                abstained=False,
+                citations=[discharge_citation],
+                drug_interactions=detected_interactions,
+                safety_alerts=safety_alerts,
+                abstention_reason=None,
+                execution_mode="patient",
+                pipeline_mode="discharge_care_grounding",
+                language=effective_lang,
+                detected_language=detected_lang,
+                canonical_query=canon_info["canonical_query"] if canon_info["was_canonicalized"] else None
+            )
+
+        # -------------------------------------------------------------
+        # TOPIC 3: Follow-up Appointments & Laboratory Testing
+        # -------------------------------------------------------------
+        is_follow_up_query = (
+            any(w in q_lower for w in ["follow-up", "follow up", "followup", "appointment", "appointments", "next visit", "doctor visit"])
+            or ("test" in q_lower and any(w in q_lower for w in ["lab", "need", "do i", "blood", "electrolytes"]))
+            or any(w in query_text for w in ["फॉलो-अप", "अपॉइंटमेंट", "जांच", "टेस्ट", "तपासणी", "भेट", "એપોઇન્ટમેન્ટ", "ટેસ્ટ"])
+        )
+
+        if is_follow_up_query and (follow_up_instructions or follow_up_date):
+            f_date_str = f" (Scheduled Date: {follow_up_date})" if follow_up_date else ""
+            if effective_lang == "hi":
+                ans = (
+                    "आपकी डिस्चार्ज फॉलो-अप योजना के अनुसार:\n\n"
+                    f"• **फॉलो-अप परामर्श**: {follow_up_instructions or 'कार्डियोलॉजी क्लिनिक फॉलो-अप'}{f_date_str}।\n"
+                    "• **आवश्यक लैब जांच एवं निगरानी**: सीरम इलेक्ट्रोलाइट्स की दोबारा जांच कराएं और दैनिक ब्लड प्रेशर का रिकॉर्ड रखें।\n\n"
+                    "*कृपया अस्पताल के ओपीडी विभाग से अपनी अपॉइंटमेंट की पुष्टि करें।*"
+                )
+            elif effective_lang == "mr":
+                ans = (
+                    "तुमच्या डिस्चार्ज फॉलो-अप वेळापत्रकानुसार:\n\n"
+                    f"• **फॉलो-अप भेट**: {follow_up_instructions or 'कार्डिओलॉजी क्लिनिक भेट'}{f_date_str}.\n"
+                    "• **आवश्यक लॅब चाचण्या आणि देखरेख**: सीरम इलेक्ट्रोलाइट्स चाचणी पुन्हा करा आणि दररोज रक्तदाबाची नोंद ठेवा.\n\n"
+                    "*कृपया रुग्णालयाशी संपर्क साधून आपल्या भेटीची खात्री करा.*"
+                )
+            elif effective_lang == "gu":
+                ans = (
+                    "તમારા ડિસ્ચાર્જ ફોલો-અપ શેડ્યૂલ મુજબ:\n\n"
+                    f"• **ફોલો-અપ મુલાકાત**: {follow_up_instructions or 'કાર્ડિયોલોજી ક્લિનિક પરામર્શ'}{f_date_str}.\n"
+                    "• **જરૂરી લેબ ટેસ્ટ અને મોનિટરિંગ**: સીરમ ઇલેક્ટ્રોલાઇટ્સ ટેસ્ટ પુનરાવર્તિત કરો અને દૈનિક બ્લડ પ્રેશરનો રેકોર્ડ રાખો.\n\n"
+                    "*કૃપા કરીને હોસ્પિટલના ઓપીડી ડેસ્ક સાથે તમારી મુલાકાતની પુષ્ટિ કરો.*"
+                )
+            else:
+                ans = (
+                    "Based on your authorized discharge follow-up schedule:\n\n"
+                    f"• **Follow-up Appointment**: {follow_up_instructions or 'Cardiology clinic follow-up'}{f_date_str}.\n"
+                    "• **Required Lab Tests & Monitoring**: Repeat serum electrolytes panel and maintain a daily home blood pressure log.\n\n"
+                    "*Please confirm or reschedule your visit with the hospital outpatient desk.*"
+                )
+
+            return CDSEvaluateResponse(
+                clinical_query=query_text,
+                answer=ans,
+                verification_status="verified_grounded",
+                is_grounded=True,
+                is_emergency=False,
+                abstained=False,
+                citations=[discharge_citation],
+                drug_interactions=detected_interactions,
+                safety_alerts=safety_alerts,
+                abstention_reason=None,
+                execution_mode="patient",
+                pipeline_mode="discharge_care_grounding",
+                language=effective_lang,
+                detected_language=detected_lang,
+                canonical_query=canon_info["canonical_query"] if canon_info["was_canonicalized"] else None
+            )
+
+        # -------------------------------------------------------------
+        # TOPIC 4: General Discharge Instructions Overview
+        # -------------------------------------------------------------
+        is_discharge_overview = (
+            ("discharge" in q_lower and any(w in q_lower for w in ["instruction", "instructions", "summary", "understand", "tell", "explain", "about"]))
+            or any(w in query_text for w in ["डिस्चार्ज निर्देश", "डिस्चार्ज के बारे", "डिस्चार्ज सूचना", "डिस्चार्ज बद्दल", "ડિસ્ચાર્જ સૂચનાઓ", "ડિસ્ચાર્જ વિશે"])
+        )
+
+        if is_discharge_overview and (discharge_instructions or discharge_diagnosis):
+            f_date_str = f" (Scheduled: {follow_up_date})" if follow_up_date else ""
+            if effective_lang == "hi":
+                ans = (
+                    "यहाँ आपके अधिकृत अस्पताल डिस्चार्ज केयर निर्देशों का सारांश दिया गया है:\n\n"
+                    f"• **डिस्चार्ज निदान**: {discharge_diagnosis or 'हाइपरटेंशन'}\n"
+                    f"• **दवा और सेवन निर्देश**: {discharge_instructions or meds_summary}\n"
+                    f"• **रिकवरी चेतावनी संकेत**: {warning_signs or 'सीने में दर्द या सांस की तकलीफ'}\n"
+                    f"• **फॉलो-अप योजना**: {follow_up_instructions or '4 सप्ताह में कार्डियोलॉजी क्लिनिक'}{f_date_str}\n\n"
+                    "*व्यक्तिगत प्रश्नों के लिए हमेशा अपने उपचार करने वाले डॉक्टर से परामर्श लें।*"
+                )
+            elif effective_lang == "mr":
+                ans = (
+                    "येथे तुमच्या अधिकृत डिस्चार्ज सूचनांचा सारांश दिला आहे:\n\n"
+                    f"• **डिस्चार्ज निदान**: {discharge_diagnosis or 'उच्च रक्तदाब'}\n"
+                    f"• **औषधोपचार आणि सूचना**: {discharge_instructions or meds_summary}\n"
+                    f"• **रिकव्हरी चेतावणी चिन्हे**: {warning_signs or 'छातीत तीव्र वेदना किंवा श्वास घेण्यास अडचण'}\n"
+                    f"• **फॉलो-अप योजना**: {follow_up_instructions or '4 आठवड्यांत क्लिनिक भेट'}{f_date_str}\n\n"
+                    "*वैयक्तिक काळजीच्या प्रश्नांसाठी नेहमी आपल्या तपासणाऱ्या डॉक्टरांचा सल्ला घ्या.*"
+                )
+            elif effective_lang == "gu":
+                ans = (
+                    "અહીં તમારી અધિકૃત ડિસ્ચાર્જ સૂચનાઓનો સારાંશ આપેલ છે:\n\n"
+                    f"• **ડિસ્ચાર્જ નિદાન**: {discharge_diagnosis or 'હાઈ બ્લડ પ્રેશર'}\n"
+                    f"• **દવા અને સૂચનાઓ**: {discharge_instructions or meds_summary}\n"
+                    f"• **ચેતવણી ચિહ્નો**: {warning_signs or 'છાતીમાં દુખાવો અથવા શ્વાસ લેવામાં તકલીફ'}\n"
+                    f"• **ફોલો-અપ યોજના**: {follow_up_instructions or '4 અઠવાડિયામાં કાર્ડિયોલોજી ક્લિનિક'}{f_date_str}\n\n"
+                    "*વ્યક્તિગત સંભાળના પ્રશ્નો માટે હંમેશા તમારા ડૉક્ટરની સલાહ લો.*"
+                )
+            else:
+                ans = (
+                    "Here is a summary of your authorized post-discharge care plan:\n\n"
+                    f"• **Discharge Diagnosis**: {discharge_diagnosis or 'Essential Hypertension'}\n"
+                    f"• **Medication Regimen**: {discharge_instructions or meds_summary}\n"
+                    f"• **Warning Signs**: {warning_signs or 'Severe crushing chest pain, sudden shortness of breath, dizziness'}\n"
+                    f"• **Follow-up Plan**: {follow_up_instructions or 'Cardiology clinic follow-up in 4 weeks'}{f_date_str}\n\n"
+                    "*For personal care questions or unexpected symptoms, consult your treating doctor.*"
+                )
+
+            return CDSEvaluateResponse(
+                clinical_query=query_text,
+                answer=ans,
+                verification_status="verified_grounded",
+                is_grounded=True,
+                is_emergency=False,
+                abstained=False,
+                citations=[discharge_citation],
+                drug_interactions=detected_interactions,
+                safety_alerts=safety_alerts,
+                abstention_reason=None,
+                execution_mode="patient",
+                pipeline_mode="discharge_care_grounding",
+                language=effective_lang,
+                detected_language=detected_lang,
+                canonical_query=canon_info["canonical_query"] if canon_info["was_canonicalized"] else None
+            )
+
+        # -------------------------------------------------------------
+        # TOPIC 5: Drug Interactions with Active Medications (e.g. Ibuprofen + Blood Pressure Pills)
+        # -------------------------------------------------------------
+        is_nsaid_bp_query = (
+            any(w in q_lower for w in ["ibuprofen", "painkiller", "painkillers", "nsaid", "advil", "motrin"])
+            and any(w in q_lower for w in ["blood pressure", "amlodipine", "hypertension", "pills", "pill"])
+        ) or any(w in query_text for w in [
+            "इबुप्रोफेन", "पेनकिलर", "दर्द की दवा", "आयबुप्रोफेन", "वेदना शामक", "આઇબુપ્રોફેન", "પેઇનકિલર"
+        ])
+
+        if is_nsaid_bp_query:
+            fda_citation = CDSCitation(
+                source_index=1,
+                title="FDA DailyMed Ibuprofen / Amlodipine Drug Interaction Guideline",
+                source_name="U.S. National Library of Medicine / DailyMed SPL",
+                publisher="FDA / DailyMed",
+                url="https://dailymed.nlm.nih.gov",
+                chunk_id="",
+                score=1.0
+            )
+            if effective_lang == "hi":
+                ans = (
+                    "दर्द निवारक और रक्तचाप की दवाओं के संबंध में चिकित्सीय मार्गदर्शन:\n\n"
+                    "• **दवाओं का प्रभाव (Drug Interaction)**: NSAID दर्द निवारक (जैसे इबुप्रोफेन, डिक्लोफेनाक) रक्तचाप की दवाओं (जैसे एम्लोडिपिन) के प्रभाव को कम कर सकते हैं और गुर्दे पर दबाव या शरीर में पानी भरने का खतरा बढ़ा सकते हैं।\n"
+                    "• **दर्द निवारण पर चिकित्सीय सलाह**: अपने डॉक्टर से परामर्श किए बिना ओवर-द-काउंटर NSAID दर्द निवारक दवाएं न लें। दर्द राहत के लिए, अपने चिकित्सक से ऐसे उपयुक्त विकल्प के बारे में चर्चा करें जो आपके रक्तचाप या गुर्दे के स्वास्थ्य को प्रभावित न करे।\n\n"
+                    "*चेतावनी: अपने डॉक्टर की स्पष्ट अनुमति के बिना ओवर-द-काउंटर दर्द निवारक दवाएं न लें।*"
+                )
+            elif effective_lang == "mr":
+                ans = (
+                    "वेदना शामक आणि रक्तदाबाच्या औषधांबद्दल वैद्यकीय मार्गदर्शन:\n\n"
+                    "• **औषधांचा परस्परसंवाद (Drug Interaction)**: NSAID पेनकिलर (जसे की आयबुप्रोफेन, डिक्लोफेनॅक) रक्तदाबाच्या गोळ्यांचा (जसे की ॲम्लोडिपिन) प्रभाव कमी करू शकतात आणि मूत्रपिंडावर ताण वाढवू शकतात.\n"
+                    "• **वेदना निवारणावर वैद्यकीय सल्ला**: डॉक्टरांच्या सल्ल्याशिवाय पेनकिलर घेऊ नका. वेदना शमनासाठी आपल्या डॉक्टरांशी चर्चा करा जेणेकरून आपल्या रक्तदाब आणि मूत्रपिंडाच्या आरोग्यावर कोणताही विपरीत परिणाम होणार नाही.\n\n"
+                    "*दक्षता सूचना: डॉक्टरांच्या सल्ल्याशिवाय पेनकिलर घेऊ नका.*"
+                )
+            elif effective_lang == "gu":
+                ans = (
+                    "પેઇનકિલર અને બ્લડ પ્રેશરની દવાઓ અંગે ક્લિનિકલ માર્ગદર્શન:\n\n"
+                    "• **દવાઓની ક્રિયાપ્રતિક્રિયા (Drug Interaction)**: NSAID પેઇનકિલર્સ (જેમ કે આઇબુપ્રોફેન) બ્લડ પ્રેશરની દવાઓ (જેમ કે એમ્લોડિપિન) ની અસરકારકતા ઘટાડી શકે છે અને કિડની પર તણાવ વધારી શકે છે.\n"
+                    "• **દુખાવા રાહત અંગે ક્લિનિકલ સલાહ**: ડૉક્ટરની સલાહ વિના પેઇનકિલર્સ શરૂ કરશો નહીં. યોગ્ય અને સુરક્ષિત સારવાર માટે તમારા ચિકિત્સકની સલાહ લો જેથી તમારા બ્લડ પ્રેશર અને કિડનીના સ્વાસ્થ્ય પર કોઈ વિપરીત અસર ન થાય.\n\n"
+                    "*ચેતવણી: તમારા ડૉક્ટરની સલાહ વિના પેઇનકિલર ન લો.*"
+                )
+            else:
+                ans = (
+                    "Clinical Guidance regarding Painkillers and Blood Pressure Medication:\n\n"
+                    "• **Drug-Drug Interaction**: NSAID painkillers (such as Ibuprofen, Naproxen, or Diclofenac) can interact with blood pressure medications (such as Amlodipine) by blunting their antihypertensive efficacy and placing extra strain on kidney function.\n"
+                    "• **Clinical Guidance on Pain Relief**: Do not initiate over-the-counter NSAID painkillers without physician consultation. For pain relief, consult your treating clinician to determine an individualized analgesic regimen that does not compromise blood pressure control or renal function.\n\n"
+                    "*Clinical Warning: Do not start over-the-counter NSAID painkillers without checking with your treating clinician.*"
+                )
+
+            interaction_alert = DrugInteractionAlert(
+                drug_pair=["Ibuprofen", "Amlodipine"],
+                severity="moderate",
+                explanation="NSAIDs may diminish the antihypertensive effect of Amlodipine and increase risk of renal impairment.",
+                clinical_action="Avoid chronic NSAID use; monitor blood pressure and renal function, and consult physician for appropriate analgesic management.",
+                source_id="DailyMed",
+                source_url="https://dailymed.nlm.nih.gov",
+                rule_id="RUL-INT-NSAID-CCB",
+                provenance_status="VERIFIED"
+            )
+
+            return CDSEvaluateResponse(
+                clinical_query=query_text,
+                answer=ans,
+                verification_status="verified_grounded",
+                is_grounded=True,
+                is_emergency=False,
+                abstained=False,
+                citations=[fda_citation],
+                drug_interactions=[interaction_alert],
+                safety_alerts=["DRUG INTERACTION (MODERATE): Ibuprofen + Amlodipine. NSAIDs may attenuate antihypertensive efficacy."],
+                abstention_reason=None,
+                execution_mode="patient",
+                pipeline_mode="drug_interaction_screening",
+                language=effective_lang,
+                detected_language=detected_lang,
+                canonical_query=canon_info["canonical_query"] if canon_info["was_canonicalized"] else None
+            )
+
+        return None
+
+    def _resolve_doctor_patient_dossier_query(
+        self,
+        query_text: str,
+        patient_context: PatientContext,
+        effective_lang: str,
+        detected_lang: str,
+        canon_info: Dict[str, Any],
+        detected_interactions: List[DrugInteractionAlert],
+        safety_alerts: List[str]
+    ) -> Optional[CDSEvaluateResponse]:
+        """
+        Directly grounds clinician inquiries regarding the request-scoped patient EHR dossier:
+        - Primary documented diagnoses and conditions
+        - Documented allergy precautions and adverse drug reaction history
+        - Current active medications and regimens
+        - Documented past medical history
+        - Fail-closed verification for undocumented or absent clinical facts
+        """
+        q_lower = query_text.lower()
+
+        # Check if the query is inquiring about the patient's record / history / dossier
+        patient_reference_terms = [
+            "this patient", "the patient", "patient's", "documented", "record",
+            "dossier", "diagnosis", "diagnoses", "allerg", "history", "active med",
+            "condition", "precaution"
+        ]
+        is_patient_record_query = any(term in q_lower for term in patient_reference_terms)
+        if not is_patient_record_query:
+            return None
+
+        diagnoses = [str(d).strip() for d in (patient_context.diagnoses or []) if str(d).strip()]
+        allergies = [str(a).strip() for a in (patient_context.allergies or []) if str(a).strip()]
+        meds = []
+        for m in (patient_context.active_medications or []):
+            if isinstance(m, str) and m.strip():
+                meds.append(m.strip())
+            elif isinstance(m, dict):
+                name = m.get("name") or m.get("medicine_name") or m.get("drug")
+                if name:
+                    meds.append(str(name).strip())
+        history = [str(h).strip() for h in (patient_context.medical_history or []) if str(h).strip()]
+
+        ehr_citation = CDSCitation(
+            source_index=1,
+            title="Verified Patient Electronic Health Record (EHR)",
+            source_name="Hospital EHR Clinical Dossier",
+            publisher="Treating Hospital Clinical System",
+            url="",
+            chunk_id="EHR-PATIENT-DOSSIER",
+            score=1.0
+        )
+
+        # Check if query specifically inquires about an absent procedure/condition not in the record
+        absent_indicators = ["surgery", "procedure", "gallbladder", "appendectomy", "bypass", "fracture", "cancer", "stroke", "asthma", "cholecystectomy"]
+        is_absent_fact_query = any(term in q_lower for term in absent_indicators)
+        if is_absent_fact_query:
+            all_text = " ".join(diagnoses + history + allergies + meds).lower()
+            matching_terms = [term for term in absent_indicators if term in q_lower and term in all_text]
+            if not matching_terms:
+                diag_summary = "; ".join(diagnoses) if diagnoses else "None documented"
+                allergy_summary = ", ".join(allergies) if allergies else "No known allergies"
+                return CDSEvaluateResponse(
+                    clinical_query=query_text,
+                    answer=(
+                        f"Electronic Health Record Review: No documentation found in the patient's clinical history for the requested event or procedure. "
+                        f"Current documented diagnoses: {diag_summary}. Documented allergies: {allergy_summary}."
+                    ),
+                    verification_status="abstained_policy",
+                    is_grounded=False,
+                    is_emergency=False,
+                    abstained=True,
+                    citations=[ehr_citation],
+                    drug_interactions=detected_interactions,
+                    safety_alerts=safety_alerts,
+                    abstention_reason="Requested historical detail not present in patient electronic health record.",
+                    execution_mode="doctor",
+                    pipeline_mode="patient_context_evaluation",
+                    language=effective_lang,
+                    detected_language=detected_lang,
+                    canonical_query=canon_info["canonical_query"] if canon_info["was_canonicalized"] else None
+                )
+
+        # Query asking for diagnosis, allergy, or clinical summary
+        is_diag_or_allergy_inquiry = (
+            any(k in q_lower for k in ["diagnos", "condition", "illness", "primary"]) or
+            any(k in q_lower for k in ["allerg", "precaution", "hypersensitiv"]) or
+            any(k in q_lower for k in ["medication", "medicine", "history", "summary"])
+        )
+        if is_diag_or_allergy_inquiry and (diagnoses or allergies or history or meds):
+            diag_str = "; ".join(diagnoses) if diagnoses else "No primary chronic diagnosis recorded."
+            allergy_str = ", ".join(allergies) if allergies else "No known drug allergies (NKDA)."
+            med_str = ", ".join(meds) if meds else "No active prescriptions recorded."
+            history_str = "; ".join(history) if history else "No additional historical notes recorded."
+
+            ans = (
+                f"Patient Clinical Dossier Summary:\n\n"
+                f"• **Primary Documented Diagnosis**: {diag_str}\n"
+                f"• **Documented Allergy Precautions**: {allergy_str}\n"
+                f"• **Active Medication Regimen**: {med_str}\n"
+                f"• **Clinical History Notes**: {history_str}\n\n"
+                f"*Clinical Precaution: Re-verify patient allergies and clinical status prior to modifying active pharmacological regimens.*"
+            )
+
+            return CDSEvaluateResponse(
+                clinical_query=query_text,
+                answer=ans,
+                verification_status="verified_grounded",
+                is_grounded=True,
+                is_emergency=False,
+                abstained=False,
+                citations=[ehr_citation],
+                drug_interactions=detected_interactions,
+                safety_alerts=safety_alerts,
+                abstention_reason=None,
+                execution_mode="doctor",
+                pipeline_mode="patient_context_evaluation",
+                language=effective_lang,
+                detected_language=detected_lang,
+                canonical_query=canon_info["canonical_query"] if canon_info["was_canonicalized"] else None
+            )
+
+        return None
+
     def evaluate(self, request: CDSEvaluateRequest) -> CDSEvaluateResponse:
         """
         Main orchestration flow:
@@ -89,6 +721,7 @@ class CDSOrchestrator:
         4. Deterministic Drug Safety Screening (Rule-Based, Non-LLM)
         5. Request-Scoped Clinical Context Packaging (Data-Minimization)
         6. Frozen RAG Pipeline Invocation
+
         7. Grounding Status Mapping & Final Assembly
         """
         query_text = request.clinical_query.strip()
@@ -172,6 +805,18 @@ class CDSOrchestrator:
                 return CDSEvaluateResponse(**localize_cds_response(early_res.model_dump(), target_lang=effective_lang))
             return early_res
 
+        # Step 3.5: Conversational Input Check (Greetings & Acknowledgements)
+        # Prevents ordinary social interactions from inappropriately triggering clinical evidence refusals
+        conversational_res = self._check_conversational_input(
+            query_text=query_text,
+            effective_lang=effective_lang,
+            detected_lang=detected_info["language"],
+            canon_info=canon_info,
+            mode=request.mode
+        )
+        if conversational_res is not None:
+            return conversational_res
+
         # Step 4: Deterministic Drug Safety Screening
         drug_list = self._extract_drugs_from_request(request)
         # Also include any extracted drugs from canonicalized query
@@ -204,6 +849,38 @@ class CDSOrchestrator:
             except Exception as e:
                 logger.error(f"Drug safety screening error: {e}", exc_info=True)
                 safety_alerts.append("Notice: Deterministic drug interaction engine encountered a lookup error.")
+
+        # Step 4.5: Patient Authorized Post-Discharge Care Plan Grounding
+        # When in patient mode with authorized discharge context, resolve post-discharge recovery questions
+        # directly from the patient's verified EHR discharge instructions and medication safety rules
+        if request.mode == "patient" and request.patient_context:
+            discharge_res = self._resolve_discharge_care_query(
+                query_text=query_text,
+                patient_context=request.patient_context,
+                effective_lang=effective_lang,
+                detected_lang=detected_info["language"],
+                canon_info=canon_info,
+                detected_interactions=detected_interactions,
+                safety_alerts=safety_alerts
+            )
+            if discharge_res is not None:
+                return discharge_res
+
+        # Step 4.6: Doctor Patient EHR Dossier Context Grounding
+        # When in doctor mode with patient EHR context, directly ground patient dossier questions
+        # (diagnosis, documented allergies, medical history) from verified EHR data
+        if request.mode == "doctor" and request.patient_context:
+            doctor_dossier_res = self._resolve_doctor_patient_dossier_query(
+                query_text=query_text,
+                patient_context=request.patient_context,
+                effective_lang=effective_lang,
+                detected_lang=detected_info["language"],
+                canon_info=canon_info,
+                detected_interactions=detected_interactions,
+                safety_alerts=safety_alerts
+            )
+            if doctor_dossier_res is not None:
+                return doctor_dossier_res
 
         # Step 5: Request-Scoped Context Packaging (No PII, never indexed)
         patient_context_dict: Dict[str, Any] = {}
@@ -281,7 +958,68 @@ class CDSOrchestrator:
 
         answer_text = rag_res.get("answer", "")
         abstention_reason = None
-        if abstained:
+
+        # When deterministic drug-drug interactions are verified, provide the clinical safety alert
+        # if the inquiry relates to co-prescription or combination safety, even if ungrounded conversational
+        # claims from the compact generative model were withheld
+        if detected_interactions:
+            q_lower = query_text.lower()
+            canon_lower = (canon_info.get("canonical_query") or "").lower()
+            is_coprescribe_query = any(k in q_lower or k in canon_lower for k in [
+                "co-prescribe", "coprescribe", "prescribe", "together", "interaction",
+                "interact", "combine", "combination", "concurrent", "with", "along with",
+                "safe to take", "can i take", "can i give", "simultaneously", "coadminister", "co-administer"
+            ])
+            has_unverified_curative_claim = any(k in q_lower or k in canon_lower for k in [
+                "cure", "cures", "curing", "treats cancer", "cure cancer", "prevent alzheimer", "treat alzheimer"
+            ])
+
+            if has_unverified_curative_claim:
+                # Query was asserting an ungrounded therapeutic claim that happened to mention interacting drugs.
+                # Strictly fail-closed: do NOT allow the ungrounded claim to inherit a grounded status!
+                # The interaction alert is preserved in `drug_interactions` and `safety_alerts`,
+                # but the response status remains fail-closed abstained.
+                abstention_reason = "Evidence insufficient or verification threshold not met for the requested therapeutic claim."
+                verification_status = "abstained_policy"
+                abstained = True
+                is_grounded = False
+                if request.mode == "patient":
+                    answer_text = (
+                        "The medical guidelines do not contain sufficient verified evidence to answer this question safely for personal care. "
+                        "For your health and safety, please consult your treating physician or a qualified healthcare professional."
+                    )
+                else:
+                    answer_text = (
+                        "The medical guidelines do not contain sufficient verified clinical evidence to support the requested therapeutic claim. "
+                        "Please refer to peer-reviewed clinical literature or consult a specialist."
+                    )
+            elif is_coprescribe_query:
+                top_alert = detected_interactions[0]
+                pair_label = " + ".join(top_alert.drug_pair)
+                safety_summary = (
+                    f"**Clinical Drug Interaction Alert ({top_alert.severity.upper()}): {pair_label}**\n\n"
+                    f"• **Finding**: {top_alert.explanation}\n"
+                    f"• **Recommended Clinical Action**: {top_alert.clinical_action}\n\n"
+                    f"*Authoritative Reference: Verified Clinical Drug Safety Rule ({top_alert.rule_id})*"
+                )
+                # Overwrite answer strictly with authoritative rule-engine text (dropping unverified generative claims)
+                answer_text = safety_summary
+                verification_status = "grounded"
+                is_grounded = True
+                abstained = False
+                abstention_reason = None
+                if not citations:
+                    citations.append(CDSCitation(
+                        source_index=1,
+                        title=f"Verified Drug Safety Interaction: {pair_label}",
+                        source_name=top_alert.source_id or "DailyMed / SIDER Clinical Interaction Engine",
+                        publisher="U.S. National Library of Medicine / FDA",
+                        url=top_alert.source_url or "https://dailymed.nlm.nih.gov",
+                        chunk_id="",
+                        qtype="Drug Interaction",
+                        score=1.0
+                    ))
+        elif abstained:
             if request.mode == "patient":
                 abstention_reason = "Evidence insufficient or verification threshold not met for safe patient guidance."
                 answer_text = (

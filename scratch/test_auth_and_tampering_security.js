@@ -11,7 +11,13 @@
  * 7. Legitimate Doctor and Patient logins obtain verified server JWTs.
  */
 
-const jwt = require("jsonwebtoken");
+const path = require("path");
+let jwt;
+try {
+  jwt = require("jsonwebtoken");
+} catch {
+  jwt = require(path.resolve(__dirname, "../Portal Major P/Bhumi/Doctor portal/backend/node_modules/jsonwebtoken"));
+}
 
 const BASE_URL = "http://127.0.0.1:5000";
 

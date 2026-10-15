@@ -1,63 +1,156 @@
 """
 Canonical Query Representation & Medical Normalization.
-Converts Hindi and Marathi medical inquiries into canonical English medical queries
-suitable for the frozen English DailyMed / ICMR RAG knowledge base.
+Converts multilingual (Hindi, Marathi, Gujarati, English) clinical inquiries into
+canonical English medical representations suitable for the frozen English DailyMed / ICMR RAG knowledge base.
 
 Core Invariants:
-1. Exact drug names and dosages (e.g., 500mg, 5mg) are preserved.
-2. Clinical negations (e.g., नहीं, नाही) are preserved.
-3. Medical conditions and question intentions are translated to canonical terms.
+1. Exact drug names, brand names, and dosages (e.g. 500mg, 5mg, 10ml) are preserved.
+2. Clinical negations (e.g. नहीं, नाही, न, don't, avoid, never) are preserved.
+3. Medical conditions, symptoms, and clinical intentions are normalized to canonical terminology.
+4. Generalizable phonetic transliteration & vocabulary mapping over all 199+ corpus drugs.
+5. NO tokens are dropped merely because they are not in a dictionary.
+6. NO canned questions are fabricated when normalization fails.
+7. Metadata exposing normalization provenance is returned for transparency and empirical evaluation.
 """
+import os
 import re
-from typing import Dict, Any, List, Tuple
+import difflib
+from typing import Dict, Any, List, Set, Optional
 from multilingual_module.detector import detect_language
 
 
-# Devanagari & Gujarati to Generic Drug Transliteration / Lexicon Map
-INDIC_DRUG_LEXICON = {
-    # Antidiabetics (Hi, Mr, Gu)
-    "मेटफॉर्मिन": "metformin", "मेटफार्मिन": "metformin", "मेटफोर्मिन": "metformin",
-    "મેટફોર્મિન": "metformin", "મેટફાર્મિન": "metformin",
-    "ગ્લિમેપિરાઇડ": "glimepiride", "ગ્લિક્લાઝાઇડ": "gliclazide",
-    "ग्लिमेपिराइड": "glimepiride", "ग्लिक्लाजाइड": "gliclazide",
-    # Antihypertensives & Cardiovascular
-    "लिसिनोप्रिल": "lisinopril", "लिसिनोप्रिल्": "lisinopril",
-    "લિસિનોપ્રિલ": "lisinopril",
-    "एम्लोडिपिन": "amlodipine", "अम्लोडिपाइन": "amlodipine",
-    "એમ્લોડિપિન": "amlodipine",
-    "एटेनोलोल": "atenolol", "मेटोप्रोलोल": "metoprolol",
-    "એટેનોલોલ": "atenolol", "મેટોપ્રોલોલ": "metoprolol",
-    "एटोर्वास्टेटिन": "atorvastatin", "एटोरवास्टेटिन": "atorvastatin", "लिपिटर": "lipitor",
-    "એટોર્વાસ્ટેટિન": "atorvastatin", "લિપિટર": "lipitor",
-    "वारफारिन": "warfarin", "वारफेरिन": "warfarin",
-    "વોરફેરિન": "warfarin", "વારફરીન": "warfarin",
-    "एस्पिरिन": "aspirin", "ऐस्पिरिन": "aspirin",
-    "એસ્પિરિન": "aspirin",
-    # Antibiotics & Analgesics
-    "पेरासिटामोल": "paracetamol", "पैरासिटामोल": "paracetamol", "डोलो": "dolo",
-    "પેરાસિટામોલ": "paracetamol", "ડોલો": "dolo",
-    "आइबुप्रोफेन": "ibuprofen", "इबुप्रोफेन": "ibuprofen",
-    "ઇબુપ્રોફેન": "ibuprofen", "આઇબુપ્રોફેન": "ibuprofen",
-    "सिप्रोफ्लोक्सासिन": "ciprofloxacin", "सिप्रो": "cipro",
-    "સિપ્રોફ્લોક્સાસીન": "ciprofloxacin", "સિપ્રો": "cipro",
-    "एमोक्सिसिलिन": "amoxicillin", "अमोक्सिसिलिन": "amoxicillin",
-    "એમોક્સિસિલિન": "amoxicillin",
-    "अजिथ्रोमाइसिन": "azithromycin", "एजिथ्रोमाइसिन": "azithromycin",
-    "એઝિથ્રોમાઇસિન": "azithromycin",
-    # Respiratory & GI
-    "ओमेप्राजोल": "omeprazole", "पैंटोप्राजोल": "pantoprazole", "पँटोप्राझोल": "pantoprazole",
-    "ઓમેપ્રાઝોલ": "omeprazole", "પેન્ટોપ્રાઝોલ": "pantoprazole",
-    "सालबुटामोल": "salbutamol", "मॉन्टेक्लुस्ट": "montelukast",
-    "સાલ્બુટામોલ": "salbutamol", "મોન્ટેલ્યુકાસ્ટ": "montelukast",
+# -----------------------------------------------------------------------------
+# 1. Corpus Drug Knowledge
+# -----------------------------------------------------------------------------
+CORPUS_DRUGS_PATH = os.path.join(os.path.dirname(__file__), "..", "rag_module", "data", "corpus_drugs.txt")
+
+def _load_corpus_drugs() -> List[str]:
+    drugs: List[str] = []
+    if os.path.exists(CORPUS_DRUGS_PATH):
+        with open(CORPUS_DRUGS_PATH, "r", encoding="utf-8") as f:
+            for line in f:
+                d = line.strip().lower()
+                if d and d not in drugs:
+                    drugs.append(d)
+    if not drugs:
+        drugs = [
+            "acyclovir", "albuterol", "allopurinol", "alprazolam", "amlodipine", "amoxicillin",
+            "aspirin", "atenolol", "atorvastatin", "azithromycin", "carvedilol", "ciprofloxacin",
+            "clopidogrel", "diltiazem", "furosemide", "glimepiride", "gliclazide", "hydrochlorothiazide",
+            "ibuprofen", "lisinopril", "losartan", "metformin", "metoprolol", "omeprazole",
+            "pantoprazole", "paracetamol", "prednisone", "ramipril", "rosuvastatin", "salbutamol",
+            "simvastatin", "telmisartan", "tramadol", "valsartan", "warfarin"
+        ]
+    return drugs
+
+CORPUS_DRUGS: List[str] = _load_corpus_drugs()
+CORPUS_DRUGS_SET: Set[str] = set(CORPUS_DRUGS)
+
+
+# -----------------------------------------------------------------------------
+# 2. Phonetic Transliteration Tables (Devanagari & Gujarati -> Latin)
+# -----------------------------------------------------------------------------
+DEVA_TO_LATIN = {
+    'क': 'k', 'ख': 'kh', 'ग': 'g', 'घ': 'gh', 'ङ': 'ng',
+    'च': 'ch', 'छ': 'chh', 'ज': 'j', 'झ': 'jh', 'ञ': 'ny',
+    'ट': 't', 'ठ': 'th', 'ड': 'd', 'ढ': 'dh', 'ण': 'n',
+    'त': 't', 'थ': 'th', 'द': 'd', 'ध': 'dh', 'न': 'n',
+    'प': 'p', 'फ': 'ph', 'ब': 'b', 'भ': 'bh', 'म': 'm',
+    'य': 'y', 'र': 'r', 'ल': 'l', 'व': 'v', 'श': 'sh',
+    'ष': 'sh', 'स': 's', 'ह': 'h', 'ळ': 'l', 'क्ष': 'ksh', 'ज्ञ': 'gy',
+    'ा': 'a', 'ि': 'i', 'ी': 'i', 'ु': 'u', 'ू': 'u',
+    'े': 'e', 'ै': 'ai', 'ो': 'o', 'ौ': 'au', 'ं': 'n', '्': '',
+    'अ': 'a', 'आ': 'a', 'इ': 'i', 'ई': 'i', 'उ': 'u', 'ऊ': 'u',
+    'ए': 'e', 'ऐ': 'ai', 'ओ': 'o', 'औ': 'au',
+    'ऑ': 'o', 'ॅ': 'e', 'ॉ': 'o', 'ऍ': 'e', 'ऋ': 'ri',
+    '़': '', 'ज़': 'z', 'फ़': 'f', 'क़': 'q', 'ख़': 'kh', 'ग़': 'gh'
 }
 
-# Indic Medical Concept / Query Intention Lexicon (Hindi + Marathi + Gujarati)
-INDIC_CONCEPT_LEXICON = {
+GUJ_TO_LATIN = {
+    'ક': 'k', 'ખ': 'kh', 'ગ': 'g', 'ઘ': 'gh', 'ઙ': 'ng',
+    'ચ': 'ch', 'છ': 'chh', 'જ': 'j', 'ઝ': 'jh', 'ઞ': 'ny',
+    'ટ': 't', 'ઠ': 'th', 'ડ': 'd', 'ઢ': 'dh', 'ણ': 'n',
+    'ત': 't', 'થ': 'th', 'દ': 'd', 'ધ': 'dh', 'ન': 'n',
+    'પ': 'p', 'ફ': 'ph', 'બ': 'b', 'ભ': 'bh', 'મ': 'm',
+    'ય': 'y', 'ર': 'r', 'લ': 'l', 'વ': 'v', 'શ': 'sh',
+    'ષ': 'sh', 'સ': 's', 'હ': 'h', 'ળ': 'l', 'ક્ષ': 'ksh', 'જ્ઞ': 'gy',
+    'ા': 'a', 'િ': 'i', 'ી': 'i', 'ુ': 'u', 'ૂ': 'u',
+    'ે': 'e', 'ૈ': 'ai', 'ો': 'o', 'ૌ': 'au', 'ં': 'n', '્': '',
+    'અ': 'a', 'આ': 'a', 'ઇ': 'i', 'ઈ': 'i', 'ઉ': 'u', 'ઊ': 'u',
+    'એ': 'e', 'ઐ': 'ai', 'ઓ': 'o', 'ઔ': 'au',
+    'ૉ': 'o', 'ૅ': 'e', '઼': ''
+}
+
+
+def transliterate_token(token: str) -> str:
+    """Dynamically transliterates an Indic script token (Devanagari/Gujarati) into Latin phonetics."""
+    chars = []
+    # Replace composite nukta characters first
+    t = token.replace('ज़', 'z').replace('फ़', 'f').replace('क़', 'q').replace('ख़', 'kh').replace('ग़', 'gh')
+    for c in t:
+        if c in DEVA_TO_LATIN:
+            chars.append(DEVA_TO_LATIN[c])
+        elif c in GUJ_TO_LATIN:
+            chars.append(GUJ_TO_LATIN[c])
+        else:
+            chars.append(c)
+    return "".join(chars)
+
+
+def match_corpus_drug_phonetically(token: str) -> Optional[str]:
+    """
+    Attempts to match an Indic or Latin transliterated token to the authoritative 199-drug DailyMed corpus.
+    Uses phonetic rule substitutions (ph->f, v->w, em->am) and fuzzy string similarity.
+    """
+    t_clean = re.sub(r"^[\s,.!?।;:\"'()\[\]{}]+|[\s,.!?।;:\"'()\[\]{}]+$", "", token).lower()
+    if not t_clean or len(t_clean) < 3:
+        return None
+
+    # Direct match
+    if t_clean in CORPUS_DRUGS_SET:
+        return t_clean
+
+    trans = transliterate_token(t_clean)
+    candidate = trans.replace("ph", "f").replace("ee", "i").replace("oo", "u").replace("़", "").replace("઼", "")
+
+    # Generate phonetic variants
+    variants = []
+    if candidate.startswith("em"):
+        variants.append("am" + candidate[2:])
+        variants.append(candidate)
+    else:
+        variants.append(candidate)
+
+    if candidate.startswith("v"):
+        variants.append("w" + candidate[1:])
+    if "j" in candidate:
+        variants.append(candidate.replace("j", "z"))
+    if candidate.startswith("s"):
+        variants.append("c" + candidate[1:])
+    if candidate.startswith("s") and ("j" in candidate or "z" in candidate):
+        variants.append("c" + candidate[1:].replace("j", "z"))
+    if candidate.startswith("ai"):
+        variants.append("i" + candidate[2:])
+
+    for var in variants:
+        if var in CORPUS_DRUGS_SET:
+            return var
+        matches = difflib.get_close_matches(var, CORPUS_DRUGS, n=1, cutoff=0.72)
+        if matches:
+            return matches[0]
+
+    return None
+
+
+# -----------------------------------------------------------------------------
+# 3. Clinical Intent & Negation Mapping
+# -----------------------------------------------------------------------------
+CLINICAL_INTENT_MAP = {
     # Conditions
-    "मधुमेह": "diabetes mellitus", "डायबिटीज": "diabetes mellitus",
-    "ડાયાબિટીસ": "diabetes mellitus",
+    "मधुमेह": "diabetes mellitus", "डायबिटीज": "diabetes mellitus", "ડાયાબિટીસ": "diabetes mellitus",
     "उच्च रक्तचाप": "hypertension", "उच्च रक्तदाब": "hypertension", "बीपी": "blood pressure",
-    "હાઈ બ્લડ પ્રેશર": "hypertension", "હાઈ બીપી": "hypertension",
+    "रक्तदाबाच्या": "blood pressure", "रक्तदाब": "blood pressure", "रक्तचाप": "blood pressure",
+    "બ્લડ પ્રેશર": "blood pressure", "હાઈ બ્લડ પ્રેશર": "hypertension", "હાઈ બીપી": "hypertension",
     "हार्ट अटॅक": "heart attack", "हार्ट अटैक": "heart attack", "હાર્ટ એટેક": "heart attack",
     "किडनी": "kidney", "गुर्दा": "kidney", "मूत्रपिंड": "renal / kidney", "કિડની": "kidney",
     "यकृत": "liver", "लिवर": "liver", "जिगर": "liver",
@@ -65,32 +158,43 @@ INDIC_CONCEPT_LEXICON = {
     "ताप": "fever", "बुखार": "fever",
     "डोकेदुखी": "headache", "सिरदर्द": "headache", "માથાનો દુખાવો": "headache",
 
-    # Pharmacology Question Intents
     "दुष्परिणाम": "side effects and adverse reactions",
     "दुष्प्रभाव": "side effects and adverse reactions",
     "આડઅસરો": "side effects and adverse reactions",
     "આડઅસર": "side effects",
+    "आडअसरो": "side effects and adverse reactions",
+    "आडअसर": "side effects",
     "आडपरिणाम": "adverse effects",
+    "નુકસાન": "adverse effects and risks",
     "नुकसान": "adverse effects and risks",
     "साइड इफेक्ट्स": "side effects",
     "साइड इफेक्ट": "side effects",
     "સાઇડ ઇફેક્ટ્સ": "side effects",
     "સાઇડ ઇફેક્ટ": "side effects",
     "खुराक": "dosage and administration",
-    "डोस": "dosage",
-    "ડોઝ": "dosage",
-    "प्रमाण": "dosage amount",
-    "માત્રા": "dosage amount",
+    "डोस": "dosage", "ડોઝ": "dosage",
+    "प्रमाण": "dosage amount", "માત્રા": "dosage amount",
     "वापर": "indications and clinical usage",
     "उपयोग": "indications and clinical usage",
-    "ફાયદા": "therapeutic benefits and indications",
     "फायदे": "therapeutic benefits and indications",
+    "ફાયદા": "therapeutic benefits and indications",
     "कसे घ्यावे": "how to administer and take",
     "कैसे लें": "how to administer and take",
     "કેવી રીતે લેવી": "how to administer and take",
     "ક્યારે લેવી": "administration timing",
+    "ક્યારે લેવું": "administration timing",
     "कधी घ्यावे": "administration timing",
     "केव्हा घ्यावे": "administration timing",
+    "कधी घ्यावी": "administration timing",
+    "कब लें": "administration timing",
+    "कब लेना": "administration timing",
+    "सुबह": "morning", "सकाळी": "morning", "સવારે": "morning",
+    "रात": "night", "रात्री": "night", "રાત્રે": "night",
+    "સાંજે": "evening", "संध्याकाळी": "evening", "शाम": "evening",
+    "પાણી સાથે": "with water", "पाण्यासोबत": "with water", "पानी के साथ": "with water",
+    "ખોરાક સાથે": "with food", "जेवणासोबत": "with food", "खाने के साथ": "with food",
+    "ખાધા પછી": "after food", "जेवणानंतर": "after food", "खाने के बाद": "after food",
+    "ખાધા પહેલાં": "before food", "जेवणापूर्वी": "before food", "खाने से पहले": "before food",
     "कशी काम करते": "mechanism of action",
     "कैसे काम करती है": "mechanism of action",
     "કેવી રીતે કામ કરે છે": "mechanism of action",
@@ -109,33 +213,82 @@ INDIC_CONCEPT_LEXICON = {
     "ચેતવણીઓ": "warnings and precautions",
     "સાવચેતી": "warnings and precautions",
 
-    # Emergency Triage Concepts
-    "छातीत वेदना": "chest pain",
-    "छातीत तीव्र वेदना": "severe crushing chest pain",
-    "छाती में दर्द": "chest pain",
-    "छाती में तेज दर्द": "severe chest pain",
-    "છાતીમાં દુખાવો": "chest pain",
-    "છાતીમાં તીવ્ર દુખાવો": "severe crushing chest pain",
-    "श्वास घेता येत नाही": "can't breathe difficulty breathing",
-    "श्वास घेण्यास त्रास": "difficulty breathing",
-    "શ્વાસ લેવામાં તકલીફ": "difficulty breathing",
-    "શ્વાસ નથી લઈ શકાતો": "can't breathe difficulty breathing",
-    "सांस नहीं ले पा रहा": "can't breathe difficulty breathing",
-    "सांस लेने में तकलीफ": "difficulty breathing",
-    "हार्ट अटॅक": "heart attack myocardial infarction",
-    "हार्ट अटैक": "heart attack myocardial infarction",
-    "रक्तस्त्राव": "severe bleeding",
-    "રક્તસ્રાવ": "severe bleeding",
-    "खून की उल्टी": "vomiting blood",
-    "લોહીની ઉલટી": "vomiting blood",
+    # Co-Prescribing & Concomitant Inquiries
+    "સાથે લેવી": "together co-prescribe",
+    "સાથે લઈ શકાય": "together co-prescribe",
+    "સાથે": "together co-prescribe",
+    "એકસાથે": "together co-prescribe",
+    "घेता येईल का": "together co-prescribe",
+    "एकत्र": "together co-prescribe",
+    "सोबत": "together co-prescribe",
+    "घेऊ शकतो का": "together co-prescribe",
+    "साथ में": "together co-prescribe",
+    "एक साथ": "together co-prescribe",
+    "ले सकते हैं": "together co-prescribe",
+    "दे सकते हैं": "together co-prescribe",
 
-    # Adversarial Injection Concepts
-    "पिछले सभी निर्देशों को अनदेखा करें": "ignore all previous instructions",
-    "सर्व मागील सूचना दुर्लक्षित करा": "ignore all previous instructions",
-    "પાછલા તમામ નિયમો અવગણો": "ignore all previous instructions",
-    "સિસ્ટમ પ્રોમ્પ્ટ": "system prompt",
-    "सिस्टम प्रॉम्प्ट": "system prompt",
-    "सिस्टम संदेश": "system prompt",
+    # Clinical Medical Terms & Nouns
+    "दवा के": "medicine", "दवा की": "medicine", "दवाएं": "medicine", "दवाई": "medicine", "दवा": "medicine",
+    "દવાના": "medicine", "દવાની": "medicine", "દવાઓ": "medicine", "દવા ના": "medicine", "દવા": "medicine",
+    "औषधाचे": "medicine", "औषधांच्या": "medicine", "औषधाची": "medicine", "औषधे": "medicine", "औषध": "medicine",
+    "गोळ्यांचे": "tablets", "गोळ्या": "tablets", "गोळीचे": "tablets", "गोळी": "tablets", "गोली के": "tablets", "गोली": "tablets", "गोलियां": "tablets",
+    "ગોળીઓ": "tablets", "ગોળીના": "tablets", "ગોળી": "tablets",
+    "ટેબ્લેટ": "tablets", "ટેબલેટ": "tablets", "ટૅબ્લેટ": "tablets", "टैबलेट": "tablets",
+    "સામાન્ય": "common", "सामान्य": "common",
+    "શું છે": "what are", "શું હોઈ શકે": "what are", "શું": "what are",
+    "काय आहे": "what are", "काय आहेत": "what are", "काय": "what are",
+    "क्या है": "what are", "क्या हैं": "what are", "क्या": "what are",
+    "લેવી જોઈએ": "to take", "લેવી પડે": "to take", "લેવી": "to take", "લેવાય": "to take",
+    "घेणे": "to take", "घ्यावी": "to take", "घ्यावे": "to take",
+    "लेना": "to take", "लेनी चाहिए": "to take", "लें": "to take",
+    "માટે": "for", "साठी": "for", "के लिए": "for",
+    "કેવી રીતે": "how to", "कसे": "how to", "कैसे": "how to",
+    "ક્યારે": "when", "कधी": "when", "कब": "when",
+    "શા માટે": "why", "कशासाठी": "why", "किसलिए": "why", "क्यों": "why",
+    "કોઈપણ": "any", "કોઈ": "any", "कोणते": "any", "काही": "any", "कोई": "any",
+    "છે": "are", "છો": "are",
+    "आहे": "is", "आहेत": "are",
+    "है": "is", "हैं": "are",
+    "અને": "and", "आणि": "and", "और": "and",
+    "અથવા": "or", "किंवा": "or", "या": "or",
+
+    # Latin-script Transliteration & Code-Switching Patterns
+    "kya nuksan hain": "side effects and adverse reactions",
+    "kya nuksan hai": "side effects and adverse reactions",
+    "kya side effects hain": "side effects and adverse reactions",
+    "side effects kya hain": "side effects and adverse reactions",
+    "kadhi ghyavi": "administration timing",
+    "kadhi ghyave": "administration timing",
+    "kyare levi": "administration timing",
+    "kyare levanu": "administration timing",
+    "kashasathi": "indications and clinical usage",
+    "kiske liye": "indications and clinical usage",
+    "sha mate": "indications and clinical usage",
+    "pani ke sath": "with water",
+    "pani sathe": "with water",
+    "panyasobat": "with water",
+    "khana khane ke baad": "after food",
+    "jamya pachhi": "after food",
+    "jevananantar": "after food",
+    "ek sath": "together co-prescribe",
+    "saath me": "together co-prescribe",
+    "ekatra": "together co-prescribe",
+    "sathe levi": "together co-prescribe",
+    "le sakte hain": "can take",
+    "gheu shakto ka": "can take",
+    "lai shakay": "can take",
+
+    # Clinical Conditions & Intentions
+    "गर्भावस्था": "pregnancy", "ગર્ભાવસ્થા": "pregnancy",
+    "उल्टी": "vomiting and nausea", "ઉલટી": "vomiting and nausea", "उलटी": "vomiting and nausea",
+
+    # Negations & Contraindications (MUST BE PRESERVED)
+    "नहीं": "not", "नही": "not", "नाही": "not", "न": "do not",
+    "ન": "do not", "નથી": "not", "નહીં": "not", "नका": "do not", "नको": "do not",
+    "ન લેવી": "do not take", "નથી લેવી": "do not take", "ન લેવું": "do not take",
+    "न लें": "do not take", "नका घेऊ": "do not take", "घेऊ नका": "do not take",
+    "बंध": "discontinue", "बंद": "discontinue",
+    "बिना": "without", "शिवाय": "without", "વિના": "without"
 }
 
 
@@ -147,7 +300,8 @@ def extract_dosage_tokens(text: str) -> List[str]:
 
 def canonicalize_medical_query(raw_query: str, forced_lang: str = None) -> Dict[str, Any]:
     """
-    Transforms Hindi/Marathi medical query into canonical English for the RAG engine.
+    Transforms Hindi, Marathi, Gujarati, or English medical queries into canonical English
+    representations for the retrieval engine without dropping unmatched tokens or fabricating canned queries.
     
     Returns:
         {
@@ -155,7 +309,10 @@ def canonicalize_medical_query(raw_query: str, forced_lang: str = None) -> Dict[
             "original_query": str,
             "detected_language": str,
             "extracted_drugs": List[str],
-            "was_canonicalized": bool
+            "extracted_dosages": List[str],
+            "preserved_tokens": List[str],
+            "was_canonicalized": bool,
+            "normalization_strategy": str
         }
     """
     if not raw_query or not raw_query.strip():
@@ -164,61 +321,88 @@ def canonicalize_medical_query(raw_query: str, forced_lang: str = None) -> Dict[
             "original_query": "",
             "detected_language": "en",
             "extracted_drugs": [],
-            "was_canonicalized": False
+            "extracted_dosages": [],
+            "preserved_tokens": [],
+            "was_canonicalized": False,
+            "normalization_strategy": "empty_query"
         }
 
     raw = raw_query.strip()
     detection = detect_language(raw)
     lang = forced_lang or detection["language"]
 
-    # If already English, return as-is
+    # Extract dosages first
+    extracted_dosages = extract_dosage_tokens(raw)
+
+    # If already English, check for known drugs directly
     if lang == "en":
+        extracted_drugs = []
+        for word in re.findall(r"\b[a-zA-Z]{3,}\b", raw.lower()):
+            if word in CORPUS_DRUGS_SET and word not in extracted_drugs:
+                extracted_drugs.append(word)
         return {
             "canonical_query": raw,
             "original_query": raw,
             "detected_language": "en",
-            "extracted_drugs": [],
-            "was_canonicalized": False
+            "extracted_drugs": extracted_drugs,
+            "extracted_dosages": extracted_dosages,
+            "preserved_tokens": raw.split(),
+            "was_canonicalized": False,
+            "normalization_strategy": "passthrough_english"
         }
 
-    # Extract drugs and dosages
-    extracted_drugs = []
-    canonical_tokens = []
-    
-    # Check for known Indic drug names in text
+    # Multilingual Normalization Pipeline
     working_text = raw
-    for indic_drug, english_drug in INDIC_DRUG_LEXICON.items():
-        if indic_drug in working_text:
-            extracted_drugs.append(english_drug)
-            working_text = working_text.replace(indic_drug, f" {english_drug} ")
+    extracted_drugs: List[str] = []
 
-    # Check for known medical concepts / intentions
-    for indic_concept, english_concept in INDIC_CONCEPT_LEXICON.items():
-        if indic_concept in working_text:
-            working_text = working_text.replace(indic_concept, f" {english_concept} ")
+    # 1. Map known multi-word clinical phrases & intentions (with punctuation & boundary protection)
+    for indic_phrase, english_equiv in sorted(CLINICAL_INTENT_MAP.items(), key=lambda x: -len(x[0])):
+        # Match only at word boundaries (whitespace or punctuation)
+        pattern = re.compile(rf"(?<![^\s\.,\?!।\(\)]){re.escape(indic_phrase)}(?![^\s\.,\?!।\(\)])")
+        if pattern.search(working_text):
+            working_text = pattern.sub(f" {english_equiv} ", working_text)
 
-    # Also detect any English drug names already present in Latin script
-    latin_words = re.findall(r"\b[a-zA-Z]{3,}\b", working_text)
-    for word in latin_words:
-        w_lower = word.lower()
-        if w_lower in ["metformin", "lisinopril", "aspirin", "warfarin", "amlodipine", "atorvastatin", "ciprofloxacin"]:
-            if w_lower not in extracted_drugs:
-                extracted_drugs.append(w_lower)
+    # 2. Tokenize and identify drugs dynamically (transliteration + fuzzy match)
+    tokens = working_text.split()
+    processed_tokens: List[str] = []
 
-    # Clean up non-Devanagari and Devanagari residual stopwords
-    cleaned_english_parts = []
-    for token in working_text.split():
-        # Keep Latin words, numbers, and dosage expressions
-        if re.search(r"[a-zA-Z0-9]", token):
-            cleaned_english_parts.append(token)
+    for tok in tokens:
+        clean_tok = re.sub(r"^[\s,.!?।;:\"'()\[\]{}]+|[\s,.!?।;:\"'()\[\]{}]+$", "", tok)
+        # Check if this token matches a corpus drug
+        matched_drug = match_corpus_drug_phonetically(clean_tok)
+        if matched_drug:
+            if matched_drug not in extracted_drugs:
+                extracted_drugs.append(matched_drug)
+            processed_tokens.append(matched_drug)
+        else:
+            # Check if token is already Latin or numeric
+            if re.search(r"[a-zA-Z0-9]", tok):
+                processed_tokens.append(tok)
+            else:
+                # Transliterate Indic token rather than silently dropping it
+                translit = transliterate_token(clean_tok)
+                if translit and len(translit) >= 1:
+                    processed_tokens.append(translit)
 
-    canonical_result = " ".join(cleaned_english_parts).strip()
+    canonical_result = " ".join(processed_tokens).strip()
+    canonical_result = re.sub(r"\s+", " ", canonical_result)
 
-    # If canonical result is empty or too sparse, construct a robust query from extracted entities
-    if len(canonical_result) < 5 and extracted_drugs:
-        canonical_result = f"What are the clinical indications, dosage, and adverse effects of {' and '.join(extracted_drugs)}?"
-    elif not canonical_result:
-        # Fallback: if untranslatable Indic, preserve original
+    # Normalize inverted Indic interrogative syntax for RAG retrieval & generator prompt clarity
+    # e.g., "amlodipine medicine common side effects what are" -> "what are common side effects of amlodipine"
+    what_match = re.search(r"^(.*?)\s+(what\s+(?:is|are))\s*$", canonical_result, re.IGNORECASE)
+    if what_match:
+        rest = what_match.group(1).strip()
+        q_word = what_match.group(2).strip()
+        tokens_rest = rest.split()
+        if tokens_rest and tokens_rest[0].lower() in CORPUS_DRUGS_SET:
+            drug = tokens_rest[0]
+            other = " ".join([t for t in tokens_rest[1:] if t.lower() not in {"medicine", "medicines", "tablet", "tablets"}])
+            canonical_result = f"{q_word} {other} of {drug}"
+        else:
+            canonical_result = f"{q_word} {rest}"
+
+    # Fallback safety: If result is empty, keep original query
+    if not canonical_result:
         canonical_result = raw
 
     return {
@@ -226,5 +410,8 @@ def canonicalize_medical_query(raw_query: str, forced_lang: str = None) -> Dict[
         "original_query": raw,
         "detected_language": lang,
         "extracted_drugs": list(set(extracted_drugs)),
-        "was_canonicalized": True
+        "extracted_dosages": extracted_dosages,
+        "preserved_tokens": processed_tokens,
+        "was_canonicalized": True,
+        "normalization_strategy": "dynamic_transliteration_and_corpus_alignment"
     }

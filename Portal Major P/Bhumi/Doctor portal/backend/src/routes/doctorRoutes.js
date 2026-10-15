@@ -19,6 +19,7 @@ const {
     createFollowup,
     getDoctorFollowups,
     evaluateDoctorCDS,
+    screenPrescriptionSafety,
     createOrUpdateDischarge,
     getDoctorPatientDischarge,
     uploadAndProcessPrescriptionOcr,
@@ -123,6 +124,13 @@ router.post(
     "/cds",
     authenticateDoctor,
     evaluateDoctorCDS
+);
+
+// High-Performance Deterministic Prescription Screening Bridge (<20ms)
+router.post(
+    "/prescriptions/screen",
+    authenticateDoctor,
+    screenPrescriptionSafety
 );
 
 // Post-Discharge Clinical Care

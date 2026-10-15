@@ -81,7 +81,7 @@ const renderHubHtml = () => `<!DOCTYPE html>
       <div class="portal-card">
         <div class="portal-icon">🩺</div>
         <h2 class="portal-title">Doctor Portal</h2>
-        <span class="portal-port">http://localhost:5173</span>
+        <span class="portal-port">http://localhost:5173/doctor</span>
         <p class="portal-desc">Clinical dashboard for licensed physicians to review dossiers, screen drug interactions, verify OCR prescriptions, and generate discharge summaries.</p>
         <ul class="portal-features">
           <li>Patient EHR & Vitals Dossier</li>
@@ -89,14 +89,14 @@ const renderHubHtml = () => `<!DOCTYPE html>
           <li>Prescription OCR Verification</li>
           <li>Post-discharge Care Creation</li>
         </ul>
-        <a href="http://localhost:5173" class="portal-btn">Launch Doctor Portal →</a>
+        <a href="http://localhost:5173/doctor" class="portal-btn">Launch Doctor Portal →</a>
       </div>
 
       <!-- RECEPTIONIST PORTAL -->
       <div class="portal-card">
         <div class="portal-icon">📋</div>
         <h2 class="portal-title">Receptionist Portal</h2>
-        <span class="portal-port">http://localhost:5174</span>
+        <span class="portal-port">http://localhost:5173/receptionist</span>
         <p class="portal-desc">Administrative workstation for front-desk staff to register patients, manage queue scheduling, and handle secure account activation provisioning.</p>
         <ul class="portal-features">
           <li>Patient Registration & Enrollment</li>
@@ -104,14 +104,14 @@ const renderHubHtml = () => `<!DOCTYPE html>
           <li>Single-use Activation Provisioning</li>
           <li>Isolated Administrative Boundary</li>
         </ul>
-        <a href="http://localhost:5174" class="portal-btn receptionist">Launch Receptionist Portal →</a>
+        <a href="http://localhost:5173/receptionist" class="portal-btn receptionist">Launch Receptionist Portal →</a>
       </div>
 
       <!-- PATIENT PORTAL -->
       <div class="portal-card">
         <div class="portal-icon">🏥</div>
         <h2 class="portal-title">Patient Portal</h2>
-        <span class="portal-port">http://localhost:5175</span>
+        <span class="portal-port">http://localhost:5173/patient</span>
         <p class="portal-desc">Patient self-service portal for reviewing personal medical records, upcoming appointments, prescriptions, and authorized post-discharge educational CDS.</p>
         <ul class="portal-features">
           <li>Self-Service Health Records</li>
@@ -119,7 +119,7 @@ const renderHubHtml = () => `<!DOCTYPE html>
           <li>Post-Discharge Care Guidelines</li>
           <li>Restricted Educational Assistant</li>
         </ul>
-        <a href="http://localhost:5175" class="portal-btn patient">Launch Patient Portal →</a>
+        <a href="http://localhost:5173/patient" class="portal-btn patient">Launch Patient Portal →</a>
       </div>
     </div>
 
@@ -128,7 +128,7 @@ const renderHubHtml = () => `<!DOCTYPE html>
         <h3>🔑 Have a new patient activation token?</h3>
         <p>Complete account setup with single-use cryptographic token verification and set your secure password.</p>
       </div>
-      <a href="http://localhost:5175/activate" class="activation-btn">Open Activation Page →</a>
+      <a href="http://localhost:5173/activate" class="activation-btn">Open Activation Page →</a>
     </div>
 
     <footer class="security-notice">
@@ -151,10 +151,11 @@ const getHub = (req, res) => {
     version: "2.10",
     status: "active",
     portals: {
-      doctor: "http://localhost:5173",
-      receptionist: "http://localhost:5174",
-      patient: "http://localhost:5175",
-      activation: "http://localhost:5175/activate"
+      unified_app: "http://localhost:5173",
+      doctor: "http://localhost:5173/doctor",
+      receptionist: "http://localhost:5173/receptionist",
+      patient: "http://localhost:5173/patient",
+      activation: "http://localhost:5173/activate"
     },
     services: {
       express_api: "http://localhost:5000",

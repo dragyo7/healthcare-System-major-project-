@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { LogOut, Sun, Moon, Menu, X, Shield, Sparkles } from "lucide-react";
+import { LogOut, Sun, Moon, Menu, X, Shield, Sparkles, Globe } from "lucide-react";
 import { DOCTOR_NAV, PATIENT_NAV, RECEPTIONIST_NAV } from "../constants/navigation";
 import { useAuth } from "../contexts/AuthContext";
+import { useLanguage } from "../contexts/LanguageContext";
 import { useTheme } from "../hooks/useTheme";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import Sidebar from "../components/layout/Sidebar";
@@ -10,6 +11,7 @@ import Sidebar from "../components/layout/Sidebar";
 export default function DashboardLayout({ children, role }) {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
   const { isDark, toggleTheme } = useTheme();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -69,7 +71,7 @@ export default function DashboardLayout({ children, role }) {
           <div className="hidden md:flex items-center ml-4">
             <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${badgeColor}`}>
               <span>{roleIcon}</span>
-              <span>{workspaceTitle}</span>
+              <span>{t(workspaceTitle)}</span>
             </span>
           </div>
         </div>
@@ -83,6 +85,22 @@ export default function DashboardLayout({ children, role }) {
             <span className="text-[11px] text-slate-500 dark:text-slate-400">
               {user?.email || (user?.role ? `${user.role.toUpperCase()} Session` : "")}
             </span>
+          </div>
+
+          {/* Visible Multilingual Selector */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs shadow-xs" title="Select Platform Language">
+            <Globe className="h-3.5 w-3.5 text-primary-600 dark:text-primary-400 shrink-0" />
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              className="bg-transparent text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer focus:outline-hidden"
+              aria-label="Interface Language"
+            >
+              <option value="en" className="text-slate-900">EN (English)</option>
+              <option value="hi" className="text-slate-900">हिन्दी (Hindi)</option>
+              <option value="mr" className="text-slate-900">मराठी (Marathi)</option>
+              <option value="gu" className="text-slate-900">ગુજરાતી (Gujarati)</option>
+            </select>
           </div>
 
           <button
@@ -99,7 +117,7 @@ export default function DashboardLayout({ children, role }) {
             title="Sign out of current session"
           >
             <LogOut className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Sign Out</span>
+            <span className="hidden sm:inline">{t("Sign Out")}</span>
           </button>
         </div>
       </header>

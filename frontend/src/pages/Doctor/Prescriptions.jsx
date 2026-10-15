@@ -139,9 +139,8 @@ export default function DoctorPrescriptions() {
     setSafetyFindings([]);
 
     try {
-      const res = await doctorApi.evaluateCDS({
+      const res = await doctorApi.screenPrescription({
         patientId: selectedPatientId,
-        clinicalQuery: `Prescription Safety Screening: ${medNames.join(", ")} for ${diagnosis || "Primary Care"}`,
         candidateMedications: medNames,
       });
 
@@ -177,11 +176,20 @@ export default function DoctorPrescriptions() {
         medicines: validMeds
       });
 
-      setSuccessMessage("Prescription verified, finalized, and saved to hospital database!");
+      if (res.duplicate_prevented) {
+        setSuccessMessage(`Prescription already recorded: Prescription #${res.prescription_id} (duplicate submission prevented).`);
+      } else {
+        setSuccessMessage("Prescription verified, finalized, and saved to hospital database!");
+      }
       setCreatedRxId(res.prescription_id || res.id);
       loadHistory();
     } catch (err) {
-      setError(err?.message || "Failed to persist prescription.");
+      const contraMsg = err?.response?.data?.contraindications?.join(" ") || "";
+      setError(
+        contraMsg
+          ? `${err.message || "Safety Failure"}: ${contraMsg}`
+          : (err?.message || "Failed to persist prescription.")
+      );
     } finally {
       setSubmitting(false);
     }

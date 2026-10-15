@@ -241,18 +241,33 @@ class AnswerGroundingVerifier:
         # 1. Subject extraction (generic active agent or noun phrase)
         subject = ""
 
-        # Pattern A: "Reactions of X", "Dose of X", "Use of X"
-        of_match = re.search(
-            r'\b(?:reactions?\s+of|effects?\s+of|dose\s+of|use\s+of|safety\s+of|indications?\s+for)\s+([a-zA-Z0-9_/-]+(?:\s+and\s+[a-zA-Z0-9_/-]+(?:\s+potassium)?)?)',
+        # Pattern C: Direct leading subject: "X is indicated...", "X decreases...", "X can cause...", "X is known..."
+        direct_match = re.match(
+            r'^([a-zA-Z0-9_/-]+(?:\s+and\s+[a-zA-Z0-9_/-]+(?:\s+potassium)?)?)\s+(?:is|are|was|were|can|could|may|might|will|would|should|must|decreases|increases|reduces|improves|prevents|causes|works|acts)\b',
             clean_text,
             re.IGNORECASE
         )
-        if of_match:
-            cand = of_match.group(1).strip()
-            if " - " in cand:
-                cand = cand.split(" - ")[0].strip()
-            if cand.lower() not in NON_SUBJECT_WORDS and not (cand and cand[0].isdigit()):
-                subject = cand
+        if direct_match:
+            candidate = direct_match.group(1).strip()
+            if " - " in candidate:
+                candidate = candidate.split(" - ")[0].strip()
+            cand_words = set(candidate.lower().split())
+            if candidate.lower() not in NON_SUBJECT_WORDS and not cand_words.issubset(NON_SUBJECT_WORDS) and not (candidate and candidate[0].isdigit()):
+                subject = candidate
+
+        # Pattern A: "Reactions of X", "Dose of X", "Use of X"
+        if not subject:
+            of_match = re.search(
+                r'\b(?:reactions?\s+of|effects?\s+of|dose\s+of|use\s+of|safety\s+of|indications?\s+for)\s+([a-zA-Z0-9_/-]+(?:\s+and\s+[a-zA-Z0-9_/-]+(?:\s+potassium)?)?)',
+                clean_text,
+                re.IGNORECASE
+            )
+            if of_match:
+                cand = of_match.group(1).strip()
+                if " - " in cand:
+                    cand = cand.split(" - ")[0].strip()
+                if cand.lower() not in NON_SUBJECT_WORDS and not (cand and cand[0].isdigit()):
+                    subject = cand
 
         # Pattern A1: "maximum dose for adults of X", "dose in adults of X", "effects in patients of X"
         if not subject:
@@ -280,17 +295,6 @@ class AnswerGroundingVerifier:
                 if " - " in candidate:
                     candidate = candidate.split(" - ")[0].strip()
                 if candidate.lower() not in NON_SUBJECT_WORDS and not (candidate and candidate[0].isdigit()):
-                    subject = candidate
-
-        # Pattern C: "X is indicated...", "X decreases...", "X is a vitamin"
-        if not subject:
-            direct_match = re.match(r'^([a-zA-Z0-9_/-]+(?:\s+and\s+[a-zA-Z0-9_/-]+(?:\s+potassium)?|\s+[a-zA-Z0-9_/-]+)?)\s+(?:is|are|decreases|increases|reduces|improves|prevents|causes|works|acts|should|can|may)', clean_text, re.IGNORECASE)
-            if direct_match:
-                candidate = direct_match.group(1).strip()
-                if " - " in candidate:
-                    candidate = candidate.split(" - ")[0].strip()
-                cand_words = set(candidate.lower().split())
-                if candidate.lower() not in NON_SUBJECT_WORDS and not cand_words.issubset(NON_SUBJECT_WORDS) and not (candidate and candidate[0].isdigit()):
                     subject = candidate
 
         # Pattern D: Pharmaceutical nomenclature suffix pattern (-ol, -il, -in, -an, -ide, -ate, etc.)
@@ -726,13 +730,17 @@ class AnswerGroundingVerifier:
             num_pattern = r'\b' + re.escape(val_str) + r'\s*(mg|mcg|g|ml)\b'
             matches = list(re.finditer(num_pattern, combined_evidence_text, re.IGNORECASE))
             if not matches:
-                return ClaimVerificationResult(
-                    claim_text=claim_text,
-                    status=ClaimStatus.NUMERIC_MISMATCH,
-                    proposition=prop,
-                    cited_chunk_ids=citation_chunk_ids,
-                    discrepancy_reason=f"Numeric value '{prop.value}' not found in cited evidence."
-                )
+                # Check broader accepted evidence chunks for this verified entity
+                all_accepted_text = "\n".join([str(c.get("text") or "") for c in evidence_chunks if isinstance(c, dict)])
+                matches = list(re.finditer(num_pattern, all_accepted_text, re.IGNORECASE))
+                if not matches:
+                    return ClaimVerificationResult(
+                        claim_text=claim_text,
+                        status=ClaimStatus.NUMERIC_MISMATCH,
+                        proposition=prop,
+                        cited_chunk_ids=citation_chunk_ids,
+                        discrepancy_reason=f"Numeric value '{prop.value}' not found in cited evidence."
+                    )
 
             # Check unit for the matching value
             ev_units = {m.group(1).lower() for m in matches}

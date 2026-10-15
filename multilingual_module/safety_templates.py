@@ -24,6 +24,8 @@ SAFETY_TEMPLATE_KEYS = {
     "DRUG_INTERACTION_ALERT": "drug_interaction_alert",
     "PHYSICIAN_CONSULTATION_REQUIRED": "physician_consultation_required",
     "PATIENT_EDUCATIONAL_DISCLAIMER": "patient_educational_disclaimer",
+    "CONVERSATIONAL_GREETING": "conversational_greeting",
+    "CONVERSATIONAL_ACKNOWLEDGEMENT": "conversational_acknowledgement",
 }
 
 
@@ -167,6 +169,49 @@ SAFETY_TEMPLATES: Dict[str, Dict[str, str]] = {
             "તમારા ડૉક્ટરના સ્પષ્ટ નિર્દેશ વિના તમારી દવાનો ડોઝ બદલશો નહીં, બંધ કરશો નહીં અથવા શરૂ કરશો નહીં.*"
         ),
     },
+    # -------------------------------------------------------------------------
+    # 8. CONVERSATIONAL GREETING & ACKNOWLEDGEMENT
+    # -------------------------------------------------------------------------
+    "conversational_greeting": {
+        "en": (
+            "Hello! I am your Post-Discharge Care Assistant. I can help answer questions about your "
+            "discharge instructions, prescribed medications, follow-up schedule, or recovery warning signs. "
+            "How can I help you today?"
+        ),
+        "hi": (
+            "नमस्ते! मैं आपका पोस्ट-डिस्चार्ज केयर असिस्टेंट हूँ। मैं आपके डिस्चार्ज निर्देशों, निर्धारित दवाओं, "
+            "फॉलो-अप शेड्यूल या रिकवरी चेतावनी संकेतों के बारे में सवालों के जवाब देने में मदद कर सकता हूँ। "
+            "आज मैं आपकी क्या मदद कर सकता हूँ?"
+        ),
+        "mr": (
+            "नमस्कार! मी तुमचा पोस्ट-डिस्चार्ज केअर असिस्टंट आहे. मी तुमच्या डिस्चार्ज सूचना, लिहून दिलेली औषधे, "
+            "फॉलो-अप वेळापत्रक किंवा रिकव्हरी चेतावणी चिन्हांबद्दलच्या प्रश्नांची उत्तरे देण्यास मदत करू शकतो. "
+            "आज मी तुम्हाला कशी मदत करू शकतो?"
+        ),
+        "gu": (
+            "નમસ્તે! હું તમારો પોસ્ટ-ડિસ્ચાર્જ કેર આસિસ્ટન્ટ છું. હું તમારા ડિસ્ચાર્જ સૂચનાઓ, સૂચવેલ દવાઓ, "
+            "ફોલો-અપ શેડ્યૂલ અથવા રિકવરી ચેતવણી ચિહ્નો વિશેના પ્રશ્નોના જવાબ આપવામાં મદદ કરી શકું છું. "
+            "આજે હું તમને કેવી રીતે મદદ કરી શકું?"
+        ),
+    },
+    "conversational_acknowledgement": {
+        "en": (
+            "You're welcome! Please let me know if you have any questions about your medications, "
+            "recovery instructions, or follow-up schedule."
+        ),
+        "hi": (
+            "आपका स्वागत है! यदि आपके पास अपनी दवाओं, रिकवरी निर्देशों या फॉलो-अप शेड्यूल के बारे में कोई प्रश्न हैं, "
+            "तो कृपया मुझे बताएं।"
+        ),
+        "mr": (
+            "आपले स्वागत आहे! आपल्या औषधांबद्दल, रिकव्हरी सूचनांबद्दल किंवा फॉलो-अप वेळापत्रकाबद्दल काही प्रश्न असल्यास "
+            "कृपया मला विचारा."
+        ),
+        "gu": (
+            "આપનું સ્વાગત છે! જો તમને તમારી દવાઓ, રિકવરી સૂચનાઓ અથવા ફોલો-અપ શેડ્યૂલ વિશે કોઈ પ્રશ્નો હોય, "
+            "તો કૃપા કરીને મને પૂછો."
+        ),
+    },
 }
 
 
@@ -186,6 +231,16 @@ def get_localized_safety_alert(key: str, lang: str = "en", **kwargs) -> str:
 def get_localized_emergency_guidance(lang: str = "en") -> str:
     """Returns authoritative emergency guidance in target language."""
     return get_localized_safety_alert("emergency_guidance", lang)
+
+
+def get_conversational_greeting(lang: str = "en") -> str:
+    """Returns friendly, localized post-discharge assistant greeting."""
+    return get_localized_safety_alert("conversational_greeting", lang)
+
+
+def get_conversational_acknowledgement(lang: str = "en") -> str:
+    """Returns friendly, localized post-discharge assistant acknowledgement."""
+    return get_localized_safety_alert("conversational_acknowledgement", lang)
 
 
 def get_localized_interaction_alert(drug_a: str, drug_b: str, severity: str, clinical_action: str, lang: str = "en") -> Dict[str, str]:
