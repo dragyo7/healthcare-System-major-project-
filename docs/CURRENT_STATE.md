@@ -1,10 +1,10 @@
-# CURRENT STATE — CANONICAL PROJECT BASELINE
+﻿# CURRENT STATE — CANONICAL PROJECT BASELINE
 
-> **Document Type**: Authoritative Canonical Project State  
-> **Repository Branch**: `feature/cds-gateway` (Merged from `feature/rag-v2-foundation` & Teammate Doctor Portal)  
-> **Status**: **VERIFIED & OPERATIONAL BASELINE (All Phases Complete: Phase 0 RAG, Phase 1 CDS Gateway, Phase 2 Doctor E2E, Phase 3 Multilingual, Phase 4 Receptionist Integration, Phase 5 Patient Portal, Phase 6 Discharge Care, Phase 7 Prescription OCR Pipeline, Phase 8 Full-System Multi-Role E2E)**  
-> **Date**: October 2026  
-> **Authoritative Baseline Reference**: Hardened Frozen RAG V2.10 + CDS Gateway + Express EHR + Doctor Portal (5173) + Receptionist Portal (5174) + Patient Portal (5175) + Offline OCR Pipeline  
+> **Document Type**: Authoritative Canonical Project State
+> **Repository Branch**: `main` (Merged Release Baseline `cbee83a`, Hardened `5a03d85`)
+> **Status**: **VERIFIED, HARDENED & MERGED ON MAIN (All Phases Complete: Phase 0 RAG, Phase 1 CDS Gateway, Phase 2 Doctor E2E, Phase 3 Multilingual, Phase 4 Receptionist Integration, Phase 5 Patient Portal, Phase 6 Discharge Care, Phase 7 Prescription OCR Pipeline, Phase 8 Full-System Multi-Role E2E, Phase 9 Account Lifecycle & RBAC)**
+> **Date**: October 2026
+> **Authoritative Baseline Reference**: Hardened Frozen RAG V2.10 + CDS Gateway + Express EHR + Unified Portal (Port 5173) + Offline OCR Pipeline
 
 ---
 
@@ -17,7 +17,7 @@ The system connects three role-specific portals (Doctor, Patient, Receptionist) 
 2. **Deterministic Medication Safety Engine (`drug_module`)**: Multi-drug interaction screening and contraindication detection based on verified clinical rules (DrugBank, SIDER).
 3. **Prescription Extraction & Safety Flow (`prescription_module`)**: Structured prescription entity extraction, offline OCR (`tesseract.js`) image scanning, and safety screening.
 4. **Post-Discharge Care & Follow-Up**: Doctor discharge summaries, red-flag warning signs, and restricted patient post-discharge CDS.
-5. **Multilingual Foundation (`multilingual_module`)**: Cross-cutting language identification, canonical medical normalization, and localized response generation for English, Hindi, and Marathi.
+5. **Multilingual Foundation (`multilingual_module`)**: Cross-cutting language identification, canonical medical normalization, and localized response generation for English, Hindi, Marathi, and Gujarati.
 6. **Electronic Health Record (EHR) Gateway (`backend`)**: Express + MySQL backend enforcing server-side JWT authentication, role-based access control (RBAC), Broken Object Level Authorization (BOLA) defenses, and Zero-PII sanitization.
 
 ---
@@ -42,6 +42,7 @@ The system connects three role-specific portals (Doctor, Patient, Receptionist) 
                    │  • Doctor-Patient BOLA Check            │
                    │  • Zero-PII Context Sanitizer           │
                    │  • Offline Prescription OCR Engine      │
+                   │  • Session Advisory Lock Manager        │
                    └────────────┬──────────────────┬─────────┘
                                 │                  │
                      SQL (3306) │                  │ HTTP (127.0.0.1:8000/cds/evaluate)
@@ -52,13 +53,13 @@ The system connects three role-specific portals (Doctor, Patient, Receptionist) 
            │ • Users (Doc, Pat,    │  │                                                        │
            │   Receptionist)       │  │  ┌──────────────────────┐    ┌──────────────────────┐  │
            │ • Patients & Profiles │  │  │ Multilingual Layer   │    │  Deterministic Drug  │  │
-           │ • Medical Hist & Sym  │  │  │ (en / hi / mr)       │    │     Safety Engine    │  │
+           │ • Medical Hist & Sym  │  │  │ (en / hi / mr / gu)  │    │     Safety Engine    │  │
            │ • Prescriptions & Rx  │  │  │ • Detector           │    │ • DrugBank 8 Rules   │  │
-           │ • Discharges (New)    │  │  │ • Canonicalizer      │    │ • SIDER 20 Profiles  │  │
-           │ • OCR Jobs (New)      │  │  │ • Safety Templates   │    │ • Severity Rules     │  │
-           │ • Appointments/Sched  │  │  └──────────┬───────────┘    └──────────┬───────────┘  │
-           └───────────────────────┘  │             │                           │              │
-                                      │             ▼                           ▼              │
+           │ • Discharges (Table)  │  │  │ • Canonicalizer      │    │ • SIDER 20 Profiles  │  │
+           │ • OCR Jobs (Table)    │  │  │ • Safety Templates   │    │ • Severity Rules     │  │
+           │ • Activations (Table) │  │  └──────────┬───────────┘    └──────────┬───────────┘  │
+           │ • Appointments/Sched  │  │             │                           │              │
+           └───────────────────────┘  │             ▼                           ▼              │
                                       │  ┌──────────────────────────────────────────────────┐  │
                                       │  │              FROZEN MEDICAL RAG V2.10            │  │
                                       │  │ • 2,204 DailyMed SPL Knowledge Chunks            │  │
@@ -77,13 +78,15 @@ The system connects three role-specific portals (Doctor, Patient, Receptionist) 
 
 ## 3. Current Branch & Git Baseline
 
-* **Active Git Branch**: `feature/cds-gateway`
+* **Active Git Branch**: `main`
 * **Baseline Commits**:
   * `497a547`: Hardened RAG V2.10 Core Freeze
-  * `a825690`: Initial Doctor Dashboard integration
-  * `893155a`: Verified E2E RAG Chat & Safety Banners
-  * `58a2bcd`: Project State Consolidation & Freeze Baseline
-  * `7b0867b`: Integration of Frozen RAG V2.10 with verified Teammate Doctor Portal
+  * `7b0867b`: Integration of Frozen RAG V2.10 with verified Doctor Portal
+  * `cbee83a`: Merge branch `release/cdss-final` into `main` (Phases 0–9 consolidated)
+  * `db34fe4`: Prescription concurrency idempotency via MySQL session advisory locks
+  * `b2b9a40`: Prescription PDF authorization and lock-timeout fail-closed defense
+  * `c905c9a`: Receptionist registration modal repair, date validation, and manuscript finalization
+  * `5a03d85`: Route matrix, database migration docs, and explicit system limitations
 
 ---
 

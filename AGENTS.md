@@ -1,10 +1,10 @@
-# AGENTS.md — Developer & AI Agent Operations Manual
+﻿# AGENTS.md — Developer & AI Agent Operations Manual
 
-> **Authoritative Root Guide for Developers and AI Coding Agents**  
-> **Project**: Modular AI-Powered Clinical Decision Support (CDS) System (4th-Year Major Project)  
-> **Repository Branch**: `feature/cds-gateway` (Targeting `main`)
-> **RAG Frozen Baseline Commit**: `497a547` (Hardened V2.10)  
-> **Frontend Integration Baseline Commit**: `893155a` (Verified E2E)  
+> **Authoritative Root Guide for Developers and AI Coding Agents**
+> **Project**: Modular AI-Powered Clinical Decision Support (CDS) System (4th-Year Major Project)
+> **Repository Branch**: `main` (Merged Baseline `cbee83a`, Hardened `5a03d85`)
+> **RAG Frozen Baseline Commit**: `497a547` (Hardened V2.10)
+> **Frontend Integration Baseline Commit**: `893155a` (Verified E2E)
 
 ---
 

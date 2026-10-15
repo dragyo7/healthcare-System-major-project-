@@ -1,9 +1,10 @@
-# Project Roadmap & Phase Progression
+﻿# Project Roadmap & Phase Progression
 
-> **Document Type**: Master Project Engineering Roadmap  
-> **Project**: Modular AI-Powered Multilingual Clinical Decision Support System  
-> **Date**: October 2026  
-> **Current Position**: **Phase 3 Complete / Standing by for Phase 4 & Phase 5 Teammate Modules**  
+> **Document Type**: Master Project Engineering Roadmap
+> **Project**: Modular AI-Powered Multilingual Clinical Decision Support System (4th-Year Major Project)
+> **Authoritative Branch**: `main` (Merged and Hardened Baseline `5a03d85`)
+> **Status**: **ALL PHASES (0–9) COMPLETE, VERIFIED & MERGED TO MAIN**
+> **Date**: October 2026
 
 ---
 
@@ -11,52 +12,57 @@
 
 ```text
 ┌────────────────────────┐
-│ PHASE 0: RAG CORE      │  [COMPLETE / HARD FROZEN]
+│ PHASE 0: RAG CORE      │  [COMPLETE / HARD FROZEN - Commit 497a547]
 └───────────┬────────────┘
             │
             ▼
 ┌────────────────────────┐
-│ PHASE 1: CDS GATEWAY   │  [COMPLETE / VERIFIED]
+│ PHASE 1: CDS GATEWAY   │  [COMPLETE / VERIFIED - 9/9 Tests Passed]
 └───────────┬────────────┘
             │
             ▼
 ┌────────────────────────┐
-│ PHASE 2: DOCTOR PORTAL │  [COMPLETE / VERIFIED]
+│ PHASE 2: DOCTOR PORTAL │  [COMPLETE / VERIFIED - 26/26 Tests Passed]
 └───────────┬────────────┘
             │
             ▼
 ┌────────────────────────┐
-│ PHASE 3: MULTILINGUAL  │  [COMPLETE / VERIFIED]
+│ PHASE 3: MULTILINGUAL  │  [COMPLETE / VERIFIED - 16/16 Tests Passed]
 └───────────┬────────────┘
             │
             ▼
 ┌────────────────────────┐
-│ PHASE 4: PATIENT MOD.  │  [WAITING FOR TEAMMATE]
+│ PHASE 4: RECEPTIONIST  │  [COMPLETE / VERIFIED - 9/9 Tests Passed]
 └───────────┬────────────┘
             │
             ▼
 ┌────────────────────────┐
-│ PHASE 5: RECEPTIONIST  │  [WAITING FOR TEAMMATE]
+│ PHASE 5: PATIENT MOD.  │  [COMPLETE / VERIFIED - 14/14 Tests Passed]
 └───────────┬────────────┘
             │
             ▼
 ┌────────────────────────┐
-│ PHASE 6: OCR / IMAGES  │  [FUTURE SCOPE]
+│ PHASE 6: DISCHARGE     │  [COMPLETE / VERIFIED - Migration 002]
 └───────────┬────────────┘
             │
             ▼
 ┌────────────────────────┐
-│ PHASE 7: FULL SYS E2E  │  [FUTURE SCOPE]
+│ PHASE 7: OCR / IMAGES  │  [COMPLETE / VERIFIED - 12/12 Tests Passed]
 └───────────┬────────────┘
             │
             ▼
 ┌────────────────────────┐
-│ PHASE 8: RAG TUNING    │  [FUTURE SCOPE]
+│ PHASE 8: FULL SYS E2E  │  [COMPLETE / VERIFIED - 20/20 Tests Passed]
 └───────────┬────────────┘
             │
             ▼
 ┌────────────────────────┐
-│ PHASE 9: DEPLOYMENT    │  [FUTURE SCOPE]
+│ PHASE 9: RBAC & SEC    │  [COMPLETE / VERIFIED - 12/12 Tests Passed]
+└───────────┬────────────┘
+            │
+            ▼
+┌────────────────────────┐
+│ FINAL RELEASE MERGE    │  [MERGED TO MAIN - Commit cbee83a -> 5a03d85]
 └────────────────────────┘
 ```
 
@@ -69,7 +75,7 @@
 * **Scope Completed**:
   * Ingestion of 2,204 DailyMed SPL monograph knowledge chunks.
   * Dense FAISS index (`BAAI/bge-small-en`, 384 dimensions) and BM25 lexical retriever.
-  * Reciprocal Rank Fusion (`k=60`) and Cross-Encoder second-stage reranker.
+  * Reciprocal Rank Fusion (`k=60`) and Cross-Encoder second-stage reranker (`cross-encoder/ms-marco-MiniLM-L-6-v2`).
   * `EvidencePolicyEngine` with dynamic entity isolation.
   * Deterministic `AnswerGroundingVerifier` and fail-closed safety policy.
   * Baseline Test Suite: 190 passed, 2 skipped, 0 failed.
@@ -81,8 +87,8 @@
 * **Scope Completed**:
   * Unified FastAPI CDS Gateway (`/cds/evaluate`, `/cds/screen-prescription`).
   * Role-scoped execution modes (`doctor`, `patient`, non-clinical `receptionist` rejection).
-  * Integration of deterministic `drug_module` interaction engine (DrugBank, SIDER).
-  * Emergency triage diversion and prompt injection early blocking.
+  * Integration of deterministic `drug_module` interaction engine (DrugBank 8 rules, SIDER 20 profiles).
+  * Emergency triage diversion (108/112) and prompt injection early blocking.
   * Automated Gateway Test Suite: 9/9 passed.
 
 ---
@@ -113,58 +119,79 @@
 
 ---
 
-### PHASE 4 — Patient Module Integration
-* **Status**: **WAITING FOR TEAMMATE**
-* **Upcoming Scope**:
-  * Ingest teammate Patient Portal frontend component into the platform.
-  * Connect to Express `/api/patient/cds` endpoint under `mode="patient"`.
-  * Validate that patients can only evaluate their own medical history (BOLA enforcement).
-  * Validate educational patient guidance with internal chunk IDs and scores redacted.
-  * Verify multilingual query submission (Hindi/Marathi) from the Patient UI.
+### PHASE 4 — Secure Receptionist Integration
+* **Status**: **COMPLETE / VERIFIED**
+* **Scope Completed**:
+  * Integrated front-desk receptionist interface into the unified frontend on port 5173.
+  * Receptionist administrative routes (`/api/receptionist/doctors`, `/api/receptionist/patients`, `/api/receptionist/appointments`).
+  * Enforced strict server-side rejection of any clinical RAG or CDS requests by administrative accounts (HTTP 403 Forbidden).
+  * Receptionist Endpoints Test Suite: 9/9 passed.
 
 ---
 
-### PHASE 5 — Receptionist Module Integration
-* **Status**: **WAITING FOR TEAMMATE**
-* **Upcoming Scope**:
-  * Ingest teammate Receptionist Portal frontend component into the platform.
-  * Verify administrative endpoints (patient registration, appointment booking, doctor schedules).
-  * Enforce strict rejection of any clinical RAG or CDS requests by administrative accounts (HTTP 403 Forbidden).
+### PHASE 5 — Patient Self-Service Portal
+* **Status**: **COMPLETE / VERIFIED**
+* **Scope Completed**:
+  * Integrated Patient self-service portal into the unified frontend.
+  * Patient personal health metrics, appointment history, active prescriptions, and discharge directives.
+  * BOLA isolation: Patient token strictly bound to caller identity; cross-patient parameter tampering rejected.
+  * Educational patient guidance with internal chunk IDs and scores redacted.
+  * Patient & Discharge Care Suite: 14/14 passed.
 
 ---
 
-### PHASE 6 — Prescription OCR & Image Parsing Integration
-* **Status**: **FUTURE SCOPE**
-* **Upcoming Scope**:
-  * Ingest handwritten/printed prescription image uploads.
-  * OCR extraction via vision pipeline, normalizing text into structured medication objects (`drug`, `dose`, `route`, `frequency`, `duration`).
-  * Feed parsed medications directly into `/cds/screen-prescription` for instantaneous safety checks.
+### PHASE 6 — Post-Discharge Care & Follow-Up
+* **Status**: **COMPLETE / VERIFIED**
+* **Scope Completed**:
+  * Applied database migration `002_create_discharges_table.sql`.
+  * Doctor endpoint `POST /api/doctor/discharge` for authorizing discharge directives, follow-up dates, and red-flag warning signs.
+  * Patient endpoint `GET /api/patient/discharge` for viewing discharge care plans.
+  * Grounded patient post-discharge assistant (`POST /api/patient/cds`) answering recovery questions based strictly on the patient's authorized care plan.
 
 ---
 
-### PHASE 7 — Full-System End-to-End Validation
-* **Status**: **FUTURE SCOPE**
-* **Upcoming Scope**:
-  * Cross-portal live lifecycle testing:
-    * Receptionist registers patient and books appointment.
-    * Doctor consults, reviews dossier, queries CDS in Hindi/Marathi, and prescribes medications.
-    * Patient logs in to view prescription, review educational guidance, and check interaction warnings.
-  * Platform-wide automated integration test run.
+### PHASE 7 — Prescription Image OCR Pipeline
+* **Status**: **COMPLETE / VERIFIED**
+* **Scope Completed**:
+  * Applied database migration `003_create_prescription_ocr_jobs.sql`.
+  * Multer magic-byte upload validation preventing non-image file uploads.
+  * Offline Tesseract.js optical character recognition engine with regex clinical entity extraction (`drug`, `dose`, `route`, `frequency`, `duration`).
+  * Strict Human Clinician Invariant: Extracted prescriptions remain in unconfirmed draft status (`needs_review: true`) until explicitly reviewed and confirmed via `POST /api/doctor/prescriptions/confirm-ocr`.
+  * Prescription OCR Pipeline Test Suite: 12/12 passed.
 
 ---
 
-### PHASE 8 — Targeted RAG Accuracy & Latency Optimization
-* **Status**: **FUTURE SCOPE (AFTER COMPLETE SYSTEM INTEGRATION)**
-* **Upcoming Scope**:
-  * Benchmark token verification thresholds without relaxing fail-closed guarantees.
-  * Evaluate compact generator fine-tuning or quantization to reduce inference latency.
-  * Evaluate expanding DailyMed SPL coverage beyond primary care medications.
+### PHASE 8 — Full-System Multi-Role Synthetic Journey
+* **Status**: **COMPLETE / VERIFIED**
+* **Scope Completed**:
+  * Complete synthetic cross-role lifecycle execution:
+    1. Receptionist registers patient and books appointment.
+    2. Doctor consults, reviews patient dossier, runs CDS inquiries, screens prescriptions for interactions, and persists the prescription.
+    3. Doctor authors post-discharge recovery instructions.
+    4. Patient logs in, reviews prescriptions, downloads PDF, and queries post-discharge assistant in English and Indic languages.
+  * Negative security test matrix (tampered IDs, unauthorized PDF access, invalid tokens).
+  * Multi-Role Synthetic Journey Test Suite: 20/20 passed.
 
 ---
 
-### PHASE 9 — Production Hardening & Container Deployment
-* **Status**: **FUTURE SCOPE**
-* **Upcoming Scope**:
-  * Author consolidated multi-service `docker-compose.yml` (MySQL, Express, FastAPI, Vite).
-  * Configure environment variable injection, TLS termination, and production database seed scripts.
-  * Author formal major project deployment guide and examiner evaluation manual.
+### PHASE 9 — Secure Role Selection, Account Lifecycle & RBAC
+* **Status**: **COMPLETE / VERIFIED**
+* **Scope Completed**:
+  * Applied database migration `004_create_account_activations.sql`.
+  * Role selection entry point supporting Doctor, Receptionist, and Patient logins.
+  * Eliminated all universal/default passwords: patient intake generates a cryptographically random 32-byte single-use activation token.
+  * Patient activation page (`/activate?token=...`) with 48-hour expiration and immediate anti-replay invalidation upon consumption.
+  * Server-side role-mismatch defense (e.g., Patient attempting to authenticate via Doctor login).
+  * Account Activation & RBAC Suite: 12/12 passed.
+
+---
+
+### Final Release Integration & Hardening
+* **Status**: **MERGED TO MAIN & HARDENED** (Merge commit `cbee83a`, hardened through `5a03d85`)
+* **Scope Completed**:
+  * MySQL session advisory locks (`rx_lock_<docId>_<patId>`) enforcing concurrent prescription creation idempotency and fail-closed timeout (HTTP 503 with 0 orphaned rows).
+  * Doctor and Patient prescription PDF ownership authorization with zero PDF bytes streamed on unauthorized requests (HTTP 403).
+  * Modal backdrop rendering repair with semantic CSS tokens and Escape key dismiss.
+  * Strict date range (`1900-01-01` to current date) and sanitized emergency contact field validation in patient registration.
+  * Production bundle compilation verified: Vite 8 + React 19 (1.03s, 0 errors).
+  * Root `README.md` and research manuscript (`Complete_Healthcare_CDS_Research_Paper_Final_v2.10.docx` & `.pdf`) synchronized with empirical findings.
