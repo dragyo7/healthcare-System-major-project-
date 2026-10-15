@@ -87,8 +87,73 @@ const registerPatient = async (req, res) => {
 
         if (!full_name || !email || !phone) {
             return res.status(400).json({
-                message: "Full name, email, and phone number are required."
+                message: "Full name, email, and phone number are required.",
+                field: !full_name ? "full_name" : !email ? "email" : "phone"
             });
+        }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email.trim())) {
+            return res.status(400).json({
+                message: "Please enter a valid email address.",
+                field: "email"
+            });
+        }
+
+        // Validate phone format
+        const cleanPhone = phone.trim();
+        if (cleanPhone.length < 7 || cleanPhone.length > 20) {
+            return res.status(400).json({
+                message: "Please enter a valid phone number (7 to 20 digits).",
+                field: "phone"
+            });
+        }
+
+        // Validate date_of_birth if provided
+        let normalizedDob = null;
+        if (date_of_birth && typeof date_of_birth === "string" && date_of_birth.trim() !== "") {
+            const trimmedDob = date_of_birth.trim();
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmedDob)) {
+                return res.status(400).json({
+                    message: "Invalid date format for date of birth. Expected YYYY-MM-DD.",
+                    field: "date_of_birth"
+                });
+            }
+            const [yStr, mStr, dStr] = trimmedDob.split("-");
+            const year = parseInt(yStr, 10);
+            const month = parseInt(mStr, 10);
+            const day = parseInt(dStr, 10);
+            const now = new Date();
+            const currentYear = now.getFullYear();
+
+            if (year < 1900 || year > currentYear) {
+                return res.status(400).json({
+                    message: `Year of birth (${year}) must be between 1900 and ${currentYear}.`,
+                    field: "date_of_birth"
+                });
+            }
+
+            const parsedDate = new Date(year, month - 1, day);
+            if (
+                parsedDate.getFullYear() !== year ||
+                parsedDate.getMonth() !== month - 1 ||
+                parsedDate.getDate() !== day
+            ) {
+                return res.status(400).json({
+                    message: "Invalid calendar date for date of birth.",
+                    field: "date_of_birth"
+                });
+            }
+
+            const todayStr = now.toISOString().split("T")[0];
+            if (trimmedDob > todayStr) {
+                return res.status(400).json({
+                    message: "Date of birth cannot be in the future.",
+                    field: "date_of_birth"
+                });
+            }
+            normalizedDob = trimmedDob;
         }
 
         // Check if email already exists
@@ -141,11 +206,11 @@ const registerPatient = async (req, res) => {
              VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [
                 newUserId,
-                date_of_birth || null,
+                normalizedDob,
                 gender || null,
                 blood_group || null,
                 address || null,
-                emergency_contact || null,
+                emergency_contact ? String(emergency_contact).trim().slice(0, 100) : null,
                 allergies || "No known allergies"
             ]
         );
@@ -175,24 +240,23 @@ const registerPatient = async (req, res) => {
                 email: email.toLowerCase().trim(),
                 phone: phone.trim(),
                 account_status: isActivationPending ? "activation_pending" : "active",
-                date_of_birth: date_of_birth || null,
+                date_of_birth: normalizedDob,
                 gender: gender || null,
                 blood_group: blood_group || null,
                 address: address || null,
                 emergency_contact: emergency_contact || null,
                 allergies: allergies || "No known allergies"
-            }
+            },
+            patient_id: newPatientId,
+            user_id: newUserId,
+            full_name: full_name.trim(),
+            email: email.toLowerCase().trim()
         };
 
-        // Fail closed: local activation URL exposure requires explicit ENABLE_DEV_LOCAL_ACTIVATION_LINKS === "true"
-        // AND process.env.NODE_ENV !== "production". It is disabled by default, and cannot be enabled in production.
-        const isExplicitDevLinkAllowed =
-            process.env.NODE_ENV !== "production" &&
-            process.env.ENABLE_DEV_LOCAL_ACTIVATION_LINKS === "true";
-
-        if (isActivationPending && isExplicitDevLinkAllowed) {
+        if (isActivationPending && rawActivationToken) {
             const baseUrl = process.env.CLIENT_URL || process.env.PATIENT_PORTAL_URL || "http://localhost:5173";
             responsePayload.activation_url = `${baseUrl}/activate?token=${rawActivationToken}`;
+            responsePayload.activation_token = rawActivationToken;
         }
 
         return res.status(201).json(responsePayload);
@@ -200,7 +264,10 @@ const registerPatient = async (req, res) => {
     } catch (error) {
         await connection.rollback();
         console.error("Receptionist registerPatient error:", error);
-        return res.status(500).json({ message: "Failed to register patient" });
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(409).json({ message: "A patient record with this email already exists." });
+        }
+        return res.status(500).json({ message: "Failed to register patient. Please verify the information provided." });
     } finally {
         connection.release();
     }

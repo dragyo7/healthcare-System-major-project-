@@ -61,6 +61,17 @@ export default function ReceptionistAppointments() {
     loadData();
   }, []);
 
+  useEffect(() => {
+    if (!showModal) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setShowModal(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showModal]);
+
   const handleStatusChange = async (appointmentId, newStatus) => {
     try {
       await receptionistApi.updateAppointmentStatus(appointmentId, newStatus);
@@ -226,36 +237,53 @@ export default function ReceptionistAppointments() {
 
       {/* Booking Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="rounded-2xl border border-border bg-card shadow-2xl max-w-lg w-full p-6 space-y-5">
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-primary" />
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="booking-modal-title"
+        >
+          {/* Dedicated backdrop layer behind dialog */}
+          <div
+            className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm transition-opacity"
+            onClick={() => setShowModal(false)}
+            aria-hidden="true"
+          />
+
+          {/* Opaque readable dialog surface rendered above backdrop */}
+          <div className="relative z-10 w-full max-w-lg my-auto rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl p-6 sm:p-7 space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+              <h2 id="booking-modal-title" className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                 Schedule Consultation Appointment
               </h2>
               <button
+                type="button"
                 onClick={() => setShowModal(false)}
-                className="p-1 rounded-md text-muted-foreground hover:text-foreground"
+                className="p-1.5 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                aria-label="Close dialog"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {formError && (
-              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 shrink-0" />
-                <span>{formError}</span>
+              <div className="p-3.5 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-300 text-xs flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 shrink-0 text-red-600 dark:text-red-400" />
+                <span className="font-medium">{formError}</span>
               </div>
             )}
 
             <form onSubmit={handleCreate} className="space-y-4 text-xs">
               <div>
-                <label className="block font-semibold text-foreground mb-1">Select Patient *</label>
+                <label className="block font-semibold text-slate-800 dark:text-slate-200 mb-1">
+                  Select Patient *
+                </label>
                 <select
                   required
                   value={formData.patient_id}
                   onChange={(e) => setFormData({ ...formData, patient_id: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
                 >
                   {patients.map((p) => (
                     <option key={p.patient_id} value={p.patient_id}>
@@ -266,12 +294,14 @@ export default function ReceptionistAppointments() {
               </div>
 
               <div>
-                <label className="block font-semibold text-foreground mb-1">Select Physician *</label>
+                <label className="block font-semibold text-slate-800 dark:text-slate-200 mb-1">
+                  Select Physician *
+                </label>
                 <select
                   required
                   value={formData.doctor_id}
                   onChange={(e) => setFormData({ ...formData, doctor_id: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
                 >
                   {doctors.map((d) => (
                     <option key={d.doctor_id} value={d.doctor_id}>
@@ -283,52 +313,58 @@ export default function ReceptionistAppointments() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-semibold text-foreground mb-1">Appointment Date *</label>
+                  <label className="block font-semibold text-slate-800 dark:text-slate-200 mb-1">
+                    Appointment Date *
+                  </label>
                   <input
                     type="date"
                     required
                     value={formData.appointment_date}
                     onChange={(e) => setFormData({ ...formData, appointment_date: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-foreground mb-1">Consultation Time *</label>
+                  <label className="block font-semibold text-slate-800 dark:text-slate-200 mb-1">
+                    Consultation Time *
+                  </label>
                   <input
                     type="time"
                     required
                     value={formData.start_time}
                     onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-semibold text-foreground mb-1">Clinical Reason / Chief Complaint</label>
+                <label className="block font-semibold text-slate-800 dark:text-slate-200 mb-1">
+                  Clinical Reason / Chief Complaint
+                </label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Follow-up consultation, Routine BP check"
                   value={formData.reason}
                   onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-3 border-t border-border">
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 rounded-lg border border-border hover:bg-muted text-foreground font-semibold"
+                  className="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex items-center gap-2 px-5 py-2 rounded-lg bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition disabled:opacity-50"
+                  className="flex items-center gap-2 px-5 py-2 rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition shadow-sm disabled:opacity-50"
                 >
                   {submitting ? (
                     <>

@@ -53,9 +53,22 @@ export default function ReceptionistPatients() {
     }
   };
 
+  const today = new Date().toISOString().split("T")[0];
+
   useEffect(() => {
     loadPatients();
   }, []);
+
+  useEffect(() => {
+    if (!showModal) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setShowModal(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showModal]);
 
   const handleInputChange = (e) => {
     setFormData({
@@ -67,22 +80,48 @@ export default function ReceptionistPatients() {
   const handleRegister = async (e) => {
     e.preventDefault();
     setFormError("");
+
+    // Client-side validation
+    if (!formData.full_name.trim()) {
+      setFormError("Full name is required.");
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email.trim())) {
+      setFormError("Please enter a valid email address.");
+      return;
+    }
+    if (!formData.phone.trim() || formData.phone.trim().length < 7) {
+      setFormError("Please enter a valid phone number (at least 7 digits).");
+      return;
+    }
+    if (formData.date_of_birth) {
+      const parts = formData.date_of_birth.split("-");
+      const year = parseInt(parts[0], 10);
+      const currentYear = new Date().getFullYear();
+      if (isNaN(year) || year < 1900 || year > currentYear || formData.date_of_birth > today) {
+        setFormError(`Please enter a valid date of birth between 1900 and ${today}.`);
+        return;
+      }
+    }
+
     setSubmitting(true);
 
     try {
       const created = await receptionistApi.registerPatient(formData);
       
       // Compute the canonical frontend activation link
-      let actUrl = created.activation_url;
-      if (created.activation_token) {
-        actUrl = `${window.location.origin}/activate?token=${created.activation_token}`;
+      let actUrl = created.activation_url || (created.patient && created.patient.activation_url);
+      const actToken = created.activation_token || (created.patient && created.patient.activation_token);
+      if (actToken) {
+        actUrl = `${window.location.origin}/activate?token=${actToken}`;
       } else if (actUrl && actUrl.includes(":5175")) {
         actUrl = actUrl.replace(":5175", ":5173");
       }
 
       setActivationAlert({
-        name: created.full_name || formData.full_name,
-        patient_id: created.patient_id,
+        name: created.full_name || (created.patient && created.patient.full_name) || formData.full_name,
+        patient_id: created.patient_id || (created.patient && created.patient.patient_id),
         email: formData.email,
         activation_url: actUrl,
       });
@@ -281,32 +320,49 @@ export default function ReceptionistPatients() {
 
       {/* Intake Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="rounded-2xl border border-border bg-card shadow-2xl max-w-2xl w-full p-6 space-y-5 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-                <UserPlus className="w-5 h-5 text-primary" />
-                Patient Intake & Account Registration
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="patient-intake-modal-title"
+        >
+          {/* Dedicated backdrop layer behind dialog */}
+          <div
+            className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm transition-opacity"
+            onClick={() => setShowModal(false)}
+            aria-hidden="true"
+          />
+
+          {/* Opaque readable dialog surface rendered above backdrop */}
+          <div className="relative z-10 w-full max-w-2xl my-auto rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl p-6 sm:p-7 space-y-5 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+              <h2 id="patient-intake-modal-title" className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <UserPlus className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                Patient Intake &amp; Account Registration
               </h2>
               <button
+                type="button"
                 onClick={() => setShowModal(false)}
-                className="p-1 rounded-md text-muted-foreground hover:text-foreground"
+                className="p-1.5 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                aria-label="Close dialog"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {formError && (
-              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 shrink-0" />
-                <span>{formError}</span>
+              <div className="p-3.5 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-300 text-xs flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 shrink-0 text-red-600 dark:text-red-400" />
+                <span className="font-medium">{formError}</span>
               </div>
             )}
 
             <form onSubmit={handleRegister} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div>
-                  <label className="block font-semibold text-foreground mb-1">Full Legal Name *</label>
+                  <label className="block font-semibold text-slate-800 dark:text-slate-200 mb-1">
+                    Full Legal Name *
+                  </label>
                   <input
                     type="text"
                     required
@@ -314,12 +370,14 @@ export default function ReceptionistPatients() {
                     placeholder="e.g. Rahul Sharma"
                     value={formData.full_name}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-foreground mb-1">Email Address *</label>
+                  <label className="block font-semibold text-slate-800 dark:text-slate-200 mb-1">
+                    Email Address *
+                  </label>
                   <input
                     type="email"
                     required
@@ -327,12 +385,14 @@ export default function ReceptionistPatients() {
                     placeholder="e.g. rahul@example.com"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-foreground mb-1">Mobile Phone *</label>
+                  <label className="block font-semibold text-slate-800 dark:text-slate-200 mb-1">
+                    Mobile Phone *
+                  </label>
                   <input
                     type="tel"
                     required
@@ -340,29 +400,35 @@ export default function ReceptionistPatients() {
                     placeholder="+91 98765 43210"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-foreground mb-1">Date of Birth *</label>
+                  <label className="block font-semibold text-slate-800 dark:text-slate-200 mb-1">
+                    Date of Birth *
+                  </label>
                   <input
                     type="date"
                     required
                     name="date_of_birth"
+                    min="1900-01-01"
+                    max={today}
                     value={formData.date_of_birth}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-foreground mb-1">Biological Gender</label>
+                  <label className="block font-semibold text-slate-800 dark:text-slate-200 mb-1">
+                    Biological Gender
+                  </label>
                   <select
                     name="gender"
                     value={formData.gender}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
                   >
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
@@ -371,12 +437,14 @@ export default function ReceptionistPatients() {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-foreground mb-1">Blood Group</label>
+                  <label className="block font-semibold text-slate-800 dark:text-slate-200 mb-1">
+                    Blood Group
+                  </label>
                   <select
                     name="blood_group"
                     value={formData.blood_group}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
                   >
                     <option value="A+">A+</option>
                     <option value="A-">A-</option>
@@ -390,54 +458,60 @@ export default function ReceptionistPatients() {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block font-semibold text-foreground mb-1">Residential Address</label>
+                  <label className="block font-semibold text-slate-800 dark:text-slate-200 mb-1">
+                    Residential Address
+                  </label>
                   <input
                     type="text"
                     name="address"
                     placeholder="House/Street, City, State"
                     value={formData.address}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block font-semibold text-foreground mb-1">Emergency Contact & Phone</label>
+                  <label className="block font-semibold text-slate-800 dark:text-slate-200 mb-1">
+                    Emergency Contact &amp; Phone
+                  </label>
                   <input
                     type="text"
                     name="emergency_contact"
                     placeholder="Name & Relationship (Phone Number)"
                     value={formData.emergency_contact}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block font-semibold text-foreground mb-1">Known Drug Allergies</label>
+                  <label className="block font-semibold text-slate-800 dark:text-slate-200 mb-1">
+                    Known Drug Allergies
+                  </label>
                   <input
                     type="text"
                     name="allergies"
                     placeholder="e.g. Penicillin, Sulfa, Aspirin (or 'No known drug allergies')"
                     value={formData.allergies}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
                   />
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-3 border-t border-border">
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 rounded-lg border border-border hover:bg-muted text-foreground text-xs font-semibold"
+                  className="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex items-center gap-2 px-5 py-2 rounded-lg bg-primary text-primary-foreground font-semibold text-xs hover:bg-primary/90 transition disabled:opacity-50"
+                  className="flex items-center gap-2 px-5 py-2 rounded-lg bg-indigo-600 text-white font-semibold text-xs hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition shadow-sm disabled:opacity-50"
                 >
                   {submitting ? (
                     <>
