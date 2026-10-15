@@ -36,6 +36,7 @@ const suites = [
   { name: "Adversarial Gateway & Security Invariants", script: "tests/test_adversarial_gateway_e2e.js" },
   { name: "Supabase Auth & Deployment Security", script: "scratch/test_supabase_security_and_deployment.js" },
   { name: "Authentication & Role Tampering Security", script: "scratch/test_auth_and_tampering_security.js" },
+  { name: "Concurrent Prescription Idempotency & Locking", script: "tests/integration/test_concurrent_prescription_idempotency.js" },
 ];
 
 console.log("==========================================================================");

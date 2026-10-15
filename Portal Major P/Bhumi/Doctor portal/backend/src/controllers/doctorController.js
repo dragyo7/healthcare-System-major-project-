@@ -384,6 +384,8 @@ const getDoctorAppointments = async (req, res) => {
 };
 const createPrescription = async (req, res) => {
     const connection = await db.getConnection();
+    let lockName = null;
+    let lockAcquired = false;
 
     try {
         const userId = req.user.user_id;
@@ -418,6 +420,15 @@ const createPrescription = async (req, res) => {
             return res.status(403).json({
                 message: "You do not have access to this patient"
             });
+        }
+
+        // Atomic Idempotency: Acquire per-(doctor, patient) advisory lock to serialize concurrent submissions
+        lockName = `rx_lock_${doctorId}_${patient_id}`;
+        try {
+            const [lockRes] = await connection.execute('SELECT GET_LOCK(?, 10) AS acquired', [lockName]);
+            lockAcquired = lockRes[0]?.acquired === 1;
+        } catch (lockErr) {
+            console.warn("Could not acquire advisory lock for prescription:", lockErr.message);
         }
 
         // Idempotency: Check for recent duplicate prescription submitted within 15 seconds
@@ -523,6 +534,13 @@ const createPrescription = async (req, res) => {
         });
 
     } finally {
+        if (lockAcquired) {
+            try {
+                await connection.execute('SELECT RELEASE_LOCK(?)', [lockName]);
+            } catch (relErr) {
+                console.warn("Could not release advisory lock for prescription:", relErr.message);
+            }
+        }
         connection.release();
     }
 };
