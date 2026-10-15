@@ -345,31 +345,29 @@ server {
 Execute these verified scripts to validate platform integrity before any presentation:
 
 ```powershell
-# 1. Final Readiness Comprehensive Audit (25 Tests across Sections A-E)
-node scratch/test_final_readiness_audit.js
-# Output: 25 PASSED, 0 FAILED
+# 1. Master Healthcare CDS Test Suite (Runs all 14 integration, BOLA, idempotency & security suites)
+node tests/run_all_tests.js
 
-# 2. 28-Case Multilingual Matrix (7 scenarios x 4 languages: en, hi, mr, gu)
-node scratch/test_phase4_multilingual_matrix.js
-# Output: 28/28 PASSED, 0 FAILED
+# 2. Prescription PDF Ownership & Advisory Lock Failure Regression
+node tests/integration/test_pdf_ownership_and_lock_failure.js
 
-# 3. Security Boundaries & Tampering Suite (17 Tests)
-node scratch/test_auth_and_tampering_security.js
-# Output: 17 PASSED, 0 FAILED
+# 3. Concurrent Prescription Idempotency & Locking Suite
+node tests/integration/test_concurrent_prescription_idempotency.js
 
-# 4. Account Activation & Role Mismatch Suite (20 Tests)
+# 4. Route Authorization & BOLA Matrix (24 Tests)
+node tests/integration/test_route_authorization_matrix.js
+
+# 5. Account Activation & Single-Use Token Isolation Suite
 node scratch/test_activation_and_role_mismatch.js
-# Output: 20 PASSED, 0 FAILED
 
-# 5. Frozen RAG Core Regression Suite (190 passed, 2 skipped, 0 failed)
+# 6. Frozen RAG Core Regression Suite (190 passed, 2 skipped, 0 failed)
 python -m pytest rag_module/tests/ -q
 
-# 6. CDS Gateway Architecture Suite (9 passed)
+# 7. CDS Gateway Architecture Suite (9 passed)
 python -m pytest cds_module/ -v
 
-# 7. Frontend Production Bundle Compilation
+# 8. Frontend Production Bundle Compilation
 cd frontend; npm run build
-# Output: built in ~700ms with 0 errors
 ```
 
 ---

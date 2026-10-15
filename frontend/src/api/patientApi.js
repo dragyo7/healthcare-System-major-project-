@@ -71,4 +71,19 @@ export const patientApi = {
     if (!res.ok) throw new Error(data.message || `Post-discharge CDS query failed (${res.status})`);
     return data;
   },
+
+  getPrescriptionPDFUrl: (prescriptionId) => {
+    return `${API_BASE}/patient/prescriptions/${prescriptionId}/pdf`;
+  },
+
+  downloadPrescriptionPDF: async (prescriptionId) => {
+    const res = await fetch(`${API_BASE}/patient/prescriptions/${prescriptionId}/pdf`, {
+      headers: getAuthHeaders(),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ message: "Failed to download PDF" }));
+      throw new Error(err.message || `Download failed (${res.status})`);
+    }
+    return await res.blob();
+  },
 };

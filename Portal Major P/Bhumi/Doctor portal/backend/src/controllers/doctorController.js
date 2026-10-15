@@ -428,7 +428,16 @@ const createPrescription = async (req, res) => {
             const [lockRes] = await connection.execute('SELECT GET_LOCK(?, 10) AS acquired', [lockName]);
             lockAcquired = lockRes[0]?.acquired === 1;
         } catch (lockErr) {
-            console.warn("Could not acquire advisory lock for prescription:", lockErr.message);
+            console.error("Prescription concurrency lock error:", lockErr.message);
+            return res.status(503).json({
+                message: "Service temporarily unavailable due to concurrency lock error. Please retry."
+            });
+        }
+
+        if (!lockAcquired) {
+            return res.status(503).json({
+                message: "Unable to obtain prescription lock within timeout. Please retry."
+            });
         }
 
         // Idempotency: Check for recent duplicate prescription submitted within 15 seconds

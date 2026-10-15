@@ -14,6 +14,7 @@
  */
 
 const db = require("../config/db");
+const PDFDocument = require("pdfkit");
 const { sanitizePatientContext, forwardToFastAPICDS } = require("../services/cdsBridgeService");
 
 /**
@@ -481,6 +482,133 @@ const evaluatePatientCDS = async (req, res) => {
     }
 };
 
+/**
+ * GET /api/patient/prescriptions/:prescriptionId/pdf
+ * Generates and streams PDF for an authorized prescription belonging to the authenticated patient.
+ * Rejects with 403 Forbidden (streaming zero bytes) if the prescription belongs to another patient.
+ */
+const generatePatientPrescriptionPDF = async (req, res) => {
+    try {
+        const { prescriptionId } = req.params;
+        const ownPatient = await getAuthenticatedPatient(req.user.user_id);
+        if (!ownPatient) {
+            return res.status(404).json({ message: "Patient not found" });
+        }
+
+        // Check if prescription exists and verify ownership
+        const [prescriptions] = await db.execute(
+            `SELECT
+                p.prescription_id,
+                p.patient_id,
+                p.doctor_id,
+                p.diagnosis,
+                p.notes,
+                p.prescription_date,
+                u.full_name AS patient_name,
+                doc_u.full_name AS doctor_name,
+                d.specialization,
+                d.qualification,
+                d.license_number
+             FROM prescriptions p
+             JOIN patients pt ON p.patient_id = pt.patient_id
+             JOIN users u ON pt.user_id = u.user_id
+             JOIN doctors d ON p.doctor_id = d.doctor_id
+             JOIN users doc_u ON d.user_id = doc_u.user_id
+             WHERE p.prescription_id = ?`,
+            [prescriptionId]
+        );
+
+        if (prescriptions.length === 0) {
+            // Check if prescription exists at all without join to give exact status
+            const [check] = await db.execute(
+                `SELECT prescription_id, patient_id FROM prescriptions WHERE prescription_id = ?`,
+                [prescriptionId]
+            );
+            if (check.length === 0) {
+                return res.status(404).json({ message: "Prescription not found" });
+            }
+            if (check[0].patient_id !== ownPatient.patient_id) {
+                return res.status(403).json({ message: "You do not have access to this prescription" });
+            }
+            return res.status(404).json({ message: "Prescription details incomplete" });
+        }
+
+        const prescription = prescriptions[0];
+        if (prescription.patient_id !== ownPatient.patient_id) {
+            return res.status(403).json({ message: "You do not have access to this prescription" });
+        }
+
+        // Get medicines
+        const [medicines] = await db.execute(
+            `SELECT medicine_name, dosage, frequency, duration, instructions
+             FROM prescription_medicines
+             WHERE prescription_id = ?`,
+            [prescriptionId]
+        );
+
+        // Stream PDF
+        const doc = new PDFDocument({ margin: 50 });
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", `inline; filename=prescription-${prescriptionId}.pdf`);
+
+        doc.pipe(res);
+
+        // Header
+        doc.fontSize(20).font("Helvetica-Bold").text("RAG Healthcare", { align: "center" });
+        doc.moveDown(0.5).fontSize(16).text("Medical Prescription", { align: "center" });
+        doc.moveDown();
+
+        // Doctor details
+        doc.fontSize(11).font("Helvetica-Bold");
+        doc.text(`Dr. ${prescription.doctor_name}`);
+        doc.font("Helvetica");
+        doc.text(`${prescription.specialization || ""} | ${prescription.qualification || ""}`);
+        if (prescription.license_number) {
+            doc.text(`License No.: ${prescription.license_number}`);
+        }
+        doc.moveDown();
+
+        // Patient details
+        doc.font("Helvetica-Bold").text("Patient Details");
+        doc.font("Helvetica");
+        doc.text(`Name: ${prescription.patient_name}`);
+        doc.text(`Date: ${new Date(prescription.prescription_date).toLocaleDateString()}`);
+        doc.moveDown();
+
+        // Diagnosis
+        doc.font("Helvetica-Bold").text("Diagnosis");
+        doc.font("Helvetica").text(prescription.diagnosis || "Not specified");
+        doc.moveDown();
+
+        // Medicines
+        doc.font("Helvetica-Bold").text("Medicines");
+        doc.moveDown(0.5);
+        medicines.forEach((m, idx) => {
+            doc.font("Helvetica-Bold").text(`${idx + 1}. ${m.medicine_name}`);
+            doc.font("Helvetica");
+            if (m.dosage) doc.text(`Dosage: ${m.dosage}`);
+            if (m.frequency) doc.text(`Frequency: ${m.frequency}`);
+            if (m.duration) doc.text(`Duration: ${m.duration}`);
+            if (m.instructions) doc.text(`Instructions: ${m.instructions}`);
+            doc.moveDown(0.5);
+        });
+
+        // Notes
+        if (prescription.notes) {
+            doc.moveDown();
+            doc.font("Helvetica-Bold").text("Doctor's Notes");
+            doc.font("Helvetica").text(prescription.notes);
+        }
+
+        doc.moveDown(2);
+        doc.fontSize(10).text("This prescription was generated through the RAG Healthcare system.", { align: "center" });
+        doc.end();
+    } catch (error) {
+        console.error("Patient PDF generation error:", error);
+        return res.status(500).json({ message: "Failed to generate prescription PDF" });
+    }
+};
+
 module.exports = {
     getPatientProfile,
     getPatientDashboard,
@@ -489,5 +617,6 @@ module.exports = {
     getPatientMedications,
     getPatientDischarge,
     getPatientAppointments,
-    evaluatePatientCDS
+    evaluatePatientCDS,
+    generatePatientPrescriptionPDF
 };

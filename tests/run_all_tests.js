@@ -37,6 +37,7 @@ const suites = [
   { name: "Supabase Auth & Deployment Security", script: "scratch/test_supabase_security_and_deployment.js" },
   { name: "Authentication & Role Tampering Security", script: "scratch/test_auth_and_tampering_security.js" },
   { name: "Concurrent Prescription Idempotency & Locking", script: "tests/integration/test_concurrent_prescription_idempotency.js" },
+  { name: "Prescription PDF Ownership & Lock Failure", script: "tests/integration/test_pdf_ownership_and_lock_failure.js" },
 ];
 
 console.log("==========================================================================");

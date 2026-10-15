@@ -11,6 +11,7 @@ import {
   ChevronUp,
   FileText,
   Printer,
+  Download,
   Sparkles,
   ShieldCheck,
 } from "lucide-react";
@@ -150,6 +151,28 @@ export default function PatientPrescriptions() {
                     </div>
 
                     <div className="flex items-center gap-3">
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          try {
+                            const blob = await patientApi.downloadPrescriptionPDF(rx.prescription_id);
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement("a");
+                            a.href = url;
+                            a.download = `prescription-${rx.prescription_id}.pdf`;
+                            document.body.appendChild(a);
+                            a.click();
+                            window.URL.revokeObjectURL(url);
+                            document.body.removeChild(a);
+                          } catch (err) {
+                            alert(err.message || "Failed to download prescription PDF");
+                          }
+                        }}
+                        className="p-2 rounded-lg border border-border hover:bg-muted text-muted-foreground hover:text-foreground"
+                        title="Download official PDF"
+                      >
+                        <Download className="w-4 h-4" />
+                      </button>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
