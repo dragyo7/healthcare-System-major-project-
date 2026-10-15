@@ -1,5 +1,11 @@
 const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '../Portal Major P/Bhumi/Doctor portal/backend/.env') });
+let dotenv;
+try {
+  dotenv = require('dotenv');
+} catch {
+  dotenv = require(path.resolve(__dirname, '../Portal Major P/Bhumi/Doctor portal/backend/node_modules/dotenv'));
+}
+dotenv.config({ path: path.resolve(__dirname, '../Portal Major P/Bhumi/Doctor portal/backend/.env') });
 const db = require(path.resolve(__dirname, '../Portal Major P/Bhumi/Doctor portal/backend/src/config/db'));
 const crypto = require('crypto');
 

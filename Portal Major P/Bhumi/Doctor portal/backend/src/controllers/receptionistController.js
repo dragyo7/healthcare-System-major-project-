@@ -191,7 +191,8 @@ const registerPatient = async (req, res) => {
             process.env.ENABLE_DEV_LOCAL_ACTIVATION_LINKS === "true";
 
         if (isActivationPending && isExplicitDevLinkAllowed) {
-            responsePayload.activation_url = `http://localhost:5175/activate?token=${rawActivationToken}`;
+            const baseUrl = process.env.CLIENT_URL || process.env.PATIENT_PORTAL_URL || "http://localhost:5173";
+            responsePayload.activation_url = `${baseUrl}/activate?token=${rawActivationToken}`;
         }
 
         return res.status(201).json(responsePayload);

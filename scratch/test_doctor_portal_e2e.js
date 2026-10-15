@@ -672,9 +672,14 @@ async function runE2E() {
         console.log("\n>>> ALL DOCTOR PORTAL E2E WORKFLOW TESTS PASSED PERFECTLY! <<<\n");
     } else {
         console.error("\n>>> SOME TESTS FAILED. INVESTIGATION REQUIRED. <<<\n");
+        await db.end();
+        process.exit(1);
     }
 
     await db.end();
 }
 
-runE2E().catch(console.error);
+runE2E().catch(err => {
+    console.error("FATAL: Doctor portal E2E failed:", err);
+    process.exit(1);
+});

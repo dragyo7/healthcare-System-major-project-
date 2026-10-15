@@ -1,8 +1,10 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 export default function Sidebar({ navigation, onItemClick }) {
   const location = useLocation();
+  const { t } = useLanguage();
 
   return (
     <nav className="flex flex-col gap-1.5 p-4">
@@ -21,7 +23,7 @@ export default function Sidebar({ navigation, onItemClick }) {
             }`}
           >
             <Icon className="h-5 w-5 shrink-0" />
-            {item.label}
+            {t(item.label)}
           </Link>
         );
       })}

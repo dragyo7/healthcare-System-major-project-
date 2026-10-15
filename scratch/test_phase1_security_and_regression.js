@@ -1,5 +1,11 @@
 const http = require("http");
-const jwt = require("jsonwebtoken");
+const path = require("path");
+let jwt;
+try {
+    jwt = require("jsonwebtoken");
+} catch {
+    jwt = require(path.resolve(__dirname, "../Portal Major P/Bhumi/Doctor portal/backend/node_modules/jsonwebtoken"));
+}
 
 async function request(options, postData) {
     return new Promise((resolve, reject) => {

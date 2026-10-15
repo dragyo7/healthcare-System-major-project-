@@ -86,6 +86,7 @@ const sanitizePatientContext = (patientData) => {
     }).filter(Boolean);
 
     const rawDischarge = patientData.discharge;
+    let dischargeContext = null;
     if (rawDischarge) {
         if (rawDischarge.diagnosis && !diagnoses.includes(rawDischarge.diagnosis)) {
             diagnoses.push(`Discharge Diagnosis: ${rawDischarge.diagnosis}`);
@@ -96,6 +97,19 @@ const sanitizePatientContext = (patientData) => {
         if (rawDischarge.warning_signs) {
             medicalHistory.push(`Discharge Warning Signs: ${rawDischarge.warning_signs}`);
         }
+        if (rawDischarge.follow_up_instructions) {
+            medicalHistory.push(`Discharge Follow-up Instructions: ${rawDischarge.follow_up_instructions}`);
+        }
+        if (rawDischarge.follow_up_date) {
+            medicalHistory.push(`Follow-up Scheduled Date: ${rawDischarge.follow_up_date}`);
+        }
+        dischargeContext = {
+            diagnosis: rawDischarge.diagnosis || null,
+            discharge_instructions: rawDischarge.discharge_instructions || null,
+            warning_signs: rawDischarge.warning_signs || null,
+            follow_up_instructions: rawDischarge.follow_up_instructions || null,
+            follow_up_date: rawDischarge.follow_up_date || null
+        };
     }
 
     // 7. Lab report summaries
@@ -113,7 +127,8 @@ const sanitizePatientContext = (patientData) => {
         allergies,
         active_medications: activeMedications,
         medical_history: medicalHistory,
-        lab_summaries: labSummaries
+        lab_summaries: labSummaries,
+        discharge_context: dischargeContext
     };
 };
 
@@ -180,8 +195,60 @@ const forwardToFastAPICDS = async (payload) => {
     }
 };
 
+/**
+ * Forwards prescription screening request to FastAPI CDS Gateway.
+ * Highly optimized deterministic path (<50ms).
+ *
+ * @param {object} payload
+ * @param {Array<string>} payload.allergies
+ * @param {Array<string>} payload.active_conditions
+ * @param {Array<string|object>} payload.candidate_medications
+ * @returns {Promise<object>}
+ */
+const forwardToFastAPIPrescriptionScreen = async (payload) => {
+    const targetUrl = `${CDS_SERVICE_URL}/cds/screen-prescription`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
+    try {
+        const response = await fetch(targetUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify({
+                allergies: payload.allergies || [],
+                active_conditions: payload.active_conditions || [],
+                candidate_medications: payload.candidate_medications || []
+            }),
+            signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+            let errorDetail = `FastAPI CDS Screening responded with HTTP ${response.status}`;
+            try {
+                const errorJson = await response.json();
+                if (errorJson.detail) errorDetail += `: ${JSON.stringify(errorJson.detail)}`;
+            } catch (_) {}
+            const err = new Error(errorDetail);
+            err.statusCode = response.status;
+            throw err;
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        clearTimeout(timeoutId);
+        throw error;
+    }
+};
+
 module.exports = {
     calculateAge,
     sanitizePatientContext,
-    forwardToFastAPICDS
+    forwardToFastAPICDS,
+    forwardToFastAPIPrescriptionScreen
 };

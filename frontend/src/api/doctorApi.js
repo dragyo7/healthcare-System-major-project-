@@ -166,6 +166,20 @@ export const doctorApi = {
     return data;
   },
 
+  screenPrescription: async ({ patientId, candidateMedications = [] }) => {
+    const res = await fetch(`${API_BASE}/doctor/prescriptions/screen`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({
+        patient_id: patientId,
+        candidate_medications: candidateMedications,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || `Prescription screening failed (${res.status})`);
+    return data;
+  },
+
   uploadPrescriptionOcr: async (formData) => {
     const token = localStorage.getItem("cdss_token") || localStorage.getItem("token");
     const res = await fetch(`${API_BASE}/doctor/prescriptions/upload-ocr`, {

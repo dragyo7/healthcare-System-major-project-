@@ -1,0 +1,201 @@
+acyclovir
+albuterol
+allopurinol
+alprazolam
+amiodarone
+amitriptyline
+amlodipine
+amoxicillin
+anastrozole
+apixaban
+aripiprazole
+aspirin
+atenolol
+atomoxetine
+atorvastatin
+azathioprine
+azithromycin
+baclofen
+benazepril
+benzonatate
+bisoprolol
+brimonidine
+bumetanide
+bupropion
+buspirone
+canagliflozin
+carbamazepine
+carvedilol
+cefdinir
+cefuroxime axetil
+celecoxib
+cephalexin
+cetirizine
+chlorthalidone
+ciprofloxacin
+citalopram
+clarithromycin
+clobetasol propionate
+clonazepam
+clonidine
+clopidogrel
+colchicine
+cyclobenzaprine
+cyclosporine
+dabigatran
+dapagliflozin
+desvenlafaxine
+dexamethasone
+dexlansoprazole
+diazepam
+diclofenac sodium
+dicyclomine
+digoxin
+diltiazem
+divalproex sodium
+donepezil
+doxycycline hyclate
+dulaglutide
+duloxetine
+dutasteride
+empagliflozin
+enalapril
+eplerenone
+escitalopram
+esomeprazole
+eszopiclone
+ezetimibe
+famotidine
+febuxostat
+felodipine
+fenofibrate
+fexofenadine
+finasteride
+fluconazole
+fludrocortisone
+fluoxetine
+furosemide
+gabapentin
+gemfibrozil
+glimepiride
+glipizide
+glyburide
+hydralazine
+hydrochlorothiazide
+hydroxychloroquine
+hydroxyurea
+hydroxyzine
+hyoscyamine
+ibuprofen
+icosapent ethyl
+indapamide
+indomethacin
+insulin aspart
+insulin degludec
+insulin detemir
+insulin glargine
+insulin lispro
+irbesartan
+isosorbide mononitrate
+labetalol
+lacosamide
+lactulose
+lamotrigine
+lansoprazole
+latanoprost
+letrozole
+levalbuterol
+levetiracetam
+levocetirizine
+levofloxacin
+levothyroxine
+linagliptin
+liothyronine
+liraglutide
+lisdexamfetamine
+lisinopril
+lithium carbonate
+loratadine
+lorazepam
+losartan
+lovastatin
+medroxyprogesterone
+meloxicam
+memantine
+mesalamine
+metformin
+methimazole
+methocarbamol
+methylphenidate
+methylprednisolone
+metoclopramide
+metoprolol succinate
+metoprolol tartrate
+minocycline
+mirabegron
+mirtazapine
+montelukast
+morphine sulfate
+moxifloxacin
+mycophenolate mofetil
+naproxen
+nebivolol
+nifedipine
+nitrofurantoin
+nitroglycerin
+nortriptyline
+nurtec odt
+olanzapine
+olmesartan
+omeprazole
+ondansetron
+oseltamivir
+oxcarbazepine
+oxybutynin
+pantoprazole
+paracetamol
+paroxetine
+penicillin v potassium
+pioglitazone
+pneumonia
+polyethylene glycol 3350
+pramipexole
+pravastatin
+prednisone
+pregabalin
+prochlorperazine
+promethazine
+propranolol
+quetiapine
+ramipril
+risperidone
+rivaroxaban
+rizatriptan
+ropinirole
+rosuvastatin
+sertraline
+sildenafil
+simvastatin
+sitagliptin
+solifenacin
+spironolactone
+sumatriptan
+tadalafil
+tamoxifen
+tamsulosin
+telmisartan
+ticagrelor
+tiotropium
+tizanidine
+topiramate
+torsemide
+tramadol
+trazodone
+tretinoin
+type 2 diabetes
+valacyclovir
+valsartan
+venlafaxine
+verapamil
+warfarin
+zolpidem

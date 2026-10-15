@@ -23,6 +23,7 @@ class PatientContext(BaseModel):
     )
     medical_history: List[str] = Field(default_factory=list, description="Relevant past medical history.")
     lab_summaries: List[str] = Field(default_factory=list, description="Summaries of pertinent laboratory tests.")
+    discharge_context: Optional[Dict[str, Any]] = Field(default=None, description="Discharge instructions, warning signs, and follow-up plan.")
 
 
 class CDSEvaluateRequest(BaseModel):

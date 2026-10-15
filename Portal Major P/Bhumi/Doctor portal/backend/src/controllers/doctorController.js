@@ -11,7 +11,8 @@ const {
 } = require("../services/doctorAuthorizationService");
 const {
     sanitizePatientContext,
-    forwardToFastAPICDS
+    forwardToFastAPICDS,
+    forwardToFastAPIPrescriptionScreen
 } = require("../services/cdsBridgeService");
 const {
     validateMagicBytes,
@@ -416,6 +417,62 @@ const createPrescription = async (req, res) => {
         if (!authorized) {
             return res.status(403).json({
                 message: "You do not have access to this patient"
+            });
+        }
+
+        // Idempotency: Check for recent duplicate prescription submitted within 15 seconds
+        const [recent] = await connection.execute(
+            `SELECT prescription_id FROM prescriptions
+             WHERE doctor_id = ? AND patient_id = ?
+             AND prescription_date >= NOW() - INTERVAL 15 SECOND
+             ORDER BY prescription_id DESC LIMIT 1`,
+            [doctorId, patient_id]
+        );
+
+        if (recent.length > 0) {
+            const [recentMeds] = await connection.execute(
+                `SELECT medicine_name FROM prescription_medicines WHERE prescription_id = ?`,
+                [recent[0].prescription_id]
+            );
+            const recentNames = recentMeds.map(m => (m.medicine_name || "").trim().toLowerCase()).sort().join(",");
+            const incomingNames = medicines.map(m => (m.medicine_name || "").trim().toLowerCase()).sort().join(",");
+            if (recentNames && recentNames === incomingNames) {
+                return res.status(200).json({
+                    message: "Duplicate submission prevented: prescription already recorded.",
+                    prescription_id: recent[0].prescription_id,
+                    duplicate_prevented: true
+                });
+            }
+        }
+
+        // Safety Boundary: screen candidate medicines against documented patient allergies
+        const [patientAllergyRows] = await connection.execute(
+            `SELECT allergies FROM patients WHERE patient_id = ?`,
+            [patient_id]
+        );
+        const allergiesStr = patientAllergyRows[0]?.allergies || "";
+        const patientAllergies = allergiesStr
+            ? allergiesStr.split(",").map(a => a.trim().toLowerCase()).filter(a => a && a !== "none" && a !== "nil")
+            : [];
+
+        const contraindications = [];
+        for (const med of medicines) {
+            const medName = (med.medicine_name || "").toLowerCase().trim();
+            for (const allergy of patientAllergies) {
+                if (allergy && (medName.includes(allergy) || allergy.includes(medName))) {
+                    contraindications.push(
+                        `ALLERGY CONTRAINDICATION: Patient has documented allergy to '${allergy}', matching candidate drug '${med.medicine_name}'.`
+                    );
+                }
+            }
+        }
+
+        if (contraindications.length > 0 && !req.body.safety_override) {
+            return res.status(422).json({
+                message: "Prescription rejected by clinical safety boundary due to documented patient allergy.",
+                contraindications,
+                rule_id: "ALLERGY_RULE",
+                safety_override_required: true
             });
         }
 
@@ -1274,6 +1331,113 @@ const evaluateDoctorCDS = async (req, res) => {
 };
 
 /**
+ * POST /api/doctor/prescriptions/screen
+ * High-performance deterministic drug-drug and allergy screening (<20ms).
+ * Strictly decoupled from slower generative RAG explanation pipeline.
+ */
+const screenPrescriptionSafety = async (req, res) => {
+    try {
+        const userId = req.user.user_id;
+        const { patient_id, candidate_medications } = req.body;
+
+        if (!candidate_medications || !Array.isArray(candidate_medications) || candidate_medications.length === 0) {
+            return res.status(400).json({
+                message: "candidate_medications array is required"
+            });
+        }
+
+        let allergies = [];
+        let activeConditions = [];
+        let allMedicationsToScreen = [...candidate_medications];
+
+        if (patient_id) {
+            const doctor = await getDoctorByUserId(userId);
+            if (!doctor) {
+                return res.status(404).json({ message: "Doctor not found" });
+            }
+
+            const authorized = await isDoctorAuthorizedForPatient(doctor.doctor_id, patient_id);
+            if (!authorized) {
+                return res.status(403).json({ message: "You do not have access to this patient" });
+            }
+
+            // Fetch patient allergies
+            const [patientRows] = await db.execute(
+                `SELECT allergies FROM patients WHERE patient_id = ?`,
+                [patient_id]
+            );
+            if (patientRows.length > 0 && patientRows[0].allergies) {
+                allergies = patientRows[0].allergies
+                    .split(",")
+                    .map(a => a.trim())
+                    .filter(a => a && a.toLowerCase() !== "none" && a.toLowerCase() !== "nil");
+            }
+
+            // Fetch patient active medical conditions
+            const [historyRows] = await db.execute(
+                `SELECT condition_name FROM medical_history WHERE patient_id = ?`,
+                [patient_id]
+            );
+            activeConditions = historyRows.map(h => h.condition_name).filter(Boolean);
+
+            // Fetch active prescriptions to screen candidates against existing medications
+            const [activeRxRows] = await db.execute(
+                `SELECT pm.medicine_name
+                 FROM prescriptions pr
+                 JOIN prescription_medicines pm ON pr.prescription_id = pm.prescription_id
+                 WHERE pr.patient_id = ?
+                 ORDER BY pr.prescription_date DESC LIMIT 20`,
+                [patient_id]
+            );
+            for (const rx of activeRxRows) {
+                if (rx.medicine_name && !allMedicationsToScreen.includes(rx.medicine_name)) {
+                    allMedicationsToScreen.push(rx.medicine_name);
+                }
+            }
+        }
+
+        // Call fast deterministic screening endpoint
+        const screenResponse = await forwardToFastAPIPrescriptionScreen({
+            allergies,
+            active_conditions: activeConditions,
+            candidate_medications: allMedicationsToScreen
+        });
+
+        // Shape response to supply both detailed screening contract and backward-compatible safety_findings
+        const safetyFindings = [
+            ...(screenResponse.interactions || []).map(i => ({
+                drugs: i.drug_pair,
+                severity: i.severity,
+                description: i.explanation,
+                clinical_consequence: i.clinical_action,
+                rule_id: i.rule_id
+            })),
+            ...(screenResponse.contraindications || []).map(c => ({
+                drugs: [],
+                severity: "critical",
+                description: c,
+                clinical_consequence: "Immediate clinician review required due to documented allergy",
+                rule_id: "ALLERGY_RULE"
+            }))
+        ];
+
+        return res.status(200).json({
+            screen_status: screenResponse.screen_status,
+            interactions: screenResponse.interactions,
+            contraindications: screenResponse.contraindications,
+            recommendations: screenResponse.recommendations,
+            safety_findings: safetyFindings
+        });
+    } catch (error) {
+        console.error("Prescription screening error:", error);
+        const statusCode = error.statusCode || 500;
+        return res.status(statusCode).json({
+            message: error.message || "Failed to screen prescription safety"
+        });
+    }
+};
+
+/**
  * POST /api/doctor/discharge
  * Creates or updates a clinical discharge record for an authorized patient.
  */
@@ -1599,7 +1763,7 @@ const confirmPrescriptionOcrJob = async (req, res) => {
 
         const [rxResult] = await connection.execute(
             `INSERT INTO prescriptions (doctor_id, patient_id, prescription_date, diagnosis, notes)
-             VALUES (?, ?, CURDATE(), ?, ?)`,
+             VALUES (?, ?, NOW(), ?, ?)`,
             [
                 doctorId,
                 job.patient_id,
@@ -1669,6 +1833,7 @@ module.exports = {
     createFollowup,
     getDoctorFollowups,
     evaluateDoctorCDS,
+    screenPrescriptionSafety,
     createOrUpdateDischarge,
     getDoctorPatientDischarge,
     uploadAndProcessPrescriptionOcr,

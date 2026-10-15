@@ -15,9 +15,17 @@ import {
   CheckCircle2,
   AlertOctagon,
 } from "lucide-react";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 export default function PatientAssistant() {
-  const [language, setLanguage] = useState("en");
+  const { language: globalLanguage, setLanguage: setGlobalLanguage } = useLanguage();
+  const [language, setLanguage] = useState(globalLanguage || "en");
+
+  useEffect(() => {
+    if (globalLanguage) {
+      setLanguage(globalLanguage);
+    }
+  }, [globalLanguage]);
   const [messages, setMessages] = useState([
     {
       role: "bot",
@@ -183,12 +191,17 @@ export default function PatientAssistant() {
                   {/* Verification Status Badge */}
                   {!isUser && msg.status && msg.status !== "system_greeting" && (
                     <div className="pt-2 border-t border-border/60 flex flex-wrap items-center gap-2 text-xs">
-                      {msg.status === "verified_grounded" ? (
+                      {msg.status === "verified_grounded" || msg.status === "grounded" ? (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 font-semibold">
                           <CheckCircle2 className="w-3.5 h-3.5" />
                           Verified Grounded in Clinical Guidelines
                         </span>
-                      ) : msg.status === "emergency_intercept" || msg.is_emergency ? (
+                      ) : msg.status === "conversational_greeting" || msg.status === "conversational_response" ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 border border-blue-500/20 font-semibold">
+                          <Sparkles className="w-3.5 h-3.5" />
+                          Care Assistant Connected
+                        </span>
+                      ) : msg.status === "emergency_intercept" || msg.status === "emergency_diverted" || msg.is_emergency ? (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20 font-semibold">
                           <AlertOctagon className="w-3.5 h-3.5" />
                           Emergency Intercept Escalation
