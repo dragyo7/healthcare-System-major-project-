@@ -92,6 +92,58 @@ When presenting this project during a viva, defense, or project review, structur
 | **CDS Engine** | `8000` | Python 3.12, FastAPI, PyTorch | Orchestrates evidence RAG, deterministic drug-drug interaction rules, adverse effect lookups, Indic entity preservation, and atomic proposition verification. |
 | **Clinical Database** | `3306` | MySQL Server 8.0 | Houses synthetic patients, doctors, medical histories, appointments, prescriptions, discharge care plans, and cryptographic single-use activation tokens. |
 
+### Concise API Route Matrix
+
+| Method | Endpoint Path | Owning Service | Auth / Token | Role Scope | Ownership & Safety Policy | Verification Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :---: |
+| `GET` | `/health` | Express (5000) | Public | All | Liveness probe and health report | Verified Pass |
+| `GET` | `/hub` | Express (5000) | Public | All | Service catalog and public gateway directory | Verified Pass |
+| `POST` | `/chat` | Express -> FastAPI (8000) | Public | All | General medical RAG query (Zero PII context) | Verified Pass |
+| `GET` | `/ready` | Express -> FastAPI (8000) | Public | All | FAISS index & reranker readiness check | Verified Pass |
+| `POST` | `/api/auth/doctor/login` | Express (5000) | Public | Doctor | BCrypt credential verification -> JWT issuance | Verified Pass |
+| `POST` | `/api/auth/patient/login` | Express (5000) | Public | Patient | BCrypt credential verification -> JWT issuance | Verified Pass |
+| `POST` | `/api/auth/receptionist/login`| Express (5000) | Public | Receptionist | BCrypt credential verification -> JWT issuance | Verified Pass |
+| `POST` | `/api/auth/patient/activate` | Express (5000) | Public | Token Bearer | Single-use cryptographic token activation | Verified Pass |
+| `GET` | `/api/receptionist/doctors` | Express (5000) | JWT | `receptionist` | Hospital doctor directory listing | Verified Pass |
+| `GET` | `/api/receptionist/patients` | Express (5000) | JWT | `receptionist` | Hospital patient demographic roster | Verified Pass |
+| `POST` | `/api/receptionist/patients` | Express (5000) | JWT | `receptionist` | Intake registration & single-use token creation | Verified Pass |
+| `GET` | `/api/receptionist/appointments` | Express (5000) | JWT | `receptionist` | Appointment schedule listing | Verified Pass |
+| `POST` | `/api/receptionist/appointments`| Express (5000) | JWT | `receptionist` | Book patient consultation appointment | Verified Pass |
+| `PATCH`| `/api/receptionist/appointments/:id/status` | Express (5000) | JWT | `receptionist` | Update appointment status (checked_in, cancelled) | Verified Pass |
+| `GET` | `/api/doctor/profile` | Express (5000) | JWT | `doctor` | Self profile and specialty credentials | Verified Pass |
+| `GET` | `/api/doctor/dashboard` | Express (5000) | JWT | `doctor` | Doctor metrics & appointments | Verified Pass |
+| `GET` | `/api/doctor/patients` | Express (5000) | JWT | `doctor` | Doctor patient roster | Verified Pass |
+| `GET` | `/api/doctor/patients/:patientId` | Express (5000) | JWT | `doctor` | Full clinical history & documented allergies | Verified Pass |
+| `POST` | `/api/doctor/prescriptions/screen` | Express -> FastAPI (8000) | JWT | `doctor` | Sub-20ms deterministic DDI & allergy screening | Verified Pass |
+| `POST` | `/api/doctor/prescriptions` | Express (5000) | JWT | `doctor` | Advisory lock (`rx_lock_<doc>_<pat>`), allergy gate & persistence | Verified Pass |
+| `GET` | `/api/doctor/prescriptions/:id/pdf` | Express (5000) | JWT | `doctor` | Doctor ownership verification -> PDF stream | Verified Pass |
+| `POST` | `/api/doctor/cds` | Express -> FastAPI (8000) | JWT | `doctor` | Grounded clinical RAG with anonymized context | Verified Pass |
+| `POST` | `/api/doctor/discharge` | Express (5000) | JWT | `doctor` | Authorize post-discharge instructions & care plan | Verified Pass |
+| `GET` | `/api/doctor/patients/:id/discharge` | Express (5000) | JWT | `doctor` | View patient discharge plan | Verified Pass |
+| `POST` | `/api/doctor/prescriptions/upload-ocr` | Express (5000) | JWT | `doctor` | Multer magic-byte validation, Tesseract OCR | Verified Pass |
+| `GET` | `/api/doctor/prescriptions/ocr-jobs/:id` | Express (5000) | JWT | `doctor` | Review extracted entities (`needs_review: true`)| Verified Pass |
+| `POST` | `/api/doctor/prescriptions/confirm-ocr`| Express (5000) | JWT | `doctor` | Mandatory human clinician sign-off & save | Verified Pass |
+| `GET` | `/api/patient/profile` | Express (5000) | JWT | `patient` | Self profile data | Verified Pass |
+| `GET` | `/api/patient/dashboard` | Express (5000) | JWT | `patient` | Patient portal metrics & upcoming appointments | Verified Pass |
+| `GET` | `/api/patient/medical-history` | Express (5000) | JWT | `patient` | Self medical conditions & allergies (BOLA safe) | Verified Pass |
+| `GET` | `/api/patient/prescriptions` | Express (5000) | JWT | `patient` | Active & historical prescriptions (Patient scoped)| Verified Pass |
+| `GET` | `/api/patient/prescriptions/:id/pdf` | Express (5000) | JWT | `patient` | Patient ownership verification -> PDF stream | Verified Pass |
+| `GET` | `/api/patient/discharge` | Express (5000) | JWT | `patient` | View self discharge care plan | Verified Pass |
+| `GET` | `/api/patient/appointments` | Express (5000) | JWT | `patient` | View self appointments | Verified Pass |
+| `POST` | `/api/patient/cds` | Express -> FastAPI (8000) | JWT | `patient` | Educational assistant grounded in discharge plan| Verified Pass |
+| `POST` | `/cds/evaluate` | FastAPI (8000) | Internal | Express | Multi-role clinical intelligence evaluation | Verified Pass |
+| `POST` | `/cds/screen-prescription` | FastAPI (8000) | Internal | Express | Sub-20ms deterministic drug interaction check | Verified Pass |
+
+### Database Schema & Migrations
+
+The database layer consists of 13 normalized tables in MySQL Server 8.0:
+- Core EHR: `users`, `doctors`, `patients`, `medical_histories`, `appointments`, `prescriptions`, `prescription_items`, `doctor_schedules`, `reports`, `followups`.
+- Portal Integrations & Security (Tracked under `migrations/`):
+  1. `001_add_receptionist_role.sql`: Extends user role enum to support receptionist administrative role.
+  2. `002_create_discharges_table.sql`: Introduces post-discharge care directives and educational guidance plans.
+  3. `003_create_prescription_ocr_jobs.sql`: Manages asynchronous OCR extraction jobs with mandatory clinician confirmation states.
+  4. `004_create_account_activations.sql`: Implements cryptographically random 32-byte single-use tokens with strict 48-hour expiration and anti-replay invalidation.
+
 ---
 
 ## 4. Knowledge Corpus & RAG Pipeline Forensic Audit
@@ -174,7 +226,36 @@ node server.js
 # Terminal 4: Unified Frontend (Port 5173)
 cd "frontend"
 npm run dev
-```
+### Verified Role Accounts & Test Credentials
+
+The platform is seeded with realistic synthetic personas for demonstration and testing:
+
+| Role | Email | Password | Primary Workflow |
+| :--- | :--- | :--- | :--- |
+| **Doctor** | `doctor@gmail.com` | `doctor123` | Patient dossier, CDS intelligence inquiry, deterministic DDI screening, prescription authoring, advisory locking, and PDF generation. |
+| **Receptionist** | `receptionist@gmail.com` | `receptionist123` | Patient demographic intake, appointment scheduling, and generation of cryptographic single-use patient activation tokens. |
+| **Patient** | `aarav@gmail.com` | `patient123` | Personal health metrics, active prescriptions, post-discharge directives, and restricted educational care assistant. |
+
+> **Single-Use Activation Lifecycle**: Newly registered patients do not receive universal default passwords. The receptionist registers demographics, generating an activation token: `http://localhost:5173/activate?token=<hex32>`. The patient navigates to this URL, defines a secure password, and their authenticated account is activated. Re-using the token returns `400 Bad Request (Token already consumed or expired)`.
+
+### Environment Configuration & Secrets Hygiene
+
+Environment files must follow the provided templates (`.env.example`). Never commit production secrets:
+- `Portal Major P/Bhumi/Doctor portal/backend/.env`:
+  ```ini
+  PORT=5000
+  DB_HOST=localhost
+  DB_PORT=3306
+  DB_USER=root
+  DB_PASSWORD=your_mysql_password
+  DB_NAME=rag_healthcare
+  JWT_SECRET=your_cryptographic_jwt_secret_32bytes_min
+  CDS_SERVICE_URL=http://127.0.0.1:8000
+  ```
+- `frontend/.env`:
+  ```ini
+  VITE_API_URL=http://localhost:5000
+  ```
 
 ---
 
@@ -374,10 +455,14 @@ cd frontend; npm run build
 
 ## 10. Known System Limitations & Ethical Scope
 
-1. **Academic Demonstration Scope**: This software is engineered as a research and engineering project. It is intended to assist, not replace, licensed medical practitioners.
-2. **Local CPU Generative Latency**: Local execution of `TinyLlama-1.1B` on CPU requires 25–30 seconds for deep conversational generation. Routine prescription authoring avoids this latency completely through sub-20ms deterministic rule screening.
-3. **Corpus Boundary**: The production FAISS index contains 2,204 chunks covering major primary-care, cardiovascular, and metabolic drugs. Queries regarding unindexed medications correctly trigger fail-closed policy abstentions.
-4. **Prescription Image OCR**: Scanned prescription OCR derived from Tesseract.js is tagged `needs_review: true` and cannot be persisted without clinician signature.
+1. **Academic Demonstration & Research Scope**: This software is engineered as a research and engineering project for the 4th-Year Major Engineering Project. It has **not** undergone randomized clinical trials or regulatory medical-device clearance (e.g., FDA SaMD or CDSCO approval) and is intended solely to assist and inform, never replace, the clinical judgment of licensed medical practitioners.
+2. **Bounded Deterministic Safety Coverage**: The deterministic interaction engine operates over an auditable set of **8 high-severity DrugBank rules** and **20 SIDER drug profiles** (covering cardiovascular, anticoagulant, NSAID, and antibiotic interactions). Medications outside this curated rule graph are not evaluated by the deterministic engine and rely on RAG retrieval or fail-closed safe abstentions.
+3. **Retrieval Knowledge Boundaries**: The production FAISS vector index contains **2,204 validated chunks** (2,176 DailyMed FDA monographs, MedlinePlus summaries, and ICMR guidelines) focusing on common primary care, hypertension, diabetes, and cardiovascular regimens. Inquiries regarding unindexed, experimental, or fictitious entities are safely intercepted by `AnswerGroundingVerifier` and trigger fail-closed policy abstentions (`abstained_policy`).
+4. **Local CPU Cold-Start & Generative Latency**:
+   - The Cross-Encoder reranker (`cross-encoder/ms-marco-MiniLM-L-6-v2`) requires a lazy-loading cold-start of ~1.5s on its first request after service launch before remaining in-memory.
+   - Generative decoding via `TinyLlama-1.1B` on CPU hardware requires 25–30 seconds for deep multi-turn conversational responses. Routine prescription screening avoids this overhead entirely, executing in **< 15 milliseconds** via compiled deterministic graph evaluation.
+5. **Prescription Image OCR Review Invariant**: Optical character recognition performed by offline Tesseract.js is treated strictly as an unconfirmed draft (`needs_review: true`). Extracted entities cannot bypass clinician review or be persisted directly to the patient's medical record without explicit confirmation and signature by the attending doctor.
+6. **Concurrent Submission Idempotency**: High-frequency concurrent prescription submissions for the same doctor-patient pair are governed by MySQL session advisory locks (`rx_lock_<docId>_<patId>`). If a duplicate request cannot obtain the lock within 10 seconds, it fails closed with HTTP 503, leaving zero orphaned prescription records.
 
 ---
 
