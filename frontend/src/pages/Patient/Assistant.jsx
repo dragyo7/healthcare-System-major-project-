@@ -208,8 +208,8 @@ export default function PatientAssistant() {
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/20 font-semibold">
-                          <ShieldCheck className="w-3.5 h-3.5" />
-                          Safety Policy Checked ({msg.status})
+                          <ShieldAlert className="w-3.5 h-3.5" />
+                          Safety Policy Enforced: Answer Withheld ({msg.status})
                         </span>
                       )}
                     </div>
