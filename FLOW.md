@@ -2,8 +2,10 @@
 
 > **Document Purpose**: Exact, function-by-function execution and data-flow map across all subsystems.  
 > **Repository**: `dragyo7/healthcare-System-major-project-`  
-> **Primary Branch**: `main` (Commit `b28ddb7`)  
-> **Rule**: Every step reflects real, verified source code, exact file paths, and exact symbols.  
+> **Primary Branch**: `main`<br>
+> **Audited Documentation Baseline**: `ac26bb7`<br>
+> **Frozen RAG Implementation Baseline**: Commit `497a547` (V2.10 Hard-Frozen)<br>
+> **Rule**: Every step reflects real, verified source code, exact file paths, and exact symbols.
 
 ---
 

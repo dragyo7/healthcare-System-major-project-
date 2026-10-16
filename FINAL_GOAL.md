@@ -4,8 +4,9 @@
 > **Project**: Modular AI-Powered Multilingual Clinical Decision Support System (CDSS)  
 > **Academic Context**: 4th-Year Computer Engineering Major Project (2026)  
 > **Repository**: `dragyo7/healthcare-System-major-project-`  
-> **Primary Branch**: `main`  
-> **Baseline Commit**: `b28ddb7`  
+> **Primary Branch**: `main`<br>
+> **Audited Documentation Baseline**: `ac26bb7`<br>
+> **Frozen RAG Implementation Baseline**: Commit `497a547` (V2.10 Hard-Frozen)
 
 ---
 

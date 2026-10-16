@@ -11,6 +11,7 @@
 ### DEC-001 — Operational EHR and Clinical Intelligence Remain Physically Decoupled
 - **Date**: 2026-09-20 (Ratified October 2026)
 - **Status**: **Accepted & Binding**
+- **Provenance**: *Original rationale not established from early commit history. This entry documents the current architectural assessment based on source code.*
 - **Context**: The platform requires relational data management (patients, appointments, prescriptions) and computationally heavy AI/NLP inference (PyTorch tensor operations, FAISS vector search, neural cross-encoder reranking).
 - **Evidence**: `Portal Major P/Bhumi/Doctor portal/backend/src/app.js` and `rag_module/api.py`.
 - **Decision**: Keep Node.js/Express (port 5000) and Python/FastAPI (port 8000) physically decoupled, communicating via internal HTTP requests over loopback.
@@ -26,6 +27,7 @@
 ### DEC-002 — Relational EHR Data Stored Exclusively in MySQL, Never in RAG FAISS Index
 - **Date**: 2026-09-21 (Ratified October 2026)
 - **Status**: **Accepted & Binding**
+- **Provenance**: *Original rationale not established from early commit history. This entry documents the current architectural assessment based on source code.*
 - **Context**: RAG systems use vector databases to retrieve knowledge chunks. Storing patient records alongside medical monographs would allow potential data leakage.
 - **Evidence**: `data/faiss_index/index_v2.bin` and MySQL schema in `Portal Major P/Bhumi/Doctor portal/backend/database/`.
 - **Decision**: Patient records reside exclusively in MySQL (`rag_healthcare`). They are **never** vectorized, embedded, or indexed into FAISS.
@@ -40,6 +42,7 @@
 ### DEC-003 — Server-Side RBAC, BOLA Defense, and Zero-PII Context Sanitization
 - **Date**: 2026-09-25 (Ratified October 2026)
 - **Status**: **Accepted & Binding**
+- **Provenance**: *Original rationale not established from early commit history. This entry documents the current architectural assessment based on source code.*
 - **Context**: Web clients can be manipulated to forge role headers, tamper with patient IDs (Broken Object Level Authorization / BOLA), or submit prompt injection attacks.
 - **Evidence**: `src/middleware/authMiddleware.js`, `src/routes/doctorRoutes.js`, `src/routes/patientRoutes.js`, and `tests/integration/test_route_authorization_matrix.js`.
 - **Decision**: Express enforces strict server-side JWT verification, role authorization middleware (`authenticateDoctor`, `authenticatePatient`, `authenticateReceptionist`), query-scoping to caller identity, and Zero-PII sanitization before forwarding requests to FastAPI.
@@ -53,6 +56,7 @@
 ### DEC-004 — Centralized Clinical Orchestration via FastAPI (`/cds/evaluate`)
 - **Date**: 2026-09-28 (Ratified October 2026)
 - **Status**: **Accepted & Binding**
+- **Provenance**: *Original rationale not established from early commit history. This entry documents the current architectural assessment based on source code.*
 - **Context**: Clinical intelligence requires coordinating dense retrieval, sparse BM25 retrieval, reranking, drug interaction rules, multilingual canonicalization, and grounding verification.
 - **Evidence**: `cds_module/orchestrator.py` and `cds_module/router.py`.
 - **Decision**: Expose a single unified endpoint `POST /cds/evaluate` that accepts clinical queries and optional patient context, coordinating all sub-engines internally.
@@ -66,6 +70,7 @@
 ### DEC-005 — Deterministic Medication Safety Screening (<15ms) Over Generative LLM Checking
 - **Date**: 2026-09-29 (Ratified October 2026)
 - **Status**: **Accepted & Binding**
+- **Provenance**: *Original rationale not established from early commit history. This entry documents the current architectural assessment based on source code.*
 - **Context**: Drug-drug interactions (DDIs) and patient allergy checks are safety-critical. LLMs frequently hallucinate dosages, miss obscure interactions, or invert severity levels.
 - **Evidence**: `drug_module/interaction_engine.py` and `src/controllers/doctorController.js:462`.
 - **Decision**: Evaluate DDIs via compiled JSON rule graphs (DrugBank 8 high-severity rules, SIDER 20 drug profiles) and check allergies via string intersection, bypassing LLM inference entirely.

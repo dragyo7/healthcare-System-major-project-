@@ -1,11 +1,13 @@
 # PROJECT_STATUS.md — Living State & Verification Snapshot
 
-> **Status Reference**: Authoritative Living Project Status  
-> **Repository**: `dragyo7/healthcare-System-major-project-`  
-> **Current Branch**: `main`  
-> **Current HEAD Commit**: `b28ddb7`  
-> **Remote Synchronization**: Synchronized with `origin/main` (Clean working tree)  
-> **Last Verification Run**: October 2026  
+> **Status Reference**: Authoritative Living Project Status
+> **Repository**: `dragyo7/healthcare-System-major-project-`
+> **Current Branch**: `main`
+> **Last Committed Documentation Baseline**: `ac26bb7` (1 commit ahead of `origin/main`, unpushed)
+> **Active Working Tree State**: 5 uncommitted documentation refinements (`DECISIONS.md`, `FINAL_GOAL.md`, `FLOW.md`, `PROJECT_STATUS.md`, `README.md`)
+> **Frozen RAG Implementation Baseline**: Commit `497a547` (V2.10 Hard-Frozen, 193 pass, 2 skip, 0 fail)
+> **Snapshot Timing**: 2026-10-16 22:35 IST (All runtime services currently stopped)
+> **Port Architecture Note**: Ports 5174 and 5175 in historical docs belong to superseded configurations; all roles are unified on port 5173 (DEC-013).
 
 ---
 
@@ -65,9 +67,9 @@
 - [x] `AGENTS.md`: Authoritative operations manual aligned to `main`.
 - [x] `FINAL_GOAL.md`: Product completion contract authored.
 - [x] `PROJECT_STATUS.md`: Authoritative living status authored.
-- [ ] `DECISIONS.md`: Engineering decisions log (DEC-001 through DEC-012) to be created in root.
-- [ ] `FLOW.md`: Function-by-function execution and data-flow map to be created in root.
-- [ ] `.agent/` archive: Obsolete September 2026 files to be safely archived to `docs/archive/legacy_agent/`.
+- [x] `DECISIONS.md`: Engineering decisions log (DEC-001 through DEC-013) established in root.
+- [x] `FLOW.md`: Function-by-function execution and data-flow map established in root.
+- [x] `.agent/` archive: Obsolete September 2026 files safely archived to `docs/archive/legacy_agent/` preserving Git history.
 
 ### Active Blockers / Dependencies
 - None blocking code execution. Live testing requires starting the background services (`MySQL 3306`, `FastAPI 8000`, `Express 5000`, `Vite 5173`).

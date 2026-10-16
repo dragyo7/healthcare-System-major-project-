@@ -1,4 +1,4 @@
-﻿# Modular AI-Powered Multilingual Clinical Decision Support (CDS) System
+# Modular AI-Powered Multilingual Clinical Decision Support (CDS) System
 
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/)
 [![Node 20](https://img.shields.io/badge/Node-20.x-green.svg)](https://nodejs.org/)
@@ -7,7 +7,7 @@
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-ee4c2c.svg)](https://pytorch.org/)
 [![FAISS](https://img.shields.io/badge/FAISS-1.7%2B-008080.svg)](https://github.com/facebookresearch/faiss)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-009688.svg)](https://fastapi.tiangolo.com/)
-[![Express](https://img.shields.io/badge/Express-4.19-lightgrey.svg)](https://expressjs.com/)
+[![Express](https://img.shields.io/badge/Express-5.2%2B-lightgrey.svg)](https://expressjs.com/)
 [![MySQL 8](https://img.shields.io/badge/MySQL-8.0-orange.svg)](https://www.mysql.com/)
 
 A production-grade, evidence-grounded **Clinical Decision Support (CDS) System** engineered for clinicians, hospital front-desk personnel, and patients. Built as an advanced 4th-Year Major Engineering Project in Computer Science & Engineering, the platform combines sub-15ms deterministic drug safety engines with a fail-closed Retrieval-Augmented Generation (RAG) intelligence layer, enforcing strict server-side RBAC, request-scoped patient context isolation, authentic biomedical source attribution, and native Indic language support across English, Hindi, Marathi, and Gujarati.
