@@ -126,7 +126,13 @@ export const doctorApi = {
       body: JSON.stringify(prescriptionData),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to save prescription");
+    if (!res.ok) {
+      const err = new Error(data.message || "Failed to save prescription");
+      err.contraindications = data.contraindications;
+      err.rule_id = data.rule_id;
+      err.status = res.status;
+      throw err;
+    }
     return data;
   },
 
@@ -212,5 +218,16 @@ export const doctorApi = {
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || "Failed to finalize OCR prescription");
     return data;
+  },
+
+  downloadPrescriptionPDF: async (prescriptionId) => {
+    const res = await fetch(`${API_BASE}/doctor/prescriptions/${prescriptionId}/pdf`, {
+      headers: getAuthHeaders(),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ message: "Failed to download PDF" }));
+      throw new Error(err.message || `Download failed (${res.status})`);
+    }
+    return await res.blob();
   },
 };

@@ -37,6 +37,7 @@ export default function DoctorPrescriptions() {
   const [successMessage, setSuccessMessage] = useState("");
   const [createdRxId, setCreatedRxId] = useState(null);
   const [error, setError] = useState("");
+  const [downloadingId, setDownloadingId] = useState(null);
 
   // History state
   const [prescriptionHistory, setPrescriptionHistory] = useState([]);
@@ -184,7 +185,10 @@ export default function DoctorPrescriptions() {
       setCreatedRxId(res.prescription_id || res.id);
       loadHistory();
     } catch (err) {
-      const contraMsg = err?.response?.data?.contraindications?.join(" ") || "";
+      const contraMsg =
+        err?.contraindications?.join(" ") ||
+        err?.response?.data?.contraindications?.join(" ") ||
+        "";
       setError(
         contraMsg
           ? `${err.message || "Safety Failure"}: ${contraMsg}`
@@ -192,6 +196,27 @@ export default function DoctorPrescriptions() {
       );
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  // Authenticated PDF Blob Downloader
+  const handleDownloadPDF = async (prescriptionId) => {
+    if (!prescriptionId) return;
+    setDownloadingId(prescriptionId);
+    try {
+      const blob = await doctorApi.downloadPrescriptionPDF(prescriptionId);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `prescription-${prescriptionId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      alert(err.message || "Failed to download prescription PDF");
+    } finally {
+      setDownloadingId(null);
     }
   };
 
@@ -336,6 +361,24 @@ export default function DoctorPrescriptions() {
                 </option>
               ))}
             </select>
+            {(() => {
+              const activePat = patients.find((p) => p.patient_id === selectedPatientId);
+              if (!activePat) return null;
+              return (
+                <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[10px]">
+                  <span className="text-primary-200">
+                    {activePat.gender || "Patient"} • Blood: {activePat.blood_group || "—"}
+                  </span>
+                  {activePat.allergies ? (
+                    <span className="px-1.5 py-0.5 rounded bg-rose-500/30 text-rose-200 font-bold border border-rose-400/30">
+                      Allergy: {activePat.allergies}
+                    </span>
+                  ) : (
+                    <span className="text-primary-300/80">No documented allergies</span>
+                  )}
+                </div>
+              );
+            })()}
           </div>
         </div>
       </div>
@@ -403,14 +446,15 @@ export default function DoctorPrescriptions() {
             <span>{successMessage}</span>
           </div>
           {createdRxId && (
-            <a
-              href={`http://localhost:5000/api/doctor/prescriptions/${createdRxId}/pdf`}
-              target="_blank"
-              rel="noreferrer"
-              className="text-xs font-bold underline shrink-0"
+            <button
+              type="button"
+              onClick={() => handleDownloadPDF(createdRxId)}
+              disabled={downloadingId === createdRxId}
+              className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline shrink-0 flex items-center gap-1 cursor-pointer disabled:opacity-50"
             >
-              Download PDF →
-            </a>
+              <Download className="h-3.5 w-3.5" />
+              <span>{downloadingId === createdRxId ? "Downloading..." : "Download PDF →"}</span>
+            </button>
           )}
         </div>
       )}
@@ -561,13 +605,38 @@ export default function DoctorPrescriptions() {
               <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900 space-y-2">
                 <div className="flex items-center gap-2 text-rose-700 dark:text-rose-300 font-bold text-xs uppercase tracking-wider">
                   <AlertTriangle className="h-4 w-4" />
-                  <span>Deterministic Drug-Drug Interaction Detected</span>
+                  <span>Deterministic Drug Safety Alert Detected</span>
                 </div>
                 {safetyFindings.map((f, i) => (
-                  <div key={i} className="text-xs text-rose-900 dark:text-rose-200">
-                    <strong>{f.drugs ? f.drugs.join(" ⇄ ") : f.rule_id}:</strong> {f.description || f.clinical_consequence}
+                  <div key={i} className="text-xs text-rose-900 dark:text-rose-200 space-y-1">
+                    <div className="flex items-center gap-1.5 font-bold">
+                      {f.rule_id && (
+                        <span className="px-1.5 py-0.5 rounded bg-rose-200 dark:bg-rose-900/60 text-[10px] font-mono tracking-wide text-rose-950 dark:text-rose-100">
+                          {f.rule_id}
+                        </span>
+                      )}
+                      {f.severity && (
+                        <span className="px-1.5 py-0.5 rounded bg-rose-600 text-white text-[10px] uppercase font-bold">
+                          {f.severity}
+                        </span>
+                      )}
+                      <span>{f.drugs && f.drugs.length > 0 ? f.drugs.join(" ⇄ ") : (f.rule_id || "Allergy Rule")}</span>
+                    </div>
+                    <p className="text-[11px] leading-relaxed text-rose-900/90 dark:text-rose-200/90">
+                      {f.description || f.clinical_consequence}
+                    </p>
                   </div>
                 ))}
+              </div>
+            )}
+
+            {/* Clean Safety Screen Confirmation */}
+            {safetyPassed && safetyFindings.length === 0 && (
+              <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900 text-xs text-emerald-800 dark:text-emerald-200 flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <span>
+                  <strong>Deterministic Screening Cleared:</strong> No known drug-drug interactions or documented patient allergies detected for candidate medications. Clinical evaluation remains the prescribing clinician's responsibility.
+                </span>
               </div>
             )}
 
@@ -803,15 +872,15 @@ export default function DoctorPrescriptions() {
                         ({new Date(rx.created_at).toLocaleDateString()})
                       </span>
                     </div>
-                    <a
-                      href={`http://localhost:5000/api/doctor/prescriptions/${rx.prescription_id}/pdf`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-xs font-bold text-primary-600 hover:underline flex items-center gap-1"
+                    <button
+                      type="button"
+                      onClick={() => handleDownloadPDF(rx.prescription_id)}
+                      disabled={downloadingId === rx.prescription_id}
+                      className="text-xs font-bold text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-50"
                     >
                       <Download className="h-3.5 w-3.5" />
-                      <span>Download PDF</span>
-                    </a>
+                      <span>{downloadingId === rx.prescription_id ? "Downloading..." : "Download PDF"}</span>
+                    </button>
                   </div>
 
                   <div className="text-xs text-slate-600 dark:text-slate-300">
