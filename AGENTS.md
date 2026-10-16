@@ -1,4 +1,4 @@
-﻿# AGENTS.md — Developer & AI Agent Operations Manual
+# AGENTS.md — Developer & AI Agent Operations Manual
 
 > **Authoritative Root Guide for Developers and AI Coding Agents**
 > **Project**: Modular AI-Powered Clinical Decision Support (CDS) System (4th-Year Major Project)
@@ -230,13 +230,25 @@ Automatically verifies, starts, and health-checks MySQL (3306), FastAPI CDS Gate
 
 ## 9. Authoritative Documentation Index
 
-* [`docs/CURRENT_STATE.md`](file:///E:/Major%20Project%20Code/docs/CURRENT_STATE.md): Canonical "Where are we now?" state inventory.
+* [`FINAL_GOAL.md`](file:///E:/Major%20Project%20Code/FINAL_GOAL.md): Authoritative product completion contract & acceptance criteria.
+* [`PROJECT_STATUS.md`](file:///E:/Major%20Project%20Code/PROJECT_STATUS.md): Living reality snapshot (verified vs reported functionality, test results).
+* [`DECISIONS.md`](file:///E:/Major%20Project%20Code/DECISIONS.md): Canonical engineering decisions log (DEC-001 through DEC-013).
+* [`FLOW.md`](file:///E:/Major%20Project%20Code/FLOW.md): Function-by-function execution and data-flow map.
+* [`docs/CURRENT_STATE.md`](file:///E:/Major%20Project%20Code/docs/CURRENT_STATE.md): Canonical state inventory and subsystem architecture.
 * [`docs/DO_NOT_BREAK.md`](file:///E:/Major%20Project%20Code/docs/DO_NOT_BREAK.md): Non-negotiable architectural invariants & freeze rules.
-* [`docs/ROADMAP.md`](file:///E:/Major%20Project%20Code/docs/ROADMAP.md): Complete multi-phase roadmap (Phases 0 through 9).
-* [`docs/INTEGRATION_PLAN.md`](file:///E:/Major%20Project%20Code/docs/INTEGRATION_PLAN.md): Acceptance protocol for teammate Patient & Receptionist portals.
-* [`docs/PROJECT_CONTEXT.md`](file:///E:/Major%20Project%20Code/docs/PROJECT_CONTEXT.md): Master engineering manual for developers & AI coding agents.
-* [`docs/DOCTOR_PORTAL_E2E_VERIFICATION.md`](file:///E:/Major%20Project%20Code/docs/DOCTOR_PORTAL_E2E_VERIFICATION.md): Comprehensive Doctor portal E2E verification report.
-* [`docs/MULTILINGUAL_ARCHITECTURE.md`](file:///E:/Major%20Project%20Code/docs/MULTILINGUAL_ARCHITECTURE.md): Cross-cutting multilingual architecture specification.
-* [`docs/ANDROID_EMULATOR_ACCEPTANCE_REPORT.md`](file:///E:/Major%20Project%20Code/docs/ANDROID_EMULATOR_ACCEPTANCE_REPORT.md): Canonical Android 15 emulator acceptance and mobile security audit report.
-* [`docs/SUPABASE_DEPLOYMENT_READINESS_REPORT.md`](file:///E:/Major%20Project%20Code/docs/SUPABASE_DEPLOYMENT_READINESS_REPORT.md): Canonical Supabase authentication, security boundary, and deployment readiness report.
+* [`docs/ROADMAP.md`](file:///E:/Major%20Project%20Code/docs/ROADMAP.md): Multi-phase roadmap and verified milestones.
+
+---
+
+## 10. Mandatory AI Agent Operating Contract
+
+Every future AI coding assistant working in this repository MUST strictly abide by these operating rules:
+
+1. **Read Canonical Documents First**: Before proposing or executing meaningful code modifications, you MUST read `FINAL_GOAL.md`, `PROJECT_STATUS.md`, `DECISIONS.md`, and the relevant call path in `FLOW.md`.
+2. **Establish Reality from Source Code**: Never trust an old summary over current source code. Always inspect actual files, routes, and tests.
+3. **Protect the Frozen RAG Baseline**: Do NOT modify the FAISS index, embedding models, BM25, reranker, or grounding thresholds without explicit before-and-after benchmark evaluation and user authorization.
+4. **Synchronize Decisions and Flow Maps**: Every meaningful code modification MUST update `DECISIONS.md` (recording context, decision, alternatives, trade-offs) and `FLOW.md` (updating the execution path and "Current Change" section) in the same commit.
+5. **Mandatory User Quiz Gate**: Before implementing any meaningful code change, explain the execution path, trade-offs, and failure risks to the user, and test their understanding with targeted questions. Only proceed once the user demonstrates understanding.
+6. **No Fabricated Claims**: Distinguish between Verified, Reported, Partially Verified, and Unverified results. Never invent credentials, endpoints, or benchmark metrics.
+7. **No Unrequested Git Pushes**: Never execute `git push` without the user's explicit request.
 
