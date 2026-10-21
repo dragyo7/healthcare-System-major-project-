@@ -1,0 +1,127 @@
+[
+  {
+    "rule_id": "RUL-INT-001",
+    "interacting_pair": ["aspirin", "warfarin"],
+    "target_drug_to_replace": "aspirin",
+    "evidence_strength": "CLINICAL_CONSENSUS_INFERRED",
+    "recommendation_type": "INVESTIGATIONAL_CANDIDATE_FOR_CLINICIAN_REVIEW",
+    "clinical_evidence": {
+      "source_id": "DailyMed Warfarin Sodium Label",
+      "source_section": "Section 7.2 Concomitant Therapy",
+      "source_setid": "9369d7b4-3677-4b68-b807-797746408226",
+      "source_url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=9369d7b4-3677-4b68-b807-797746408226",
+      "verbatim_passage": "Concomitant use of aspirin with warfarin increases the risk of bleeding due to complementary mechanisms of platelet inhibition and anticoagulation. Concomitant use should be avoided unless the benefit outweighs the risk."
+    },
+    "candidate": {
+      "candidate_name": "paracetamol",
+      "canonical_ingredient": "paracetamol",
+      "brand_examples": ["Crocin", "Dolo 650", "Tylenol", "Calpol"],
+      "supported_therapeutic_intent": "Analgesia and Antipyresis (Mild-to-moderate pain or fever)",
+      "unsupported_intent_caveat": "Paracetamol lacks clinically meaningful anti-inflammatory activity. It is NOT an appropriate substitute if aspirin was prescribed for antiplatelet cardiovascular secondary prevention or for inflammatory arthropathies.",
+      "clinical_eligibility": {
+        "contraindicated_conditions": ["severe hepatic impairment", "acute liver disease", "chronic alcoholism"],
+        "dosing_precautions": "Maximum daily dose 4000mg (2000-3000mg in elderly/frail or malnourished patients). Check for concurrent paracetamol in multi-ingredient OTC remedies to prevent inadvertent hepatotoxicity."
+      }
+    }
+  },
+  {
+    "rule_id": "RUL-INT-002",
+    "interacting_pair": ["ibuprofen", "warfarin"],
+    "target_drug_to_replace": "ibuprofen",
+    "evidence_strength": "CLINICAL_CONSENSUS_INFERRED",
+    "recommendation_type": "INVESTIGATIONAL_CANDIDATE_FOR_CLINICIAN_REVIEW",
+    "clinical_evidence": {
+      "source_id": "DailyMed Ibuprofen Label & Warfarin Label",
+      "source_section": "Section 7 Drug Interactions - Anticoagulants",
+      "source_setid": "7823f03b-18a8-48b6-9bb2-16a7f0521e33",
+      "source_url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=7823f03b-18a8-48b6-9bb2-16a7f0521e33",
+      "verbatim_passage": "Concomitant use of NSAIDs and warfarin produces a synergistic effect on bleeding. NSAIDs damage gastrointestinal mucosa and inhibit platelet function while warfarin inhibits clotting factor synthesis."
+    },
+    "candidate": {
+      "candidate_name": "paracetamol",
+      "canonical_ingredient": "paracetamol",
+      "brand_examples": ["Crocin", "Dolo 650", "Tylenol", "Calpol"],
+      "supported_therapeutic_intent": "Analgesia and Antipyresis (Mild-to-moderate pain or fever)",
+      "unsupported_intent_caveat": "Paracetamol does NOT inhibit peripheral cyclooxygenase enzymes in inflammatory tissue. It does NOT provide anti-inflammatory action for acute gout, rheumatoid arthritis, or active synovitis.",
+      "clinical_eligibility": {
+        "contraindicated_conditions": ["severe hepatic impairment", "acute liver failure", "active chronic alcoholism"],
+        "dosing_precautions": "Avoid exceeding 4g daily. Monitor INR if chronic high-dose paracetamol (>2g/day) is administered for longer than 7 consecutive days due to mild potential potentiating effects on warfarin."
+      }
+    }
+  },
+  {
+    "rule_id": "RUL-INT-007",
+    "interacting_pair": ["atorvastatin", "clarithromycin"],
+    "target_drug_to_replace": "clarithromycin",
+    "evidence_strength": "CLINICAL_CONSENSUS_INFERRED",
+    "recommendation_type": "INVESTIGATIONAL_CANDIDATE_FOR_CLINICIAN_REVIEW",
+    "clinical_evidence": {
+      "source_id": "DailyMed Atorvastatin Calcium Label",
+      "source_section": "Section 7.1 Strong Inhibitors of CYP3A4",
+      "source_setid": "7823f03b-18a8-48b6-9bb2-16a7f0521e29",
+      "source_url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=7823f03b-18a8-48b6-9bb2-16a7f0521e29",
+      "verbatim_passage": "Atorvastatin is metabolized by CYP3A4. Concomitant administration with strong CYP3A4 inhibitors (e.g., clarithromycin) leads to marked increases in atorvastatin plasma concentrations and increased risk of myopathy and rhabdomyolysis."
+    },
+    "candidate": {
+      "candidate_name": "azithromycin",
+      "canonical_ingredient": "azithromycin",
+      "brand_examples": ["Zithromax", "Azithral"],
+      "supported_therapeutic_intent": "Alternative Macrolide Antibacterial Therapy",
+      "unsupported_intent_caveat": "Azithromycin is NOT a universal substitute for clarithromycin. It has different pharmacokinetic and antimicrobial coverage (e.g., NOT approved for Helicobacter pylori eradication triple therapy). Clinician must confirm microbiological indication.",
+      "clinical_eligibility": {
+        "contraindicated_conditions": ["cholestatic jaundice / hepatic dysfunction associated with prior azithromycin", "prolonged QT interval / torsades de pointes history"],
+        "dosing_precautions": "Monitor QTc interval if co-administered with other QT-prolonging drugs. Avoid in patients with uncorrected hypokalemia or hypomagnesemia."
+      }
+    }
+  },
+  {
+    "rule_id": "RUL-INT-008",
+    "interacting_pair": ["omeprazole", "clopidogrel"],
+    "target_drug_to_replace": "omeprazole",
+    "evidence_strength": "FDA_LABEL_EXPLICIT_MENTION",
+    "recommendation_type": "INVESTIGATIONAL_CANDIDATE_FOR_CLINICIAN_REVIEW",
+    "clinical_evidence": {
+      "source_id": "DailyMed Clopidogrel Bisulfate Label",
+      "source_section": "Section 7.1 CYP2C19 Inhibitors",
+      "source_setid": "3323f03b-18a8-48b6-9bb2-16a7f0521e33",
+      "source_url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=3323f03b-18a8-48b6-9bb2-16a7f0521e33",
+      "verbatim_passage": "Avoid concomitant use of omeprazole or esomeprazole. In clinical studies, omeprazole 80 mg significantly decreased the antiplatelet activity of clopidogrel. In a clinical study, pantoprazole had less effect on clopidogrel's antiplatelet activity. Famotidine did not diminish the antiplatelet effect of clopidogrel."
+    },
+    "candidate": {
+      "candidate_name": "pantoprazole",
+      "canonical_ingredient": "pantoprazole",
+      "brand_examples": ["Protonix", "Pantocid"],
+      "supported_therapeutic_intent": "Gastroprotection (Proton Pump Inhibitor)",
+      "unsupported_intent_caveat": "Pantoprazole is an FDA-recognized PPI with minimal CYP2C19 inhibition relative to omeprazole. However, high-dose therapy may still exert modest metabolic effects in CYP2C19 poor metabolizers.",
+      "clinical_eligibility": {
+        "contraindicated_conditions": ["documented PPI hypersensitivity"],
+        "dosing_precautions": "Standard adult dose 40mg once daily. Long-term use requires monitoring for hypomagnesemia and vitamin B12 deficiency."
+      }
+    }
+  },
+  {
+    "rule_id": "RUL-INT-008",
+    "interacting_pair": ["omeprazole", "clopidogrel"],
+    "target_drug_to_replace": "omeprazole",
+    "evidence_strength": "FDA_LABEL_EXPLICIT_MENTION",
+    "recommendation_type": "INVESTIGATIONAL_CANDIDATE_FOR_CLINICIAN_REVIEW",
+    "clinical_evidence": {
+      "source_id": "DailyMed Clopidogrel Bisulfate Label",
+      "source_section": "Section 7.1 CYP2C19 Inhibitors",
+      "source_setid": "3323f03b-18a8-48b6-9bb2-16a7f0521e33",
+      "source_url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=3323f03b-18a8-48b6-9bb2-16a7f0521e33",
+      "verbatim_passage": "Avoid concomitant use of omeprazole or esomeprazole... Famotidine did not diminish the antiplatelet effect of clopidogrel."
+    },
+    "candidate": {
+      "candidate_name": "famotidine",
+      "canonical_ingredient": "famotidine",
+      "brand_examples": ["Pepcid"],
+      "supported_therapeutic_intent": "Gastroprotection (Histamine H2-Receptor Antagonist)",
+      "unsupported_intent_caveat": "Famotidine does not inhibit CYP2C19. However, H2-blockers provide less profound acid suppression than PPIs and may be insufficient for high-risk gastrointestinal ulcers or severe erosive esophagitis.",
+      "clinical_eligibility": {
+        "contraindicated_conditions": ["H2-receptor antagonist hypersensitivity"],
+        "dosing_precautions": "Dose adjustment required in moderate-to-severe renal impairment (CrCl < 50 mL/min) to avoid CNS toxicity."
+      }
+    }
+  }
+]

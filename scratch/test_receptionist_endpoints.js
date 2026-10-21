@@ -4,10 +4,29 @@
  */
 
 const http = require("http");
+const { verifyDestructiveTestSafety, probeGatewaySafety } = require("../tests/safety/databaseSafetyGuard");
+
+const PORT = parseInt(process.env.TEST_EXPRESS_PORT || process.env.EXPRESS_PORT || "5001");
 
 function httpRequest(options, postData) {
     return new Promise((resolve, reject) => {
-        const req = http.request(options, (res) => {
+        const targetPort = options && options.port !== undefined
+            ? (process.env.TEST_EXPRESS_PORT ? parseInt(process.env.TEST_EXPRESS_PORT) : options.port)
+            : PORT;
+
+        if (Number(targetPort) === 5000 && process.env.ALLOW_DEFAULT_DEV_PORT !== "true") {
+            return reject(new Error(
+                "SAFETY REFUSAL: httpRequest is targeting port 5000 (default development port). " +
+                "Tests must target a dedicated test backend (e.g. TEST_EXPRESS_PORT=5001) to avoid mutating development data."
+            ));
+        }
+
+        const opts = {
+            hostname: "127.0.0.1",
+            ...options,
+            port: targetPort
+        };
+        const req = http.request(opts, (res) => {
             let body = "";
             res.on("data", (chunk) => body += chunk);
             res.on("end", () => {
@@ -32,6 +51,10 @@ async function runTests() {
     console.log("=================================================");
     console.log("  PHASE 1: RECEPTIONIST PORTAL VERIFICATION SUITE ");
     console.log("=================================================\n");
+
+    const targetDb = (process.env.DB_NAME || "").trim();
+    verifyDestructiveTestSafety(targetDb);
+    await probeGatewaySafety(PORT, targetDb);
 
     let passed = 0;
     let failed = 0;

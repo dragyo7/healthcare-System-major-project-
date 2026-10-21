@@ -1,6 +1,6 @@
 /**
  * test_full_system_multi_role_e2e.js
- * 
+ *
  * Complete Synthetic Multi-Role End-to-End Journey Verification:
  * Receptionist -> Doctor -> Patient -> Cross-Role Negative Security Matrix.
  */
@@ -8,7 +8,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const BASE_URL = "http://localhost:5000";
+const PORT = parseInt(process.env.TEST_EXPRESS_PORT || process.env.EXPRESS_PORT || "5001");
+const BASE_URL = `http://localhost:${PORT}`;
 
 let passed = 0;
 let failed = 0;
@@ -27,6 +28,11 @@ async function runE2E() {
     console.log("===================================================================");
     console.log("    FULL PLATFORM MULTI-ROLE END-TO-END JOURNEY VERIFICATION       ");
     console.log("===================================================================\n");
+
+    const { verifyDestructiveTestSafety, probeGatewaySafety } = require("../tests/safety/databaseSafetyGuard");
+    const targetDb = (process.env.DB_NAME || "").trim();
+    verifyDestructiveTestSafety(targetDb);
+    await probeGatewaySafety(PORT, targetDb);
 
     try {
         // -------------------------------------------------------------

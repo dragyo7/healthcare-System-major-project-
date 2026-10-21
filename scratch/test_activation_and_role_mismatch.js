@@ -6,10 +6,11 @@ try {
   dotenv = require(path.resolve(__dirname, '../Portal Major P/Bhumi/Doctor portal/backend/node_modules/dotenv'));
 }
 dotenv.config({ path: path.resolve(__dirname, '../Portal Major P/Bhumi/Doctor portal/backend/.env') });
-const db = require(path.resolve(__dirname, '../Portal Major P/Bhumi/Doctor portal/backend/src/config/db'));
 const crypto = require('crypto');
+const { verifyDestructiveTestSafety, probeGatewaySafety } = require("../tests/safety/databaseSafetyGuard");
 
-const BASE_URL = "http://localhost:5000";
+const PORT = parseInt(process.env.TEST_EXPRESS_PORT || process.env.EXPRESS_PORT || "5001");
+const BASE_URL = `http://localhost:${PORT}`;
 
 let passed = 0;
 let failed = 0;
@@ -26,6 +27,19 @@ function assert(cond, name, detail = "") {
 
 async function run() {
     console.log("=== COMPREHENSIVE SECURITY VERIFICATION: ACTIVATIONS & RBAC ===");
+
+    const targetDb = (process.env.DB_NAME || "").trim();
+    verifyDestructiveTestSafety(targetDb);
+    await probeGatewaySafety(PORT, targetDb);
+
+    const mysql = require(path.resolve(__dirname, '../Portal Major P/Bhumi/Doctor portal/backend/node_modules/mysql2/promise'));
+    const db = await mysql.createConnection({
+        host: process.env.DB_HOST || "127.0.0.1",
+        port: Number(process.env.DB_PORT) || 3306,
+        user: process.env.DB_USER || "cdss_test_user",
+        password: process.env.DB_PASSWORD,
+        database: targetDb
+    });
 
     // 1. Receptionist Login
     const recLogRes = await fetch(`${BASE_URL}/api/auth/receptionist/login`, {
@@ -213,6 +227,7 @@ async function run() {
     });
     assert(patAsRec.status === 401, "17. Patient credentials to Receptionist login rejected with 401");
 
+    await db.end();
     console.log(`\nResults: ${passed} passed, ${failed} failed.`);
     process.exit(failed > 0 ? 1 : 0);
 }

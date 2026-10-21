@@ -19,13 +19,80 @@ const {
     performOcr,
     extractCandidateFields
 } = require("../services/prescriptionOcrService");
+const crypto = require("crypto");
+
+// Allergy class and brand mapping for clinical safety boundary
+const ALLERGY_CLASS_MAP = {
+    penicillin: ["penicillin", "amoxicillin", "ampicillin", "augmentin", "amoxicillin-clavulanate", "piperacillin", "cloxacillin", "methicillin"],
+    sulfa: ["sulfa", "sulfamethoxazole", "bactrim", "septra", "sulfasalazine", "sulfadiazine"],
+    sulfonamide: ["sulfa", "sulfamethoxazole", "bactrim", "septra", "sulfasalazine", "sulfadiazine"],
+    aspirin: ["aspirin", "acetylsalicylic acid", "ecosprin", "disprin", "ibuprofen", "naproxen", "nsaid"],
+    nsaid: ["aspirin", "ibuprofen", "naproxen", "diclofenac", "meloxicam", "indomethacin", "celecoxib", "ketorolac"],
+    statin: ["atorvastatin", "simvastatin", "rosuvastatin", "pravastatin", "lovastatin", "fluvastatin"],
+    macrolide: ["erythromycin", "clarithromycin", "azithromycin"]
+};
+
+function checkAllergyContraindication(candidateDrugName, documentedAllergy) {
+    if (!candidateDrugName || !documentedAllergy) return false;
+    const drug = candidateDrugName.toLowerCase().trim();
+    const allergy = documentedAllergy.toLowerCase().trim();
+    if (!allergy || allergy === "none" || allergy === "nil" || allergy === "no") return false;
+
+    // 1. Direct equality
+    if (drug === allergy) return true;
+
+    // 2. Class-based cross sensitivity matching
+    for (const [classKey, members] of Object.entries(ALLERGY_CLASS_MAP)) {
+        const allergyMatchesClass = allergy === classKey || members.includes(allergy);
+        const drugMatchesClass = drug === classKey || members.some(m => drug.includes(m) || m.includes(drug));
+        if (allergyMatchesClass && drugMatchesClass) {
+            return true;
+        }
+    }
+
+    // 3. Normalized token / word boundary match (prevent short substring false positives like "ice" in "clarithromycin")
+    if (allergy.length >= 4) {
+        const drugTokens = drug.split(/[\s,\-_/]+/);
+        const allergyTokens = allergy.split(/[\s,\-_/]+/);
+        for (const aTok of allergyTokens) {
+            if (aTok.length >= 4) {
+                for (const dTok of drugTokens) {
+                    if (dTok === aTok || (dTok.length >= 4 && (dTok.startsWith(aTok) || aTok.startsWith(dTok)))) {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+function computePrescriptionPayloadHash(patient_id, diagnosis, notes, medicines) {
+    const normalizedMedicines = (medicines || []).map(m => ({
+        medicine_name: (m.medicine_name || "").trim().toLowerCase(),
+        dosage: (m.dosage || "").trim().toLowerCase(),
+        frequency: (m.frequency || "").trim().toLowerCase(),
+        duration: (m.duration || "").trim().toLowerCase(),
+        instructions: (m.instructions || "").trim().toLowerCase()
+    })).sort((a, b) => a.medicine_name.localeCompare(b.medicine_name));
+
+    const canonical = {
+        patient_id: Number(patient_id),
+        diagnosis: (diagnosis || "").trim().toLowerCase(),
+        notes: (notes || "").trim().toLowerCase(),
+        medicines: normalizedMedicines
+    };
+
+    return crypto.createHash("sha256").update(JSON.stringify(canonical)).digest("hex");
+}
 
 const getDoctorProfile = async (req, res) => {
     try {
         const userId = req.user.user_id;
 
         const [doctors] = await db.execute(
-            `SELECT 
+            `SELECT
                 u.user_id,
                 u.full_name,
                 u.email,
@@ -131,8 +198,8 @@ const getDoctorDashboard = async (req, res) => {
 };
 const getPatients = async (req, res) => {
     try {
-        const [patients] = await db.execute(
-            `SELECT DISTINCT
+        const search = (req.query.search || "").trim();
+        let sql = `SELECT DISTINCT
                 p.patient_id,
                 u.full_name,
                 u.email,
@@ -147,10 +214,22 @@ const getPatients = async (req, res) => {
              JOIN users u ON p.user_id = u.user_id
              JOIN appointments a ON p.patient_id = a.patient_id
              JOIN doctors d ON a.doctor_id = d.doctor_id
-             WHERE d.user_id = ?
-             ORDER BY u.full_name`,
-            [req.user.user_id]
-        );
+             WHERE d.user_id = ?`;
+        const params = [req.user.user_id];
+
+        if (search) {
+            const numId = parseInt(search, 10);
+            if (!isNaN(numId) && String(numId) === search) {
+                sql += ` AND (u.full_name LIKE ? OR p.patient_id = ? OR u.phone LIKE ?)`;
+                params.push(`%${search}%`, numId, `%${search}%`);
+            } else {
+                sql += ` AND (u.full_name LIKE ? OR u.phone LIKE ? OR u.email LIKE ?)`;
+                params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+            }
+        }
+
+        sql += ` ORDER BY u.full_name`;
+        const [patients] = await db.execute(sql, params);
 
         res.status(200).json({
             patients: patients
@@ -422,6 +501,12 @@ const createPrescription = async (req, res) => {
             });
         }
 
+        // Compute canonical SHA-256 request hash for idempotency evaluation
+        const requestHash = computePrescriptionPayloadHash(patient_id, diagnosis, notes, medicines);
+
+        // Client-supplied idempotency key (header or body)
+        const idempotencyKey = (req.headers["idempotency-key"] || req.body.idempotency_key || "").toString().trim();
+
         // Atomic Idempotency: Acquire per-(doctor, patient) advisory lock to serialize concurrent submissions
         lockName = `rx_lock_${doctorId}_${patient_id}`;
         try {
@@ -440,28 +525,71 @@ const createPrescription = async (req, res) => {
             });
         }
 
-        // Idempotency: Check for recent duplicate prescription submitted within 15 seconds
-        const [recent] = await connection.execute(
-            `SELECT prescription_id FROM prescriptions
-             WHERE doctor_id = ? AND patient_id = ?
-             AND prescription_date >= NOW() - INTERVAL 15 SECOND
-             ORDER BY prescription_id DESC LIMIT 1`,
-            [doctorId, patient_id]
-        );
-
-        if (recent.length > 0) {
-            const [recentMeds] = await connection.execute(
-                `SELECT medicine_name FROM prescription_medicines WHERE prescription_id = ?`,
-                [recent[0].prescription_id]
+        // 1. If Idempotency-Key is provided, check existing idempotency records for this doctor
+        if (idempotencyKey) {
+            const [existingKeys] = await connection.execute(
+                `SELECT idempotency_key, doctor_id, patient_id, request_hash, prescription_id, response_body
+                 FROM prescription_idempotency_keys
+                 WHERE idempotency_key = ? AND doctor_id = ?`,
+                [idempotencyKey, doctorId]
             );
-            const recentNames = recentMeds.map(m => (m.medicine_name || "").trim().toLowerCase()).sort().join(",");
-            const incomingNames = medicines.map(m => (m.medicine_name || "").trim().toLowerCase()).sort().join(",");
-            if (recentNames && recentNames === incomingNames) {
-                return res.status(200).json({
-                    message: "Duplicate submission prevented: prescription already recorded.",
-                    prescription_id: recent[0].prescription_id,
-                    duplicate_prevented: true
-                });
+
+            if (existingKeys.length > 0) {
+                const existing = existingKeys[0];
+                if (existing.request_hash === requestHash) {
+                    // Exact replay: return cached response
+                    let parsedResponse = {};
+                    try {
+                        parsedResponse = typeof existing.response_body === "string"
+                            ? JSON.parse(existing.response_body)
+                            : existing.response_body;
+                    } catch (e) {
+                        parsedResponse = { prescription_id: existing.prescription_id };
+                    }
+                    return res.status(200).json({
+                        ...parsedResponse,
+                        prescription_id: existing.prescription_id,
+                        duplicate_prevented: true,
+                        idempotent_replay: true
+                    });
+                } else {
+                    // Reused key with different payload: 409 Conflict
+                    return res.status(409).json({
+                        message: "Idempotency key reused with different request payload",
+                        error: "IDEMPOTENCY_CONFLICT"
+                    });
+                }
+            }
+        } else {
+            // 2. Fallback deduplication: Check for identical prescription submitted within 15 seconds
+            const [recent] = await connection.execute(
+                `SELECT prescription_id, diagnosis, notes FROM prescriptions
+                 WHERE doctor_id = ? AND patient_id = ?
+                 AND prescription_date >= NOW() - INTERVAL 15 SECOND
+                 ORDER BY prescription_id DESC LIMIT 1`,
+                [doctorId, patient_id]
+            );
+
+            if (recent.length > 0) {
+                const [recentMeds] = await connection.execute(
+                    `SELECT medicine_name, dosage, frequency, duration, instructions FROM prescription_medicines WHERE prescription_id = ?`,
+                    [recent[0].prescription_id]
+                );
+                const recentHash = computePrescriptionPayloadHash(
+                    patient_id,
+                    recent[0].diagnosis,
+                    recent[0].notes,
+                    recentMeds
+                );
+
+                if (recentHash === requestHash) {
+                    return res.status(200).json({
+                        message: "Duplicate submission prevented: prescription already recorded.",
+                        prescription_id: recent[0].prescription_id,
+                        duplicate_prevented: true
+                    });
+                }
+                // If recentHash !== requestHash (e.g. dosage changed from 5mg to 10mg), it legitimately proceeds!
             }
         }
 
@@ -479,7 +607,7 @@ const createPrescription = async (req, res) => {
         for (const med of medicines) {
             const medName = (med.medicine_name || "").toLowerCase().trim();
             for (const allergy of patientAllergies) {
-                if (allergy && (medName.includes(allergy) || allergy.includes(medName))) {
+                if (checkAllergyContraindication(medName, allergy)) {
                     contraindications.push(
                         `ALLERGY CONTRAINDICATION: Patient has documented allergy to '${allergy}', matching candidate drug '${med.medicine_name}'.`
                     );
@@ -487,13 +615,91 @@ const createPrescription = async (req, res) => {
             }
         }
 
-        if (contraindications.length > 0 && !req.body.safety_override) {
+        // Server-Side Safety Revalidation: Screen candidate medicines against patient's active prescriptions for severe DDIs
+        let severeInteractions = [];
+        try {
+            const [activeRxRows] = await connection.execute(
+                `SELECT pm.medicine_name, MAX(pr.prescription_date) AS max_date
+                 FROM prescriptions pr
+                 JOIN prescription_medicines pm ON pr.prescription_id = pm.prescription_id
+                 WHERE pr.patient_id = ?
+                 GROUP BY pm.medicine_name
+                 ORDER BY max_date DESC LIMIT 20`,
+                [patient_id]
+            );
+            const activeMeds = activeRxRows.map(r => r.medicine_name).filter(Boolean);
+            const candidateMedNames = medicines.map(m => m.medicine_name).filter(Boolean);
+
+            if (candidateMedNames.length > 0) {
+                const screenRes = await forwardToFastAPIPrescriptionScreen({
+                    allergies: patientAllergies,
+                    active_conditions: [],
+                    candidate_medications: candidateMedNames,
+                    active_medications: activeMeds
+                });
+
+                if (Array.isArray(screenRes.contraindications)) {
+                    for (const c of screenRes.contraindications) {
+                        if (!contraindications.includes(c)) contraindications.push(c);
+                    }
+                }
+
+                // Filter for major/critical interactions that involve at least one candidate medication being prescribed
+                const candidateNamesLower = candidateMedNames.map(n => n.toLowerCase().trim());
+                const major = (screenRes.interactions || []).filter(i => {
+                    if (!["major", "critical", "high"].includes(String(i.severity).toLowerCase())) {
+                        return false;
+                    }
+                    const pair = (i.drug_pair || []).map(p => String(p).toLowerCase().trim());
+                    return pair.some(d => candidateNamesLower.some(c => c.includes(d) || d.includes(c)));
+                });
+                if (major.length > 0) {
+                    severeInteractions = major;
+                }
+            }
+        } catch (screenErr) {
+            console.warn("Server-side prescription safety revalidation warning:", screenErr.message);
+            // Fail closed if safety service is unreachable
+            if (!req.body.safety_override) {
+                return res.status(503).json({
+                    message: "Clinical safety verification service unavailable. Cannot verify safety of proposed prescription.",
+                    error: "SAFETY_SERVICE_UNAVAILABLE"
+                });
+            }
+        }
+
+        // STRICT SAFETY INVARIANT: Documented patient allergy contraindications CANNOT be bypassed under any circumstances
+        if (contraindications.length > 0) {
             return res.status(422).json({
-                message: "Prescription rejected by clinical safety boundary due to documented patient allergy.",
-                contraindications,
+                message: "Prescription strictly blocked by clinical safety boundary: Documented patient allergy contraindications cannot be overridden.",
                 rule_id: "ALLERGY_RULE",
-                safety_override_required: true
+                contraindications,
+                cannot_override: true
             });
+        }
+
+        // Severe DDIs require documented clinician override reason
+        if (severeInteractions.length > 0) {
+            const hasValidOverride = req.body.safety_override === true &&
+                typeof req.body.safety_override_reason === "string" &&
+                req.body.safety_override_reason.trim().length >= 5;
+
+            if (!hasValidOverride) {
+                return res.status(422).json({
+                    message: "Prescription rejected by clinical safety boundary due to severe drug interaction.",
+                    rule_id: severeInteractions[0]?.rule_id || "SEVERE_DDI_RULE",
+                    severe_interactions: severeInteractions,
+                    safety_override_required: true,
+                    requires_clinician_reason: true
+                });
+            }
+        }
+
+        // Clinician override audit trail in notes
+        let finalNotes = notes || null;
+        if (req.body.safety_override && req.body.safety_override_reason) {
+            const overrideBanner = `[CLINICIAN OVERRIDE: ${req.body.safety_override_reason.trim()}]`;
+            finalNotes = finalNotes ? `${overrideBanner} ${finalNotes}` : overrideBanner;
         }
 
         // Start transaction
@@ -504,7 +710,7 @@ const createPrescription = async (req, res) => {
             `INSERT INTO prescriptions
              (doctor_id, patient_id, diagnosis, notes)
              VALUES (?, ?, ?, ?)`,
-            [doctorId, patient_id, diagnosis || null, notes || null]
+            [doctorId, patient_id, diagnosis || null, finalNotes]
         );
 
         const prescriptionId = prescriptionResult.insertId;
@@ -526,12 +732,32 @@ const createPrescription = async (req, res) => {
             );
         }
 
+        const successResponse = {
+            message: "Prescription created successfully",
+            prescription_id: prescriptionId,
+            ...(idempotencyKey ? { idempotency_key: idempotencyKey } : {})
+        };
+
+        // Persist idempotency record if key was provided
+        if (idempotencyKey) {
+            await connection.execute(
+                `INSERT INTO prescription_idempotency_keys
+                 (idempotency_key, doctor_id, patient_id, request_hash, prescription_id, response_body)
+                 VALUES (?, ?, ?, ?, ?, ?)`,
+                [
+                    idempotencyKey,
+                    doctorId,
+                    patient_id,
+                    requestHash,
+                    prescriptionId,
+                    JSON.stringify(successResponse)
+                ]
+            );
+        }
+
         await connection.commit();
 
-        res.status(201).json({
-            message: "Prescription created successfully",
-            prescription_id: prescriptionId
-        });
+        res.status(201).json(successResponse);
 
     } catch (error) {
         await connection.rollback();
@@ -965,7 +1191,7 @@ const generatePrescriptionPDF = async (req, res) => {
 
         // Get doctor details
         const [doctors] = await db.execute(
-            `SELECT 
+            `SELECT
                 d.doctor_id,
                 u.full_name,
                 u.email,
@@ -1344,7 +1570,8 @@ const evaluateDoctorCDS = async (req, res) => {
             mode: "doctor",
             patient_context: sanitizedContext,
             candidate_medications: Array.isArray(candidate_medications) ? candidate_medications : [],
-            language: language || "auto"
+            language: language || "auto",
+            conversation_history: Array.isArray(req.body.conversation_history) ? req.body.conversation_history.slice(-6) : []
         });
 
         return res.status(200).json(cdsResponse);
@@ -1409,11 +1636,12 @@ const screenPrescriptionSafety = async (req, res) => {
 
             // Fetch active prescriptions to screen candidates against existing medications
             const [activeRxRows] = await db.execute(
-                `SELECT pm.medicine_name
+                `SELECT pm.medicine_name, MAX(pr.prescription_date) AS max_date
                  FROM prescriptions pr
                  JOIN prescription_medicines pm ON pr.prescription_id = pm.prescription_id
                  WHERE pr.patient_id = ?
-                 ORDER BY pr.prescription_date DESC LIMIT 20`,
+                 GROUP BY pm.medicine_name
+                 ORDER BY max_date DESC LIMIT 20`,
                 [patient_id]
             );
             for (const rx of activeRxRows) {
@@ -1423,11 +1651,16 @@ const screenPrescriptionSafety = async (req, res) => {
             }
         }
 
+        const activeMedsList = patient_id
+            ? allMedicationsToScreen.filter(m => !candidate_medications.includes(m))
+            : [];
+
         // Call fast deterministic screening endpoint
         const screenResponse = await forwardToFastAPIPrescriptionScreen({
             allergies,
             active_conditions: activeConditions,
-            candidate_medications: allMedicationsToScreen
+            candidate_medications: candidate_medications,
+            active_medications: activeMedsList
         });
 
         // Shape response to supply both detailed screening contract and backward-compatible safety_findings
@@ -1445,14 +1678,29 @@ const screenPrescriptionSafety = async (req, res) => {
                 description: c,
                 clinical_consequence: "Immediate clinician review required due to documented allergy",
                 rule_id: "ALLERGY_RULE"
+            })),
+            ...(screenResponse.duplicate_ingredients || []).map(d => ({
+                drugs: d.source_medications,
+                severity: d.severity,
+                description: d.finding,
+                clinical_consequence: d.clinical_action,
+                rule_id: "DUPLICATE_INGREDIENT_RULE"
             }))
         ];
 
         return res.status(200).json({
             screen_status: screenResponse.screen_status,
-            interactions: screenResponse.interactions,
-            contraindications: screenResponse.contraindications,
-            recommendations: screenResponse.recommendations,
+            rule_coverage: screenResponse.rule_coverage || "FULL",
+            interactions: screenResponse.interactions || [],
+            contraindications: screenResponse.contraindications || [],
+            duplicate_ingredients: screenResponse.duplicate_ingredients || [],
+            candidate_alternatives: screenResponse.candidate_alternatives || [],
+            evaluated_drugs: screenResponse.evaluated_drugs || [],
+            unindexed_drugs: screenResponse.unindexed_drugs || [],
+            recommendations: screenResponse.recommendations || [],
+            candidate_medications: candidate_medications,
+            existing_active_medications: activeMedsList,
+            clinical_disclaimer: screenResponse.clinical_disclaimer || "Deterministic screening reflects verified DailyMed SPL rules in local CDSS database.",
             safety_findings: safetyFindings
         });
     } catch (error) {
@@ -1659,8 +1907,8 @@ const uploadAndProcessPrescriptionOcr = async (req, res) => {
             });
         }
 
-        // Execute local OCR
-        const { raw_text, ocr_confidence } = await performOcr(req.file.path);
+        // Execute local OCR with automatic orientation detection and deskewing
+        const { raw_text, ocr_confidence, detected_orientation, orientation_corrected } = await performOcr(req.file.path);
 
         // Extract candidate fields
         const candidateFields = extractCandidateFields(raw_text);
@@ -1692,6 +1940,8 @@ const uploadAndProcessPrescriptionOcr = async (req, res) => {
             raw_extracted_text: raw_text,
             candidate_fields: candidateFields,
             confidence_score: ocr_confidence,
+            detected_orientation: detected_orientation || 0,
+            orientation_corrected: orientation_corrected || false,
             requires_human_confirmation: true
         });
 
@@ -1782,6 +2032,38 @@ const confirmPrescriptionOcrJob = async (req, res) => {
         const authorized = await isDoctorAuthorizedForPatient(doctorId, job.patient_id);
         if (!authorized) {
             return res.status(403).json({ message: "You are not authorized to confirm prescriptions for this patient" });
+        }
+
+        // Safety Boundary: screen confirmed medicines against documented patient allergies
+        const [patientRows] = await db.execute(
+            `SELECT allergies FROM patients WHERE patient_id = ?`,
+            [job.patient_id]
+        );
+        const allergiesStr = patientRows[0]?.allergies || "";
+        const patientAllergies = allergiesStr
+            ? allergiesStr.split(",").map(a => a.trim().toLowerCase()).filter(a => a && a !== "none" && a !== "nil")
+            : [];
+
+        const ocrContraindications = [];
+        for (const med of confirmed_medicines) {
+            const medName = (med.medicine_name || "").toLowerCase().trim();
+            for (const allergy of patientAllergies) {
+                if (checkAllergyContraindication(medName, allergy)) {
+                    ocrContraindications.push(
+                        `ALLERGY CONTRAINDICATION: Patient has documented allergy to '${allergy}', matching OCR-extracted candidate drug '${med.medicine_name}'.`
+                    );
+                }
+            }
+        }
+
+        // STRICT SAFETY INVARIANT: Documented patient allergy contraindications CANNOT be bypassed via OCR confirmation
+        if (ocrContraindications.length > 0) {
+            return res.status(422).json({
+                message: "OCR prescription confirmation strictly rejected by clinical safety boundary: Documented patient allergy contraindications cannot be overridden.",
+                contraindications: ocrContraindications,
+                rule_id: "ALLERGY_RULE",
+                cannot_override: true
+            });
         }
 
         // Use transaction for prescription + medicines creation

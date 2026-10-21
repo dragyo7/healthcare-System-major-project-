@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { receptionistApi } from "../../api/receptionistApi";
+import { useLanguage } from "../../contexts/LanguageContext";
 import {
   Users,
   Calendar,
@@ -15,6 +16,7 @@ import {
 } from "lucide-react";
 
 export default function ReceptionistDashboard() {
+  const { t } = useLanguage();
   const [stats, setStats] = useState({
     patients: 0,
     doctors: 0,
@@ -67,7 +69,7 @@ export default function ReceptionistDashboard() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
             <Users className="w-6 h-6 text-primary" />
-            Front Desk Operations Dashboard
+            {t("Front Desk Operations Dashboard")}
           </h1>
           <p className="text-sm text-muted-foreground">
             Administrative intake, patient account provisioning, physician rosters, and appointment coordination.
@@ -80,7 +82,7 @@ export default function ReceptionistDashboard() {
             className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition shadow-sm"
           >
             <UserPlus className="w-4 h-4" />
-            Intake New Patient
+            {t("Intake New Patient")}
           </Link>
         </div>
       </div>

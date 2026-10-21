@@ -23,6 +23,11 @@ export default function Login() {
       setRole("patient");
       setEmail("aarav@gmail.com");
       setPassword("");
+    } else if (params.get("registered") === "true") {
+      setSuccessMessage("Your patient account has been registered! Please sign in with your credentials.");
+      setRole("patient");
+      setEmail("");
+      setPassword("");
     }
   }, [location]);
 
@@ -85,8 +90,24 @@ export default function Login() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
         <div className="bg-slate-900/80 backdrop-blur-xl py-8 px-6 shadow-2xl rounded-2xl sm:px-10 border border-slate-800">
-          {/* Role Selection Tabs */}
+          {/* Top Access Mode Switch */}
           <div className="flex rounded-xl bg-slate-800/80 p-1 mb-6 border border-slate-700/60">
+            <button
+              type="button"
+              className="flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 bg-primary-600 text-white shadow-md cursor-default"
+            >
+              Sign In
+            </button>
+            <Link
+              to="/signup"
+              className="flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 text-slate-400 hover:text-white cursor-pointer"
+            >
+              Create Account
+            </Link>
+          </div>
+
+          {/* Role Selection Tabs */}
+          <div className="flex rounded-xl bg-slate-800/80 p-1 mb-2 border border-slate-700/60">
             <button
               type="button"
               onClick={() => handleRoleChange("doctor")}
@@ -124,6 +145,15 @@ export default function Login() {
               <span>Receptionist</span>
             </button>
           </div>
+
+          {/* Role Guidance Helper */}
+          <p className="text-[11px] text-slate-400 mb-5 px-1 text-center">
+            {role === "patient"
+              ? "Sign in with patient credentials, or create a patient account."
+              : role === "doctor"
+              ? "Approved clinicians sign in with verified hospital credentials."
+              : "Front desk staff sign in with provisioned reception credentials."}
+          </p>
 
           {/* Messages */}
           {successMessage && (
@@ -209,7 +239,7 @@ export default function Login() {
             <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 text-center">
               Verified Synthetic Demo Accounts
             </span>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <button
                 type="button"
                 onClick={() => handleRoleChange("doctor")}
@@ -237,22 +267,39 @@ export default function Login() {
             </div>
           </div>
 
-          {/* Patient Activation Link */}
-          <div className="mt-6 pt-4 border-t border-slate-800/80 text-center">
-            <Link
-              to="/activate"
-              className="text-xs font-semibold text-slate-400 hover:text-primary-400 transition-colors inline-flex items-center gap-1.5"
-            >
-              <span>🔑 Received an activation link from reception?</span>
-              <span className="text-primary-400 underline">Activate Account</span>
-            </Link>
+          {/* Patient Registration & Activation Links */}
+          <div className="mt-6 pt-4 border-t border-slate-800/80 text-center space-y-2">
+            <div>
+              <Link
+                to="/signup"
+                className="text-xs font-semibold text-slate-400 hover:text-emerald-400 transition-colors inline-flex items-center gap-1.5"
+              >
+                <span>Don't have a patient account?</span>
+                <span className="text-emerald-400 underline">Create Account</span>
+              </Link>
+            </div>
+            <div>
+              <Link
+                to="/activate"
+                className="text-xs text-slate-500 hover:text-primary-400 transition-colors inline-flex items-center gap-1.5"
+              >
+                <span>🔑 Received an activation link from reception?</span>
+                <span className="text-primary-400 underline">Activate Account</span>
+              </Link>
+            </div>
           </div>
         </div>
 
         {/* Security Invariant Footer */}
-        <div className="mt-4 text-center text-xs text-slate-500 flex items-center justify-center gap-1.5">
-          <ShieldCheck className="h-4 w-4 text-emerald-500" />
-          <span>Server-Side RBAC • Express Gateway Port 5000</span>
+        <div className="mt-4 text-center text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-center gap-2">
+          <div className="flex items-center gap-1.5">
+            <ShieldCheck className="h-4 w-4 text-emerald-500" />
+            <span>Server-Side RBAC • Express Gateway Port 5000</span>
+          </div>
+          <span className="hidden sm:inline">•</span>
+          <Link to="/about" className="text-primary-400 hover:text-primary-300 underline font-medium">
+            About & Clinical Ethics
+          </Link>
         </div>
       </div>
     </div>

@@ -61,6 +61,10 @@ class CDSEvaluateRequest(BaseModel):
         "en",
         description="Target language: 'en' (English), 'hi' (Hindi), 'mr' (Marathi), or 'auto'."
     )
+    conversation_history: List[Dict[str, str]] = Field(
+        default_factory=list,
+        description="Bounded prior turns [{'role': 'user'|'assistant', 'content': str}] for pronoun and context resolution."
+    )
 
     @model_validator(mode="before")
     @classmethod
@@ -71,7 +75,7 @@ class CDSEvaluateRequest(BaseModel):
                 data["clinical_query"] = data.get("query")
             if not data.get("mode"):
                 data["mode"] = "doctor"
-            
+
             raw_mode = str(data.get("mode", "doctor")).lower().strip()
             if raw_mode in ["receptionist", "admin", "administrative", "frontdesk"]:
                 raise ValueError(
@@ -152,13 +156,28 @@ class CDSEvaluateResponse(BaseModel):
 
 # Auxiliary prescription screening models matching docs/API_SURFACE.md Section 3.2
 class PrescriptionScreenRequest(BaseModel):
-    allergies: List[str] = Field(default_factory=list)
-    active_conditions: List[str] = Field(default_factory=list)
-    candidate_medications: List[Union[str, Dict[str, Any]]] = Field(..., min_length=1)
+    allergies: List[str] = Field(default_factory=list, description="Documented patient allergies.")
+    active_conditions: List[str] = Field(default_factory=list, description="Active diagnosed conditions.")
+    candidate_medications: List[Union[str, Dict[str, Any]]] = Field(..., min_length=1, description="Proposed newly prescribed medications.")
+    active_medications: Optional[List[Union[str, Dict[str, Any]]]] = Field(
+        default_factory=list,
+        description="Patient's current active medication regimen."
+    )
 
 
 class PrescriptionScreenResponse(BaseModel):
-    screen_status: str  # "safe", "warning", "critical"
+    screen_status: str  # "safe", "warning", "critical", "no_matching_local_rule"
+    rule_coverage: str = Field(
+        "FULL",
+        description="Coverage status: 'FULL' (all drugs indexed), 'PARTIAL' (some unindexed), 'NO_MATCHING_LOCAL_RULE' (unsupported pair)."
+    )
     interactions: List[DrugInteractionAlert] = Field(default_factory=list)
     contraindications: List[str] = Field(default_factory=list)
+    duplicate_ingredients: List[Dict[str, Any]] = Field(default_factory=list)
+    candidate_alternatives: List[Dict[str, Any]] = Field(default_factory=list)
+    evaluated_drugs: List[Dict[str, Any]] = Field(default_factory=list)
+    unindexed_drugs: List[str] = Field(default_factory=list)
     recommendations: List[str] = Field(default_factory=list)
+    clinical_disclaimer: str = Field(
+        default="Deterministic screening reflects verified DailyMed SPL rules in local CDSS database. This screening does not replace clinician evaluation and does not guarantee complete absence of unindexed interactions."
+    )

@@ -10,6 +10,32 @@ const { getHub, getHealth } = require("./controllers/hubController");
 
 const app = express();
 
+// Fail-Closed Production Security Checks
+const validateSecurityConfig = (env = process.env) => {
+    const isProduction = env.NODE_ENV === "production";
+    const jwtSecret = env.JWT_SECRET;
+
+    if (isProduction) {
+        const prohibitedPatterns = ["rag_healthcare_secret", "secret", "123456", "password", "default", "changeme", "change_me"];
+        const isProhibited = !jwtSecret || jwtSecret.length < 32 || prohibitedPatterns.some((p) => jwtSecret.toLowerCase().includes(p));
+        if (isProhibited) {
+            throw new Error(
+                "CRITICAL SECURITY CONFIGURATION ERROR: In production mode (NODE_ENV=production), a strong JWT_SECRET (minimum 32 characters, non-default) MUST be provided via environment configuration."
+            );
+        }
+    } else {
+        if (!jwtSecret) {
+            console.warn(
+                "⚠️ [SECURITY WARNING] JWT_SECRET is not set in environment. Falling back to development secret. DO NOT USE IN PRODUCTION."
+            );
+            env.JWT_SECRET = "dev_rag_healthcare_insecure_local_secret_only";
+        }
+    }
+    return true;
+};
+validateSecurityConfig();
+app.validateSecurityConfig = validateSecurityConfig;
+
 // Secure Headers Middleware
 app.use((req, res, next) => {
     res.setHeader("X-Content-Type-Options", "nosniff");
@@ -99,4 +125,29 @@ app.use("/api/doctor", doctorRoutes);
 app.use("/api/patient", patientRoutes);
 app.use("/api/receptionist", receptionistRoutes);
 
+// Centralized Error Handling Middleware (including Multer file limits)
+app.use((err, req, res, next) => {
+    if (err.name === "MulterError") {
+        if (err.code === "LIMIT_FILE_SIZE") {
+            return res.status(413).json({
+                message: "Prescription image exceeds maximum allowable limit of 5MB.",
+                error: "LIMIT_FILE_SIZE"
+            });
+        }
+        return res.status(400).json({
+            message: `File upload error: ${err.message}`,
+            error: err.code || "MULTER_ERROR"
+        });
+    }
+    if (err) {
+        console.error("Unhandled Application Error:", err);
+        return res.status(err.status || 500).json({
+            message: err.message || "Internal server error",
+            error: err.name || "SERVER_ERROR"
+        });
+    }
+    next();
+});
+
 module.exports = app;
+module.exports.validateSecurityConfig = validateSecurityConfig;

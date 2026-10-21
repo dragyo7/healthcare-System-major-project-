@@ -16,6 +16,17 @@ export const receptionistApi = {
     return data.doctors || [];
   },
 
+  registerDoctor: async (doctorData) => {
+    const res = await fetch(`${API_BASE}/receptionist/doctors`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(doctorData),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Failed to register physician");
+    return data;
+  },
+
   getPatients: async () => {
     const res = await fetch(`${API_BASE}/receptionist/patients`, { headers: getAuthHeaders() });
     const data = await res.json();

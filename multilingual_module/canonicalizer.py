@@ -173,7 +173,14 @@ CLINICAL_INTENT_MAP = {
     "સાઇડ ઇફેક્ટ": "side effects",
     "खुराक": "dosage and administration",
     "डोस": "dosage", "ડોઝ": "dosage",
-    "प्रमाण": "dosage amount", "માત્રા": "dosage amount",
+    "वापर आणि संकेत": "indications and clinical usage",
+    "उपयोग और संकेत": "indications and clinical usage",
+    "ઉપયોગ અને સંકેતો": "indications and clinical usage",
+    "ઉપયોગ અને સંકેત": "indications and clinical usage",
+    "संकेत": "indications",
+    "संकेतों": "indications",
+    "સંકેત": "indications",
+    "સંકેતો": "indications",
     "वापर": "indications and clinical usage",
     "उपयोग": "indications and clinical usage",
     "फायदे": "therapeutic benefits and indications",
@@ -213,19 +220,97 @@ CLINICAL_INTENT_MAP = {
     "ચેતવણીઓ": "warnings and precautions",
     "સાવચેતી": "warnings and precautions",
 
-    # Co-Prescribing & Concomitant Inquiries
+    # Co-Prescribing & Concomitant Inquiries (Only actual combination markers)
     "સાથે લેવી": "together co-prescribe",
     "સાથે લઈ શકાય": "together co-prescribe",
     "સાથે": "together co-prescribe",
     "એકસાથે": "together co-prescribe",
-    "घेता येईल का": "together co-prescribe",
     "एकत्र": "together co-prescribe",
     "सोबत": "together co-prescribe",
-    "घेऊ शकतो का": "together co-prescribe",
     "साथ में": "together co-prescribe",
     "एक साथ": "together co-prescribe",
-    "ले सकते हैं": "together co-prescribe",
-    "दे सकते हैं": "together co-prescribe",
+
+    # Permissibility & Administration Inquiries (Unlinked from co-prescribe)
+    "घेता येईल का": "can take",
+    "घेऊ शकतो का": "can take",
+    "घेऊ शकते का": "can take",
+    "घेता येईल": "can take",
+    "घेऊ शकतो": "can take",
+    "घेऊ शकते": "can take",
+    "ले सकते हैं": "can take",
+    "ले सकता हूँ": "can take",
+    "ले सकती हूँ": "can take",
+    "ले सकता": "can take",
+    "ले सकती": "can take",
+    "दे सकते हैं": "can administer",
+    "दे सकते": "can administer",
+    "दे सकता हूँ": "can administer",
+    "दे सकती हूँ": "can administer",
+    "લઈ શકાય": "can take",
+    "લઈ શકું": "can take",
+
+    # Allergy & Hypersensitivity Tokens
+    "पेनिसिलिनची ऍलर्जी आहे": "penicillin allergy",
+    "पेनिसिलिनची ऍलर्जी": "penicillin allergy",
+    "पेनिसिलिन ऍलर्जी": "penicillin allergy",
+    "पेनिसिलिनची एलर्जी": "penicillin allergy",
+    "पेनिसिलिन": "penicillin",
+    "पेन्सिलिन": "penicillin",
+    "penisilin": "penicillin",
+    "सल्फा ऍलर्जी": "sulfa allergy",
+    "सल्फा एलर्जी": "sulfa allergy",
+    "સલ્ફા એલર્જી": "sulfa allergy",
+    "सल्फा": "sulfa",
+    "સલ્ફા": "sulfa",
+    "slpha": "sulfa",
+    "ऍलर्जी": "allergy",
+    "अलर्जी": "allergy",
+    "एलर्जी": "allergy",
+    "એલર્જી": "allergy",
+    "alerji": "allergy",
+    "elrji": "allergy",
+    "allergy": "allergy",
+
+    # Dosage Frequency & Timing Tokens
+    "दिन में दो बार": "twice daily",
+    "din me do baar": "twice daily",
+    "दिवसातून दोनदा": "twice daily",
+    "divsatun donda": "twice daily",
+    "દિવસમાં બે વાર": "twice daily",
+    "दिन में एक बार": "once daily",
+    "din me ek baar": "once daily",
+    "दिवसातून एकदा": "once daily",
+    "divsatun ekda": "once daily",
+    "દિવસમાં એક વાર": "once daily",
+    "दिन में तीन बार": "three times daily",
+    "दिवसातून तीन वेळा": "three times daily",
+    "દિવસમાં ત્રણ વાર": "three times daily",
+    "din me kitni baar": "daily dosage frequency",
+    "दिन में कितनी बार": "daily dosage frequency",
+    "कितनी बार": "dosage frequency",
+    "kitni baar": "dosage frequency",
+    "किती वेळा": "dosage frequency",
+    "kiti vela": "dosage frequency",
+    "કેટલી વાર": "dosage frequency",
+    "खाली पेट": "on an empty stomach",
+    "khali pet": "on an empty stomach",
+    "उपाशी पोटी": "on an empty stomach",
+    "upashi poti": "on an empty stomach",
+    "ભૂખ્યા પેટે": "on an empty stomach",
+    "सोने से पहले": "at bedtime",
+    "sone se pehle": "at bedtime",
+    "झोपण्यापूर्वी": "at bedtime",
+    "ઊંઘતા પહેલા": "at bedtime",
+    "शराब के साथ": "with alcohol",
+    "sharab ke sath": "with alcohol",
+    "अल्कोहोलसोबत": "with alcohol",
+    "alcohol ke sath": "with alcohol",
+    "દારૂ સાથે": "with alcohol",
+    "डोस विसरल्यास": "missed dose",
+    "डोस चुकल्यास": "missed dose",
+    "खुराक भूल जाने पर": "missed dose",
+    "डबल डोस": "double dose",
+    "डबल": "double",
 
     # Clinical Medical Terms & Nouns
     "दवा के": "medicine", "दवा की": "medicine", "दवाएं": "medicine", "दवाई": "medicine", "दवा": "medicine",
@@ -287,6 +372,8 @@ CLINICAL_INTENT_MAP = {
     "ન": "do not", "નથી": "not", "નહીં": "not", "नका": "do not", "नको": "do not",
     "ન લેવી": "do not take", "નથી લેવી": "do not take", "ન લેવું": "do not take",
     "न लें": "do not take", "नका घेऊ": "do not take", "घेऊ नका": "do not take",
+    "नहीं लेना चाहिए": "do not take", "नही लेना चाहिए": "do not take",
+    "नाही घ्यावे": "do not take", "नाही घ्यावी": "do not take",
     "बंध": "discontinue", "बंद": "discontinue",
     "बिना": "without", "शिवाय": "without", "વિના": "without"
 }
@@ -302,7 +389,7 @@ def canonicalize_medical_query(raw_query: str, forced_lang: str = None) -> Dict[
     """
     Transforms Hindi, Marathi, Gujarati, or English medical queries into canonical English
     representations for the retrieval engine without dropping unmatched tokens or fabricating canned queries.
-    
+
     Returns:
         {
             "canonical_query": str,
@@ -334,22 +421,29 @@ def canonicalize_medical_query(raw_query: str, forced_lang: str = None) -> Dict[
     # Extract dosages first
     extracted_dosages = extract_dosage_tokens(raw)
 
-    # If already English, check for known drugs directly
+    # If detected as English, check whether Romanized Indic or clinical intent markers exist
     if lang == "en":
-        extracted_drugs = []
-        for word in re.findall(r"\b[a-zA-Z]{3,}\b", raw.lower()):
-            if word in CORPUS_DRUGS_SET and word not in extracted_drugs:
-                extracted_drugs.append(word)
-        return {
-            "canonical_query": raw,
-            "original_query": raw,
-            "detected_language": "en",
-            "extracted_drugs": extracted_drugs,
-            "extracted_dosages": extracted_dosages,
-            "preserved_tokens": raw.split(),
-            "was_canonicalized": False,
-            "normalization_strategy": "passthrough_english"
-        }
+        # Check if the query contains Romanized Indic or transliterated intent phrases
+        has_romanized_intent = any(
+            re.search(rf"(?<![^\s\.,\?!।\(\)]){re.escape(k)}(?![^\s\.,\?!।\(\)])", raw, re.IGNORECASE)
+            for k in CLINICAL_INTENT_MAP
+            if re.search(r"[a-zA-Z]", k) and len(k) >= 3 and k.lower() not in {"and", "or", "for", "any", "not"}
+        )
+        if not has_romanized_intent:
+            extracted_drugs = []
+            for word in re.findall(r"\b[a-zA-Z]{3,}\b", raw.lower()):
+                if word in CORPUS_DRUGS_SET and word not in extracted_drugs:
+                    extracted_drugs.append(word)
+            return {
+                "canonical_query": raw,
+                "original_query": raw,
+                "detected_language": "en",
+                "extracted_drugs": extracted_drugs,
+                "extracted_dosages": extracted_dosages,
+                "preserved_tokens": raw.split(),
+                "was_canonicalized": False,
+                "normalization_strategy": "passthrough_english"
+            }
 
     # Multilingual Normalization Pipeline
     working_text = raw
@@ -358,7 +452,7 @@ def canonicalize_medical_query(raw_query: str, forced_lang: str = None) -> Dict[
     # 1. Map known multi-word clinical phrases & intentions (with punctuation & boundary protection)
     for indic_phrase, english_equiv in sorted(CLINICAL_INTENT_MAP.items(), key=lambda x: -len(x[0])):
         # Match only at word boundaries (whitespace or punctuation)
-        pattern = re.compile(rf"(?<![^\s\.,\?!।\(\)]){re.escape(indic_phrase)}(?![^\s\.,\?!।\(\)])")
+        pattern = re.compile(rf"(?<![^\s\.,\?!।\(\)]){re.escape(indic_phrase)}(?![^\s\.,\?!।\(\)])", re.IGNORECASE)
         if pattern.search(working_text):
             working_text = pattern.sub(f" {english_equiv} ", working_text)
 
@@ -396,7 +490,8 @@ def canonicalize_medical_query(raw_query: str, forced_lang: str = None) -> Dict[
         tokens_rest = rest.split()
         if tokens_rest and tokens_rest[0].lower() in CORPUS_DRUGS_SET:
             drug = tokens_rest[0]
-            other = " ".join([t for t in tokens_rest[1:] if t.lower() not in {"medicine", "medicines", "tablet", "tablets"}])
+            postpositions = {"medicine", "medicines", "tablet", "tablets", "ke", "ki", "ka", "che", "chi", "chya", "na", "ni", "nu"}
+            other = " ".join([t for t in tokens_rest[1:] if t.lower() not in postpositions])
             canonical_result = f"{q_word} {other} of {drug}"
         else:
             canonical_result = f"{q_word} {rest}"

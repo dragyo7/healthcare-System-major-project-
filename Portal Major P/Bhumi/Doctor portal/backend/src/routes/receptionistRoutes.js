@@ -2,6 +2,7 @@ const express = require("express");
 const { authenticateReceptionist } = require("../middleware/authMiddleware");
 const {
     getDoctors,
+    registerDoctor,
     getPatients,
     registerPatient,
     getAppointments,
@@ -15,6 +16,7 @@ const router = express.Router();
 router.use(authenticateReceptionist);
 
 router.get("/doctors", getDoctors);
+router.post("/doctors", registerDoctor);
 router.get("/patients", getPatients);
 router.post("/patients", registerPatient);
 router.get("/appointments", getAppointments);

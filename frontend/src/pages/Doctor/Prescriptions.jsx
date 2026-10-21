@@ -1,14 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { Pill, Plus, Trash2, ShieldCheck, AlertTriangle, FileText, Upload, CheckCircle2, ArrowRight, Download, Camera } from "lucide-react";
+import { Pill, Plus, Trash2, ShieldCheck, ShieldAlert, AlertTriangle, FileText, Upload, CheckCircle2, ArrowRight, Download, Camera, RefreshCw } from "lucide-react";
 import { doctorApi } from "../../api/doctorApi";
+import { useLanguage } from "../../contexts/LanguageContext";
+import PatientSearchSelector from "../../components/doctor/PatientSearchSelector";
+import SafetyAnalysisModal from "../../components/doctor/SafetyAnalysisModal";
 
 export default function DoctorPrescriptions() {
   const location = useLocation();
+  const { t } = useLanguage();
 
   const [activeTab, setActiveTab] = useState("direct"); // "direct" | "assistant" | "ocr" | "history"
   const [patients, setPatients] = useState([]);
   const [selectedPatientId, setSelectedPatientId] = useState(1);
+  const [selectedPatientName, setSelectedPatientName] = useState("Patient");
+  const [patientAllergies, setPatientAllergies] = useState([]);
+  const [patientActiveMeds, setPatientActiveMeds] = useState([]);
+  const [patientContextLoading, setPatientContextLoading] = useState(false);
 
   // Form states
   const [diagnosis, setDiagnosis] = useState("");
@@ -17,10 +25,14 @@ export default function DoctorPrescriptions() {
     { medicine_name: "Metformin", dosage: "500 mg", frequency: "Twice daily", duration: "30 days", instructions: "Take with meals" }
   ]);
 
-  // Safety Screening state
+  // Safety Screening & Dialogue state
   const [safetyChecking, setSafetyChecking] = useState(false);
   const [safetyFindings, setSafetyFindings] = useState([]);
   const [safetyPassed, setSafetyPassed] = useState(false);
+  const [safetyData, setSafetyData] = useState(null);
+  const [isSafetyModalOpen, setIsSafetyModalOpen] = useState(false);
+  const [staleAnalysis, setStaleAnalysis] = useState(true);
+  const [safetyOverrideReason, setSafetyOverrideReason] = useState("");
 
   // Assistant drafter state
   const [naturalText, setNaturalText] = useState("");
@@ -85,6 +97,51 @@ export default function DoctorPrescriptions() {
     init();
   }, [location]);
 
+  // Load detailed patient clinical context (allergies & active medicines)
+  const loadPatientContext = async (patientId) => {
+    const pId = patientId || selectedPatientId;
+    if (!pId) return;
+    setPatientContextLoading(true);
+    try {
+      const details = await doctorApi.getPatientDetails(pId);
+      if (details.patient) {
+        setSelectedPatientName(details.patient.full_name || `Patient #${pId}`);
+        const allergyStr = details.patient.allergies || "";
+        const parsedAllergies = allergyStr
+          .split(",")
+          .map((a) => a.trim())
+          .filter((a) => a && a.toLowerCase() !== "none" && a.toLowerCase() !== "nil");
+        setPatientAllergies(parsedAllergies);
+      }
+
+      // Extract unique active medication names from prescription history
+      const activeRxMeds = [];
+      for (const rx of details.prescriptions || []) {
+        if (rx.medicine_name && !activeRxMeds.includes(rx.medicine_name)) {
+          activeRxMeds.push(rx.medicine_name);
+        }
+      }
+      setPatientActiveMeds(activeRxMeds);
+
+      // Invalidate safety checks when patient changes
+      setSafetyPassed(false);
+      setStaleAnalysis(true);
+      setSafetyFindings([]);
+      setSafetyData(null);
+      setSafetyOverrideReason("");
+    } catch (err) {
+      console.warn("Could not load patient clinical context:", err);
+    } finally {
+      setPatientContextLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedPatientId) {
+      loadPatientContext(selectedPatientId);
+    }
+  }, [selectedPatientId]);
+
   // Load prescription history
   const loadHistory = async (patientId) => {
     const pId = patientId || selectedPatientId;
@@ -113,11 +170,13 @@ export default function DoctorPrescriptions() {
       { medicine_name: "", dosage: "", frequency: "Once daily", duration: "7 days", instructions: "" }
     ]);
     setSafetyPassed(false);
+    setStaleAnalysis(true);
   };
 
   const handleRemoveMedicine = (idx) => {
     setMedicines(medicines.filter((_, i) => i !== idx));
     setSafetyPassed(false);
+    setStaleAnalysis(true);
   };
 
   const handleMedicineChange = (idx, field, value) => {
@@ -125,10 +184,16 @@ export default function DoctorPrescriptions() {
     updated[idx][field] = value;
     setMedicines(updated);
     setSafetyPassed(false);
+    setStaleAnalysis(true);
   };
 
   // Deterministic Safety Screening via CDS Bridge
   const handleRunSafetyCheck = async () => {
+    if (!selectedPatientId) {
+      setError("Please search and select an authorized patient before running clinical safety screening.");
+      return;
+    }
+
     const medNames = medicines.map((m) => m.medicine_name.trim()).filter(Boolean);
     if (medNames.length === 0) {
       setError("Please add at least one medication to screen.");
@@ -137,7 +202,6 @@ export default function DoctorPrescriptions() {
 
     setSafetyChecking(true);
     setError("");
-    setSafetyFindings([]);
 
     try {
       const res = await doctorApi.screenPrescription({
@@ -145,9 +209,9 @@ export default function DoctorPrescriptions() {
         candidateMedications: medNames,
       });
 
-      const findings = res.safety_findings || [];
-      setSafetyFindings(findings);
-      setSafetyPassed(true);
+      setSafetyData(res);
+      setSafetyFindings(res.safety_findings || []);
+      setIsSafetyModalOpen(true);
     } catch (err) {
       setError(err?.message || "Safety analysis failed. Please check network.");
     } finally {
@@ -155,12 +219,54 @@ export default function DoctorPrescriptions() {
     }
   };
 
+  // Replace interacting medicine with verified candidate alternative
+  const handleApplyAlternative = (originalDrug, candidateDrug) => {
+    const updated = medicines.map((m) => {
+      const currentLower = m.medicine_name.toLowerCase().trim();
+      const origLower = originalDrug.toLowerCase().trim();
+      if (currentLower === origLower || currentLower.includes(origLower) || origLower.includes(currentLower)) {
+        return {
+          ...m,
+          medicine_name: candidateDrug,
+          instructions: m.instructions ? `${m.instructions} (Replaced from ${originalDrug})` : `Alternative for ${originalDrug}`
+        };
+      }
+      return m;
+    });
+
+    setMedicines(updated);
+    setIsSafetyModalOpen(false);
+    setSafetyPassed(false);
+    setStaleAnalysis(true);
+    setSuccessMessage(`Applied evidence-backed alternative '${candidateDrug}' for '${originalDrug}'. Please run safety analysis to verify updated regimen.`);
+  };
+
+  // Clinician confirms and acknowledges safety findings from modal
+  const handleAcknowledgeAndProceed = ({ overrideApplied, overrideReason }) => {
+    if (overrideApplied) {
+      setSafetyOverrideReason(overrideReason || "");
+    }
+    setSafetyPassed(true);
+    setStaleAnalysis(false);
+    setIsSafetyModalOpen(false);
+    setSuccessMessage("Safety analysis findings acknowledged. You may now persist the prescription.");
+  };
+
   // Direct Submission & Persistence
   const handleSubmitPrescription = async (e) => {
     e.preventDefault();
+    if (!selectedPatientId) {
+      setError("Please search and select an authorized patient before submitting the prescription.");
+      return;
+    }
     const validMeds = medicines.filter((m) => m.medicine_name.trim());
     if (validMeds.length === 0) {
       setError("At least one medicine is required.");
+      return;
+    }
+
+    if (!safetyPassed || staleAnalysis) {
+      setError("Clinical Safety Analysis must be run and reviewed for current medications before issuing prescription.");
       return;
     }
 
@@ -169,21 +275,32 @@ export default function DoctorPrescriptions() {
     setSuccessMessage("");
     setCreatedRxId(null);
 
+    // Client-side idempotency key per submission intent
+    const idempotencyKey = `rx_${selectedPatientId}_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+
     try {
-      const res = await doctorApi.createPrescription({
-        patient_id: selectedPatientId,
-        diagnosis: diagnosis || "General Clinical Care",
-        notes,
-        medicines: validMeds
-      });
+      const res = await doctorApi.createPrescription(
+        {
+          patient_id: selectedPatientId,
+          diagnosis: diagnosis || "General Clinical Care",
+          notes,
+          medicines: validMeds,
+          safety_override: !!safetyOverrideReason,
+          safety_override_reason: safetyOverrideReason
+        },
+        idempotencyKey
+      );
 
       if (res.duplicate_prevented) {
         setSuccessMessage(`Prescription already recorded: Prescription #${res.prescription_id} (duplicate submission prevented).`);
       } else {
-        setSuccessMessage("Prescription verified, finalized, and saved to hospital database!");
+        setSuccessMessage(`Prescription #${res.prescription_id} successfully created and committed to clinical record!`);
       }
       setCreatedRxId(res.prescription_id || res.id);
       loadHistory();
+      setStaleAnalysis(true);
+      setSafetyPassed(false);
+      setSafetyOverrideReason("");
     } catch (err) {
       const contraMsg =
         err?.contraindications?.join(" ") ||
@@ -214,7 +331,7 @@ export default function DoctorPrescriptions() {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (err) {
-      alert(err.message || "Failed to download prescription PDF");
+      setError(err?.message || "Failed to download prescription PDF. Please check authorization or network.");
     } finally {
       setDownloadingId(null);
     }
@@ -335,52 +452,103 @@ export default function DoctorPrescriptions() {
             <span>Deterministic Safety Verification • Doctor-in-the-Loop</span>
           </div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
-            Prescription Authoring & Safety Studio
+            {t("Prescription Authoring & Safety Studio")}
           </h1>
           <p className="text-xs sm:text-sm text-primary-100/80">
             Create direct electronic prescriptions, draft assisted regimens, and verify physical prescription OCR.
           </p>
         </div>
 
-        <div className="flex items-center gap-3 z-10 shrink-0">
-          <div className="flex flex-col">
-            <label className="text-[11px] font-bold uppercase tracking-wider text-primary-300 mb-1">
-              Select Patient
-            </label>
-            <select
-              value={selectedPatientId || ""}
-              onChange={(e) => {
-                setSelectedPatientId(parseInt(e.target.value, 10));
-                setSafetyPassed(false);
-              }}
-              className="bg-primary-900/80 border border-primary-700/80 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-hidden focus:border-white cursor-pointer"
-            >
-              {patients.map((p) => (
-                <option key={p.patient_id} value={p.patient_id} className="text-slate-900">
-                  {p.full_name} (#{p.patient_id})
-                </option>
-              ))}
-            </select>
-            {(() => {
-              const activePat = patients.find((p) => p.patient_id === selectedPatientId);
-              if (!activePat) return null;
-              return (
-                <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[10px]">
-                  <span className="text-primary-200">
-                    {activePat.gender || "Patient"} • Blood: {activePat.blood_group || "—"}
-                  </span>
-                  {activePat.allergies ? (
-                    <span className="px-1.5 py-0.5 rounded bg-rose-500/30 text-rose-200 font-bold border border-rose-400/30">
-                      Allergy: {activePat.allergies}
-                    </span>
-                  ) : (
-                    <span className="text-primary-300/80">No documented allergies</span>
-                  )}
-                </div>
-              );
-            })()}
-          </div>
+      </div>
+
+      {/* Searchable Patient Selector & Clinical Dossier Banner */}
+      <div className="p-4 rounded-2xl bg-card border border-border shadow-xs">
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            {t("Patient Dossier & Authorization Verification")}
+          </label>
+          <span className="text-[11px] text-muted-foreground">
+            Prescription authoring is strictly bound to authorized patient identity.
+          </span>
         </div>
+        <PatientSearchSelector
+          selectedPatientId={selectedPatientId}
+          onSelectPatient={(patient) => {
+            const pId = patient ? patient.patient_id : null;
+            setSelectedPatientId(pId);
+            setSafetyPassed(false);
+            setStaleAnalysis(true);
+            setSafetyFindings([]);
+            setSafetyData(null);
+            setSafetyOverrideReason("");
+            if (pId) {
+              loadPatientContext(pId);
+              loadHistory(pId);
+            } else {
+              setSelectedPatientName("Patient");
+              setPatientAllergies([]);
+              setPatientActiveMeds([]);
+              setPrescriptionHistory([]);
+            }
+          }}
+          disabled={submitting}
+        />
+
+        {/* Patient Clinical Context Card */}
+        {selectedPatientId && (
+          <div className="mt-3 pt-3 border-t border-border grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60 flex items-start gap-2">
+              <ShieldAlert className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+              <div>
+                <span className="font-bold text-slate-800 dark:text-slate-200 block mb-1">
+                  {t("Documented Allergies") || "Documented Patient Allergies"}:
+                </span>
+                {patientAllergies.length > 0 ? (
+                  <div className="flex flex-wrap gap-1">
+                    {patientAllergies.map((allergy, i) => (
+                      <span
+                        key={i}
+                        className="px-2 py-0.5 rounded-md bg-rose-100 dark:bg-rose-900/40 text-rose-800 dark:text-rose-200 font-semibold text-[11px] border border-rose-200 dark:border-rose-800"
+                      >
+                        {allergy}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <span className="text-emerald-600 dark:text-emerald-400 font-medium text-[11px] flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>{t("No documented drug allergies") || "No documented drug allergies"}</span>
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60 flex items-start gap-2">
+              <Pill className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+              <div>
+                <span className="font-bold text-slate-800 dark:text-slate-200 block mb-1">
+                  {t("Current Active Medications") || "Current Active Regimen"}:
+                </span>
+                {patientActiveMeds.length > 0 ? (
+                  <div className="flex flex-wrap gap-1">
+                    {patientActiveMeds.map((med, i) => (
+                      <span
+                        key={i}
+                        className="px-2 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 font-semibold text-[11px] border border-blue-200 dark:border-blue-800"
+                      >
+                        {med}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <span className="text-slate-400 dark:text-slate-500 text-[11px] italic">
+                    {t("No existing active medications recorded") || "No prior active medications recorded in EHR."}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Tabs */}
@@ -391,11 +559,11 @@ export default function DoctorPrescriptions() {
           className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
             activeTab === "direct"
               ? "bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 shadow-sm"
-              : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
           }`}
         >
           <Pill className="h-3.5 w-3.5" />
-          <span>Direct Form Entry</span>
+          <span>{t("Direct Form Entry")}</span>
         </button>
 
         <button
@@ -404,11 +572,11 @@ export default function DoctorPrescriptions() {
           className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
             activeTab === "assistant"
               ? "bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 shadow-sm"
-              : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
           }`}
         >
           <FileText className="h-3.5 w-3.5" />
-          <span>Natural Text Drafter</span>
+          <span>{t("Natural Text Drafter")}</span>
         </button>
 
         <button
@@ -417,11 +585,11 @@ export default function DoctorPrescriptions() {
           className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
             activeTab === "ocr"
               ? "bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 shadow-sm"
-              : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
           }`}
         >
           <Camera className="h-3.5 w-3.5" />
-          <span>Prescription OCR</span>
+          <span>{t("Prescription OCR")}</span>
         </button>
 
         <button
@@ -430,11 +598,11 @@ export default function DoctorPrescriptions() {
           className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
             activeTab === "history"
               ? "bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 shadow-sm"
-              : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
           }`}
         >
           <Download className="h-3.5 w-3.5" />
-          <span>Saved History</span>
+          <span>{t("Saved History")}</span>
         </button>
       </div>
 
@@ -471,7 +639,7 @@ export default function DoctorPrescriptions() {
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
             <div>
               <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                Electronic Prescription Form
+                {t("Electronic Prescription Form")}
               </h2>
               <p className="text-xs text-slate-500">
                 Author and confirm structured regimens with automated drug interaction screening.
@@ -484,7 +652,7 @@ export default function DoctorPrescriptions() {
               className="px-3.5 py-1.5 rounded-xl bg-primary-50 dark:bg-primary-950/60 text-primary-600 dark:text-primary-300 hover:bg-primary-100 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
             >
               <Plus className="h-4 w-4" />
-              <span>Add Medication</span>
+              <span>{t("Add Medication")}</span>
             </button>
           </div>
 
@@ -492,7 +660,7 @@ export default function DoctorPrescriptions() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Clinical Diagnosis
+                  {t("Clinical Diagnosis")}
                 </label>
                 <input
                   type="text"
@@ -506,7 +674,7 @@ export default function DoctorPrescriptions() {
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Clinical Notes / Special Precautions
+                  {t("Doctor Notes")}
                 </label>
                 <input
                   type="text"
@@ -531,7 +699,7 @@ export default function DoctorPrescriptions() {
                 >
                   <div className="sm:col-span-2">
                     <label className="block text-[11px] font-semibold text-slate-500 mb-1">
-                      Medication Name
+                      {t("Medication Name")}
                     </label>
                     <input
                       type="text"
@@ -545,7 +713,7 @@ export default function DoctorPrescriptions() {
 
                   <div>
                     <label className="block text-[11px] font-semibold text-slate-500 mb-1">
-                      Dosage
+                      {t("Dosage")}
                     </label>
                     <input
                       type="text"
@@ -559,7 +727,7 @@ export default function DoctorPrescriptions() {
 
                   <div>
                     <label className="block text-[11px] font-semibold text-slate-500 mb-1">
-                      Frequency
+                      {t("Frequency")}
                     </label>
                     <input
                       type="text"
@@ -574,7 +742,7 @@ export default function DoctorPrescriptions() {
                   <div className="flex items-center gap-2">
                     <div className="flex-1">
                       <label className="block text-[11px] font-semibold text-slate-500 mb-1">
-                        Duration
+                        {t("Duration")}
                       </label>
                       <input
                         type="text"
@@ -600,43 +768,55 @@ export default function DoctorPrescriptions() {
               ))}
             </div>
 
-            {/* Safety Findings Display */}
-            {safetyFindings.length > 0 && (
-              <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900 space-y-2">
-                <div className="flex items-center gap-2 text-rose-700 dark:text-rose-300 font-bold text-xs uppercase tracking-wider">
-                  <AlertTriangle className="h-4 w-4" />
-                  <span>Deterministic Drug Safety Alert Detected</span>
+            {/* Stale Safety Analysis Warning */}
+            {staleAnalysis && (
+              <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-300 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                  <span>
+                    <strong>{t("Safety Analysis Pending") || "Safety Screening Required"}: </strong>
+                    {t("Prescription medications have been modified or have not yet been evaluated. Click 'Run Safety Analysis' to screen for drug interactions and candidate alternatives.") || "Prescription medications have been modified or have not yet been evaluated. Click 'Run Safety Analysis' to screen for drug interactions and candidate alternatives."}
+                  </span>
                 </div>
-                {safetyFindings.map((f, i) => (
-                  <div key={i} className="text-xs text-rose-900 dark:text-rose-200 space-y-1">
-                    <div className="flex items-center gap-1.5 font-bold">
-                      {f.rule_id && (
-                        <span className="px-1.5 py-0.5 rounded bg-rose-200 dark:bg-rose-900/60 text-[10px] font-mono tracking-wide text-rose-950 dark:text-rose-100">
-                          {f.rule_id}
-                        </span>
-                      )}
-                      {f.severity && (
-                        <span className="px-1.5 py-0.5 rounded bg-rose-600 text-white text-[10px] uppercase font-bold">
-                          {f.severity}
-                        </span>
-                      )}
-                      <span>{f.drugs && f.drugs.length > 0 ? f.drugs.join(" ⇄ ") : (f.rule_id || "Allergy Rule")}</span>
-                    </div>
-                    <p className="text-[11px] leading-relaxed text-rose-900/90 dark:text-rose-200/90">
-                      {f.description || f.clinical_consequence}
-                    </p>
-                  </div>
-                ))}
+                <button
+                  type="button"
+                  onClick={handleRunSafetyCheck}
+                  disabled={safetyChecking}
+                  className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shrink-0 flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
+                >
+                  <RefreshCw className={`h-3 w-3 ${safetyChecking ? "animate-spin" : ""}`} />
+                  <span>{safetyChecking ? "Screening..." : (t("Run Safety Analysis") || "Run Safety Analysis")}</span>
+                </button>
               </div>
             )}
 
-            {/* Clean Safety Screen Confirmation */}
-            {safetyPassed && safetyFindings.length === 0 && (
-              <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900 text-xs text-emerald-800 dark:text-emerald-200 flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                <span>
-                  <strong>Deterministic Screening Cleared:</strong> No known drug-drug interactions or documented patient allergies detected for candidate medications. Clinical evaluation remains the prescribing clinician's responsibility.
-                </span>
+            {/* Completed Safety Screen Status */}
+            {!staleAnalysis && safetyPassed && (
+              <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-300 dark:border-emerald-800 text-xs text-emerald-900 dark:text-emerald-200 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <div>
+                    <span className="font-bold">
+                      {t("Safety Verification Complete") || "Safety Verification Complete"}:{" "}
+                    </span>
+                    <span>
+                      {safetyData?.interactions?.length || 0} {t("interactions") || "interactions"}, {safetyData?.contraindications?.length || 0} {t("contraindications") || "contraindications"}.
+                    </span>
+                    {safetyOverrideReason && (
+                      <span className="block mt-0.5 text-rose-600 dark:text-rose-400 font-medium">
+                        [Clinician Override Applied: {safetyOverrideReason}]
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsSafetyModalOpen(true)}
+                  className="px-3 py-1.5 rounded-lg border border-emerald-600 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 font-bold text-xs shrink-0 cursor-pointer"
+                >
+                  {t("View Full Safety Report") || "View Safety Report"}
+                </button>
               </div>
             )}
 
@@ -646,23 +826,27 @@ export default function DoctorPrescriptions() {
                 type="button"
                 onClick={handleRunSafetyCheck}
                 disabled={safetyChecking}
-                className="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 flex items-center gap-1.5 cursor-pointer"
+                className="px-4 py-2.5 rounded-xl text-xs font-bold bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 hover:bg-blue-100 flex items-center gap-2 cursor-pointer shadow-xs transition-colors"
               >
-                <ShieldCheck className="h-4 w-4 text-emerald-500" />
-                <span>{safetyChecking ? "Checking Interactions..." : "Run Safety Analysis"}</span>
+                <ShieldCheck className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <span>{safetyChecking ? "Evaluating Clinically..." : (t("Run Safety Analysis") || "Run Safety Analysis")}</span>
               </button>
 
               <button
                 type="submit"
                 disabled={submitting}
-                className="px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-primary-600 hover:bg-primary-500 shadow-md shadow-primary-600/30 flex items-center gap-2 cursor-pointer"
+                className={`px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white shadow-md flex items-center gap-2 cursor-pointer transition-all ${
+                  staleAnalysis
+                    ? "bg-slate-400 dark:bg-slate-700 cursor-not-allowed opacity-80"
+                    : "bg-primary-600 hover:bg-primary-500 shadow-primary-600/30"
+                }`}
               >
                 {submitting ? (
                   <span>Persisting to Database...</span>
                 ) : (
                   <>
                     <CheckCircle2 className="h-4 w-4" />
-                    <span>Confirm & Persist Prescription</span>
+                    <span>{t("Issue Prescription")}</span>
                   </>
                 )}
               </button>
@@ -917,6 +1101,17 @@ export default function DoctorPrescriptions() {
           )}
         </div>
       )}
+
+      {/* Safety Analysis & Candidate Alternatives Modal Dialogue */}
+      <SafetyAnalysisModal
+        isOpen={isSafetyModalOpen}
+        onClose={() => setIsSafetyModalOpen(false)}
+        safetyData={safetyData}
+        onApplyAlternative={handleApplyAlternative}
+        onAcknowledgeAndProceed={handleAcknowledgeAndProceed}
+        patientName={selectedPatientName}
+        patientId={selectedPatientId}
+      />
     </div>
   );
 }

@@ -1,8 +1,8 @@
 /**
  * prescriptionOcrService.js
- * 
+ *
  * Bounded Prescription Image Upload, Local OCR Extraction & Candidate Normalization Service.
- * 
+ *
  * Security & Clinical Integrity Guarantees:
  * - Validates file extension, MIME type, file size (<= 5MB), and actual magic byte file signatures.
  * - Stores files with cryptographically random UUIDs in isolated server storage.
@@ -25,8 +25,8 @@ const KNOWN_DRUGS = [
 
 /**
  * Validates image buffer using magic byte file signatures.
- * @param {Buffer} buffer 
- * @param {string} mimeType 
+ * @param {Buffer} buffer
+ * @param {string} mimeType
  * @returns {boolean}
  */
 const validateMagicBytes = (buffer, mimeType) => {
@@ -52,16 +52,46 @@ const validateMagicBytes = (buffer, mimeType) => {
     return false;
 };
 
+const { Jimp } = require('jimp');
+
 /**
- * Executes local Tesseract OCR on validated image file.
- * @param {string} filePath 
- * @returns {Promise<{raw_text: string, ocr_confidence: number}>}
+ * Executes local Tesseract OCR on validated image file with automated orientation detection and deskewing.
+ * @param {string} filePath
+ * @returns {Promise<{raw_text: string, ocr_confidence: number, detected_orientation: number, orientation_corrected: boolean}>}
  */
 const performOcr = async (filePath) => {
     try {
+        let targetImage = filePath;
+        let detectedOrientation = 0;
+        let orientationCorrected = false;
+
+        // Step 1: Detect orientation and script using local Tesseract OSD
+        const localAssetDir = path.resolve(__dirname, '../../');
+        try {
+            const detectResult = await Tesseract.detect(filePath, {
+                langPath: localAssetDir,
+                gzip: false
+            });
+            detectedOrientation = detectResult.data ? (detectResult.data.orientation_degrees || 0) : 0;
+
+            if (detectedOrientation !== 0) {
+                const correctionAngle = (360 - detectedOrientation) % 360;
+                const jimpImage = await Jimp.read(filePath);
+                jimpImage.rotate(correctionAngle);
+                targetImage = await jimpImage.getBuffer('image/png');
+                orientationCorrected = true;
+            }
+        } catch (osdErr) {
+            console.warn("[OCR Preprocessing] OSD orientation detection non-fatal warning:", osdErr.message);
+        }
+
         const result = await Tesseract.recognize(
-            filePath,
-            'eng'
+            targetImage,
+            'eng',
+            {
+                langPath: localAssetDir,
+                gzip: false
+            }
         );
 
         const rawText = (result.data.text || '').trim();
@@ -69,7 +99,9 @@ const performOcr = async (filePath) => {
 
         return {
             raw_text: rawText,
-            ocr_confidence: ocrConfidence
+            ocr_confidence: ocrConfidence,
+            detected_orientation: detectedOrientation,
+            orientation_corrected: orientationCorrected
         };
     } catch (err) {
         console.error("Tesseract OCR execution error:", err);
@@ -79,7 +111,7 @@ const performOcr = async (filePath) => {
 
 /**
  * Extracts candidate prescription fields from raw text using regex rules.
- * @param {string} rawText 
+ * @param {string} rawText
  * @returns {Array<object>}
  */
 const extractCandidateFields = (rawText) => {

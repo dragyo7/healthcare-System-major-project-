@@ -80,7 +80,7 @@ export default function DashboardLayout({ children, role }) {
         <div className="flex items-center gap-3">
           <div className="hidden sm:flex flex-col text-right">
             <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
-              {user?.name || user?.full_name || "Authorized User"}
+              {user?.name || user?.full_name || t("Authorized User")}
             </span>
             <span className="text-[11px] text-slate-500 dark:text-slate-400">
               {user?.email || (user?.role ? `${user.role.toUpperCase()} Session` : "")}
@@ -88,7 +88,7 @@ export default function DashboardLayout({ children, role }) {
           </div>
 
           {/* Visible Multilingual Selector */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs shadow-xs" title="Select Platform Language">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs shadow-xs" title={t("Select Platform Language")}>
             <Globe className="h-3.5 w-3.5 text-primary-600 dark:text-primary-400 shrink-0" />
             <select
               value={language}
@@ -106,7 +106,7 @@ export default function DashboardLayout({ children, role }) {
           <button
             onClick={toggleTheme}
             className="h-9 w-9 flex items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors"
-            title="Toggle theme"
+            title={t("Toggle theme")}
           >
             {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
@@ -114,7 +114,7 @@ export default function DashboardLayout({ children, role }) {
           <button
             onClick={handleLogout}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:text-rose-400 dark:hover:bg-rose-900/60 border border-rose-200 dark:border-rose-900 transition-all cursor-pointer"
-            title="Sign out of current session"
+            title={t("Sign out of current session")}
           >
             <LogOut className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">{t("Sign Out")}</span>
@@ -128,9 +128,14 @@ export default function DashboardLayout({ children, role }) {
         {isDesktop && (
           <aside className="w-64 border-r border-slate-200/80 bg-white/60 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-900/60 shrink-0 flex flex-col justify-between overflow-y-auto">
             <Sidebar navigation={navigation} />
-            <div className="p-4 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 flex items-center gap-1.5 justify-center">
-              <Shield className="h-3.5 w-3.5 text-emerald-500" />
-              <span>Frozen RAG v2.10 • RBAC Enforced</span>
+            <div className="p-4 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 flex flex-col gap-1 items-center justify-center">
+              <div className="flex items-center gap-1.5">
+                <Shield className="h-3.5 w-3.5 text-emerald-500" />
+                <span>{t("Frozen RAG v2.10 • RBAC Enforced")}</span>
+              </div>
+              <Link to="/about" className="text-primary-600 dark:text-primary-400 hover:underline font-medium text-[11px]">
+                {t("About & Healthcare Ethics")}
+              </Link>
             </div>
           </aside>
         )}
@@ -146,7 +151,7 @@ export default function DashboardLayout({ children, role }) {
               <div>
                 <div className="flex items-center justify-between p-3 border-b border-slate-100 dark:border-slate-800">
                   <span className="font-bold text-xs uppercase tracking-wider text-slate-400">
-                    {workspaceTitle}
+                    {t(workspaceTitle)}
                   </span>
                   <button
                     onClick={() => setIsSidebarOpen(false)}

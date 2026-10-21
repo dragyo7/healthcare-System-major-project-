@@ -25,10 +25,10 @@ CREATE TABLE IF NOT EXISTS discharges (
 
 -- Seed initial clinical discharge record for Patient 1 (Aarav Patil) under Doctor 1 (Dr. Rahul Sharma)
 INSERT INTO discharges (
-    patient_id, doctor_id, admission_date, discharge_date, diagnosis, 
+    patient_id, doctor_id, admission_date, discharge_date, diagnosis,
     discharge_summary, discharge_instructions, follow_up_instructions, follow_up_date, warning_signs, status
 )
-SELECT 
+SELECT
     1, 1, '2026-09-20', '2026-09-25', 'Essential Hypertension & Mild Angina',
     'Patient admitted for blood pressure stabilization. Responded well to Amlodipine 5mg regimen.',
     'Take Amlodipine 5mg daily every morning with water. Maintain low-sodium diet (less than 2g salt daily). Monitor blood pressure twice daily.',
@@ -36,4 +36,7 @@ SELECT
     '2026-10-25',
     'Seek immediate emergency care if experiencing severe chest pressure or pain radiating to left arm, shortness of breath at rest, severe dizziness, or sudden fainting.',
     'discharged'
-WHERE NOT EXISTS (SELECT 1 FROM discharges WHERE patient_id = 1);
+FROM DUAL
+WHERE EXISTS (SELECT 1 FROM patients WHERE patient_id = 1)
+  AND EXISTS (SELECT 1 FROM doctors WHERE doctor_id = 1)
+  AND NOT EXISTS (SELECT 1 FROM discharges WHERE patient_id = 1);

@@ -1,6 +1,6 @@
 /**
  * Comprehensive Backend RBAC & Client Tampering Security Regression Suite
- * 
+ *
  * Verifies that:
  * 1. Unauthenticated requests to protected Doctor/Patient/Receptionist routes return 401.
  * 2. Fabricated tokens (tampered signatures) return 401.
@@ -19,10 +19,17 @@ try {
   jwt = require(path.resolve(__dirname, "../Portal Major P/Bhumi/Doctor portal/backend/node_modules/jsonwebtoken"));
 }
 
-const BASE_URL = "http://127.0.0.1:5000";
+const PORT = parseInt(process.env.TEST_EXPRESS_PORT || process.env.EXPRESS_PORT || "5001");
+const BASE_URL = `http://127.0.0.1:${PORT}`;
 
 async function runSecuritySuite() {
   console.log("=== STARTING AUTH & TAMPERING SECURITY REGRESSION SUITE ===");
+
+  const { verifyDestructiveTestSafety, probeGatewaySafety } = require("../tests/safety/databaseSafetyGuard");
+  const targetDb = (process.env.DB_NAME || "").trim();
+  verifyDestructiveTestSafety(targetDb);
+  await probeGatewaySafety(PORT, targetDb);
+
   let passed = 0;
   let failed = 0;
 

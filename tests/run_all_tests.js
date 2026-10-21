@@ -1,6 +1,6 @@
 /**
  * tests/run_all_tests.js
- * 
+ *
  * Master test runner for all maintained integration, security, and E2E test suites.
  * Executes:
  *   1. tests/integration/test_route_authorization_matrix.js (BOLA & RBAC matrix)
@@ -38,53 +38,109 @@ const suites = [
   { name: "Authentication & Role Tampering Security", script: "scratch/test_auth_and_tampering_security.js" },
   { name: "Concurrent Prescription Idempotency & Locking", script: "tests/integration/test_concurrent_prescription_idempotency.js" },
   { name: "Prescription PDF Ownership & Lock Failure", script: "tests/integration/test_pdf_ownership_and_lock_failure.js" },
+  { name: "JWT Security & Fail-Closed Configuration", script: "tests/test_jwt_security_configuration.js" },
+  { name: "Destructive Test Guard Rejection & Safety Invariants", script: "tests/test_destructive_guard_rejection.js" },
 ];
 
-console.log("==========================================================================");
-console.log("             RUNNING COMPLETE HEALTHCARE CDS TEST SUITE                   ");
-console.log("==========================================================================\n");
+const {
+  verifyTestDatabasePreflight,
+  probeGatewaySafety
+} = require("./safety/databaseSafetyGuard");
 
-let passedSuites = 0;
-let failedSuites = 0;
-const results = [];
+async function main() {
+  console.log("==========================================================================");
+  console.log("             RUNNING COMPLETE HEALTHCARE CDS TEST SUITE                   ");
+  console.log("==========================================================================\n");
 
-const env = {
-  ...process.env,
-  NODE_PATH: backendModules,
-};
+  // Preflight Database Safety Invariant Verification
+  console.log("► [PREFLIGHT] Verifying Database Safety Invariants...");
+  let targetDb;
+  try {
+    targetDb = verifyTestDatabasePreflight();
+    console.log(`✓ [PREFLIGHT] Verified test database target: '${targetDb}' (Opt-in confirmed)`);
+  } catch (err) {
+    console.error(`\n❌ [PREFLIGHT ABORT] Test suite execution blocked by Database Safety Guard:`);
+    console.error(`   ${err.message}\n`);
+    process.exit(1);
+  }
 
-for (const suite of suites) {
-  process.stdout.write(`► Running: ${suite.name} (${suite.script})... `);
-  const start = Date.now();
-  const scriptPath = path.resolve(repoRoot, suite.script);
+  // Preflight Gateway Safety Verification
+  const testPort = parseInt(process.env.TEST_EXPRESS_PORT || process.env.EXPRESS_PORT || "5001");
+  console.log(`► [PREFLIGHT] Probing Gateway Safety on port ${testPort}...`);
+  try {
+    const probe = await probeGatewaySafety(testPort, targetDb);
+    console.log(`✓ [PREFLIGHT] Active gateway on port ${testPort} verified safe (DB: '${probe.serverDbName}')`);
+  } catch (err) {
+    console.error(`\n❌ [PREFLIGHT ABORT] Gateway safety probe failed:`);
+    console.error(`   ${err.message}\n`);
+    process.exit(1);
+  }
+  console.log();
 
-  const res = spawnSync("node", [scriptPath], {
-    cwd: repoRoot,
-    env,
-    encoding: "utf8",
-    timeout: 180000,
-  });
+  let passedSuites = 0;
+  let failedSuites = 0;
+  const results = [];
 
-  const duration = ((Date.now() - start) / 1000).toFixed(1);
+  const fs = require("fs");
+  let testDbFileConfig = {};
+  try {
+    const cfgPath = path.resolve(repoRoot, "scratch/test_db_config.json");
+    if (fs.existsSync(cfgPath)) {
+      testDbFileConfig = JSON.parse(fs.readFileSync(cfgPath, "utf8"));
+    }
+  } catch (_) {}
 
-  if (res.status === 0) {
-    console.log(`[PASS] (${duration}s)`);
-    passedSuites++;
-    results.push({ name: suite.name, status: "PASS", duration, output: res.stdout });
+  const env = {
+    ...process.env,
+    NODE_ENV: "test",
+    DB_NAME: targetDb,
+    DB_USER: process.env.DB_USER || testDbFileConfig.user || "root",
+    DB_PASSWORD: process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : (testDbFileConfig.password !== undefined ? testDbFileConfig.password : ""),
+    DB_HOST: process.env.DB_HOST || testDbFileConfig.host || "127.0.0.1",
+    DB_PORT: String(process.env.DB_PORT || testDbFileConfig.port || "3306"),
+    TEST_EXPRESS_PORT: String(testPort),
+    NODE_PATH: backendModules,
+    JWT_SECRET: process.env.JWT_SECRET || "rag_healthcare_secret",
+  };
+
+  for (const suite of suites) {
+    process.stdout.write(`► Running: ${suite.name} (${suite.script})... `);
+    const start = Date.now();
+    const scriptPath = path.resolve(repoRoot, suite.script);
+
+    const res = spawnSync("node", [scriptPath], {
+      cwd: repoRoot,
+      env,
+      encoding: "utf8",
+      timeout: 180000,
+    });
+
+    const duration = ((Date.now() - start) / 1000).toFixed(1);
+
+    if (res.status === 0) {
+      console.log(`[PASS] (${duration}s)`);
+      passedSuites++;
+      results.push({ name: suite.name, status: "PASS", duration, output: res.stdout });
+    } else {
+      console.log(`[FAIL] (exit code: ${res.status}, ${duration}s)`);
+      if (res.stderr) console.error(res.stderr);
+      failedSuites++;
+      results.push({ name: suite.name, status: "FAIL", duration, output: res.stdout || res.stderr });
+    }
+  }
+
+  console.log("\n==========================================================================");
+  console.log(`  COMPLETE TEST SUITE SUMMARY: ${passedSuites}/${suites.length} SUITES PASSED, ${failedSuites} FAILED`);
+  console.log("==========================================================================\n");
+
+  if (failedSuites > 0) {
+    process.exit(1);
   } else {
-    console.log(`[FAIL] (exit code: ${res.status}, ${duration}s)`);
-    if (res.stderr) console.error(res.stderr);
-    failedSuites++;
-    results.push({ name: suite.name, status: "FAIL", duration, output: res.stdout || res.stderr });
+    process.exit(0);
   }
 }
 
-console.log("\n==========================================================================");
-console.log(`  COMPLETE TEST SUITE SUMMARY: ${passedSuites}/${suites.length} SUITES PASSED, ${failedSuites} FAILED`);
-console.log("==========================================================================\n");
-
-if (failedSuites > 0) {
+main().catch(err => {
+  console.error("Unhandled error during test run:", err);
   process.exit(1);
-} else {
-  process.exit(0);
-}
+});

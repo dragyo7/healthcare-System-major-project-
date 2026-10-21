@@ -25,12 +25,18 @@ MARATHI_MARKERS = {
     "साठी", "मधील", "वरून", "कडे", "पेक्षा", "मुळे", "बद्दल",
     # Question words & conjunctions
     "काय", "कसे", "कधी", "कुठे", "कोणते", "आणि", "किंवा", "पण", "का",
+    "कशासाठी", "कशाकरिता", "कशामुळे", "किती", "वेळा",
     # Verbal forms & imperatives
-    "करावे", "घ्यावे", "घेऊ", "वापरायचे", "सांगा", "माहिती", "औषध", "औषधे",
+    "करावे", "घ्यावे", "घ्यावी", "घ्याव्यात", "घेऊ", "घेता", "घेतात", "घ्या",
+    "वापरायचे", "सांगा", "माहिती", "औषध", "औषधे",
     "दुष्परिणाम", "तपासणी", "लक्षणे", "उपचार", "डोस", "प्रमाण",
     "नका", "नको", "येते", "येत", "येतात", "करू", "करा",
-    "घेतल्यास", "झाल्यास", "असल्यास", "वाढल्यास",
-    "झोप", "रात्री", "सकाळी", "दुपारी",
+    "घेतल्यास", "झाल्यास", "असल्यास", "वाढल्यास", "विसरल्यास", "चुकल्यास",
+    "शकतो", "शकते", "शकता", "शकत",
+    # Clinical timing, frequency & pronouns
+    "झोप", "रात्री", "सकाळी", "दुपारी", "उपाशी", "पोटी",
+    "दोनदा", "एकदा", "तीनदा", "गोळ्या", "गोळी", "त्रास",
+    "मला", "मी", "आपण",
 }
 
 # Distinctive grammatical markers for Hindi
@@ -38,12 +44,31 @@ HINDI_MARKERS = {
     # Auxiliary verbs & copulas
     "है", "हैं", "था", "थी", "थे", "नहीं", "होगी", "होगा", "हुआ",
     # Postpositions
-    "के", "की", "का", "को", "से", "में", "पर", "लिए", "द्वारा",
+    "के", "की", "का", "को", "से", "में", "पर", "लिए", "द्वारा", "साथ",
     # Question words & conjunctions
-    "क्या", "कैसे", "कब", "कहाँ", "कौन", "और", "या", "लेकिन",
+    "क्या", "कैसे", "कब", "कहाँ", "कौन", "और", "या", "लेकिन", "कितनी",
     # Verbal forms
-    "करना", "लेना", "दीजिए", "बताइए", "चाहिए", "सकता", "सकती", "दवा", "दवाई",
-    "नुकसान", "फायदे", "खुराक", "लक्षण", "इलाज",
+    "करना", "लेना", "दीजिए", "दीजिये", "बताइए", "बताएं", "चाहिए",
+    "सकता", "सकती", "सकते", "भूल", "जाने",
+    "दवा", "दवाई", "नुकसान", "फायदे", "खुराक", "लक्षण", "इलाज",
+    # Clinical timing, frequency & pronouns
+    "पेट", "खाली", "गोली", "गोलियां", "बार", "दोबार", "एकबार",
+    "मुझे", "मैं", "हम",
+}
+
+# Distinctive Romanized Indic lexical markers
+ROMANIZED_MARATHI_MARKERS = {
+    "kadhi", "ghyave", "ghyavi", "ghyavya", "kashasathi", "upashi", "poti",
+    "donda", "ekda", "divsatun", "ahe", "ahet", "nahi", "kiti", "vela",
+    "gheu", "shakto", "shakte", "naka", "sobat", "aushadh", "aushadhe",
+    "dusparinam", "panyasobat", "jevananantar"
+}
+
+ROMANIZED_HINDI_MARKERS = {
+    "din", "mein", "me", "baar", "lena", "chahiye", "kitni", "kaise",
+    "kya", "sath", "khali", "pet", "nuksan", "fayde", "dawa", "dawai",
+    "le", "sakte", "sakta", "sakti", "hain", "hai", "nahin", "nahi",
+    "khurak", "sharab"
 }
 
 # Distinctive grammatical markers for Gujarati
@@ -51,19 +76,21 @@ GUJARATI_MARKERS = {
     # Auxiliary verbs & copulas
     "છે", "છો", "હતા", "હતી", "હતું", "નથી", "થાય", "થશે",
     # Postpositions & case markers
-    "માટે", "માં", "થી", "પર", "દ્વારા", "વિશે",
+    "માટે", "માં", "થી", "પર", "દ્વારા", "વિશે", "સાથે",
     # Question words & conjunctions
-    "શું", "કેવી", "કેવી રીતે", "ક્યારે", "ક્યાં", "કોણ", "અને", "અથવા", "પણ",
+    "શું", "કેવી", "કેવી રીતે", "ક્યારે", "ક્યાં", "કોણ", "અને", "અથવા", "પણ", "કેટલી",
     # Verbal forms & clinical words
-    "લેવી", "કરવું", "આપો", "જણાવો", "જોઈએ", "શકે", "દવા", "દવાઓ",
+    "લેવી", "કરવું", "આપો", "જણાવો", "જોઈએ", "શકે", "શકાય", "દવા", "દવાઓ",
     "આડઅસર", "આડઅસરો", "દુષ્પરિણામ", "ડોઝ", "માત્રા", "લક્ષણો", "ઉપચાર", "ફાયદા",
+    # Clinical timing & pronouns
+    "પેટે", "ભૂખ્યા", "બે", "એક", "વાર", "મને", "હું",
 }
 
 
 def detect_language(text: str) -> Dict[str, Any]:
     """
     Detects language of input text (English, Hindi, Marathi, or Gujarati).
-    
+
     Returns:
         {
             "language": "en" | "hi" | "mr" | "gu",
@@ -86,8 +113,27 @@ def detect_language(text: str) -> Dict[str, Any]:
     latin_chars = len(LATIN_REGEX.findall(raw))
     total_alpha = devanagari_chars + gujarati_chars + latin_chars
 
-    # 1. Pure or predominantly Latin script -> English
+    # 1. Pure or predominantly Latin script -> English or Romanized Indic
     if (devanagari_chars == 0 and gujarati_chars == 0) or (latin_chars / max(total_alpha, 1) > 0.75):
+        tokens_lower = [re.sub(r"^[\s,.!?।;:\"'()\[\]{}]+|[\s,.!?।;:\"'()\[\]{}]+$", "", t).lower() for t in raw.split()]
+        rom_marathi_score = sum(1 for t in tokens_lower if t in ROMANIZED_MARATHI_MARKERS)
+        rom_hindi_score = sum(1 for t in tokens_lower if t in ROMANIZED_HINDI_MARKERS)
+
+        if rom_marathi_score > rom_hindi_score:
+            return {
+                "language": SupportedLanguage.MARATHI.value,
+                "confidence": round(min(0.70 + (rom_marathi_score * 0.10), 0.95), 2),
+                "script": "Latin",
+                "is_indic": True
+            }
+        elif rom_hindi_score > rom_marathi_score:
+            return {
+                "language": SupportedLanguage.HINDI.value,
+                "confidence": round(min(0.70 + (rom_hindi_score * 0.10), 0.95), 2),
+                "script": "Latin",
+                "is_indic": True
+            }
+
         return {
             "language": SupportedLanguage.ENGLISH.value,
             "confidence": 0.98 if (devanagari_chars == 0 and gujarati_chars == 0) else 0.85,
@@ -121,6 +167,11 @@ def detect_language(text: str) -> Dict[str, Any]:
     tokens = [t.strip(",.!?।;:\"'()[]{}") for t in raw.split()]
     marathi_score = sum(1 for t in tokens if t in MARATHI_MARKERS)
     hindi_score = sum(1 for t in tokens if t in HINDI_MARKERS)
+
+    # In Marathi, sentence-final 'का' is a distinctive question particle ("घेऊ शकतो का?")
+    # In Hindi, 'का' is a genitive postposition ('X का Y') and is not sentence-final.
+    if tokens and tokens[-1] == "का":
+        marathi_score += 1
 
     if marathi_score > hindi_score:
         confidence = min(0.60 + (marathi_score * 0.15), 0.98)

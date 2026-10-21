@@ -1,6 +1,6 @@
 /**
  * test_pdf_ownership_and_lock_failure.js
- * 
+ *
  * Verifies:
  * 1. Doctor Prescription PDF Ownership (BOLA protection & zero-byte stream denial on 403)
  * 2. Patient Prescription PDF Ownership (BOLA protection & zero-byte stream denial on 403)
@@ -16,6 +16,8 @@ async function runVerification() {
   console.log("==========================================================================\n");
 
   const db = await mysql.createConnection(DB_CONFIG);
+
+  let testRxId = null;
 
   try {
     // ------------------------------------------------------------------------
@@ -82,7 +84,7 @@ async function runVerification() {
     const [rxRes] = await db.execute(
       "INSERT INTO prescriptions (patient_id, doctor_id, diagnosis, notes, prescription_date) VALUES (1, 1, 'Essential Hypertension Test', 'Monitor BP twice weekly', NOW())"
     );
-    const testRxId = rxRes.insertId;
+    testRxId = rxRes.insertId;
     await db.execute(
       "INSERT INTO prescription_medicines (prescription_id, medicine_name, dosage, frequency, duration, instructions) VALUES (?, 'Lisinopril', '10mg', 'Once daily', '30 days', 'Take in morning with water')",
       [testRxId]
@@ -269,12 +271,20 @@ async function runVerification() {
     console.log("\n==========================================================================");
     console.log("       ALL PDF OWNERSHIP, LOCK FAILURE & BRIDGE CHECKS PASSED             ");
     console.log("==========================================================================");
-    process.exit(0);
 
   } catch (err) {
     console.error("Fatal test error:", err);
-    process.exit(1);
+    process.exitCode = 1;
   } finally {
+    if (testRxId) {
+      try {
+        await db.execute("DELETE FROM prescription_medicines WHERE prescription_id = ?", [testRxId]);
+        await db.execute("DELETE FROM prescriptions WHERE prescription_id = ?", [testRxId]);
+        console.log(`[Teardown] Safely cleaned up test prescription #${testRxId}`);
+      } catch (cleanupErr) {
+        console.error("Warning: Could not clean up test prescription:", cleanupErr.message);
+      }
+    }
     await db.end();
   }
 }

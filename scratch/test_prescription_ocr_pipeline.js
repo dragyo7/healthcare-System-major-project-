@@ -1,6 +1,6 @@
 /**
  * test_prescription_ocr_pipeline.js
- * 
+ *
  * Comprehensive Verification Suite for Phase 4: Prescription Image Upload,
  * Local OCR Extraction, Candidate Parsing, Human Review & Explicit Confirmation.
  */
@@ -8,7 +8,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const BASE_URL = "http://localhost:5000";
+const { verifyDestructiveTestSafety, probeGatewaySafety } = require("../tests/safety/databaseSafetyGuard");
+
+const PORT = parseInt(process.env.TEST_EXPRESS_PORT || process.env.EXPRESS_PORT || "5001");
+const BASE_URL = `http://localhost:${PORT}`;
 
 let passed = 0;
 let failed = 0;
@@ -27,6 +30,10 @@ async function runTests() {
     console.log("=================================================");
     console.log("  PHASE 4: PRESCRIPTION OCR & EXTRACTION SUITE   ");
     console.log("=================================================\n");
+
+    const targetDb = (process.env.DB_NAME || "").trim();
+    verifyDestructiveTestSafety(targetDb);
+    await probeGatewaySafety(PORT, targetDb);
 
     try {
         // 1. Authenticate Doctor

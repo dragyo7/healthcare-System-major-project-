@@ -1,12 +1,12 @@
 /**
  * receptionistController.js
- * 
+ *
  * Controller for Administrative Receptionist operations.
  * Implements:
  * - Patient registration & listing
  * - Doctor directory
  * - Appointment scheduling & status updates
- * 
+ *
  * Strict Role Guarantees:
  * - Requires authenticated receptionist session (role === 'receptionist')
  * - Strictly non-clinical: zero access to diagnoses, prescriptions, medical records, or CDS
@@ -423,8 +423,171 @@ const updateAppointmentStatus = async (req, res) => {
     }
 };
 
+/**
+ * POST /api/receptionist/doctors
+ * Registers a new physician into users and doctors tables atomically.
+ * Enforces unique email and license_number.
+ * Provisions cryptographic single-use activation token if password not supplied.
+ */
+const registerDoctor = async (req, res) => {
+    const connection = await db.getConnection();
+    try {
+        const {
+            full_name,
+            email,
+            phone,
+            specialization,
+            qualification,
+            license_number,
+            experience_years,
+            bio,
+            password
+        } = req.body;
+
+        if (!full_name || !email || !phone || !specialization) {
+            return res.status(400).json({
+                message: "Full name, email, phone number, and specialization are required.",
+                field: !full_name ? "full_name" : !email ? "email" : !phone ? "phone" : "specialization"
+            });
+        }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email.trim())) {
+            return res.status(400).json({
+                message: "Please enter a valid email address.",
+                field: "email"
+            });
+        }
+
+        // Validate phone format
+        const cleanPhone = phone.trim();
+        if (cleanPhone.length < 7 || cleanPhone.length > 20) {
+            return res.status(400).json({
+                message: "Please enter a valid phone number (7 to 20 digits).",
+                field: "phone"
+            });
+        }
+
+        // Check if email already exists
+        const [existing] = await connection.execute(
+            "SELECT user_id FROM users WHERE email = ?",
+            [email.toLowerCase().trim()]
+        );
+
+        if (existing.length > 0) {
+            return res.status(409).json({
+                message: "A user with this email already exists."
+            });
+        }
+
+        // Check if license number already exists (if provided)
+        if (license_number && typeof license_number === "string" && license_number.trim() !== "") {
+            const [existingLic] = await connection.execute(
+                "SELECT doctor_id FROM doctors WHERE license_number = ?",
+                [license_number.trim()]
+            );
+            if (existingLic.length > 0) {
+                return res.status(409).json({
+                    message: "A physician with this license number already exists.",
+                    field: "license_number"
+                });
+            }
+        }
+
+        await connection.beginTransaction();
+
+        let hashedPassword;
+        let rawActivationToken = null;
+        let isActivationPending = false;
+
+        if (password && typeof password === "string" && password.trim().length >= 8) {
+            hashedPassword = await bcrypt.hash(password.trim(), 10);
+        } else {
+            isActivationPending = true;
+            hashedPassword = `!ACTIVATION_PENDING$${crypto.randomUUID()}`;
+            rawActivationToken = crypto.randomBytes(32).toString("hex");
+        }
+
+        // 1. Insert user
+        const [userResult] = await connection.execute(
+            `INSERT INTO users (full_name, email, password, role, phone)
+             VALUES (?, ?, ?, 'doctor', ?)`,
+            [
+                full_name.trim(),
+                email.toLowerCase().trim(),
+                hashedPassword,
+                phone.trim()
+            ]
+        );
+
+        const newUserId = userResult.insertId;
+
+        // 2. Insert doctor profile
+        const [docResult] = await connection.execute(
+            `INSERT INTO doctors (user_id, specialization, qualification, license_number, experience_years, bio)
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [
+                newUserId,
+                specialization.trim(),
+                qualification ? qualification.trim() : "MBBS",
+                license_number ? license_number.trim() : null,
+                experience_years ? parseInt(experience_years, 10) || 0 : 0,
+                bio ? bio.trim() : null
+            ]
+        );
+
+        const newDoctorId = docResult.insertId;
+
+        // 3. If activation pending, store hashed token (single-use, 72h expiry)
+        if (isActivationPending && rawActivationToken) {
+            const tokenHash = crypto.createHash("sha256").update(rawActivationToken).digest("hex");
+            await connection.execute(
+                `INSERT INTO account_activations (user_id, token_hash, expires_at)
+                 VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 72 HOUR))`,
+                [newUserId, tokenHash]
+            );
+        }
+
+        await connection.commit();
+
+        const baseUrl = req.headers.origin || "http://localhost:5173";
+        const responsePayload = {
+            message: isActivationPending
+                ? "Physician registered successfully. Account activation is pending password setup."
+                : "Physician registered successfully with active credentials.",
+            doctor: {
+                doctor_id: newDoctorId,
+                user_id: newUserId,
+                full_name: full_name.trim(),
+                email: email.toLowerCase().trim(),
+                phone: phone.trim(),
+                specialization: specialization.trim(),
+                qualification: qualification ? qualification.trim() : "MBBS",
+                license_number: license_number ? license_number.trim() : null,
+                account_status: isActivationPending ? "activation_pending" : "active"
+            }
+        };
+
+        if (isActivationPending && rawActivationToken) {
+            responsePayload.activation_url = `${baseUrl}/activate?token=${rawActivationToken}`;
+            responsePayload.activation_token = rawActivationToken;
+        }
+
+        return res.status(201).json(responsePayload);
+
+    } catch (error) {
+        await connection.rollback();
+        console.error("Receptionist registerDoctor error:", error);
+        return res.status(500).json({ message: "Failed to register physician" });
+    } finally {
+        connection.release();
+    }
+};
+
 module.exports = {
     getDoctors,
+    registerDoctor,
     getPatients,
     registerPatient,
     getAppointments,

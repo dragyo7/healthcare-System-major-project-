@@ -1,7 +1,7 @@
 # FLOW.md — Execution & Data-Flow Map
 
-> **Document Purpose**: Exact, function-by-function execution and data-flow map across all subsystems.  
-> **Repository**: `dragyo7/healthcare-System-major-project-`  
+> **Document Purpose**: Exact, function-by-function execution and data-flow map across all subsystems.
+> **Repository**: `dragyo7/healthcare-System-major-project-`
 > **Primary Branch**: `main`<br>
 > **Audited Documentation Baseline**: `ac26bb7`<br>
 > **Frozen RAG Implementation Baseline**: Commit `497a547` (V2.10 Hard-Frozen)<br>
@@ -24,7 +24,8 @@
 11. [Clinical RAG Query (Retrieval, Rerank, Generate, Verify)](#11-clinical-rag-query-retrieval-rerank-generate-verify)
 12. [Indic Multilingual Canonicalization & Localized Output](#12-indic-multilingual-canonicalization--localized-output)
 13. [Negative & Security Defense Paths](#13-negative--security-defense-paths)
-14. [Current Change Section](#14-current-change-section)
+14. [Academic Ethics Disclosures, Explicit Consent & About Portal](#14-academic-ethics-disclosures-explicit-consent--about-portal)
+15. [Current Change Section](#15-current-change-section)
 
 ---
 
@@ -56,7 +57,7 @@ graph TD
 
 ## 2. Login, JWT Issuance & Role-Based Access Control
 
-**Entry Point**: `frontend/src/pages/Auth/Login.jsx` (`handleSubmit`)  
+**Entry Point**: `frontend/src/pages/Auth/Login.jsx` (`handleSubmit`)
 **Trigger**: User enters email, password, and selects role (`doctor`, `patient`, `receptionist`).
 
 ### Execution Path:
@@ -77,7 +78,7 @@ graph TD
 
 ## 3. Receptionist Patient Intake & Cryptographic Account Activation
 
-**Entry Point**: `frontend/src/pages/Receptionist/Patients.jsx` (`handleRegisterPatient`)  
+**Entry Point**: `frontend/src/pages/Receptionist/Patients.jsx` (`handleRegisterPatient`)
 **Trigger**: Receptionist fills demographic form (Name, DOB, Gender, Blood Group, Phone) and clicks "Register Patient".
 
 ```mermaid
@@ -117,7 +118,7 @@ sequenceDiagram
 
 ## 4. Doctor Patient Dossier & Documented Allergy Retrieval
 
-**Entry Point**: `frontend/src/pages/Doctor/Patients.jsx`  
+**Entry Point**: `frontend/src/pages/Doctor/Patients.jsx`
 **Trigger**: Doctor selects patient from roster.
 
 ### Execution Path:
@@ -133,7 +134,7 @@ sequenceDiagram
 
 ## 5. Deterministic Drug Interaction & Allergy Screening (<15ms)
 
-**Entry Point**: `frontend/src/pages/Doctor/Prescriptions.jsx` (`handleScreenMedications`)  
+**Entry Point**: `frontend/src/pages/Doctor/Prescriptions.jsx` (`handleScreenMedications`)
 **Trigger**: Doctor adds candidate drugs (`Atorvastatin` + `Clarithromycin`) in prescription form.
 
 ### Execution Path:
@@ -155,7 +156,7 @@ sequenceDiagram
 
 ## 6. Doctor Prescription Authoring, Advisory Locking & Deduplication
 
-**Entry Point**: `frontend/src/pages/Doctor/Prescriptions.jsx` (`handleSavePrescription`)  
+**Entry Point**: `frontend/src/pages/Doctor/Prescriptions.jsx` (`handleSavePrescription`)
 **Trigger**: Doctor clicks "Authorize & Persist Prescription".
 
 ```mermaid
@@ -198,7 +199,7 @@ sequenceDiagram
 
 ## 7. Prescription PDF Ownership Verification & Binary Streaming
 
-**Entry Point**: `frontend/src/pages/Doctor/Prescriptions.jsx` or `frontend/src/pages/Patient/Prescriptions.jsx`  
+**Entry Point**: `frontend/src/pages/Doctor/Prescriptions.jsx` or `frontend/src/pages/Patient/Prescriptions.jsx`
 **Trigger**: User clicks "Download PDF".
 
 ### Execution Path:
@@ -218,7 +219,7 @@ sequenceDiagram
 
 ## 8. Prescription Image OCR Upload & Mandatory Clinician Confirmation
 
-**Entry Point**: `frontend/src/pages/Doctor/Prescriptions.jsx` (`handleOcrUpload`)  
+**Entry Point**: `frontend/src/pages/Doctor/Prescriptions.jsx` (`handleOcrUpload`)
 **Trigger**: Doctor uploads a scanned prescription image file.
 
 ### Execution Path:
@@ -243,7 +244,7 @@ sequenceDiagram
 
 ## 9. Post-Discharge Directive Authoring & Retrieval
 
-**Entry Point**: `frontend/src/pages/Doctor/Discharge.jsx`  
+**Entry Point**: `frontend/src/pages/Doctor/Discharge.jsx`
 **Trigger**: Doctor authors discharge instructions for admitted patient.
 
 ### Execution Path:
@@ -264,7 +265,7 @@ sequenceDiagram
 
 ## 10. Patient Post-Discharge Assistant & Fail-Closed Grounding
 
-**Entry Point**: `frontend/src/pages/Patient/Assistant.jsx` (`handleSendQuery`)  
+**Entry Point**: `frontend/src/pages/Patient/Assistant.jsx` (`handleSendQuery`)
 **Trigger**: Patient asks: *"When should I take my Amlodipine blood pressure medicine?"*
 
 ```mermaid
@@ -306,7 +307,7 @@ sequenceDiagram
 
 ## 11. Clinical RAG Query (Retrieval, Rerank, Generate, Verify)
 
-**Entry Point**: `rag_module/api.py` (`POST /chat`) or `cds_module/router.py` (`POST /cds/evaluate`)  
+**Entry Point**: `rag_module/api.py` (`POST /chat`) or `cds_module/router.py` (`POST /cds/evaluate`)
 **Pipeline Orchestrator**: `rag_module/rag_pipeline.py:MedicalRAGPipeline`
 
 ### Step-by-Step Execution:
@@ -329,7 +330,7 @@ sequenceDiagram
 
 ## 12. Indic Multilingual Canonicalization & Localized Output
 
-**Module**: `multilingual_module/`  
+**Module**: `multilingual_module/`
 **Supported Languages**: English (`en`), Hindi (`hi`), Marathi (`mr`), Gujarati (`gu`)
 
 ### Execution Path:
@@ -363,16 +364,106 @@ sequenceDiagram
 
 ---
 
-## 14. Current Change Section
+## 14. Academic Ethics Disclosures, Explicit Consent & About Portal
+
+**Entry Points**:
+- Public Navigation: Header link (`/home`), Footers on `/login`, `/signup`, `/activate`, `/about`
+- Authenticated Navigation: Sidebar bottom navigation link (`About & Ethics`) in `DashboardLayout.jsx`
+- Registration Gate: `frontend/src/pages/Auth/Signup.jsx`
+
+```mermaid
+graph TD
+    User["User/Registrant"] -->|Clicks 'About & Ethics'| About["/about (About.jsx)"]
+    About --> Disclose1["1. Academic Prototype Scope & SVPCET Affiliation"]
+    About --> Disclose2["2. NMC 2020 Medical Disclaimer & Mandatory RMP Oversight"]
+    About --> Disclose3["3. Clinical Safety, Grounding Verifier & Safe Abstention"]
+    About --> Disclose4["4. OCR Pipeline Margin of Error & Mandatory Clinician Review"]
+    About --> Disclose5["5. Emergency Triage (112, 108, 102) & Non-Substitution"]
+    About --> Disclose6["6. Privacy, DPDP 2023 & Zero Cloud Transmission Invariant"]
+    About --> Disclose7["7. Research Datasets (DailyMed, DrugBank, SIDER, Stanford)"]
+    About --> Disclose8["8. Academic Grievance & Contact Mechanism"]
+    User -->|Visits /signup| Form["Signup Form"]
+    Form --> ConsentBox{"Consent Checkbox Checked?"}
+    ConsentBox -->|No| Block["Submit Disabled / Validation Alert: 'You must acknowledge...'"]
+    ConsentBox -->|Yes (Affirmative)| Submit["POST /api/auth/patient/signup (terms_accepted: true)"]
+    Submit --> ServerGuard{"Server Security Guard 3: terms_accepted === true?"}
+    ServerGuard -->|No (missing, false, invalid)| Reject["HTTP 400 Bad Request: 'Affirmative consent... strictly required'"]
+    ServerGuard -->|Yes| DBInsert["Persist user with UTC timestamp & consent_version 'v1.0-2026-10'"]
+```
+
+### Exact Call Path & Safeguards:
+1. **Public & Authenticated Routing**: `frontend/src/routes/AppRoutes.jsx` registers `/about` as a publicly accessible route rendering `pages/Common/About.jsx`.
+2. **Informed Consent Gate (Client-Side)**: `frontend/src/pages/Auth/Signup.jsx` renders an affirmative consent checkbox (`termsAccepted`).
+   - Text: *"I acknowledge that this system is an academic research prototype utilizing synthetic demonstration data. I have read and agree to the Ethical Disclaimers, Clinical Limitations, and Privacy Notice."*
+   - Submission check: `handleSubmit` inspects `formData.termsAccepted === true`. If unchecked, registration halts immediately with error alert: `"You must accept the terms, academic disclaimer, and privacy policy to register."`
+3. **Server-Side Enforcement (Security Guard 3)**: `Portal Major P/Bhumi/Doctor portal/backend/src/controllers/authController.js:patientSignup`:
+   - Inspects `req.body.terms_accepted === true || req.body.termsAccepted === true`.
+   - Strictly enforces boolean `=== true`; strings `"true"` or numbers `1` are rejected with HTTP 400.
+   - Rejection occurs before starting a database connection or creating records, preventing orphan accounts.
+4. **Audit Evidence Persistence (Migration 006)**:
+   - `users.consent_timestamp`: Persisted using `UTC_TIMESTAMP()`.
+   - `users.consent_version`: Persisted as `'v1.0-2026-10'`.
+   - Existing accounts maintain `consent_timestamp = NULL` (zero historical fabrication).
+5. **Statutory & Regulatory Transparency**:
+   - Accurately details Indian legal framework: DPDP Act 2023 & Draft DPDP Rules 2025 (phased implementation schedule; DPO requirement under Sec 10(2)(a) applicable only to Significant Data Fiduciaries; academic grievance officer provided); IT Act 2000 Sec 43A / SPDI Rules 2011; NMC Telemedicine Guidelines 2020; ABDM non-integration disclosure; CDSCO non-certified SaMD disclosure.
+6. **Zero Cloud Transmission**: All inference (FAISS, Cross-Encoder, TinyLlama) and storage (MySQL) execute strictly on-premise on `127.0.0.1`.
+
+---
+
+## 15. Current Change Section
 
 *(This section is updated whenever code modifications are proposed and executed)*
 
-- **Change ID**: `DOC-001` (Documentation Architecture Consolidation)
-- **Problem Being Solved**: Eliminating documentation sprawl and conflicting branch/roadmap statements by authoring canonical engineering documentation.
-- **Exact Files Created / Modified**:
-  - `FINAL_GOAL.md` (Created — Product Completion Contract)
-  - `PROJECT_STATUS.md` (Created — Living Reality Snapshot)
-  - `DECISIONS.md` (Created — Canonical Engineering Decisions Log)
-  - `FLOW.md` (Created — Function-by-function execution and data-flow map)
-- **Upstream Callers / Dependencies**: None (Documentation only; application code untouched).
-- **Post-Change Verification**: Verified that Git working tree remains clean and consistent with repository state.
+- **Change ID**: `FINAL-CDSS-COMPLETION-GATE-001` (DEC-029: Test Reconciliation, Dual-Key Theme Persistence, Indian Emergency Guidance Localization, and Doctor Profile Integration)
+- **Problem Being Solved**:
+  1. Test count discrepancy: Previous audit listed individual suite counts (30+11+20+25+12+14+20+9+38 = 179) while stating a summary total of 148. Needed empirical reconciliation across test cases vs assertion checks.
+  2. Theme storage key divergence: `DECISIONS.md` referenced `cdss_theme` while code referenced `theme`.
+  3. Localized emergency guidance: Multilingual safety templates contained US `911` references; Indian clinical deployment requires `112` and `108`.
+  4. Doctor profile integration: `Doctor/Profile.jsx` had a local-state stub and was not connected to backend APIs `GET/PUT /api/doctor/profile`.
+- **Execution Path**:
+  1. **Dual-Key Theme Synchronization**:
+     - `frontend/index.html`: Pre-paint anti-FOUT inline script updated to check `localStorage.getItem('cdss_theme') || localStorage.getItem('theme')`.
+     - `frontend/src/contexts/ThemeContext.jsx`: Updated to read both keys on mount, mirror write both keys (`theme` and `cdss_theme`), and listen to cross-window/cross-tab storage events for both keys.
+  2. **Indian Emergency Guidance Localization**:
+     - `multilingual_module/safety_templates.py`: Purged all `911` emergency occurrences across `en`, `hi`, `mr`, and `gu`. Standardized to Indian emergency numbers: National Emergency Helpline (`112`) and Medical Ambulance (`108`).
+     - `multilingual_module/tests/test_multilingual.py`: Updated `test_01_emergency_templates_presence_and_numbers` to assert presence of `112` and `108` and strictly assert `assert "911" not in text` across all 4 supported Indic languages.
+  3. **Doctor Profile Full-Stack Wiring**:
+     - `frontend/src/pages/Doctor/Profile.jsx`: Replaced local stub with real `doctorApi.getProfile` on component mount and `doctorApi.updateProfile` on form submit. Added saving spinner, error alerts, and read-only medical registration number display.
+     - `tests/integration/test_doctor_profile_integration.js`: Authored dedicated 19-assertion integration test suite covering RBAC, 401 unauthenticated, 403 cross-role, 400 validation, live DB updates (`users.phone`, `doctors.specialization`, `doctors.bio`), reload persistence, and state cleanup.
+  4. **Test Suite Execution & Reconciliation**:
+     - Ran 10 test suites freshly; reconciled 185 test cases and 198 assertion checks (100% pass rate).
+- **Active Working Tree Context**:
+  - Head commit: `03087be` on `main`.
+  - Working tree status: Working tree preserved; zero commits, zero pushes.
+  - Primary database `rag_healthcare`: 100% UNTOUCHED (15 tables, 176 users, 160 patients, 65 prescriptions).
+  - Frozen RAG baseline: Commit `497a547` (2,204 FAISS chunks, 100% frozen).
+- **Post-Change Verification**:
+  - Frontend production build: `dist/` built successfully in 10.65s (`npm run build`) with zero lint/compilation errors.
+  - Test suites: 10/10 suites passing (185 test cases, 198 assertions, 0 failures, 0 skips).
+  - Browser E2E verification: Theme toggle switches between light and dark modes with `theme` and `cdss_theme` synchronized in `localStorage`. Doctor profile loads legal name **Dr. Rahul Sharma** and medical license **MCI-2015-8921** directly from backend database.
+- **Change ID**: `FINAL-CDSS-MIGRATION-SAFETY-001` (DEC-030: Migration Runner Hardening, Rollback Remediation, Advisory Concurrency & Test Isolation)
+- **Problem Being Solved**:
+  1. `scripts/run_migrations.js` lacked default protection against targeting primary `rag_healthcare` in development.
+  2. `--status` and `--dry-run` executed DDL creating `schema_migrations` during read-only inspection.
+  3. No concurrency lock existed to prevent concurrent migration race conditions.
+  4. Migrations were vulnerable to silent modification without SHA-256 checksum detection.
+  5. Rollback scripts included broad account deletion (`DELETE FROM users WHERE role = "receptionist"`) and hard-coded passwords.
+- **Execution Path**:
+  1. **Migration Runner Target Safety**:
+     - Hardened `scripts/run_migrations.js` with fail-closed target validation refusing `rag_healthcare`, production targets, or missing `DB_NAME`.
+     - Required approved test/disposable targets (`_test` / `_disposable`) with `verifyDestructiveTestSafety()`.
+  2. **Read-Only Status & Dry-Run**:
+     - `--status` and `--dry-run` inspect existing tables without running DDL or table creation.
+  3. **Advisory Locking**:
+     - Added MySQL `GET_LOCK("cdss_migration_runner_lock", 10)` and `RELEASE_LOCK` in execution `finally` block.
+  4. **SHA-256 Checksums**:
+     - Added checksum calculation and validation against `schema_migrations.checksum` to detect migration tampering.
+  5. **Rollback Remediation**:
+     - Cleaned `migrations/001_rollback.sql` to avoid broad receptionist deletions.
+     - Removed hard-coded credentials from `migrations/001_add_receptionist_role.sql`.
+     - Created `scripts/run_rollback.js` requiring explicit `--confirm-destructive-rollback` and `ALLOW_DESTRUCTIVE_DATABASE_TESTS=true`.
+- **Post-Change Verification**:
+  - `tests/test_migration_safety_orchestrator.js`: 16/16 tests passed.
+  - `scratch/verify_primary_db_intact.js`: Primary database `rag_healthcare` confirmed 100% untouched.
+  - Full regression test suites passed (100% pass rate).
+  - All 4 frontends built successfully with 0 errors.

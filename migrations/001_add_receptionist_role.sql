@@ -1,12 +1,11 @@
 -- Migration: 001_add_receptionist_role.sql
--- Description: Add 'receptionist' to users table role ENUM and seed a default receptionist account.
--- Safe, additive migration. Preserves all existing records.
+-- Description: Add 'receptionist' to users table role ENUM.
+-- Safe, additive schema migration. Preserves all existing records.
+--
+-- SECURITY NOTE: Hard-coded default receptionist credentials (e.g. 'receptionist123')
+-- have been strictly removed per secure account lifecycle standards.
+-- In production, front-desk staff accounts are provisioned securely via least-privilege
+-- administration and single-use cryptographic activation links (Migration 004).
+-- In test/disposable environments, synthetic test fixtures are populated via scripts/seed_disposable_test_db.js.
 
 ALTER TABLE users MODIFY COLUMN role ENUM('doctor', 'patient', 'receptionist') NOT NULL;
-
--- Seed default receptionist account if not exists
--- Password hash for 'receptionist123' generated with bcrypt (10 rounds):
--- $2b$10$w816y9bZfN9h0PZqH85J1e0YgK8F9jQ3sM5nL2kZ1qXwVu7tPrO3m (or hash generated dynamically)
-INSERT INTO users (full_name, email, password, role, phone)
-SELECT 'Pooja Verma', 'receptionist@gmail.com', '$2b$10$w816y9bZfN9h0PZqH85J1e0YgK8F9jQ3sM5nL2kZ1qXwVu7tPrO3m', 'receptionist', '9876500001'
-WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'receptionist@gmail.com');

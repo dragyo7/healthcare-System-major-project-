@@ -42,6 +42,8 @@ import ReceptionistDoctors from "../pages/Receptionist/Doctors";
 import NotFound from "../pages/Common/NotFound";
 import Unauthorized from "../pages/Common/Unauthorized";
 import ServerError from "../pages/Common/ServerError";
+import About from "../pages/Common/About";
+import Home from "../pages/Common/Home";
 
 function RootRedirect() {
   const { user, loading } = useAuth();
@@ -83,6 +85,8 @@ export default function AppRoutes() {
           }
         />
         <Route path="/activate" element={<Activate />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/home" element={<Home />} />
         <Route
           path="/signup"
           element={

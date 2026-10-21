@@ -303,8 +303,8 @@ const patientActivate = async (req, res) => {
 
         // Atomic conditional check-and-set
         const [claimResult] = await connection.execute(
-            `UPDATE account_activations 
-             SET used_at = NOW() 
+            `UPDATE account_activations
+             SET used_at = NOW()
              WHERE activation_id = ? AND used_at IS NULL`,
             [activation.activation_id]
         );
@@ -383,6 +383,15 @@ const patientSignup = async (req, res) => {
             });
         }
 
+        // Security Guard 3: Strictly enforce affirmative consent to academic research terms
+        // Must be explicitly boolean true; truthy strings or numbers are rejected
+        const isConsentAccepted = req.body.terms_accepted === true || req.body.termsAccepted === true;
+        if (!isConsentAccepted) {
+            return res.status(400).json({
+                message: "Affirmative consent to the academic research disclaimer and terms (terms_accepted: true) is strictly required for registration."
+            });
+        }
+
         if (!full_name || !email || !password) {
             return res.status(400).json({
                 message: "Full name, email, and password are required"
@@ -429,12 +438,13 @@ const patientSignup = async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password.trim(), 10);
+        const CONSENT_DOCUMENT_VERSION = "v1.0-2026-10";
 
-        // 1. Insert into users (role is strictly 'patient')
+        // 1. Insert into users (role is strictly 'patient' with auditable UTC consent evidence)
         const [userResult] = await connection.execute(
-            `INSERT INTO users (full_name, email, password, role, phone)
-             VALUES (?, ?, ?, 'patient', ?)`,
-            [full_name.trim(), normalizedEmail, hashedPassword, phone ? phone.trim() : null]
+            `INSERT INTO users (full_name, email, password, role, phone, consent_timestamp, consent_version)
+             VALUES (?, ?, ?, 'patient', ?, UTC_TIMESTAMP(), ?)`,
+            [full_name.trim(), normalizedEmail, hashedPassword, phone ? phone.trim() : null, CONSENT_DOCUMENT_VERSION]
         );
 
         const newUserId = userResult.insertId;

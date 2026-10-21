@@ -1,10 +1,10 @@
 /**
  * patientController.js
- * 
+ *
  * Controller for Patient Portal operations.
- * Implements My Dashboard, Medical History, Prescriptions, Medications, 
+ * Implements My Dashboard, Medical History, Prescriptions, Medications,
  * Discharge Care & Follow-up, and Restricted Patient Mode Clinical Decision Support / Health Assistant.
- * 
+ *
  * Strict BOLA & Safety Guarantees:
  * - Requires authenticated patient session (JWT with role === 'patient')
  * - Resolves patient identity from req.user.user_id, NEVER trusting client-supplied IDs
@@ -22,7 +22,7 @@ const { sanitizePatientContext, forwardToFastAPICDS } = require("../services/cds
  */
 const getAuthenticatedPatient = async (userId) => {
     const [patientRows] = await db.execute(
-        `SELECT p.patient_id, p.user_id, p.date_of_birth, p.gender, p.blood_group, 
+        `SELECT p.patient_id, p.user_id, p.date_of_birth, p.gender, p.blood_group,
                 p.allergies, p.emergency_contact, p.address,
                 u.full_name, u.email, u.phone
          FROM patients p
@@ -469,7 +469,8 @@ const evaluatePatientCDS = async (req, res) => {
             mode: "patient",
             patient_context: sanitizedContext,
             candidate_medications: Array.isArray(candidate_medications) ? candidate_medications : [],
-            language: language || "auto"
+            language: language || "auto",
+            conversation_history: Array.isArray(req.body.conversation_history) ? req.body.conversation_history.slice(-6) : []
         });
 
         return res.status(200).json(cdsResponse);

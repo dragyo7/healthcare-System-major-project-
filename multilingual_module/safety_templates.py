@@ -44,7 +44,7 @@ SAFETY_TEMPLATES: Dict[str, Dict[str, str]] = {
             "EMERGENCY MEDICAL WARNING:\n"
             "This query describes acute, potentially life-threatening symptoms (e.g. acute poisoning, chest pain, anaphylaxis, severe breathing distress).\n\n"
             "IMMEDIATE ACTIONS REQUIRED:\n"
-            "1. Call local emergency medical services immediately (112 / 108 in India, 911 in US) or proceed to the nearest hospital emergency department.\n"
+            "1. Call local emergency medical services immediately (dial 112 for National Emergency Services or 108 for Medical Ambulance in India) or proceed to the nearest hospital emergency department.\n"
             "2. Do NOT wait for automated clinical decision support or online advice.\n"
             "3. If acute poisoning is suspected, contact the National Poisons Information Centre immediately."
         ),
@@ -52,7 +52,7 @@ SAFETY_TEMPLATES: Dict[str, Dict[str, str]] = {
             "आपातकालीन चिकित्सा चेतावनी:\n"
             "यह प्रश्न संभावित रूप से जीवन-घातक गंभीर लक्षणों (जैसे तीव्र विषाक्तता, सीने में दर्द, एनाफिलेक्सिस, सांस लेने में गंभीर तकलीफ) का वर्णन करता है।\n\n"
             "तत्काल आवश्यक कदम:\n"
-            "1. तुरंत स्थानीय आपातकालीन चिकित्सा सेवाओं को कॉल करें (भारत में 112 / 108, अमेरिका में 911) या नजदीकी अस्पताल के आपातकालीन विभाग में जाएं।\n"
+            "1. तुरंत स्थानीय आपातकालीन चिकित्सा सेवाओं को कॉल करें (भारत में राष्ट्रीय आपातकालीन नंबर 112 या एम्बुलेंस सेवा 108 पर कॉल करें) या नजदीकी अस्पताल के आपातकालीन विभाग में जाएं।\n"
             "2. स्वचालित चिकित्सीय निर्णय प्रणाली या ऑनलाइन सलाह की प्रतीक्षा न करें।\n"
             "3. यदि तीव्र विषाक्तता का संदेह है, तो तुरंत राष्ट्रीय विष सूचना केंद्र से संपर्क करें।"
         ),
@@ -60,7 +60,7 @@ SAFETY_TEMPLATES: Dict[str, Dict[str, str]] = {
             "तातडीची वैद्यकीय आणीबाणी सूचना:\n"
             "या प्रश्नामध्ये संभाव्य जीवघेणी तीव्र लक्षणे (उदा. विषबाधा, छातीत तीव्र वेदना, श्वास घेण्यास अडचण, ॲनाफिलेक्सिस) आढळून आली आहेत.\n\n"
             "तातडीने करावयाची कृती:\n"
-            "1. त्वरित स्थानिक रुग्णवाहिका किंवा आणीबाणी सेवांशी संपर्क साधा (भारतात 112 / 108) किंवा जवळच्या रुग्णालयातील आपत्कालीन विभागात जा.\n"
+            "1. त्वरित स्थानिक रुग्णवाहिका किंवा आणीबाणी सेवांशी संपर्क साधा (भारतातील राष्ट्रीय आपत्कालीन क्रमांक 112 किंवा रुग्णवाहिका 108) किंवा जवळच्या रुग्णालयातील आपत्कालीन विभागात जा.\n"
             "2. स्वयंचलित डिजिटल सल्ला किंवा ऑनलाइन उत्तराची वाट पाहू नका.\n"
             "3. विषबाधा झाली असल्यास त्वरित विष नियंत्रण केंद्राशी संपर्क साधा."
         ),
@@ -68,7 +68,7 @@ SAFETY_TEMPLATES: Dict[str, Dict[str, str]] = {
             "કટોકટી તબીબી ચેતવણી:\n"
             "આ પ્રશ્ન સંભવિત જીવન-જોખમી ગંભીર લક્ષણો (જેમ કે તીવ્ર ઝેર, છાતીમાં દુખાવો, એનાફિલેક્સિસ, શ્વાસ લેવામાં ગંભીર તકલીફ) દર્શાવે છે.\n\n"
             "તાત્કાલિક જરૂરી પગલાં:\n"
-            "1. તાત્કાલિક સ્થાનિક કટોકટી તબીબી સેવાઓનો સંપર્ક કરો (ભારતમાં 112 / 108, યુ.એસ.માં 911) અથવા નજીકની હોસ્પિટલના ઇમરજન્સી વિભાગમાં જાઓ.\n"
+            "1. તાત્કાલિક સ્થાનિક કટોકટી તબીબી સેવાઓનો સંપર્ક કરો (ભારતમાં રાષ્ટ્રીય ઇમરજન્સી નંબર 112 અથવા એમ્બ્યુલન્સ સેવા 108) અથવા નજીકની હોસ્પિટલના ઇમરજન્સી વિભાગમાં જાઓ.\n"
             "2. સ્વચાલિત ક્લિનિકલ નિર્ણય સપોર્ટ અથવા ઓનલાઇન સલાહની રાહ ન જુઓ.\n"
             "3. જો તીવ્ર ઝેરની શંકા હોય, તો તાત્કાલિક રાષ્ટ્રીય ઝેર માહિતી કેન્દ્રનો સંપર્ક કરો."
         ),
@@ -249,7 +249,7 @@ def get_localized_interaction_alert(drug_a: str, drug_b: str, severity: str, cli
     the exact generic drug names, severity level, and clinical action.
     """
     norm_lang = normalize_language_code(lang)
-    
+
     if norm_lang == "hi":
         return {
             "title": f"ड्रग इंटरैक्शन चेतावनी ({severity.upper()}): {drug_a} + {drug_b}",

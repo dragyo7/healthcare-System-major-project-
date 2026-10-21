@@ -80,6 +80,92 @@ class CDSOrchestrator:
 
         return drugs
 
+    def _resolve_conversational_references(
+        self,
+        query_text: str,
+        conversation_history: List[Dict[str, str]],
+        patient_context: Optional[PatientContext]
+    ) -> str:
+        """
+        Resolves conversational pronouns and anaphora ('it', 'its', 'this drug', 'the medication', etc.)
+        using previous turns and patient context, producing a self-contained query for RAG retrieval.
+        Bounded to the most recent 4 turns to prevent context drift.
+        """
+        if not conversation_history:
+            return query_text
+
+        q_lower = query_text.lower().strip()
+
+        # Pronoun or anaphoric reference indicators
+        reference_patterns = [
+            r"\b(?:it|its|this|that|these|the)\s+(?:drug|med|medication|pill|tablet|medicine|treatment)\b",
+            r"\b(?:its|their)\s+(?:dosage|dose|side\s+effects?|uses?|indications?|contraindications?|interactions?|mechanism|benefits?)\b",
+            r"\bwhat\s+(?:is|are)\s+(?:its|the)\s+(?:dosage|dose|side\s+effects?|uses?|indications?|contraindications?|interactions?)\b",
+            r"\bcan\s+(?:i|patient|he|she)\s+take\s+(?:it|this)\b",
+            r"\bhow\s+to\s+take\s+(?:it|this)\b",
+            r"\b(?:is|are)\s+(?:it|this)\s+safe\b",
+            r"\b(?:इसके|इसकी|इस दवा|उस दवा|त्याचे|ह्या औषधाचे|તેના|આ દવાની)\b"
+        ]
+
+        has_reference = any(re.search(pat, q_lower) for pat in reference_patterns)
+        if not has_reference:
+            return query_text
+
+        antecedent_drug = None
+
+        # Look in prior turns in reverse order
+        for turn in reversed(conversation_history[-4:]):
+            content = turn.get("content") or turn.get("text") or ""
+            if not content:
+                continue
+
+            # Check known interaction drugs
+            if self.interaction_dict:
+                for drug_name in self.interaction_dict.keys():
+                    if re.search(r"\b" + re.escape(str(drug_name)) + r"\b", content, re.IGNORECASE):
+                        antecedent_drug = str(drug_name).capitalize()
+                        break
+            if antecedent_drug:
+                break
+
+            # Check major corpus drugs
+            from multilingual_module.canonicalizer import CORPUS_DRUGS
+            for drug_name in CORPUS_DRUGS:
+                if len(drug_name) >= 4 and re.search(r"\b" + re.escape(drug_name) + r"\b", content, re.IGNORECASE):
+                    antecedent_drug = drug_name.capitalize()
+                    break
+            if antecedent_drug:
+                break
+
+        # If not found in history, check patient context active medications
+        if not antecedent_drug and patient_context and patient_context.active_medications:
+            first_med = patient_context.active_medications[0]
+            if isinstance(first_med, str):
+                antecedent_drug = first_med.strip()
+            elif isinstance(first_med, dict):
+                antecedent_drug = first_med.get("medicine_name") or first_med.get("name")
+
+        if antecedent_drug:
+            # Reformulate cleanly
+            reformulated = re.sub(
+                r"\b(?:it|this drug|that drug|the drug|this medication|the medication|this medicine|the medicine)\b",
+                antecedent_drug,
+                query_text,
+                flags=re.IGNORECASE
+            )
+            reformulated = re.sub(r"\b(?:its|their)\b", f"{antecedent_drug}'s", reformulated, flags=re.IGNORECASE)
+            reformulated = re.sub(r"\b(?:इसके|इसकी|इस दवा)\b", f"{antecedent_drug}", reformulated, flags=re.IGNORECASE)
+            reformulated = re.sub(r"\b(?:त्याचे|ह्या औषधाचे)\b", f"{antecedent_drug}", reformulated, flags=re.IGNORECASE)
+            reformulated = re.sub(r"\b(?:તેના|આ દવાની)\b", f"{antecedent_drug}", reformulated, flags=re.IGNORECASE)
+
+            if antecedent_drug.lower() not in reformulated.lower():
+                reformulated = f"{reformulated} for {antecedent_drug}"
+
+            logger.info(f"Conversational reference resolved: '{query_text}' -> '{reformulated}'")
+            return reformulated
+
+        return query_text
+
     def _check_conversational_input(
         self,
         query_text: str,
@@ -749,6 +835,15 @@ class CDSOrchestrator:
         canon_info = canonicalize_medical_query(query_text, forced_lang=effective_lang)
         retrieval_query = canon_info["canonical_query"] if canon_info["was_canonicalized"] else query_text
 
+        # Multi-Turn Conversational Reference Resolution (pronoun & entity continuity)
+        history = getattr(request, "conversation_history", []) or []
+        if history:
+            retrieval_query = self._resolve_conversational_references(
+                query_text=retrieval_query,
+                conversation_history=history,
+                patient_context=request.patient_context
+            )
+
         # Step 2: Emergency Triage Check (evaluated on raw, canonical, and Indic patterns)
         emergency_alert = (
             self.rag_pipeline.guardrails.check_emergency(retrieval_query)
@@ -1060,55 +1155,150 @@ class CDSOrchestrator:
 
     def screen_prescription(self, request: PrescriptionScreenRequest) -> PrescriptionScreenResponse:
         """
-        Deterministic prescription screening endpoint (DrugBank + Allergy/Condition matching).
+        Deterministic prescription screening endpoint (DailyMed/DrugBank + Allergy + Multi-ingredient decomposition).
+        Evaluates proposed medicines against existing patient medicines and computes verified alternative candidates.
         """
-        drug_names = []
+        from drug_module.interaction_engine import screen_medications_detailed
+        from drug_module.alternative_engine import find_candidate_alternatives
+        from drug_module.normalizer import decompose_medication
+
+        candidate_med_names = []
         for med in request.candidate_medications:
             if isinstance(med, str):
-                drug_names.append(med.strip())
+                candidate_med_names.append(med.strip())
             elif isinstance(med, dict):
                 name = med.get("name") or med.get("medicine_name") or med.get("drug")
                 if name:
-                    drug_names.append(str(name).strip())
+                    candidate_med_names.append(str(name).strip())
+
+        active_med_names = []
+        for med in (request.active_medications or []):
+            if isinstance(med, str):
+                active_med_names.append(med.strip())
+            elif isinstance(med, dict):
+                name = med.get("name") or med.get("medicine_name") or med.get("drug")
+                if name:
+                    active_med_names.append(str(name).strip())
+
+        all_med_names = list(candidate_med_names)
+        for act in active_med_names:
+            if act not in all_med_names:
+                all_med_names.append(act)
+
+        # Execute multi-ingredient decomposition and interaction screening
+        detailed_screening = screen_medications_detailed(all_med_names, self.interaction_dict)
+        raw_interactions = detailed_screening.get("interactions", [])
+        duplicate_ingredients = detailed_screening.get("duplicate_ingredients", [])
+        evaluated_drugs = detailed_screening.get("evaluated_drugs", [])
+        unindexed_drugs = detailed_screening.get("unindexed_drugs", [])
 
         interactions: List[DrugInteractionAlert] = []
-        if len(drug_names) >= 2:
-            from drug_module.interaction_engine import check_interactions
-            raw_interactions = check_interactions(drug_names, self.interaction_dict)
-            for item in raw_interactions:
-                interactions.append(DrugInteractionAlert(
-                    drug_pair=item.get("drug_pair", []),
-                    severity=str(item.get("severity", "moderate")),
-                    explanation=str(item.get("explanation", "")),
-                    clinical_action=str(item.get("clinical_action", "")),
-                    source_id=str(item.get("source_id", "DailyMed")),
-                    source_url=str(item.get("source_url", "")),
-                    rule_id=str(item.get("rule_id", "")),
-                    provenance_status=str(item.get("provenance_status", "VERIFIED"))
-                ))
+        for item in raw_interactions:
+            interactions.append(DrugInteractionAlert(
+                drug_pair=item.get("drug_pair", []),
+                severity=str(item.get("severity", "moderate")),
+                explanation=str(item.get("explanation", "")),
+                clinical_action=str(item.get("clinical_action", "")),
+                source_id=str(item.get("source_id", "DailyMed")),
+                source_url=str(item.get("source_url", "")),
+                rule_id=str(item.get("rule_id", "")),
+                provenance_status=str(item.get("provenance_status", "VERIFIED"))
+            ))
+
+        ALLERGY_CROSS_REACTIONS = {
+            "penicillin": ["amoxicillin", "ampicillin", "augmentin", "piperacillin", "penicillin", "penicillin v", "penicillin g", "amoxil"],
+            "penicillins": ["amoxicillin", "ampicillin", "augmentin", "piperacillin", "penicillin", "penicillin v", "penicillin g", "amoxil"],
+            "sulfa": ["bactrim", "septra", "sulfamethoxazole", "trimethoprim-sulfamethoxazole", "sulfasalazine"],
+            "sulfonamides": ["bactrim", "septra", "sulfamethoxazole", "trimethoprim-sulfamethoxazole", "sulfasalazine"],
+            "nsaid": ["aspirin", "ibuprofen", "naproxen", "diclofenac", "combiflam", "advil", "motrin", "aleve"],
+            "nsaids": ["aspirin", "ibuprofen", "naproxen", "diclofenac", "combiflam", "advil", "motrin", "aleve"],
+            "aspirin": ["aspirin", "ibuprofen", "naproxen", "diclofenac", "combiflam", "advil", "motrin", "aleve", "ecotrin", "bayer"],
+            "ibuprofen": ["ibuprofen", "aspirin", "naproxen", "diclofenac", "combiflam", "advil", "motrin", "aleve"],
+            "paracetamol": ["paracetamol", "acetaminophen", "crocin", "dolo 650", "dolo-650", "dolo", "combiflam", "tylenol", "calpol"],
+            "acetaminophen": ["paracetamol", "acetaminophen", "crocin", "dolo 650", "dolo-650", "dolo", "combiflam", "tylenol", "calpol"]
+        }
 
         contraindications = []
-        # Check simple allergy contraindication
-        for drug in drug_names:
-            for allergy in request.allergies:
-                if allergy.lower() in drug.lower() or drug.lower() in allergy.lower():
-                    contraindications.append(f"ALLERGY CONTRAINDICATION: Patient has documented allergy to '{allergy}', matching candidate drug '{drug}'.")
+        cleaned_allergies = [a.lower().strip() for a in request.allergies if a and str(a).strip() and a.lower() not in ["none", "nil"]]
+        for drug in candidate_med_names:
+            drug_lower = drug.lower().strip()
+            constituents = decompose_medication(drug)
+            for allergy in cleaned_allergies:
+                is_match = False
+                matched_moiety = drug
+                if allergy in drug_lower or drug_lower in allergy:
+                    is_match = True
+                else:
+                    for c in constituents:
+                        if allergy in c.lower() or c.lower() in allergy:
+                            is_match = True
+                            matched_moiety = f"{drug} (active ingredient '{c}')"
+                            break
+                if not is_match:
+                    # Check cross-reactive classes
+                    cross_meds = ALLERGY_CROSS_REACTIONS.get(allergy, [])
+                    for xm in cross_meds:
+                        if xm in drug_lower:
+                            is_match = True
+                            matched_moiety = f"{drug} (cross-reactive with '{allergy}' class)"
+                            break
+                        for c in constituents:
+                            if xm in c.lower():
+                                is_match = True
+                                matched_moiety = f"{drug} (active ingredient '{c}' cross-reactive with '{allergy}' class)"
+                                break
+                        if is_match:
+                            break
+
+                if is_match:
+                    contraindications.append(
+                        f"ALLERGY CONTRAINDICATION: Patient has documented allergy to '{allergy}', matching proposed drug '{matched_moiety}'."
+                    )
+
+        # Compute evidence-backed alternative candidates if interactions detected
+        candidate_alternatives = []
+        if interactions:
+            candidate_alternatives = find_candidate_alternatives(
+                detected_interactions=raw_interactions,
+                proposed_medications=candidate_med_names,
+                active_medications=active_med_names,
+                patient_allergies=cleaned_allergies,
+                interaction_dict=self.interaction_dict
+            )
+
+        # Establish rule coverage & screening status
+        rule_coverage = "FULL"
+        if len(unindexed_drugs) == len(all_med_names) and len(all_med_names) > 0:
+            rule_coverage = "NO_MATCHING_LOCAL_RULE"
+        elif len(unindexed_drugs) > 0:
+            rule_coverage = "PARTIAL"
 
         screen_status = "safe"
         if contraindications:
             screen_status = "critical"
         elif any(i.severity.lower() in ["high", "critical", "major"] for i in interactions):
+            screen_status = "critical"
+        elif interactions or duplicate_ingredients:
             screen_status = "warning"
-        elif interactions:
-            screen_status = "warning"
+        elif rule_coverage == "NO_MATCHING_LOCAL_RULE" or (len(interactions) == 0 and len(unindexed_drugs) > 0):
+            # An unsupported drug pair returns 'no_matching_local_rule', never a silent 'safe'
+            screen_status = "no_matching_local_rule"
 
         recommendations = [i.clinical_action for i in interactions if i.clinical_action]
+        for dup in duplicate_ingredients:
+            recommendations.append(dup["clinical_action"])
 
         return PrescriptionScreenResponse(
             screen_status=screen_status,
+            rule_coverage=rule_coverage,
             interactions=interactions,
             contraindications=contraindications,
-            recommendations=recommendations
+            duplicate_ingredients=duplicate_ingredients,
+            candidate_alternatives=candidate_alternatives,
+            evaluated_drugs=evaluated_drugs,
+            unindexed_drugs=unindexed_drugs,
+            recommendations=recommendations,
+            clinical_disclaimer="Deterministic screening reflects verified DailyMed SPL rules in local CDSS database. This screening does not replace clinician evaluation and does not guarantee complete absence of unindexed interactions."
         )
 
 

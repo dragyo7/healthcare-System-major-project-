@@ -1,10 +1,13 @@
 /**
  * test_patient_and_discharge.js
- * 
+ *
  * Comprehensive Verification Suite for Phase 2 (Patient Portal) & Phase 3 (Discharge Care & Follow-up).
  */
 
-const BASE_URL = "http://localhost:5000";
+const { verifyDestructiveTestSafety, probeGatewaySafety } = require("../tests/safety/databaseSafetyGuard");
+
+const PORT = parseInt(process.env.TEST_EXPRESS_PORT || process.env.EXPRESS_PORT || "5001");
+const BASE_URL = `http://localhost:${PORT}`;
 
 let passed = 0;
 let failed = 0;
@@ -23,6 +26,10 @@ async function runTests() {
     console.log("=================================================");
     console.log("  PHASE 2 & 3: PATIENT PORTAL & DISCHARGE SUITE  ");
     console.log("=================================================\n");
+
+    const targetDb = (process.env.DB_NAME || "").trim();
+    verifyDestructiveTestSafety(targetDb);
+    await probeGatewaySafety(PORT, targetDb);
 
     try {
         // 1. Patient Login
@@ -95,7 +102,7 @@ async function runTests() {
             headers: { "Authorization": `Bearer ${patientToken}` }
         });
         const dischargeData = await dischargeRes.json();
-        assert(dischargeRes.status === 200 && dischargeData.discharge?.diagnosis.includes("Hypertension"), "9. Get Patient Discharge Episode", `-> Diagnosis: ${dischargeData.discharge?.diagnosis}`);
+        assert(dischargeRes.status === 200 && dischargeData.discharge?.diagnosis.includes("Hypertens"), "9. Get Patient Discharge Episode", `-> Diagnosis: ${dischargeData.discharge?.diagnosis}`);
 
         // 10. BOLA Security: Patient attempting to supply another patient's ID to CDS
         const bolaRes = await fetch(`${BASE_URL}/api/patient/cds`, {

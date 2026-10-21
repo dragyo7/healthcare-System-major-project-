@@ -24,6 +24,11 @@ export default function Home() {
               <Sparkles className="h-3.5 w-3.5" /> Launch CDS Assistant
             </Button>
           </Link>
+          <Link to="/about">
+            <Button variant="ghost" size="sm">
+              About & Ethics
+            </Button>
+          </Link>
           <Link to="/login">
             <Button variant="ghost" size="sm">
               Sign In
@@ -43,11 +48,11 @@ export default function Home() {
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary-50 text-primary-700 dark:bg-primary-950/40 dark:text-primary-400 text-xs font-bold uppercase tracking-wider mb-6">
             <ShieldCheck className="h-4 w-4" /> Evidence-Grounded Healthcare RAG Architecture
           </div>
-          
+
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white max-w-3xl leading-tight">
             Healthcare Clinical Decision Support & Diagnostics
           </h1>
-          
+
           <p className="text-base sm:text-lg text-slate-500 dark:text-slate-400 mt-4 max-w-2xl leading-relaxed">
             Powered by a verified 2,204-chunk multi-source clinical corpus (FDA DailyMed, MedlinePlus, ICMR, and MoHFW) with hybrid FAISS dense retrieval, BM25 lexical matching, reciprocal rank fusion, and deterministic clinical safety policies.
           </p>

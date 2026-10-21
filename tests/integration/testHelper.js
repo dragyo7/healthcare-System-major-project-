@@ -1,6 +1,6 @@
 /**
  * testHelper.js
- * 
+ *
  * Centralized test infrastructure helper for integration & E2E tests.
  * Resolves database connections, JWT generation, HTTP client requests,
  * and backend dependencies cleanly without ad-hoc path manipulation.
@@ -23,20 +23,60 @@ const mysql = require(path.join(backendModules, "mysql2/promise"));
 const jwt = require(path.join(backendModules, "jsonwebtoken"));
 const bcrypt = require(path.join(backendModules, "bcrypt"));
 
+const fs = require("fs");
+
+const {
+  verifyDestructiveTestSafety,
+  verifyTestDatabasePreflight,
+  probeGatewaySafety
+} = require("../safety/databaseSafetyGuard");
+
 const JWT_SECRET = process.env.JWT_SECRET || "rag_healthcare_secret";
-const GATEWAY_PORT = parseInt(process.env.EXPRESS_PORT || process.env.PORT || "5000");
+const GATEWAY_PORT = parseInt(process.env.TEST_EXPRESS_PORT || process.env.EXPRESS_PORT || process.env.PORT || "5001");
 const GATEWAY_HOST = process.env.EXPRESS_HOST || "127.0.0.1";
 
+let testDbFileConfig = {};
+try {
+  const cfgPath = path.resolve(__dirname, "../../scratch/test_db_config.json");
+  if (fs.existsSync(cfgPath)) {
+    testDbFileConfig = JSON.parse(fs.readFileSync(cfgPath, "utf8"));
+  }
+} catch (_) {}
+
 const DB_CONFIG = {
-  host: process.env.DB_HOST || "127.0.0.1",
-  port: parseInt(process.env.DB_PORT || "3306"),
-  user: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "",
-  database: process.env.DB_NAME || "rag_healthcare",
+  host: process.env.DB_HOST || testDbFileConfig.host || "127.0.0.1",
+  port: parseInt(process.env.DB_PORT || testDbFileConfig.port || "3306"),
+  user: process.env.DB_USER || testDbFileConfig.user || "root",
+  password: process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : (testDbFileConfig.password !== undefined ? testDbFileConfig.password : ""),
+  get database() {
+    const dbToVerify = this._overrideDb || process.env.DB_NAME;
+    return verifyTestDatabasePreflight(dbToVerify);
+  },
+  set database(val) {
+    this._overrideDb = val;
+  }
 };
+Object.defineProperty(DB_CONFIG, "_overrideDb", {
+  value: null,
+  writable: true,
+  enumerable: false,
+  configurable: true
+});
 
 function httpRequest(options, postData) {
   return new Promise((resolve, reject) => {
+    const targetPort = options && options.port !== undefined
+      ? (Number(options.port) === 5000 && process.env.TEST_EXPRESS_PORT ? parseInt(process.env.TEST_EXPRESS_PORT) : options.port)
+      : GATEWAY_PORT;
+
+    if (Number(targetPort) === 5000 && process.env.ALLOW_DEFAULT_DEV_PORT !== "true") {
+      return reject(new Error(
+        "SAFETY REFUSAL: httpRequest is targeting port 5000 (default development port). " +
+        "Tests must target a dedicated test backend (e.g. TEST_EXPRESS_PORT=5001) to avoid mutating development data. " +
+        "Set ALLOW_DEFAULT_DEV_PORT=true only if port 5000 is verified to be an isolated test server."
+      ));
+    }
+
     const headers = { ...(options && options.headers ? options.headers : {}) };
     let payload = null;
     if (postData) {
@@ -55,8 +95,8 @@ function httpRequest(options, postData) {
 
     const opts = {
       hostname: GATEWAY_HOST,
-      port: GATEWAY_PORT,
       ...options,
+      port: targetPort,
       headers
     };
     const req = http.request(opts, (res) => {
@@ -97,4 +137,7 @@ module.exports = {
   DB_CONFIG,
   httpRequest,
   generateToken,
+  verifyDestructiveTestSafety,
+  verifyTestDatabasePreflight,
+  probeGatewaySafety
 };

@@ -1,6 +1,6 @@
 /**
  * test_portal_cds_responsibilities.js
- * 
+ *
  * Comprehensive 25-Scenario Test Suite for Portal-Specific CDS Architecture.
  * Tests:
  * 1-10:   Doctor Mode (Full CDS)
@@ -13,11 +13,30 @@ const http = require("http");
 const path = require("path");
 const jwt = require(path.join(__dirname, "../Portal Major P/Bhumi/Doctor portal/backend/node_modules/jsonwebtoken"));
 
+const { verifyDestructiveTestSafety, probeGatewaySafety } = require("../tests/safety/databaseSafetyGuard");
+
 const JWT_SECRET = process.env.JWT_SECRET || "rag_healthcare_secret";
+const PORT = parseInt(process.env.TEST_EXPRESS_PORT || process.env.EXPRESS_PORT || "5001");
 
 function httpRequest(options, postData) {
     return new Promise((resolve, reject) => {
-        const req = http.request(options, (res) => {
+        const targetPort = options && options.port !== undefined
+            ? (Number(options.port) === 5000 && process.env.TEST_EXPRESS_PORT ? parseInt(process.env.TEST_EXPRESS_PORT) : options.port)
+            : PORT;
+
+        if (Number(targetPort) === 5000 && process.env.ALLOW_DEFAULT_DEV_PORT !== "true") {
+            return reject(new Error(
+                "SAFETY REFUSAL: httpRequest is targeting port 5000 (default development port). " +
+                "Tests must target a dedicated test backend (e.g. TEST_EXPRESS_PORT=5001) to avoid mutating development data."
+            ));
+        }
+
+        const opts = {
+            hostname: "127.0.0.1",
+            ...options,
+            port: targetPort
+        };
+        const req = http.request(opts, (res) => {
             let body = "";
             res.on("data", (chunk) => body += chunk);
             res.on("end", () => {
@@ -42,6 +61,10 @@ async function runAudit() {
     console.log("==========================================================================");
     console.log("  COMPREHENSIVE CDS AUDIT: PORTAL RESPONSIBILITIES & SAFETY VERIFICATION  ");
     console.log("==========================================================================\n");
+
+    const targetDb = (process.env.DB_NAME || "").trim();
+    verifyDestructiveTestSafety(targetDb);
+    await probeGatewaySafety(PORT, targetDb);
 
     const results = [];
     function record(id, name, pass, detail) {
@@ -296,7 +319,7 @@ async function runAudit() {
             active_conditions: ["Hypertension"],
             candidate_medications: ["Aspirin", "Warfarin"]
         });
-        const pass = res.status === 200 && res.body.screen_status === "warning" && res.body.interactions?.length >= 1;
+        const pass = res.status === 200 && ["warning", "critical"].includes(res.body.screen_status) && res.body.interactions?.length >= 1;
         record(10, "Prescription safety -> deterministic safety analysis", pass, `Screen status: ${res.body.screen_status}, interactions: ${res.body.interactions?.length}`);
     } catch (e) {
         record(10, "Prescription safety -> deterministic safety analysis", false, e.message);

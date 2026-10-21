@@ -58,13 +58,14 @@ export const patientApi = {
     return data.appointments || [];
   },
 
-  evaluateCDS: async ({ clinicalQuery, language = "en" }) => {
+  evaluateCDS: async ({ clinicalQuery, language = "en", conversationHistory = [] }) => {
     const res = await fetch(`${API_BASE}/patient/cds`, {
       method: "POST",
       headers: getAuthHeaders(),
       body: JSON.stringify({
         clinical_query: clinicalQuery,
         language,
+        conversation_history: conversationHistory,
       }),
     });
     const data = await res.json();

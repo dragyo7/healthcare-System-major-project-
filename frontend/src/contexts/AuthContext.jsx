@@ -115,6 +115,21 @@ export function AuthProvider({ children }) {
     return await authApi.activatePatient(token, password);
   };
 
+  const signUpPatient = async (patientData) => {
+    return await authApi.signupPatient(patientData);
+  };
+
+  const signUp = async (email, password, metadata = {}) => {
+    return await authApi.signupPatient({
+      email,
+      password,
+      full_name: metadata.name || metadata.full_name || email.split("@")[0],
+      phone: metadata.phone || null,
+      role: "patient",
+      ...metadata,
+    });
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -125,6 +140,8 @@ export function AuthProvider({ children }) {
         signIn,
         signOut,
         activateAccount,
+        signUpPatient,
+        signUp,
       }}
     >
       {children}

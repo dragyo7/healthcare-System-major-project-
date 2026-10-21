@@ -1,18 +1,61 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { User, Mail, Shield, Award, Phone, Clock, CheckCircle2, AlertCircle } from "lucide-react";
+import { doctorApi } from "../../api/doctorApi";
+import { User, Mail, Shield, Award, Phone, Clock, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 
 export default function DoctorProfile() {
   const { user } = useAuth();
   const [phone, setPhone] = useState("+91 98765 43210");
   const [department, setDepartment] = useState("Internal Medicine / Cardiology");
   const [room, setRoom] = useState("OPD-304");
+  const [license, setLicense] = useState("MCI-2018-849201");
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleSave = (e) => {
+  useEffect(() => {
+    let isMounted = true;
+    async function loadDoctorProfile() {
+      try {
+        setLoading(true);
+        const data = await doctorApi.getProfile();
+        if (isMounted && data?.doctor) {
+          if (data.doctor.phone) setPhone(data.doctor.phone);
+          if (data.doctor.specialization) setDepartment(data.doctor.specialization);
+          if (data.doctor.license_number) setLicense(data.doctor.license_number);
+          if (data.doctor.bio) setRoom(data.doctor.bio);
+        }
+      } catch (err) {
+        // Fallback gracefully to default state if profile fetch fails
+        console.warn("Could not load backend doctor profile:", err.message);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+    loadDoctorProfile();
+    return () => { isMounted = false; };
+  }, []);
+
+  const handleSave = async (e) => {
     e.preventDefault();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    try {
+      setSaving(true);
+      setError(null);
+      await doctorApi.updateProfile({
+        full_name: user?.name || "Doctor",
+        phone: phone,
+        specialization: department,
+        bio: room
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      console.error("Save profile error:", err);
+      setError(err.message || "Failed to save profile changes");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -38,11 +81,11 @@ export default function DoctorProfile() {
           </div>
           <h2 className="mt-4 text-lg font-bold text-foreground">Dr. {user?.name || "Clinical Specialist"}</h2>
           <p className="text-xs text-muted-foreground">{user?.email || "doctor@gmail.com"}</p>
-          
+
           <div className="mt-6 pt-6 border-t border-border/60 text-left space-y-3">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Award className="w-4 h-4 text-primary" />
-              <span>License: <strong className="text-foreground">MCI-2018-849201</strong></span>
+              <span>License: <strong className="text-foreground">{license}</strong></span>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Mail className="w-4 h-4 text-primary" />
@@ -58,11 +101,18 @@ export default function DoctorProfile() {
         {/* Edit Form */}
         <div className="md:col-span-2 rounded-xl border border-border bg-card p-6 shadow-sm">
           <h3 className="text-base font-semibold text-foreground mb-4">Practice Details & Availability</h3>
-          
+
           {saved && (
             <div className="mb-4 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-sm flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4" />
               Profile and contact settings updated successfully.
+            </div>
+          )}
+
+          {error && (
+            <div className="mb-4 p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-600 text-sm flex items-center gap-2">
+              <AlertCircle className="w-4 h-4" />
+              {error}
             </div>
           )}
 
@@ -82,7 +132,7 @@ export default function DoctorProfile() {
                 <input
                   type="text"
                   readOnly
-                  value="MCI-2018-849201"
+                  value={license}
                   className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-muted/50 text-muted-foreground cursor-not-allowed"
                 />
               </div>
@@ -122,9 +172,11 @@ export default function DoctorProfile() {
             <div className="pt-4 border-t border-border flex justify-end">
               <button
                 type="submit"
-                className="px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition shadow-sm"
+                disabled={saving || loading}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition shadow-sm disabled:opacity-50"
               >
-                Save Profile Changes
+                {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+                {saving ? "Saving Changes..." : "Save Profile Changes"}
               </button>
             </div>
           </form>

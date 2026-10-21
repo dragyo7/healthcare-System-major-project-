@@ -1,6 +1,6 @@
 /**
  * scratch/test_supabase_security_and_deployment.js
- * 
+ *
  * Comprehensive automated security, Supabase role verification,
  * patient cross-isolation, and deployment readiness test suite.
  */
@@ -17,7 +17,8 @@ require(path.join(backendModules, 'dotenv')).config({ path: path.join(backendDir
 const db = require(path.join(backendDir, 'src/config/db'));
 const jwt = require(path.join(backendModules, 'jsonwebtoken'));
 
-const BASE_URL = "http://localhost:5000";
+const PORT = parseInt(process.env.TEST_EXPRESS_PORT || process.env.EXPRESS_PORT || "5001");
+const BASE_URL = `http://localhost:${PORT}`;
 
 let totalTests = 0;
 let passedTests = 0;
@@ -43,7 +44,7 @@ async function run() {
   // Section 1: Supabase Configuration & Network Reachability Audit
   // ========================================================================
   console.log("--- Section 1: Supabase Configuration & Reachability Audit ---");
-  
+
   const frontendEnvPath = path.resolve(__dirname, '../frontend/.env');
   const frontendEnvExists = fs.existsSync(frontendEnvPath);
   assert(frontendEnvExists, "1.1 frontend/.env file exists locally");

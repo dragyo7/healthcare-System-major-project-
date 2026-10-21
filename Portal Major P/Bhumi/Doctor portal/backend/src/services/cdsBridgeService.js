@@ -1,6 +1,6 @@
 /**
  * cdsBridgeService.js
- * 
+ *
  * Internal Service Bridge between Express EHR backend and the FastAPI CDS Gateway.
  * Enforces strict request-scoped patient context sanitization (Zero PII)
  * and forwards clinical inquiries to POST /cds/evaluate.
@@ -10,7 +10,7 @@ const CDS_SERVICE_URL = process.env.CDS_SERVICE_URL || "http://127.0.0.1:8000";
 
 /**
  * Derives patient age in whole years from ISO date string.
- * @param {string|Date} dob 
+ * @param {string|Date} dob
  * @returns {number|null}
  */
 const calculateAge = (dob) => {
@@ -25,7 +25,7 @@ const calculateAge = (dob) => {
 /**
  * Sanitizes rich EHR patient dossier into a data-minimized clinical context.
  * STRICTLY OMITS PII: name, email, phone, address, emergency_contact, user_id, patient_id.
- * 
+ *
  * @param {object} patientData Raw patient dossier from database
  * @returns {object} Sanitized PatientContext object conforming to cds_module/models.py
  */
@@ -134,8 +134,8 @@ const sanitizePatientContext = (patientData) => {
 
 /**
  * Forwards clinical query + sanitized patient context to FastAPI CDS Gateway.
- * 
- * @param {object} payload 
+ *
+ * @param {object} payload
  * @param {string} payload.clinical_query
  * @param {string} payload.mode
  * @param {object} payload.patient_context
@@ -152,7 +152,8 @@ const forwardToFastAPICDS = async (payload) => {
         candidate_medications: payload.candidate_medications || [],
         retrieval_mode: "hybrid",
         top_k: 5,
-        language: payload.language || "auto"
+        language: payload.language || "auto",
+        conversation_history: Array.isArray(payload.conversation_history) ? payload.conversation_history : []
     };
 
     const controller = new AbortController();
@@ -220,7 +221,8 @@ const forwardToFastAPIPrescriptionScreen = async (payload) => {
             body: JSON.stringify({
                 allergies: payload.allergies || [],
                 active_conditions: payload.active_conditions || [],
-                candidate_medications: payload.candidate_medications || []
+                candidate_medications: payload.candidate_medications || [],
+                active_medications: payload.active_medications || []
             }),
             signal: controller.signal
         });

@@ -29,11 +29,11 @@ const renderHubHtml = () => `<!DOCTYPE html>
     .badge-pill { display: inline-block; background: rgba(37, 99, 235, 0.2); border: 1px solid rgba(37, 99, 235, 0.4); color: #60a5fa; font-size: 0.8rem; font-weight: 600; padding: 0.35rem 0.85rem; border-radius: 9999px; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em; }
     h1 { font-size: 2.4rem; font-weight: 800; margin-bottom: 0.75rem; letter-spacing: -0.02em; background: linear-gradient(135deg, #fff 30%, #94a3b8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     p.subtitle { color: var(--text-muted); font-size: 1.1rem; max-width: 650px; margin: 0 auto; line-height: 1.5; }
-    
+
     .status-bar { display: flex; justify-content: center; gap: 1rem; margin-bottom: 2.5rem; flex-wrap: wrap; }
     .status-chip { display: flex; align-items: center; gap: 0.5rem; background: rgba(30, 41, 59, 0.7); border: 1px solid var(--card-border); padding: 0.4rem 0.85rem; border-radius: 8px; font-size: 0.85rem; color: #cbd5e1; }
     .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 8px var(--success); }
-    
+
     .portal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
     .portal-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; padding: 1.75rem; display: flex; flex-direction: column; transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; position: relative; overflow: hidden; }
     .portal-card:hover { transform: translateY(-4px); border-color: #3b82f6; box-shadow: 0 12px 24px -10px rgba(37, 99, 235, 0.3); }
@@ -50,7 +50,7 @@ const renderHubHtml = () => `<!DOCTYPE html>
     .portal-btn.patient:hover { background: #047857; }
     .portal-btn.receptionist { background: #7c3aed; }
     .portal-btn.receptionist:hover { background: #6d28d9; }
-    
+
     .activation-card { background: rgba(30, 41, 59, 0.5); border: 1px dashed var(--card-border); border-radius: 12px; padding: 1.25rem 1.75rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem; }
     .activation-text h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.2rem; }
     .activation-text p { font-size: 0.85rem; color: var(--text-muted); }
@@ -173,6 +173,7 @@ const getHealth = async (req, res) => {
       status: "healthy",
       services: {
         database: "connected",
+        database_name: process.env.NODE_ENV !== "production" ? process.env.DB_NAME : undefined,
         express_gateway: "active",
         cds_bridge: "active"
       },
@@ -187,6 +188,7 @@ const getHealth = async (req, res) => {
       error: err.message,
       services: {
         database: "disconnected",
+        database_name: process.env.NODE_ENV !== "production" ? process.env.DB_NAME : undefined,
         express_gateway: "active"
       },
       timestamp: new Date().toISOString()

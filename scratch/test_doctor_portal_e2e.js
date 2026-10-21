@@ -1,6 +1,6 @@
 /**
  * test_doctor_portal_e2e.js
- * 
+ *
  * Exhaustive End-to-End Verification of the Doctor Portal Workflow:
  * 1. Authentication (valid, invalid, unauthenticated, role guard)
  * 2. Dashboard metrics against real MySQL
@@ -25,11 +25,30 @@ const path = require("path");
 const mysql = require(path.join(__dirname, "../Portal Major P/Bhumi/Doctor portal/backend/node_modules/mysql2/promise"));
 const jwt = require(path.join(__dirname, "../Portal Major P/Bhumi/Doctor portal/backend/node_modules/jsonwebtoken"));
 
+const { verifyDestructiveTestSafety, probeGatewaySafety } = require("../tests/safety/databaseSafetyGuard");
+
 const JWT_SECRET = process.env.JWT_SECRET || "rag_healthcare_secret";
+const GATEWAY_PORT = parseInt(process.env.TEST_EXPRESS_PORT || process.env.EXPRESS_PORT || "5001");
 
 function httpRequest(options, postData) {
     return new Promise((resolve, reject) => {
-        const req = http.request(options, (res) => {
+        const targetPort = options && options.port !== undefined
+            ? (Number(options.port) === 5000 && process.env.TEST_EXPRESS_PORT ? parseInt(process.env.TEST_EXPRESS_PORT) : options.port)
+            : GATEWAY_PORT;
+
+        if (Number(targetPort) === 5000 && process.env.ALLOW_DEFAULT_DEV_PORT !== "true") {
+            return reject(new Error(
+                "SAFETY REFUSAL: httpRequest is targeting port 5000 (default development port). " +
+                "Tests must target a dedicated test backend (e.g. TEST_EXPRESS_PORT=5001) to avoid mutating development data."
+            ));
+        }
+
+        const opts = {
+            hostname: "localhost",
+            ...options,
+            port: targetPort
+        };
+        const req = http.request(opts, (res) => {
             let body = "";
             res.on("data", (chunk) => body += chunk);
             res.on("end", () => {
@@ -55,12 +74,16 @@ async function runE2E() {
     console.log("   DOCTOR PORTAL COMPREHENSIVE E2E VERIFICATION & INTEGRATION SUITE      ");
     console.log("==========================================================================\n");
 
+    const targetDb = (process.env.DB_NAME || "").trim();
+    verifyDestructiveTestSafety(targetDb);
+    await probeGatewaySafety(GATEWAY_PORT, targetDb);
+
     const db = await mysql.createConnection({
-        host: "localhost",
-        user: "root",
-        password: "bhumi",
-        database: "rag_healthcare",
-        port: 3306
+        host: process.env.DB_HOST || "localhost",
+        user: process.env.DB_USER || "root",
+        password: process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : "bhumi",
+        database: targetDb,
+        port: parseInt(process.env.DB_PORT || "3306")
     });
 
     const results = [];
@@ -164,7 +187,7 @@ async function runE2E() {
         // Query MySQL directly to cross-verify
         const [patientsCount] = await db.execute("SELECT COUNT(DISTINCT patient_id) AS total FROM appointments WHERE doctor_id = 1");
         const [completedCount] = await db.execute("SELECT COUNT(*) AS total FROM appointments WHERE doctor_id = 1 AND appointment_date = CURDATE() AND status = 'completed'");
-        
+
         const pass = res.status === 200 &&
                      Number(res.body.total_patients) === Number(patientsCount[0].total) &&
                      Number(res.body.today_completed) === Number(completedCount[0].total);

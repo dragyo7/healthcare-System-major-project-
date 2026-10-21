@@ -473,7 +473,7 @@ export default function CDSAssistant() {
             onChange={(e) => setInputQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Ask a clinical question (e.g. 'What is metformin?' or 'What are the adverse effects of Lipitor?')..."
-            className="flex-1 h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-800 dark:bg-slate-900/90 dark:text-white text-sm focus:outline-hidden focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all shadow-2xs"
+            className="flex-1 h-11 px-4 rounded-xl border border-slate-200 bg-white text-slate-900 dark:border-slate-800 dark:bg-slate-900/90 dark:text-white text-sm focus:outline-hidden focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all shadow-2xs"
             disabled={isLoading}
           />
           <Button

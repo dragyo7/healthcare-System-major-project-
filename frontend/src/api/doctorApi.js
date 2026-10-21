@@ -34,8 +34,9 @@ export const doctorApi = {
     return data;
   },
 
-  getPatients: async () => {
-    const res = await fetch(`${API_BASE}/doctor/patients`, { headers: getAuthHeaders() });
+  getPatients: async (search = "") => {
+    const q = search ? `?search=${encodeURIComponent(search)}` : "";
+    const res = await fetch(`${API_BASE}/doctor/patients${q}`, { headers: getAuthHeaders() });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || "Failed to fetch patients list");
     return data.patients || [];
@@ -119,10 +120,15 @@ export const doctorApi = {
     return data;
   },
 
-  createPrescription: async (prescriptionData) => {
+  createPrescription: async (prescriptionData, idempotencyKey = null) => {
+    const key = idempotencyKey || prescriptionData?.idempotency_key;
+    const headers = getAuthHeaders();
+    if (key) {
+      headers["Idempotency-Key"] = key;
+    }
     const res = await fetch(`${API_BASE}/doctor/prescriptions`, {
       method: "POST",
-      headers: getAuthHeaders(),
+      headers,
       body: JSON.stringify(prescriptionData),
     });
     const data = await res.json();
@@ -131,6 +137,7 @@ export const doctorApi = {
       err.contraindications = data.contraindications;
       err.rule_id = data.rule_id;
       err.status = res.status;
+      err.error = data.error;
       throw err;
     }
     return data;
@@ -156,7 +163,7 @@ export const doctorApi = {
     return data;
   },
 
-  evaluateCDS: async ({ patientId, clinicalQuery, candidateMedications = [], language = "auto" }) => {
+  evaluateCDS: async ({ patientId, clinicalQuery, candidateMedications = [], language = "auto", conversationHistory = [] }) => {
     const res = await fetch(`${API_BASE}/doctor/cds`, {
       method: "POST",
       headers: getAuthHeaders(),
@@ -165,6 +172,7 @@ export const doctorApi = {
         clinical_query: clinicalQuery,
         candidate_medications: candidateMedications,
         language,
+        conversation_history: conversationHistory,
       }),
     });
     const data = await res.json();
