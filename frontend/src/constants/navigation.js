@@ -22,6 +22,7 @@ export const DOCTOR_NAV = [
 
 export const PATIENT_NAV = [
   { label: "My Dashboard", path: "/patient", icon: LayoutDashboard },
+  { label: "Appointments & Doctors", path: "/patient/appointments", icon: Calendar },
   { label: "Post-Discharge Care", path: "/patient/discharge", icon: FileText },
   { label: "Post-Discharge Assistant", path: "/patient/assistant", icon: Bot },
   { label: "My Prescriptions", path: "/patient/prescriptions", icon: Pill },

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Calendar, Clock, Plus, CheckCircle2, XCircle, Trash2, User, Filter } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Calendar, Clock, Plus, CheckCircle2, XCircle, Trash2, User, Filter, ChevronLeft, ChevronRight, Eye } from "lucide-react";
 import { doctorApi } from "../../api/doctorApi";
 
 export default function DoctorAppointments() {
@@ -116,9 +117,38 @@ export default function DoctorAppointments() {
     }
   };
 
+  // Date filter state
+  const [selectedDate, setSelectedDate] = useState("");
+  const [filterByDate, setFilterByDate] = useState(false);
+
+  const handlePrevDay = () => {
+    const cur = selectedDate ? new Date(selectedDate) : new Date();
+    cur.setDate(cur.getDate() - 1);
+    setSelectedDate(cur.toISOString().split("T")[0]);
+    setFilterByDate(true);
+  };
+
+  const handleNextDay = () => {
+    const cur = selectedDate ? new Date(selectedDate) : new Date();
+    cur.setDate(cur.getDate() + 1);
+    setSelectedDate(cur.toISOString().split("T")[0]);
+    setFilterByDate(true);
+  };
+
+  const handleToday = () => {
+    setSelectedDate(new Date().toISOString().split("T")[0]);
+    setFilterByDate(true);
+  };
+
   const filteredAppointments = appointments.filter((a) => {
-    if (filter === "all") return true;
-    return a.status?.toLowerCase() === filter.toLowerCase();
+    if (filter !== "all" && a.status?.toLowerCase() !== filter.toLowerCase()) {
+      return false;
+    }
+    if (filterByDate && selectedDate) {
+      const aDate = a.appointment_date ? new Date(a.appointment_date).toISOString().split("T")[0] : "";
+      if (aDate !== selectedDate) return false;
+    }
+    return true;
   });
 
   if (loading) {
@@ -211,23 +241,70 @@ export default function DoctorAppointments() {
       {/* TAB 1: APPOINTMENTS */}
       {activeTab === "appointments" && (
         <div className="space-y-4">
-          {/* Filter Bar */}
-          <div className="flex items-center gap-2 pb-2">
-            <Filter className="h-3.5 w-3.5 text-slate-400" />
-            <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Status:</span>
-            {["all", "scheduled", "completed", "cancelled"].map((f) => (
+          {/* Calendar Date Navigator & Filter Bar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs">
+            {/* Date Navigator */}
+            <div className="flex items-center gap-2">
               <button
-                key={f}
-                onClick={() => setFilter(f)}
-                className={`px-3 py-1 rounded-lg text-xs font-bold capitalize transition-colors cursor-pointer ${
-                  filter === f
-                    ? "bg-primary-600 text-white"
-                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
-                }`}
+                onClick={handlePrevDay}
+                className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                title="Previous Day"
               >
-                {f}
+                <ChevronLeft className="h-4 w-4 text-slate-600 dark:text-slate-300" />
               </button>
-            ))}
+              <button
+                onClick={handleToday}
+                className="px-2.5 py-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              >
+                Today
+              </button>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => {
+                  setSelectedDate(e.target.value);
+                  setFilterByDate(!!e.target.value);
+                }}
+                className="px-2.5 py-1 text-xs font-mono rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"
+              />
+              <button
+                onClick={handleNextDay}
+                className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                title="Next Day"
+              >
+                <ChevronRight className="h-4 w-4 text-slate-600 dark:text-slate-300" />
+              </button>
+              {filterByDate && (
+                <button
+                  onClick={() => {
+                    setFilterByDate(false);
+                    setSelectedDate("");
+                  }}
+                  className="text-xs text-rose-600 hover:underline font-semibold ml-1"
+                >
+                  Clear Date
+                </button>
+              )}
+            </div>
+
+            {/* Status Filter */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <Filter className="h-3.5 w-3.5 text-slate-400" />
+              <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Status:</span>
+              {["all", "pending", "confirmed", "completed", "cancelled"].map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setFilter(f)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold capitalize transition-colors cursor-pointer ${
+                    filter === f
+                      ? "bg-primary-600 text-white"
+                      : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
+                  }`}
+                >
+                  {f}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
@@ -240,14 +317,14 @@ export default function DoctorAppointments() {
                     <th className="py-3.5 px-6">Time Window</th>
                     <th className="py-3.5 px-6">Reason / Condition</th>
                     <th className="py-3.5 px-6">Status</th>
-                    <th className="py-3.5 px-6 text-right">Update Status</th>
+                    <th className="py-3.5 px-6 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
                   {filteredAppointments.length === 0 ? (
                     <tr>
                       <td colSpan="6" className="py-12 text-center text-slate-400 text-xs">
-                        No appointments found matching "{filter}".
+                        No appointments found matching current filter{filterByDate ? ` on ${selectedDate}` : ""}.
                       </td>
                     </tr>
                   ) : (
@@ -262,7 +339,16 @@ export default function DoctorAppointments() {
                               {appt.patient_name?.charAt(0) || "P"}
                             </div>
                             <div>
-                              <div>{appt.patient_name || `Patient #${appt.patient_id}`}</div>
+                              <div className="flex items-center gap-1.5">
+                                <span>{appt.patient_name || `Patient #${appt.patient_id}`}</span>
+                                <Link
+                                  to={`/doctor/patients?id=${appt.patient_id}`}
+                                  className="text-primary-600 hover:text-primary-700 dark:text-primary-400 inline-flex items-center gap-0.5 text-[11px] font-semibold"
+                                  title="Open authorized medical dossier"
+                                >
+                                  <Eye className="h-3 w-3" /> Dossier
+                                </Link>
+                              </div>
                               <span className="text-[10px] text-slate-400 font-normal">ID: #{appt.patient_id}</span>
                             </div>
                           </div>
@@ -271,7 +357,7 @@ export default function DoctorAppointments() {
                           {appt.appointment_date ? new Date(appt.appointment_date).toLocaleDateString() : "—"}
                         </td>
                         <td className="py-4 px-6 text-slate-600 dark:text-slate-300">
-                          {appt.start_time} - {appt.end_time}
+                          {appt.start_time} - {appt.end_time || appt.start_time}
                         </td>
                         <td className="py-4 px-6 text-slate-500 max-w-xs truncate">
                           {appt.reason || "General Consultation"}
@@ -281,9 +367,11 @@ export default function DoctorAppointments() {
                             className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
                               appt.status === "completed"
                                 ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
-                                : appt.status === "cancelled"
-                                ? "bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300"
-                                : "bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300"
+                                : appt.status === "confirmed" || appt.status === "scheduled"
+                                ? "bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300"
+                                : appt.status === "pending"
+                                ? "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
+                                : "bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300"
                             }`}
                           >
                             {appt.status}
@@ -291,7 +379,16 @@ export default function DoctorAppointments() {
                         </td>
                         <td className="py-4 px-6 text-right">
                           <div className="inline-flex items-center gap-1.5">
-                            {appt.status !== "completed" && (
+                            {appt.status === "pending" && (
+                              <button
+                                onClick={() => handleUpdateStatus(appt.appointment_id || appt.id, "confirmed")}
+                                className="px-2 py-1 rounded-md text-[11px] font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 transition-colors"
+                                title="Confirm Appointment"
+                              >
+                                Confirm
+                              </button>
+                            )}
+                            {appt.status !== "completed" && appt.status !== "cancelled" && (
                               <button
                                 onClick={() => handleUpdateStatus(appt.appointment_id || appt.id, "completed")}
                                 className="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 transition-colors cursor-pointer"
@@ -300,7 +397,7 @@ export default function DoctorAppointments() {
                                 <CheckCircle2 className="h-4 w-4" />
                               </button>
                             )}
-                            {appt.status !== "cancelled" && (
+                            {appt.status !== "cancelled" && appt.status !== "rejected" && (
                               <button
                                 onClick={() => handleUpdateStatus(appt.appointment_id || appt.id, "cancelled")}
                                 className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/60 transition-colors cursor-pointer"

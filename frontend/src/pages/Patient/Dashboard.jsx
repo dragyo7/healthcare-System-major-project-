@@ -146,9 +146,12 @@ export default function PatientDashboard() {
               <Calendar className="w-4 h-4 text-primary" />
               {t("Upcoming Clinical Appointments")}
             </h3>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-semibold">
-              {appointments.length}
-            </span>
+            <Link
+              to="/patient/appointments"
+              className="text-xs text-primary hover:underline font-semibold"
+            >
+              {t("Browse Doctors & Book")} →
+            </Link>
           </div>
 
           {appointments.length > 0 ? (

@@ -920,14 +920,18 @@ const updateAppointmentStatus = async (req, res) => {
         }
 
         const allowedStatuses = [
+            "pending",
             "scheduled",
+            "confirmed",
             "completed",
-            "cancelled"
+            "cancelled",
+            "rejected",
+            "reschedule_requested"
         ];
 
-        if (!allowedStatuses.includes(status)) {
+        if (!allowedStatuses.includes(status.toLowerCase())) {
             return res.status(400).json({
-                message: "Invalid appointment status"
+                message: `Invalid appointment status. Allowed: ${allowedStatuses.join(", ")}`
             });
         }
 

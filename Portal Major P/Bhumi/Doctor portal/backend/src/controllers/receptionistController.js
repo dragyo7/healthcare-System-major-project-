@@ -351,6 +351,19 @@ const createAppointment = async (req, res) => {
             resolvedEndTime = `${endH}:${endM}:00`;
         }
 
+        // Prevent doctor double-booking
+        const [conflict] = await db.execute(
+            `SELECT appointment_id FROM appointments
+             WHERE doctor_id = ? AND appointment_date = ? AND start_time = ?
+               AND status IN ('scheduled', 'confirmed')`,
+            [doctor_id, appointment_date, start_time]
+        );
+        if (conflict.length > 0) {
+            return res.status(409).json({
+                message: "Physician already has a consultation scheduled at this date and time."
+            });
+        }
+
         const [result] = await db.execute(
             `INSERT INTO appointments (doctor_id, patient_id, appointment_date, start_time, end_time, reason, status)
              VALUES (?, ?, ?, ?, ?, ?, 'scheduled')`,
@@ -383,38 +396,56 @@ const createAppointment = async (req, res) => {
 
 /**
  * PATCH /api/receptionist/appointments/:id/status
- * Updates appointment status (scheduled, completed, cancelled).
+ * Updates appointment status (pending, scheduled, confirmed, completed, cancelled, rejected, reschedule_requested).
  */
 const updateAppointmentStatus = async (req, res) => {
     try {
         const appointmentId = req.params.id;
         const { status } = req.body;
 
-        const validStatuses = ["scheduled", "completed", "cancelled"];
+        const validStatuses = ["pending", "scheduled", "confirmed", "completed", "cancelled", "rejected", "reschedule_requested"];
         if (!status || !validStatuses.includes(status.toLowerCase())) {
             return res.status(400).json({
                 message: `Status must be one of: ${validStatuses.join(", ")}`
             });
         }
 
-        const [check] = await db.execute(
-            "SELECT appointment_id FROM appointments WHERE appointment_id = ?",
+        const [apptRows] = await db.execute(
+            "SELECT appointment_id, doctor_id, appointment_date, start_time FROM appointments WHERE appointment_id = ?",
             [appointmentId]
         );
 
-        if (check.length === 0) {
+        if (apptRows.length === 0) {
             return res.status(404).json({ message: "Appointment not found" });
+        }
+
+        const appt = apptRows[0];
+        const newStatus = status.toLowerCase();
+
+        // If approving/confirming/scheduling, ensure no double booking
+        if (newStatus === "scheduled" || newStatus === "confirmed") {
+            const [conflict] = await db.execute(
+                `SELECT appointment_id FROM appointments
+                 WHERE doctor_id = ? AND appointment_date = ? AND start_time = ?
+                   AND status IN ('scheduled', 'confirmed') AND appointment_id != ?`,
+                [appt.doctor_id, appt.appointment_date, appt.start_time, appointmentId]
+            );
+            if (conflict.length > 0) {
+                return res.status(409).json({
+                    message: "Cannot approve appointment: Another appointment is already scheduled for this physician at this date and time."
+                });
+            }
         }
 
         await db.execute(
             "UPDATE appointments SET status = ? WHERE appointment_id = ?",
-            [status.toLowerCase(), appointmentId]
+            [newStatus, appointmentId]
         );
 
         return res.status(200).json({
-            message: `Appointment status updated to ${status.toLowerCase()}`,
+            message: `Appointment status updated to ${newStatus}`,
             appointment_id: appointmentId,
-            status: status.toLowerCase()
+            status: newStatus
         });
 
     } catch (error) {

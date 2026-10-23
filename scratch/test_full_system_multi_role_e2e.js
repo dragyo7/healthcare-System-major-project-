@@ -75,7 +75,10 @@ async function runE2E() {
         assert(regPatientRes.status === 201 && newPatientId, "1.2 Receptionist registers patient", `-> Patient ID: ${newPatientId}`);
         const newPatientEmail = `e2e_pat_${testTimestamp}@gmail.com`;
 
-        // 1.3 Receptionist schedules an appointment with Doctor 1 (Dr. Rahul Sharma)
+        const apptDate = `2027-${String((testTimestamp % 12) + 1).padStart(2, '0')}-${String((testTimestamp % 28) + 1).padStart(2, '0')}`;
+        const startMin = String(testTimestamp % 60).padStart(2, '0');
+        const startTime = `14:${startMin}:00`;
+
         const apptRes = await fetch(`${BASE_URL}/api/receptionist/appointments`, {
             method: "POST",
             headers: {
@@ -85,9 +88,9 @@ async function runE2E() {
             body: JSON.stringify({
                 doctor_id: 1,
                 patient_id: newPatientId,
-                appointment_date: "2026-10-30",
-                start_time: "10:30:00",
-                end_time: "11:00:00",
+                appointment_date: apptDate,
+                start_time: startTime,
+                end_time: `15:${startMin}:00`,
                 reason: "Hypertension follow-up consultation"
             })
         });

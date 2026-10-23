@@ -8,6 +8,9 @@ const {
     getPatientMedications,
     getPatientDischarge,
     getPatientAppointments,
+    getAvailableDoctors,
+    requestAppointment,
+    cancelPatientAppointment,
     evaluatePatientCDS,
     generatePatientPrescriptionPDF
 } = require("../controllers/patientController");
@@ -25,6 +28,9 @@ router.get("/prescriptions/:prescriptionId/pdf", authenticatePatient, generatePa
 router.get("/medications", authenticatePatient, getPatientMedications);
 router.get("/discharge", authenticatePatient, getPatientDischarge);
 router.get("/appointments", authenticatePatient, getPatientAppointments);
+router.get("/doctors", authenticatePatient, getAvailableDoctors);
+router.post("/appointments", authenticatePatient, requestAppointment);
+router.patch("/appointments/:id/cancel", authenticatePatient, cancelPatientAppointment);
 
 /**
  * POST /api/patient/cds

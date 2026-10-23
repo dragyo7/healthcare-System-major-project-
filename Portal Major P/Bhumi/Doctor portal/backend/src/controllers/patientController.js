@@ -375,6 +375,210 @@ const getPatientAppointments = async (req, res) => {
 };
 
 /**
+ * GET /api/patient/doctors
+ * Directory of available doctors for patient consultation discovery.
+ * Returns: doctor_id, full_name, email, specialization, qualification, experience_years, bio
+ */
+const getAvailableDoctors = async (req, res) => {
+    try {
+        const [doctors] = await db.execute(
+            `SELECT d.doctor_id, u.full_name, u.email, d.specialization, d.qualification,
+                    d.experience_years, d.bio
+             FROM doctors d
+             JOIN users u ON d.user_id = u.user_id
+             ORDER BY u.full_name ASC`
+        );
+
+        return res.status(200).json({
+            count: doctors.length,
+            doctors
+        });
+    } catch (error) {
+        console.error("Patient getAvailableDoctors error:", error);
+        return res.status(500).json({ message: "Failed to retrieve doctor directory" });
+    }
+};
+
+/**
+ * POST /api/patient/appointments
+ * Patient requests a consultation appointment with a selected physician.
+ * Body: { doctor_id, appointment_date, start_time, end_time, reason }
+ */
+const requestAppointment = async (req, res) => {
+    let connection;
+    try {
+        const patient = await getAuthenticatedPatient(req.user.user_id);
+        if (!patient) {
+            return res.status(404).json({ message: "Patient record not found" });
+        }
+
+        const { doctor_id, appointment_date, start_time, appointment_time, end_time, reason } = req.body || {};
+        const effectiveStartTime = start_time || appointment_time;
+
+        if (!doctor_id || !appointment_date || !effectiveStartTime) {
+            return res.status(400).json({
+                message: "doctor_id, appointment_date, and start_time are required"
+            });
+        }
+
+        const apptDate = new Date(appointment_date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (isNaN(apptDate.getTime()) || apptDate < today) {
+            return res.status(400).json({
+                message: "Appointment date must be today or a future date"
+            });
+        }
+
+        connection = await db.getConnection();
+        await connection.beginTransaction();
+
+        // 1. Verify doctor exists
+        const [doctorRows] = await connection.execute(
+            `SELECT d.doctor_id, u.full_name
+             FROM doctors d
+             JOIN users u ON d.user_id = u.user_id
+             WHERE d.doctor_id = ?`,
+            [doctor_id]
+        );
+
+        if (doctorRows.length === 0) {
+            await connection.rollback();
+            return res.status(404).json({ message: "Selected physician does not exist" });
+        }
+
+        // 2. Prevent doctor double-booking
+        const [existingDoctorSlots] = await connection.execute(
+            `SELECT appointment_id FROM appointments
+             WHERE doctor_id = ? AND appointment_date = ? AND start_time = ?
+               AND status IN ('pending', 'scheduled', 'confirmed')
+             FOR UPDATE`,
+            [doctor_id, appointment_date, effectiveStartTime]
+        );
+
+        if (existingDoctorSlots.length > 0) {
+            await connection.rollback();
+            return res.status(409).json({
+                message: "The requested time slot is already reserved for this physician. Please choose another time or date."
+            });
+        }
+
+        // 3. Prevent patient double-booking
+        const [existingPatientSlots] = await connection.execute(
+            `SELECT appointment_id FROM appointments
+             WHERE patient_id = ? AND appointment_date = ? AND start_time = ?
+               AND status IN ('pending', 'scheduled', 'confirmed')
+             FOR UPDATE`,
+            [patient.patient_id, appointment_date, effectiveStartTime]
+        );
+
+        if (existingPatientSlots.length > 0) {
+            await connection.rollback();
+            return res.status(409).json({
+                message: "You already have a consultation booked or pending at this date and time."
+            });
+        }
+
+        // 4. Create appointment with status 'pending'
+        const calcEndTime = end_time || effectiveStartTime;
+        const [insertResult] = await connection.execute(
+            `INSERT INTO appointments (doctor_id, patient_id, appointment_date, start_time, end_time, reason, status)
+             VALUES (?, ?, ?, ?, ?, ?, 'pending')`,
+            [doctor_id, patient.patient_id, appointment_date, effectiveStartTime, calcEndTime, reason || null]
+        );
+
+        await connection.commit();
+
+        return res.status(201).json({
+            message: "Appointment request submitted successfully. Pending review by clinic reception.",
+            appointment: {
+                appointment_id: insertResult.insertId,
+                doctor_id,
+                doctor_name: doctorRows[0].full_name,
+                patient_id: patient.patient_id,
+                appointment_date,
+                start_time: effectiveStartTime,
+                end_time: calcEndTime,
+                reason: reason || null,
+                status: "pending"
+            }
+        });
+
+    } catch (error) {
+        if (connection) {
+            try { await connection.rollback(); } catch (_) {}
+        }
+        console.error("Patient requestAppointment error:", error);
+        return res.status(500).json({ message: "Server error scheduling appointment request" });
+    } finally {
+        if (connection) connection.release();
+    }
+};
+
+/**
+ * PATCH /api/patient/appointments/:id/cancel
+ * Patient cancels their own pending or scheduled appointment.
+ */
+const cancelPatientAppointment = async (req, res) => {
+    try {
+        const patient = await getAuthenticatedPatient(req.user.user_id);
+        if (!patient) {
+            return res.status(404).json({ message: "Patient record not found" });
+        }
+
+        const appointmentId = parseInt(req.params.id, 10);
+        if (isNaN(appointmentId)) {
+            return res.status(400).json({ message: "Invalid appointment ID" });
+        }
+
+        const [rows] = await db.execute(
+            "SELECT appointment_id, patient_id, status FROM appointments WHERE appointment_id = ?",
+            [appointmentId]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: "Appointment not found" });
+        }
+
+        const appt = rows[0];
+
+        // BOLA protection: Patient can only cancel their own appointment
+        if (appt.patient_id !== patient.patient_id) {
+            return res.status(403).json({
+                message: "Access denied: You are not authorized to cancel this appointment"
+            });
+        }
+
+        if (appt.status === "completed") {
+            return res.status(400).json({
+                message: "Completed appointments cannot be cancelled"
+            });
+        }
+
+        if (appt.status === "cancelled") {
+            return res.status(400).json({
+                message: "Appointment is already cancelled"
+            });
+        }
+
+        await db.execute(
+            "UPDATE appointments SET status = 'cancelled' WHERE appointment_id = ?",
+            [appointmentId]
+        );
+
+        return res.status(200).json({
+            message: "Appointment cancelled successfully",
+            appointment_id: appointmentId,
+            status: "cancelled"
+        });
+
+    } catch (error) {
+        console.error("Patient cancelPatientAppointment error:", error);
+        return res.status(500).json({ message: "Server error cancelling appointment" });
+    }
+};
+
+/**
  * POST /api/patient/cds
  * Evaluates personal health question using authorized patient clinical context & discharge care instructions.
  */
@@ -618,6 +822,9 @@ module.exports = {
     getPatientMedications,
     getPatientDischarge,
     getPatientAppointments,
+    getAvailableDoctors,
+    requestAppointment,
+    cancelPatientAppointment,
     evaluatePatientCDS,
     generatePatientPrescriptionPDF
 };

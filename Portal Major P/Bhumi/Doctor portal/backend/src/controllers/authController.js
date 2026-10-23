@@ -503,10 +503,111 @@ const patientSignup = async (req, res) => {
     }
 };
 
+/**
+ * POST /api/auth/receptionist/provision
+ * Administrative controlled one-time receptionist provisioning.
+ * Enforces:
+ * - Exactly one receptionist account across the facility
+ * - Atomic transaction with row lock and database unique constraint
+ * - Rejects with HTTP 409 Conflict if receptionist already exists
+ * - Password length >= 8, bcrypt hashing
+ */
+const provisionReceptionist = async (req, res) => {
+    let connection;
+    try {
+        const { full_name, email, password, phone } = req.body;
+
+        if (!full_name || !email || !password) {
+            return res.status(400).json({
+                message: "Full name, email, and password are required"
+            });
+        }
+
+        if (typeof password !== "string" || password.length < 8) {
+            return res.status(400).json({
+                message: "Password must be at least 8 characters long"
+            });
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(normalizedEmail)) {
+            return res.status(400).json({
+                message: "A valid email address is required"
+            });
+        }
+
+        connection = await db.getConnection();
+        await connection.beginTransaction();
+
+        // Lock users table check for single receptionist invariant
+        const [existingRecs] = await connection.execute(
+            "SELECT user_id, email FROM users WHERE role = 'receptionist' FOR UPDATE"
+        );
+
+        if (existingRecs.length > 0) {
+            await connection.rollback();
+            return res.status(409).json({
+                message: "A receptionist account already exists for this healthcare facility. Exactly one receptionist account is permitted."
+            });
+        }
+
+        // Check if email already registered under another role
+        const [existingEmail] = await connection.execute(
+            "SELECT user_id FROM users WHERE email = ?",
+            [normalizedEmail]
+        );
+
+        if (existingEmail.length > 0) {
+            await connection.rollback();
+            return res.status(400).json({
+                message: "Email is already registered. Please use another email."
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(password.trim(), 10);
+
+        const [insertResult] = await connection.execute(
+            `INSERT INTO users (full_name, email, password, role, phone)
+             VALUES (?, ?, ?, 'receptionist', ?)`,
+            [full_name.trim(), normalizedEmail, hashedPassword, phone ? phone.trim() : null]
+        );
+
+        await connection.commit();
+
+        return res.status(201).json({
+            message: "Administrative receptionist account provisioned successfully",
+            receptionist: {
+                user_id: insertResult.insertId,
+                name: full_name.trim(),
+                email: normalizedEmail,
+                role: "receptionist"
+            }
+        });
+
+    } catch (error) {
+        if (connection) {
+            try { await connection.rollback(); } catch (_) {}
+        }
+        if (error.code === "ER_DUP_ENTRY") {
+            return res.status(409).json({
+                message: "A receptionist account already exists for this healthcare facility. Exactly one receptionist account is permitted."
+            });
+        }
+        console.error("Receptionist provisioning error:", error);
+        return res.status(500).json({
+            message: "Server error during receptionist provisioning"
+        });
+    } finally {
+        if (connection) connection.release();
+    }
+};
+
 module.exports = {
     doctorLogin,
     patientLogin,
     receptionistLogin,
     patientActivate,
-    patientSignup
+    patientSignup,
+    provisionReceptionist
 };

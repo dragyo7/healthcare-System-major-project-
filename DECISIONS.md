@@ -529,3 +529,38 @@
 - **Verification**:
   - `tests/test_migration_safety_orchestrator.js`: 16/16 tests passed across Scenarios A through O.
   - `scratch/verify_primary_db_intact.js`: Primary database `rag_healthcare` confirmed 100% untouched.
+
+---
+
+### DEC-031 — Singleton Receptionist Enforcement, Multi-Account Lifecycle, Patient Appointment Discovery & Clinical Flow Hardening
+- **Date**: 2026-10-23
+- **Status**: **Accepted & Binding**
+- **Context**: Integration requirements called for full support of multi-user lifecycles while enforcing strict clinical boundaries:
+  1. Multiple patients must register independently via `/signup` with DPDP consent and authenticate cleanly without mandatory passkeys.
+  2. Multiple doctors must be registered through administrative review (`POST /api/receptionist/doctors`) with real clinical specialities, license numbers, and isolated patient schedules.
+  3. Exactly one receptionist account must exist across the entire platform. Public registration of receptionist accounts is strictly forbidden. Database-level race conditions during initial setup must fail closed.
+  4. Patients must discover active physicians with genuine stored specialities, request appointments with transactional double-booking prevention, view personal history, and cancel own appointments with server-side BOLA checks.
+  5. Doctors must navigate appointments via date-based schedule navigator (`< Prev | Today | Next >`), view assigned patient dossiers, and update consultation statuses.
+  6. Authentication pages must feature a refreshed, accessible green-and-white healthcare theme with elevated cards and soft mint gradients while preserving dark mode and system typography.
+- **Decision & Engineering Execution**:
+  1. **Database Singleton Constraint (Migration 007)**:
+     - Applied `migrations/007_enforce_single_receptionist_and_appointment_statuses.sql` on test database `rag_healthcare_test`.
+     - Added virtual stored column `single_receptionist VARCHAR(25) GENERATED ALWAYS AS (IF(role = 'receptionist', 'RECEPTIONIST_SINGLETON', NULL)) STORED` with `UNIQUE KEY uq_single_receptionist`.
+     - Expanded `appointments.status` ENUM to include `pending`, `scheduled`, `confirmed`, `completed`, `cancelled`, `rejected`, `reschedule_requested`.
+  2. **Backend Controllers & Routes**:
+     - `authController.js`: Added `provisionReceptionist` (`POST /api/auth/receptionist/provision`) with row-locking transaction (`SELECT ... FOR UPDATE`) and `ER_DUP_ENTRY` interception returning 409 Conflict.
+     - `patientController.js`: Added `getAvailableDoctors` (`GET /api/patient/doctors`), `requestAppointment` (`POST /api/patient/appointments` with doctor double-booking check), and `cancelPatientAppointment` (`PATCH /api/patient/appointments/:id/cancel` with BOLA ownership validation).
+     - `receptionistController.js`: Added transactional double-booking guard to `createAppointment`, updated doctor registration to accept and persist real specialties (`specialization`).
+  3. **Frontend UI Refinements**:
+     - `Login.jsx` & `Signup.jsx`: Styled in modern, clean green-and-white healthcare theme (`#0f766e`, `#047857`, `#f0fdf4`) with elevated cards, accessible role selector, DPDP consent, and dark mode support.
+     - `frontend/src/pages/Patient/Appointments.jsx`: Created appointment discovery and booking interface with physician search, speciality filter pills, booking modal, and cancellation actions.
+     - `frontend/src/pages/Doctor/Appointments.jsx`: Added date-based schedule navigator (`< Prev | Today | Next >` + date picker) and patient dossier links.
+- **Verification**:
+  - `scratch/test_account_appointment_and_cds_flow.js`: 31/31 passed across Groups 1-7 (receptionist singleton, patient accounts, doctor onboarding, doctor directory, appointment booking/conflict/cancellation/BOLA, doctor calendar, and 8 clinical RAG/CDS cases).
+  - `scratch/test_full_system_multi_role_e2e.js`: 20/20 passed.
+  - `scratch/test_activation_and_role_mismatch.js`: 20/20 passed.
+  - `cds_module/test_cds_gateway.py`: 9/9 passed.
+  - `multilingual_module/tests/`: 38/38 passed.
+  - `rag_module/tests/`: 193 passed, 2 skipped, 0 failed.
+  - Frontend production build (`npm run build`): 0 errors.
+  - Primary database `rag_healthcare`: 100% UNTOUCHED.

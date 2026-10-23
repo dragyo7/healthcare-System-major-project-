@@ -58,6 +58,40 @@ export const patientApi = {
     return data.appointments || [];
   },
 
+  getDoctors: async () => {
+    const res = await fetch(`${API_BASE}/patient/doctors`, { headers: getAuthHeaders() });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Failed to load doctor directory");
+    return data.doctors || [];
+  },
+
+  requestAppointment: async ({ doctor_id, appointment_date, appointment_time, reason }) => {
+    const res = await fetch(`${API_BASE}/patient/appointments`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({
+        doctor_id,
+        appointment_date,
+        appointment_time,
+        reason,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Failed to submit appointment request");
+    return data;
+  },
+
+  cancelAppointment: async (appointmentId, reason) => {
+    const res = await fetch(`${API_BASE}/patient/appointments/${appointmentId}/cancel`, {
+      method: "PATCH",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ reason }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Failed to cancel appointment");
+    return data;
+  },
+
   evaluateCDS: async ({ clinicalQuery, language = "en", conversationHistory = [] }) => {
     const res = await fetch(`${API_BASE}/patient/cds`, {
       method: "POST",

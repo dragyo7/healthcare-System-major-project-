@@ -26,6 +26,7 @@ import DoctorProfile from "../pages/Doctor/Profile";
 
 // Patient Workspace
 import PatientDashboard from "../pages/Patient/Dashboard";
+import PatientAppointments from "../pages/Patient/Appointments";
 import PatientDischarge from "../pages/Patient/Discharge";
 import PatientAssistant from "../pages/Patient/Assistant";
 import PatientPrescriptions from "../pages/Patient/Prescriptions";
@@ -210,6 +211,18 @@ export default function AppRoutes() {
               <RoleGuard allowedRoles={["patient"]}>
                 <DashboardLayout role="patient">
                   <PatientDashboard />
+                </DashboardLayout>
+              </RoleGuard>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/patient/appointments"
+          element={
+            <ProtectedRoute>
+              <RoleGuard allowedRoles={["patient"]}>
+                <DashboardLayout role="patient">
+                  <PatientAppointments />
                 </DashboardLayout>
               </RoleGuard>
             </ProtectedRoute>

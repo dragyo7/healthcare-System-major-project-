@@ -467,3 +467,33 @@ graph TD
   - `scratch/verify_primary_db_intact.js`: Primary database `rag_healthcare` confirmed 100% untouched.
   - Full regression test suites passed (100% pass rate).
   - All 4 frontends built successfully with 0 errors.
+
+- **Change ID**: `FINAL-CDSS-ACCOUNT-APPOINTMENT-FLOW-001` (DEC-031: Singleton Receptionist, Multi-Account Lifecycle, Patient Appointment Discovery & Clinical Flow Hardening)
+- **Problem Being Solved**:
+  1. Multiple patient accounts needed self-registration (`/signup`, DPDP consent) without requiring mandatory passkeys.
+  2. Multiple doctor accounts needed approved administrative onboarding with real stored specialties and isolated schedules.
+  3. Single receptionist invariant needed database-enforced unique constraints (`uq_single_receptionist`) and transactional row-locking to prevent concurrent double-provisioning.
+  4. Patient needed doctor directory discovery with genuine stored specialties, appointment requesting with double-booking prevention, and BOLA-defended cancellation.
+  5. Doctor calendar needed date-based schedule navigation (`< Prev | Today | Next >`), status progression, and direct patient dossier linkage.
+  6. Authentication pages needed refreshed green-and-white healthcare aesthetics with accessible contrast, soft mint gradients, elevated cards, and dark-mode support.
+- **Execution Path**:
+  1. **Database Singleton Constraint (Migration 007)**:
+     - `migrations/007_enforce_single_receptionist_and_appointment_statuses.sql` adds virtual stored column `single_receptionist` and `UNIQUE KEY uq_single_receptionist`.
+     - `appointments.status` ENUM expanded to 7 statuses (`pending`, `scheduled`, `confirmed`, `completed`, `cancelled`, `rejected`, `reschedule_requested`).
+  2. **Auth & Backend Gateway**:
+     - `authController.js`: `provisionReceptionist` enforces singleton via `SELECT ... FOR UPDATE` and catches `ER_DUP_ENTRY` returning 409 Conflict.
+     - `patientController.js`: `getAvailableDoctors` queries `doctors d JOIN users u` returning genuine `specialization`; `requestAppointment` executes `SELECT ... FOR UPDATE` checking double-booking; `cancelPatientAppointment` enforces BOLA ownership check.
+     - `receptionistController.js`: `registerDoctor` takes `full_name`, `email`, `phone`, `specialization`, `license_number`; `createAppointment` enforces double-booking guard.
+  3. **Frontend UI Refinements**:
+     - `Login.jsx` & `Signup.jsx`: Mint and deep emerald green palette (`#0f766e`, `#047857`, `#f0fdf4`), accessible form fields, DPDP consent, role selector, and dark mode support.
+     - `frontend/src/pages/Patient/Appointments.jsx`: Searchable physician directory, speciality filters, appointment modal, and appointment history with cancel action.
+     - `frontend/src/pages/Doctor/Appointments.jsx`: Date-based schedule navigator (`< Prev | Today | Next >` + date picker) and patient medical dossier links.
+- **Post-Change Verification**:
+  - `scratch/test_account_appointment_and_cds_flow.js`: 31/31 passed across Groups 1-7.
+  - `scratch/test_full_system_multi_role_e2e.js`: 20/20 passed.
+  - `scratch/test_activation_and_role_mismatch.js`: 20/20 passed.
+  - `cds_module/test_cds_gateway.py`: 9/9 passed.
+  - `multilingual_module/tests/`: 38/38 passed.
+  - `rag_module/tests/`: 193 passed, 2 skipped, 0 failed.
+  - Frontend production build (`npm run build`): 0 errors.
+  - Primary database `rag_healthcare`: 100% UNTOUCHED.
