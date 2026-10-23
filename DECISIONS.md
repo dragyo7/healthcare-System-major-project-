@@ -564,3 +564,42 @@
   - `rag_module/tests/`: 193 passed, 2 skipped, 0 failed.
   - Frontend production build (`npm run build`): 0 errors.
   - Primary database `rag_healthcare`: 100% UNTOUCHED.
+
+---
+
+### DEC-032: Appointment State Transition Machine & Dual-Role Administrative Queue
+- **Date**: 2026-10-24
+- **Status**: **Accepted & Binding**
+- **Context**:
+  1. The appointment schema defined 7 statuses (`pending`, `scheduled`, `confirmed`, `completed`, `cancelled`, `rejected`, `reschedule_requested`). However, backend controllers allowed arbitrary overwrites, including modifying terminal states (`completed`, `cancelled`, `rejected`) back to active states.
+  2. In the receptionist UI, consultation requests submitted by patients (`pending`) had no dedicated review queue or approve/reject action buttons.
+  3. Patient appointment booking referenced non-normalized properties (`doc.id` instead of `doc.doctor_id || doc.id`), risking booking failures.
+  4. Public user registration (`Signup.jsx`) only serviced patients, leaving doctors without clear guidance on hospital administrative onboarding.
+- **Decision & Engineering Execution**:
+  1. **Strict State Transition Machine**:
+     - Hardened `doctorController.js` and `receptionistController.js` with `validTransitions` lookup tables enforcing valid progression and rejecting transitions from terminal states with HTTP 400 Bad Request:
+       ```javascript
+       const validTransitions = {
+         pending: ["confirmed", "scheduled", "rejected", "cancelled", "reschedule_requested"],
+         scheduled: ["confirmed", "completed", "cancelled", "reschedule_requested"],
+         confirmed: ["completed", "cancelled", "reschedule_requested"],
+         reschedule_requested: ["scheduled", "confirmed", "cancelled", "rejected"],
+         completed: [],
+         cancelled: [],
+         rejected: []
+       };
+       ```
+  2. **Receptionist Consultation Review Queue**:
+     - Updated `frontend/src/pages/Receptionist/Appointments.jsx` with an alert banner notifying staff of pending requests, filter tabs for all 7 statuses, and direct `Approve` (to `confirmed`) and `Reject` (to `rejected`) action triggers.
+  3. **Doctor Onboarding Guidance Gate**:
+     - Updated `frontend/src/pages/Auth/Signup.jsx` with clear role switcher (`Patient Registration` vs `Doctor Onboarding`). When Doctor is selected, presents clinical credentialing notice (NMC compliance) explaining administrative vetting and links to `/activate` and `/login`.
+  4. **Frontend Property Normalization**:
+     - Normalized `Appointments.jsx` property access to `doc.doctor_id || doc.id`, `doc.full_name || doc.name`, and `app.appointment_id || app.id`.
+- **Verification**:
+  - `scratch/test_account_appointment_and_cds_flow.js`: 35/35 passed (including terminal transition rejections, receptionist rejection, and Indic emergency queries).
+  - `scratch/test_full_system_multi_role_e2e.js`: 20/20 passed.
+  - `scratch/test_activation_and_role_mismatch.js`: 20/20 passed.
+  - `cds_module/test_cds_gateway.py`: 9/9 passed.
+  - `multilingual_module/tests/`: 38/38 passed.
+  - Frontend production build (`npm run build`): 0 errors.
+

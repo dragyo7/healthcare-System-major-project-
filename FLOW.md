@@ -497,3 +497,28 @@ graph TD
   - `rag_module/tests/`: 193 passed, 2 skipped, 0 failed.
   - Frontend production build (`npm run build`): 0 errors.
   - Primary database `rag_healthcare`: 100% UNTOUCHED.
+
+- **Change ID**: `FINAL-CDSS-APPOINTMENT-STATE-MACHINE-001` (DEC-032: Appointment State Transition Machine & Dual-Role Administrative Queue)
+- **Problem Being Solved**:
+  1. Terminal appointment statuses (`completed`, `cancelled`, `rejected`) could previously be overwritten back to active statuses because controller logic lacked transition constraints.
+  2. The receptionist interface lacked an administrative queue and action buttons for approving or rejecting patient-requested (`pending`) appointments.
+  3. Patient appointment booking referenced un-normalized properties (`doc.id` instead of `doc.doctor_id || doc.id`), which broke booking in the UI.
+  4. Public user registration (`Signup.jsx`) only serviced patients, leaving doctors without clear guidance on hospital administrative onboarding.
+- **Execution Path**:
+  1. **Backend State Machine**:
+     - `doctorController.js` and `receptionistController.js`: Added `validTransitions` matrix in `updateAppointmentStatus`. Rejects transitions from terminal states (`completed`, `cancelled`, `rejected`) and invalid transitions with `400 Bad Request`.
+  2. **Receptionist Review Queue**:
+     - `frontend/src/pages/Receptionist/Appointments.jsx`: Added pending appointment review banner, filter tabs for all 7 statuses (`all`, `pending`, `confirmed`, `scheduled`, `completed`, `cancelled`, `rejected`), status badges, and action buttons (`Approve` to `confirmed`, `Reject` to `rejected`, `Complete`, `Cancel`).
+  3. **Doctor Onboarding Guidance Gate**:
+     - `frontend/src/pages/Auth/Signup.jsx`: Added clear role tabs (`Patient Registration` vs `Doctor Onboarding`). When Doctor is selected, presents clinical credentialing notice (NMC/NABH compliance) explaining administrative vetting with buttons to `/activate` and `/login`.
+  4. **Frontend Property Normalization**:
+     - `frontend/src/pages/Patient/Appointments.jsx`: Normalized doctor and appointment ID references to `doc.doctor_id || doc.id`, `doc.full_name || doc.name`, and `app.appointment_id || app.id`.
+- **Post-Change Verification**:
+  - `scratch/test_account_appointment_and_cds_flow.js`: 35/35 passed (including terminal transition rejections, receptionist rejection, and Indic emergency queries).
+  - `scratch/test_full_system_multi_role_e2e.js`: 20/20 passed.
+  - `scratch/test_activation_and_role_mismatch.js`: 20/20 passed.
+  - `cds_module/test_cds_gateway.py`: 9/9 passed.
+  - `multilingual_module/tests/`: 38/38 passed.
+  - Frontend production build (`npm run build`): 0 errors.
+  - Primary database `rag_healthcare`: 100% UNTOUCHED.
+

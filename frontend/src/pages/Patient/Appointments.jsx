@@ -70,14 +70,17 @@ export default function PatientAppointments() {
     setSuccess("");
 
     try {
+      const docId = selectedDoctor.doctor_id || selectedDoctor.id;
+      const docName = selectedDoctor.full_name || selectedDoctor.name;
+
       await patientApi.requestAppointment({
-        doctor_id: selectedDoctor.id,
+        doctor_id: docId,
         appointment_date: appointmentDate,
         appointment_time: appointmentTime,
         reason: reason.trim() || "Consultation",
       });
 
-      setSuccess(`Appointment request sent to Dr. ${selectedDoctor.name}. Status: Pending approval.`);
+      setSuccess(`Appointment request sent to Dr. ${docName}. Status: Pending approval.`);
       setSelectedDoctor(null);
       setAppointmentDate("");
       setAppointmentTime("");
@@ -111,9 +114,10 @@ export default function PatientAppointments() {
   );
 
   const filteredDoctors = doctors.filter((doc) => {
+    const docName = doc.full_name || doc.name || "";
     const matchesSearch =
-      doc.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doc.specialization?.toLowerCase().includes(searchTerm.toLowerCase());
+      docName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (doc.specialization || "").toLowerCase().includes(searchTerm.toLowerCase());
     const matchesSpeciality =
       specialityFilter === "all" || doc.specialization === specialityFilter;
     return matchesSearch && matchesSpeciality;
@@ -192,63 +196,66 @@ export default function PatientAppointments() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {appointments.map((app) => (
-              <div
-                key={app.id}
-                className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm space-y-3 relative flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <span
-                      className={`text-xs px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider border ${getStatusBadge(
-                        app.status
-                      )}`}
-                    >
-                      {t(app.status || "pending")}
-                    </span>
-                    <span className="text-xs text-slate-500 font-mono">
-                      #{app.id}
-                    </span>
+            {appointments.map((app) => {
+              const apptId = app.appointment_id || app.id;
+              return (
+                <div
+                  key={apptId}
+                  className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm space-y-3 relative flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <span
+                        className={`text-xs px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider border ${getStatusBadge(
+                          app.status
+                        )}`}
+                      >
+                        {t(app.status || "pending")}
+                      </span>
+                      <span className="text-xs text-slate-500 font-mono">
+                        #{apptId}
+                      </span>
+                    </div>
+
+                    <h3 className="font-bold text-slate-900 dark:text-white text-base">
+                      Dr. {app.doctor_name || "Specialist"}
+                    </h3>
+                    <p className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold">
+                      {app.specialization || "General Practice"}
+                    </p>
+
+                    <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                        <span>{app.appointment_date ? new Date(app.appointment_date).toLocaleDateString() : "Date TBD"}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-3.5 w-3.5 text-slate-400" />
+                        <span>{app.start_time || app.appointment_time || "Time TBD"}</span>
+                      </div>
+                      {app.reason && (
+                        <p className="mt-1 text-slate-500 dark:text-slate-400 italic">
+                          "{app.reason}"
+                        </p>
+                      )}
+                    </div>
                   </div>
 
-                  <h3 className="font-bold text-slate-900 dark:text-white text-base">
-                    Dr. {app.doctor_name || "Specialist"}
-                  </h3>
-                  <p className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold">
-                    {app.specialization || "General Practice"}
-                  </p>
-
-                  <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-3.5 w-3.5 text-slate-400" />
-                      <span>{app.appointment_date ? new Date(app.appointment_date).toLocaleDateString() : "Date TBD"}</span>
+                  {/* Cancel Action (if pending or scheduled/confirmed) */}
+                  {["pending", "scheduled", "confirmed"].includes((app.status || "").toLowerCase()) && (
+                    <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+                      <button
+                        onClick={() => handleCancel(apptId)}
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 hover:text-rose-700 dark:text-rose-400 hover:underline cursor-pointer"
+                      >
+                        <XCircle className="h-3.5 w-3.5" />
+                        {t("Cancel Appointment")}
+                      </button>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-3.5 w-3.5 text-slate-400" />
-                      <span>{app.start_time || app.appointment_time || "Time TBD"}</span>
-                    </div>
-                    {app.reason && (
-                      <p className="mt-1 text-slate-500 dark:text-slate-400 italic">
-                        "{app.reason}"
-                      </p>
-                    )}
-                  </div>
+                  )}
                 </div>
-
-                {/* Cancel Action (if pending or scheduled/confirmed) */}
-                {["pending", "scheduled", "confirmed"].includes((app.status || "").toLowerCase()) && (
-                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end">
-                    <button
-                      onClick={() => handleCancel(app.id)}
-                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 hover:text-rose-700 dark:text-rose-400 hover:underline cursor-pointer"
-                    >
-                      <XCircle className="h-3.5 w-3.5" />
-                      {t("Cancel Appointment")}
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -310,62 +317,66 @@ export default function PatientAppointments() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filteredDoctors.map((doc) => (
-              <div
-                key={doc.id}
-                className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between"
-              >
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <div className="h-12 w-12 rounded-2xl bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 flex items-center justify-center font-bold text-lg shrink-0">
-                      <Stethoscope className="h-6 w-6" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-slate-900 dark:text-white text-base">
-                        Dr. {doc.name}
-                      </h3>
-                      <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
-                        {doc.specialization || "General Medicine"}
-                      </p>
-                      {doc.qualification && (
-                        <p className="text-[11px] text-slate-500 font-mono">
-                          {doc.qualification}
+            {filteredDoctors.map((doc) => {
+              const docId = doc.doctor_id || doc.id;
+              const docName = doc.full_name || doc.name;
+              return (
+                <div
+                  key={docId}
+                  className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="h-12 w-12 rounded-2xl bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 flex items-center justify-center font-bold text-lg shrink-0">
+                        <Stethoscope className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-slate-900 dark:text-white text-base">
+                          Dr. {docName}
+                        </h3>
+                        <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                          {doc.specialization || "General Medicine"}
                         </p>
+                        {doc.qualification && (
+                          <p className="text-[11px] text-slate-500 font-mono">
+                            {doc.qualification}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-1 text-xs text-slate-600 dark:text-slate-400">
+                      {doc.room_number && (
+                        <div className="flex items-center gap-2">
+                          <Building className="h-3.5 w-3.5 text-slate-400" />
+                          <span>Room / Clinic: {doc.room_number}</span>
+                        </div>
+                      )}
+                      {doc.experience_years && (
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-3.5 w-3.5 text-slate-400" />
+                          <span>Experience: {doc.experience_years} years</span>
+                        </div>
                       )}
                     </div>
                   </div>
 
-                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-1 text-xs text-slate-600 dark:text-slate-400">
-                    {doc.room_number && (
-                      <div className="flex items-center gap-2">
-                        <Building className="h-3.5 w-3.5 text-slate-400" />
-                        <span>Room / Clinic: {doc.room_number}</span>
-                      </div>
-                    )}
-                    {doc.experience_years && (
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-3.5 w-3.5 text-slate-400" />
-                        <span>Experience: {doc.experience_years} years</span>
-                      </div>
-                    )}
+                  <div className="pt-4 mt-3 border-t border-slate-100 dark:border-slate-800">
+                    <button
+                      onClick={() => {
+                        setSelectedDoctor(doc);
+                        setError("");
+                        setSuccess("");
+                      }}
+                      className="w-full inline-flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
+                    >
+                      <PlusCircle className="h-4 w-4" />
+                      {t("Request Appointment")}
+                    </button>
                   </div>
                 </div>
-
-                <div className="pt-4 mt-3 border-t border-slate-100 dark:border-slate-800">
-                  <button
-                    onClick={() => {
-                      setSelectedDoctor(doc);
-                      setError("");
-                      setSuccess("");
-                    }}
-                    className="w-full inline-flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
-                  >
-                    <PlusCircle className="h-4 w-4" />
-                    {t("Request Appointment")}
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -390,7 +401,7 @@ export default function PatientAppointments() {
                   Book Appointment
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Dr. {selectedDoctor.name} ({selectedDoctor.specialization || "General Medicine"})
+                  Dr. {selectedDoctor.full_name || selectedDoctor.name} ({selectedDoctor.specialization || "General Medicine"})
                 </p>
               </div>
             </div>

@@ -411,7 +411,7 @@ const updateAppointmentStatus = async (req, res) => {
         }
 
         const [apptRows] = await db.execute(
-            "SELECT appointment_id, doctor_id, appointment_date, start_time FROM appointments WHERE appointment_id = ?",
+            "SELECT appointment_id, doctor_id, appointment_date, start_time, status FROM appointments WHERE appointment_id = ?",
             [appointmentId]
         );
 
@@ -420,7 +420,33 @@ const updateAppointmentStatus = async (req, res) => {
         }
 
         const appt = apptRows[0];
+        const currentStatus = (appt.status || "scheduled").toLowerCase();
         const newStatus = status.toLowerCase();
+
+        if (currentStatus === newStatus) {
+            return res.status(200).json({
+                message: `Appointment is already ${newStatus}`,
+                appointment_id: Number(appointmentId),
+                status: newStatus
+            });
+        }
+
+        const validTransitions = {
+            pending: ["confirmed", "scheduled", "rejected", "cancelled", "reschedule_requested"],
+            scheduled: ["confirmed", "completed", "cancelled", "reschedule_requested"],
+            confirmed: ["completed", "cancelled", "reschedule_requested"],
+            reschedule_requested: ["scheduled", "confirmed", "cancelled", "rejected"],
+            completed: [],
+            cancelled: [],
+            rejected: []
+        };
+
+        const allowed = validTransitions[currentStatus] || [];
+        if (!allowed.includes(newStatus)) {
+            return res.status(400).json({
+                message: `Invalid appointment status transition: Cannot transition appointment from '${currentStatus}' to '${newStatus}'.`
+            });
+        }
 
         // If approving/confirming/scheduling, ensure no double booking
         if (newStatus === "scheduled" || newStatus === "confirmed") {

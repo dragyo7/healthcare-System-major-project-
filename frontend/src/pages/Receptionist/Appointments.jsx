@@ -138,19 +138,35 @@ export default function ReceptionistAppointments() {
         </div>
       )}
 
+      {/* Pending Requests Alert Banner */}
+      {appointments.filter((a) => (a.status || "").toLowerCase() === "pending").length > 0 && (
+        <div className="flex items-center gap-2 p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs text-amber-800 dark:text-amber-300 font-medium">
+          <AlertTriangle className="w-4 h-4 shrink-0 text-amber-600" />
+          <span>
+            {appointments.filter((a) => (a.status || "").toLowerCase() === "pending").length} patient consultation request(s) awaiting administrative review.
+          </span>
+          <button
+            onClick={() => setStatusFilter("pending")}
+            className="ml-auto underline font-bold cursor-pointer hover:text-amber-900 dark:hover:text-amber-200"
+          >
+            Review Pending Queue
+          </button>
+        </div>
+      )}
+
       {/* Filter Tabs */}
       <div className="flex flex-wrap items-center gap-2 border-b border-border pb-2 text-xs">
         <span className="font-semibold text-muted-foreground flex items-center gap-1 mr-2">
           <Filter className="w-3.5 h-3.5" />
           Filter:
         </span>
-        {["all", "scheduled", "completed", "cancelled"].map((st) => (
+        {["all", "pending", "confirmed", "scheduled", "completed", "cancelled", "rejected"].map((st) => (
           <button
             key={st}
             onClick={() => setStatusFilter(st)}
-            className={`px-3 py-1.5 rounded-lg font-semibold uppercase text-[11px] transition ${
+            className={`px-3 py-1.5 rounded-lg font-semibold uppercase text-[11px] transition cursor-pointer ${
               statusFilter === st
-                ? "bg-primary text-primary-foreground"
+                ? "bg-primary text-primary-foreground shadow-xs"
                 : "bg-muted/50 hover:bg-muted text-muted-foreground"
             }`}
           >
@@ -200,31 +216,55 @@ export default function ReceptionistAppointments() {
                     <td className="py-3 px-4 text-foreground font-medium">{a.reason || "General Consult"}</td>
                     <td className="py-3 px-4">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                        a.status === "completed" ? "bg-emerald-500/10 text-emerald-600" :
-                        a.status === "cancelled" ? "bg-destructive/10 text-destructive" :
+                        a.status === "confirmed" ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30" :
+                        a.status === "scheduled" ? "bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/30" :
+                        a.status === "pending" ? "bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30" :
+                        a.status === "completed" ? "bg-slate-500/15 text-slate-700 dark:text-slate-300 border border-slate-500/30" :
+                        a.status === "cancelled" || a.status === "rejected" ? "bg-destructive/15 text-destructive border border-destructive/30" :
                         "bg-primary/10 text-primary"
                       }`}>
                         {a.status || "scheduled"}
                       </span>
                     </td>
                     <td className="py-3 px-4 text-right space-x-1.5">
-                      {a.status !== "completed" && (
-                        <button
-                          onClick={() => handleStatusChange(a.appointment_id, "completed")}
-                          className="px-2 py-1 rounded bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 font-semibold text-[11px]"
-                          title="Mark completed"
-                        >
-                          Complete
-                        </button>
+                      {(a.status || "").toLowerCase() === "pending" && (
+                        <>
+                          <button
+                            onClick={() => handleStatusChange(a.appointment_id, "confirmed")}
+                            className="px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-[11px] transition shadow-xs cursor-pointer"
+                            title="Approve and confirm consultation"
+                          >
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => handleStatusChange(a.appointment_id, "rejected")}
+                            className="px-2.5 py-1 rounded bg-rose-600/15 hover:bg-rose-600/25 text-rose-700 dark:text-rose-400 font-semibold text-[11px] transition cursor-pointer"
+                            title="Reject consultation request"
+                          >
+                            Reject
+                          </button>
+                        </>
                       )}
-                      {a.status !== "cancelled" && (
-                        <button
-                          onClick={() => handleStatusChange(a.appointment_id, "cancelled")}
-                          className="px-2 py-1 rounded bg-destructive/10 hover:bg-destructive/20 text-destructive font-semibold text-[11px]"
-                          title="Cancel appointment"
-                        >
-                          Cancel
-                        </button>
+                      {["scheduled", "confirmed"].includes((a.status || "").toLowerCase()) && (
+                        <>
+                          <button
+                            onClick={() => handleStatusChange(a.appointment_id, "completed")}
+                            className="px-2 py-1 rounded bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 font-semibold text-[11px] transition cursor-pointer"
+                            title="Mark completed"
+                          >
+                            Complete
+                          </button>
+                          <button
+                            onClick={() => handleStatusChange(a.appointment_id, "cancelled")}
+                            className="px-2 py-1 rounded bg-destructive/10 hover:bg-destructive/20 text-destructive font-semibold text-[11px] transition cursor-pointer"
+                            title="Cancel appointment"
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      )}
+                      {["completed", "cancelled", "rejected"].includes((a.status || "").toLowerCase()) && (
+                        <span className="text-[11px] text-muted-foreground italic">No actions</span>
                       )}
                     </td>
                   </tr>
