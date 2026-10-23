@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Calendar, Clock, Plus, CheckCircle2, XCircle, Trash2, User, Filter, ChevronLeft, ChevronRight, Eye } from "lucide-react";
 import { doctorApi } from "../../api/doctorApi";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 export default function DoctorAppointments() {
+  const { t } = useLanguage();
   const [appointments, setAppointments] = useState([]);
   const [schedule, setSchedule] = useState([]);
   const [patients, setPatients] = useState([]);
@@ -208,7 +210,7 @@ export default function DoctorAppointments() {
           }`}
         >
           <Calendar className="h-3.5 w-3.5" />
-          <span>Appointments ({appointments.length})</span>
+          <span>{t("Appointments & Schedule")} ({appointments.length})</span>
         </button>
         <button
           type="button"
@@ -220,7 +222,7 @@ export default function DoctorAppointments() {
           }`}
         >
           <Clock className="h-3.5 w-3.5" />
-          <span>Weekly Routine ({schedule.length})</span>
+          <span>{t("Consultation Schedule")} ({schedule.length})</span>
         </button>
       </div>
 
@@ -248,7 +250,7 @@ export default function DoctorAppointments() {
               <button
                 onClick={handlePrevDay}
                 className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                title="Previous Day"
+                title={t("Previous Day")}
               >
                 <ChevronLeft className="h-4 w-4 text-slate-600 dark:text-slate-300" />
               </button>
@@ -256,7 +258,7 @@ export default function DoctorAppointments() {
                 onClick={handleToday}
                 className="px-2.5 py-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               >
-                Today
+                {t("Today")}
               </button>
               <input
                 type="date"
@@ -270,7 +272,7 @@ export default function DoctorAppointments() {
               <button
                 onClick={handleNextDay}
                 className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                title="Next Day"
+                title={t("Next Day")}
               >
                 <ChevronRight className="h-4 w-4 text-slate-600 dark:text-slate-300" />
               </button>
@@ -282,7 +284,7 @@ export default function DoctorAppointments() {
                   }}
                   className="text-xs text-rose-600 hover:underline font-semibold ml-1"
                 >
-                  Clear Date
+                  {t("Clear")}
                 </button>
               )}
             </div>
@@ -290,7 +292,7 @@ export default function DoctorAppointments() {
             {/* Status Filter */}
             <div className="flex items-center gap-1.5 flex-wrap">
               <Filter className="h-3.5 w-3.5 text-slate-400" />
-              <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Status:</span>
+              <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">{t("Status")}:</span>
               {["all", "pending", "confirmed", "completed", "cancelled"].map((f) => (
                 <button
                   key={f}
@@ -301,7 +303,7 @@ export default function DoctorAppointments() {
                       : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
                   }`}
                 >
-                  {f}
+                  {f === "all" ? t("All Appointments") : t(f.charAt(0).toUpperCase() + f.slice(1)) || f}
                 </button>
               ))}
             </div>
@@ -312,12 +314,12 @@ export default function DoctorAppointments() {
               <table className="w-full text-left text-xs sm:text-sm">
                 <thead>
                   <tr className="border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[11px]">
-                    <th className="py-3.5 px-6">Patient</th>
-                    <th className="py-3.5 px-6">Date</th>
-                    <th className="py-3.5 px-6">Time Window</th>
-                    <th className="py-3.5 px-6">Reason / Condition</th>
-                    <th className="py-3.5 px-6">Status</th>
-                    <th className="py-3.5 px-6 text-right">Actions</th>
+                    <th className="py-3.5 px-6">{t("Patient Name")}</th>
+                    <th className="py-3.5 px-6">{t("Date")}</th>
+                    <th className="py-3.5 px-6">{t("Time Slot")}</th>
+                    <th className="py-3.5 px-6">{t("Reason for Visit")}</th>
+                    <th className="py-3.5 px-6">{t("Status")}</th>
+                    <th className="py-3.5 px-6 text-right">{t("Action")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">

@@ -3,9 +3,11 @@ import { Link } from "react-router-dom";
 import { Users, Calendar, AlertCircle, Sparkles, Pill, FileText, ArrowRight, CheckCircle2, Clock } from "lucide-react";
 import { doctorApi } from "../../api/doctorApi";
 import { useAuth } from "../../contexts/AuthContext";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 export default function DoctorDashboard() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -62,7 +64,7 @@ export default function DoctorDashboard() {
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-primary-950 font-bold text-xs sm:text-sm shadow-md hover:bg-primary-50 transition-all cursor-pointer"
           >
             <Sparkles className="h-4 w-4 text-primary-600" />
-            <span>Open CDS Assistant</span>
+            <span>{t("Launch CDS Assistant")}</span>
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
@@ -78,7 +80,7 @@ export default function DoctorDashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Total Patients</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{t("Total Patients")}</span>
             <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600">
               <Users className="h-5 w-5" />
             </div>
@@ -91,7 +93,7 @@ export default function DoctorDashboard() {
 
         <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Today's Visits</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{t("Upcoming Consultations")}</span>
             <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600">
               <Calendar className="h-5 w-5" />
             </div>
@@ -104,7 +106,7 @@ export default function DoctorDashboard() {
 
         <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Active Prescriptions</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{t("Active Medications")}</span>
             <div className="p-2 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-600">
               <Pill className="h-5 w-5" />
             </div>
@@ -117,7 +119,7 @@ export default function DoctorDashboard() {
 
         <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Pending Follow-ups</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{t("Post-Discharge Care")}</span>
             <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600">
               <AlertCircle className="h-5 w-5" />
             </div>
@@ -137,16 +139,16 @@ export default function DoctorDashboard() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <Clock className="h-4 w-4 text-primary-600" />
-                <span>Today's Consultation Queue</span>
+                <span>{t("Active Consultation Queue")}</span>
               </h2>
               <Link to="/doctor/appointments" className="text-xs font-semibold text-primary-600 hover:underline">
-                View all →
+                {t("View All")} →
               </Link>
             </div>
 
             {todayAppointments.length === 0 ? (
               <div className="py-8 text-center text-slate-400 text-xs">
-                No consultations scheduled for today.
+                {t("No appointments found.")}
               </div>
             ) : (
               <div className="space-y-3">
@@ -170,7 +172,7 @@ export default function DoctorDashboard() {
                           : "bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-400"
                       }`}
                     >
-                      {appt.status}
+                      {t(appt.status.charAt(0).toUpperCase() + appt.status.slice(1)) || appt.status}
                     </span>
                   </div>
                 ))}
@@ -183,7 +185,7 @@ export default function DoctorDashboard() {
               to="/doctor/appointments"
               className="text-xs font-bold text-primary-600 hover:text-primary-700 flex items-center gap-1"
             >
-              <span>Manage Doctor Appointments & Schedules</span>
+              <span>{t("Appointments & Schedule")}</span>
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
@@ -195,16 +197,16 @@ export default function DoctorDashboard() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <Users className="h-4 w-4 text-primary-600" />
-                <span>Recent Clinical Records</span>
+                <span>{t("Patient Medical Dossier")}</span>
               </h2>
               <Link to="/doctor/patients" className="text-xs font-semibold text-primary-600 hover:underline">
-                View all patients →
+                {t("View All")} →
               </Link>
             </div>
 
             {recentPatients.length === 0 ? (
               <div className="py-8 text-center text-slate-400 text-xs">
-                No recent patient records found.
+                {t("No results found")}
               </div>
             ) : (
               <div className="space-y-3">
@@ -225,7 +227,7 @@ export default function DoctorDashboard() {
                       to={`/doctor/patients?id=${pat.patient_id}`}
                       className="text-xs font-bold text-primary-600 hover:text-primary-700 bg-primary-50 dark:bg-primary-950/60 px-3 py-1.5 rounded-lg border border-primary-200 dark:border-primary-900"
                     >
-                      Open Dossier
+                      {t("Open Patient Dossier")}
                     </Link>
                   </div>
                 ))}
@@ -238,7 +240,7 @@ export default function DoctorDashboard() {
               to="/doctor/patients"
               className="text-xs font-bold text-primary-600 hover:text-primary-700 flex items-center gap-1"
             >
-              <span>Inspect All Patients & Complete Dossiers</span>
+              <span>{t("Patients Dossier")}</span>
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>

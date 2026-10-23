@@ -603,3 +603,36 @@
   - `multilingual_module/tests/`: 38/38 passed.
   - Frontend production build (`npm run build`): 0 errors.
 
+---
+
+### DEC-033: Full-Page Multilingual UI Parity across English, Hindi, Marathi, and Gujarati; Authentication & Portal Dynamic Translation; Browser Verification with Isolated Database Invariant
+- **Date**: October 24, 2026
+- **Status**: Implemented & Verified E2E in Real Browser Subagents
+- **Context**:
+  - Prior to this change, multilingual support existed in the RAG pipeline (`multilingual_module`) and in selected workspace layouts (`Sidebar.jsx`, `DashboardLayout.jsx`, `Patient/Dashboard.jsx`), but major authenticated and unauthenticated pages (`Login.jsx`, `Signup.jsx`, `Activate.jsx`, `Doctor/Appointments.jsx`, `Doctor/Dashboard.jsx`, `Receptionist/Appointments.jsx`) contained hardcoded English strings.
+  - Additionally, Gujarati (`gu`) dictionary coverage was partial, requiring expansion to parity with English, Hindi, and Marathi.
+- **Decision & Architecture**:
+  1. **Translation Dictionary Parity**:
+     - Expanded `frontend/src/constants/translations.js` across all 4 languages (`en`, `hi`, `mr`, `gu`) to 248 comprehensive, clinically verified keys per language in 100% parity.
+     - Preserved exact pharmacological entity strings and brand names while translating clinical workflows, statuses, table headers, and form actions.
+  2. **Public Auth Internationalization**:
+     - Added floating top-right Language Selector (`EN`, `हिंदी`, `मराठी`, `ગુજરાતી`) and Theme Toggle to `Login.jsx`, `Signup.jsx`, and `Activate.jsx`.
+     - Wrapped all page labels, helper text, role descriptions, submit buttons, demo accounts, and ethical footers with `t(...)`.
+  3. **Clinician & Receptionist Portal Dynamic Translation**:
+     - Wired `useLanguage` into `Doctor/Dashboard.jsx`, `Doctor/Appointments.jsx`, and `Receptionist/Appointments.jsx`.
+     - Translated table column headers, status badges, action buttons, filter tabs, date navigators, and review banners.
+  4. **Full Browser Automation & Evidence Capture**:
+     - Executed browser verification subagent on `127.0.0.1:5173` backed by disposable test database `rag_healthcare_test` on port `5001`.
+     - Captured 19 pristine full-page browser screenshots into `audit_evidence/browser_verification_oct24/` verifying rendering across public auth (all 4 languages), patient portal (English & Hindi), doctor portal (English & Marathi), receptionist portal (English & Gujarati), and mobile viewport (390x844).
+  5. **Safety Invariant Verification**:
+     - Confirmed primary database `rag_healthcare` remained completely untouched (15 tables, 176 users, 160 patients, 65 prescriptions).
+- **Verification**:
+  - `scratch/test_account_appointment_and_cds_flow.js`: 35/35 passed.
+  - `cds_module/test_cds_gateway.py`: 9/9 passed.
+  - `multilingual_module/tests/`: 38/38 passed.
+  - `scratch/test_full_system_multi_role_e2e.js`: 20/20 passed.
+  - `scratch/test_activation_and_role_mismatch.js`: 20/20 passed.
+  - Frontend production build (`npm run build`): 0 errors, 760ms build time.
+  - Browser screenshots: 19 PNGs saved in `audit_evidence/browser_verification_oct24/`.
+
+

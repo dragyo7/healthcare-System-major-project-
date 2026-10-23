@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { receptionistApi } from "../../api/receptionistApi";
+import { useLanguage } from "../../contexts/LanguageContext";
 import {
   Calendar,
   Clock,
@@ -14,6 +15,7 @@ import {
 } from "lucide-react";
 
 export default function ReceptionistAppointments() {
+  const { t } = useLanguage();
   const [appointments, setAppointments] = useState([]);
   const [patients, setPatients] = useState([]);
   const [doctors, setDoctors] = useState([]);
@@ -115,10 +117,10 @@ export default function ReceptionistAppointments() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
             <Calendar className="w-6 h-6 text-primary" />
-            Consultation Scheduling & Appointment Queue
+            {t("Front Desk Appointment Management")}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Schedule doctor consultations, assign queue tokens, and coordinate patient visits.
+            {t("Patient Consultation Requests")}
           </p>
         </div>
 
@@ -127,7 +129,7 @@ export default function ReceptionistAppointments() {
           className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition shadow-sm w-fit"
         >
           <Plus className="w-4 h-4" />
-          Book New Consultation
+          {t("Schedule New Appointment")}
         </button>
       </div>
 
@@ -143,13 +145,13 @@ export default function ReceptionistAppointments() {
         <div className="flex items-center gap-2 p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs text-amber-800 dark:text-amber-300 font-medium">
           <AlertTriangle className="w-4 h-4 shrink-0 text-amber-600" />
           <span>
-            {appointments.filter((a) => (a.status || "").toLowerCase() === "pending").length} patient consultation request(s) awaiting administrative review.
+            {appointments.filter((a) => (a.status || "").toLowerCase() === "pending").length} {t("patient consultation request(s) awaiting administrative review.")}
           </span>
           <button
             onClick={() => setStatusFilter("pending")}
             className="ml-auto underline font-bold cursor-pointer hover:text-amber-900 dark:hover:text-amber-200"
           >
-            Review Pending Queue
+            {t("Review Pending Queue")}
           </button>
         </div>
       )}
@@ -158,7 +160,7 @@ export default function ReceptionistAppointments() {
       <div className="flex flex-wrap items-center gap-2 border-b border-border pb-2 text-xs">
         <span className="font-semibold text-muted-foreground flex items-center gap-1 mr-2">
           <Filter className="w-3.5 h-3.5" />
-          Filter:
+          {t("Filter by Status")}:
         </span>
         {["all", "pending", "confirmed", "scheduled", "completed", "cancelled", "rejected"].map((st) => (
           <button
@@ -170,7 +172,7 @@ export default function ReceptionistAppointments() {
                 : "bg-muted/50 hover:bg-muted text-muted-foreground"
             }`}
           >
-            {st}
+            {st === "all" ? t("All Appointments") : t(st.charAt(0).toUpperCase() + st.slice(1)) || st}
           </button>
         ))}
       </div>
@@ -180,11 +182,11 @@ export default function ReceptionistAppointments() {
         {loading ? (
           <div className="flex items-center justify-center p-12 space-y-3">
             <Loader2 className="w-6 h-6 animate-spin text-primary" />
-            <span className="text-xs text-muted-foreground ml-2">Loading appointments...</span>
+            <span className="text-xs text-muted-foreground ml-2">{t("Loading...")}</span>
           </div>
         ) : filtered.length === 0 ? (
           <div className="p-12 text-center text-xs text-muted-foreground">
-            No consultations registered under this filter.
+            {t("No appointments found.")}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -192,12 +194,12 @@ export default function ReceptionistAppointments() {
               <thead className="bg-muted/50 text-muted-foreground uppercase text-[11px] font-semibold border-b border-border">
                 <tr>
                   <th className="py-3 px-4">Booking ID</th>
-                  <th className="py-3 px-4">Patient</th>
-                  <th className="py-3 px-4">Physician</th>
-                  <th className="py-3 px-4">Date & Time</th>
-                  <th className="py-3 px-4">Clinical Reason</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-3 px-4">{t("Patient Name")}</th>
+                  <th className="py-3 px-4">{t("Physician")}</th>
+                  <th className="py-3 px-4">{t("Appointment Date")}</th>
+                  <th className="py-3 px-4">{t("Reason for Visit")}</th>
+                  <th className="py-3 px-4">{t("Status")}</th>
+                  <th className="py-3 px-4 text-right">{t("Action")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
@@ -223,7 +225,7 @@ export default function ReceptionistAppointments() {
                         a.status === "cancelled" || a.status === "rejected" ? "bg-destructive/15 text-destructive border border-destructive/30" :
                         "bg-primary/10 text-primary"
                       }`}>
-                        {a.status || "scheduled"}
+                        {t(a.status.charAt(0).toUpperCase() + a.status.slice(1)) || a.status || "scheduled"}
                       </span>
                     </td>
                     <td className="py-3 px-4 text-right space-x-1.5">
@@ -232,16 +234,16 @@ export default function ReceptionistAppointments() {
                           <button
                             onClick={() => handleStatusChange(a.appointment_id, "confirmed")}
                             className="px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-[11px] transition shadow-xs cursor-pointer"
-                            title="Approve and confirm consultation"
+                            title={t("Approve and confirm consultation")}
                           >
-                            Approve
+                            {t("Approve")}
                           </button>
                           <button
                             onClick={() => handleStatusChange(a.appointment_id, "rejected")}
                             className="px-2.5 py-1 rounded bg-rose-600/15 hover:bg-rose-600/25 text-rose-700 dark:text-rose-400 font-semibold text-[11px] transition cursor-pointer"
-                            title="Reject consultation request"
+                            title={t("Reject consultation request")}
                           >
-                            Reject
+                            {t("Reject")}
                           </button>
                         </>
                       )}
@@ -250,16 +252,16 @@ export default function ReceptionistAppointments() {
                           <button
                             onClick={() => handleStatusChange(a.appointment_id, "completed")}
                             className="px-2 py-1 rounded bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 font-semibold text-[11px] transition cursor-pointer"
-                            title="Mark completed"
+                            title={t("Mark Completed")}
                           >
-                            Complete
+                            {t("Completed")}
                           </button>
                           <button
                             onClick={() => handleStatusChange(a.appointment_id, "cancelled")}
                             className="px-2 py-1 rounded bg-destructive/10 hover:bg-destructive/20 text-destructive font-semibold text-[11px] transition cursor-pointer"
-                            title="Cancel appointment"
+                            title={t("Cancel Appointment")}
                           >
-                            Cancel
+                            {t("Cancel")}
                           </button>
                         </>
                       )}

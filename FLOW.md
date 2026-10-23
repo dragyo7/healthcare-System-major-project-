@@ -522,3 +522,30 @@ graph TD
   - Frontend production build (`npm run build`): 0 errors.
   - Primary database `rag_healthcare`: 100% UNTOUCHED.
 
+- **Change ID**: `FINAL-CDSS-MULTILINGUAL-BROWSER-VERIFY-001` (DEC-033: Full-Page Multilingual UI Parity across English, Hindi, Marathi, and Gujarati; Authentication & Portal Dynamic Translation; Browser Verification)
+- **Problem Being Solved**:
+  1. Multilingual UI translation dictionary was incomplete for Gujarati (`gu`), creating an uneven multilingual experience.
+  2. Public Auth pages (`Login.jsx`, `Signup.jsx`, `Activate.jsx`) lacked language selectors and contained hardcoded English strings.
+  3. Doctor and Receptionist schedule and appointment management pages had hardcoded English labels for statuses, filters, table columns, and action buttons.
+  4. Real browser visual evidence was required across all roles (Patient, Doctor, Receptionist) and languages (`en`, `hi`, `mr`, `gu`) on an isolated test database.
+- **Execution Path**:
+  1. **Dictionary Parity (`frontend/src/constants/translations.js`)**:
+     - Expanded translation dictionary across `en`, `hi`, `mr`, and `gu` to 248 keys in 100% parity.
+  2. **Auth Internationalization (`Login.jsx`, `Signup.jsx`, `Activate.jsx`)**:
+     - Added floating top-right language switcher (`EN`, `हिंदी`, `मराठी`, `ગુજરાતી`) and theme toggle.
+     - Wrapped all page labels, helper descriptions, error/success banners, submit buttons, and footers with `t(...)`.
+  3. **Clinician & Receptionist Portal Translation (`Doctor/Dashboard.jsx`, `Doctor/Appointments.jsx`, `Receptionist/Appointments.jsx`)**:
+     - Wired `useLanguage` and wrapped metrics cards, queue banners, status filters, action buttons, table columns, and date navigators with `t(...)`.
+  4. **Browser Subagent Automation & Screenshot Evidence**:
+     - Automated real Chrome browser across public auth, patient portal, doctor portal, receptionist portal, and mobile layout.
+     - Captured 19 pristine PNG screenshots into `audit_evidence/browser_verification_oct24/`.
+- **Post-Change Verification**:
+  - `scratch/test_account_appointment_and_cds_flow.js`: 35/35 passed.
+  - `cds_module/test_cds_gateway.py`: 9/9 passed.
+  - `multilingual_module/tests/`: 38/38 passed.
+  - `scratch/test_full_system_multi_role_e2e.js`: 20/20 passed.
+  - `scratch/test_activation_and_role_mismatch.js`: 20/20 passed.
+  - Frontend production build (`npm run build`): 0 errors (760ms).
+  - Primary database `rag_healthcare`: Verified 100% UNTOUCHED (15 tables, 176 users, 160 patients, 65 prescriptions).
+
+

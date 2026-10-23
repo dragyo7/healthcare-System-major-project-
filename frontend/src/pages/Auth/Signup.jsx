@@ -1,10 +1,14 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Mail, Lock, User, Phone, Eye, EyeOff, ShieldCheck, ArrowRight, CheckCircle2, AlertCircle, HeartPulse, Stethoscope } from "lucide-react";
+import { Mail, Lock, User, Phone, Eye, EyeOff, ShieldCheck, ArrowRight, CheckCircle2, AlertCircle, HeartPulse, Stethoscope, Globe, Sun, Moon } from "lucide-react";
 import { authApi } from "../../api/authApi";
+import { useLanguage } from "../../contexts/LanguageContext";
+import { useTheme } from "../../contexts/ThemeContext";
 
 export default function Signup() {
   const navigate = useNavigate();
+  const { language, setLanguage, t } = useLanguage();
+  const { isDark, toggleTheme } = useTheme();
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -77,17 +81,69 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50/90 via-teal-50/40 to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/30 flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-slate-800 dark:text-slate-100 antialiased transition-colors">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50/90 via-teal-50/40 to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/30 flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-slate-800 dark:text-slate-100 antialiased transition-colors relative">
+      {/* Top Floating Controls: Language & Theme */}
+      <div className="absolute top-4 right-4 flex items-center gap-2 z-20">
+        <div className="flex items-center gap-1 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md p-1 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <Globe className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 ml-1.5" />
+          <button
+            type="button"
+            onClick={() => setLanguage("en")}
+            className={`px-2 py-1 text-xs font-semibold rounded-lg transition-colors ${
+              language === "en" ? "bg-emerald-600 text-white" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+            }`}
+          >
+            EN
+          </button>
+          <button
+            type="button"
+            onClick={() => setLanguage("hi")}
+            className={`px-2 py-1 text-xs font-semibold rounded-lg transition-colors ${
+              language === "hi" ? "bg-emerald-600 text-white" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+            }`}
+          >
+            हिंदी
+          </button>
+          <button
+            type="button"
+            onClick={() => setLanguage("mr")}
+            className={`px-2 py-1 text-xs font-semibold rounded-lg transition-colors ${
+              language === "mr" ? "bg-emerald-600 text-white" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+            }`}
+          >
+            मराठी
+          </button>
+          <button
+            type="button"
+            onClick={() => setLanguage("gu")}
+            className={`px-2 py-1 text-xs font-semibold rounded-lg transition-colors ${
+              language === "gu" ? "bg-emerald-600 text-white" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+            }`}
+          >
+            ગુજરાતી
+          </button>
+        </div>
+
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className="p-2 rounded-xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 shadow-sm transition-colors"
+          title="Toggle Theme"
+        >
+          {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        </button>
+      </div>
+
       {/* Branding Header Area */}
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center px-4">
         <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-600 to-emerald-700 shadow-xl shadow-emerald-600/25 text-white mb-4 ring-4 ring-emerald-100 dark:ring-emerald-900/50">
           <HeartPulse className="h-9 w-9 text-white animate-pulse" />
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-          Clinical Decision Support
+          {t("Clinical Decision Support")}
         </h1>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 font-medium">
-          Unified Healthcare Platform • Account Registration
+          {t("Modular Healthcare Platform • Evidence-Grounded Medical Intelligence")}
         </p>
       </div>
 
@@ -99,13 +155,13 @@ export default function Signup() {
               to="/login"
               className="flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-white"
             >
-              Sign In
+              {t("Sign In")}
             </Link>
             <button
               type="button"
               className="flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 bg-emerald-700 text-white shadow-md cursor-default"
             >
-              Create Account
+              {t("Create Account")}
             </button>
           </div>
 
@@ -121,7 +177,7 @@ export default function Signup() {
               }`}
             >
               <User className="h-3.5 w-3.5" />
-              Patient Registration
+              {t("Patient Registration")}
             </button>
             <button
               type="button"
@@ -133,7 +189,7 @@ export default function Signup() {
               }`}
             >
               <Stethoscope className="h-3.5 w-3.5" />
-              Doctor Onboarding
+              {t("Doctor Onboarding")}
             </button>
           </div>
 
@@ -143,7 +199,7 @@ export default function Signup() {
               <div className="p-4 rounded-xl bg-emerald-50/90 dark:bg-slate-800/80 border border-emerald-200/80 dark:border-slate-700 space-y-3">
                 <div className="flex items-center gap-2 text-emerald-900 dark:text-emerald-300 font-bold text-sm">
                   <ShieldCheck className="h-5 w-5 text-emerald-600" />
-                  <span>Clinical Physician Credentialing</span>
+                  <span>{t("Clinical Physician Credentialing")}</span>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                   In compliance with hospital clinical governance and National Medical Commission (NMC) regulations, physician accounts require verified medical council registration and cannot be registered through public unverified sign-up forms.
@@ -166,20 +222,20 @@ export default function Signup() {
                   className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-md transition-colors"
                 >
                   <Lock className="h-4 w-4" />
-                  Have an Activation Link? Activate Account
+                  {t("Have an Activation Link? Activate Account")}
                 </Link>
                 <Link
                   to="/login"
                   className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs transition-colors"
                 >
-                  Already Activated? Doctor Sign In
+                  {t("Already Activated? Doctor Sign In")}
                 </Link>
                 <button
                   type="button"
                   onClick={() => setRoleTab("patient")}
                   className="w-full text-center py-1 text-xs text-emerald-700 dark:text-emerald-400 hover:underline font-semibold cursor-pointer"
                 >
-                  ← Return to Patient Registration
+                  {t("← Return to Patient Registration")}
                 </button>
               </div>
             </div>
@@ -189,7 +245,7 @@ export default function Signup() {
               <div className="p-3.5 mb-5 rounded-xl bg-emerald-50/80 dark:bg-slate-800/60 border border-emerald-200/70 dark:border-slate-700/60 text-xs text-slate-700 dark:text-slate-300">
                 <div className="flex items-center gap-1.5 font-bold text-emerald-800 dark:text-emerald-400 mb-1">
                   <User className="h-4 w-4 text-emerald-600" />
-                  <span>Patient Self-Registration Portal</span>
+                  <span>{t("Patient Self-Registration Portal")}</span>
                 </div>
                 <p className="text-[11px] leading-relaxed text-slate-600 dark:text-slate-400">
                   Patients can create accounts directly to access personal health records and appointments with hospital specialists.
@@ -200,7 +256,7 @@ export default function Signup() {
               {success ? (
                 <div className="text-center py-6">
                   <CheckCircle2 className="h-14 w-14 text-emerald-600 dark:text-emerald-400 mx-auto mb-4 animate-bounce" />
-                  <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Account Created Successfully!</h2>
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{t("Account Created Successfully!")}</h2>
                   <p className="text-sm text-slate-600 dark:text-slate-300 mb-6">
                     Your patient account has been registered in the EHR system. Redirecting you to sign in...
                   </p>
@@ -208,7 +264,7 @@ export default function Signup() {
                     to="/login?registered=true"
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm shadow-md shadow-emerald-700/20"
                   >
-                    Go to Sign In <ArrowRight className="h-4 w-4" />
+                    {t("Go to Sign In")} <ArrowRight className="h-4 w-4" />
                   </Link>
                 </div>
               ) : (
@@ -222,7 +278,7 @@ export default function Signup() {
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Full Name
+                  {t("Full Name")}
                 </label>
                 <div className="relative">
                   <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-700/60 dark:text-emerald-400/60" />
@@ -239,7 +295,7 @@ export default function Signup() {
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Email Address
+                  {t("Email Address")}
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-700/60 dark:text-emerald-400/60" />
@@ -256,7 +312,7 @@ export default function Signup() {
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Phone Number <span className="text-slate-400 font-normal">(Optional)</span>
+                  {t("Phone Number")} <span className="text-slate-400 font-normal">(Optional)</span>
                 </label>
                 <div className="relative">
                   <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-700/60 dark:text-emerald-400/60" />
@@ -272,7 +328,7 @@ export default function Signup() {
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Password <span className="text-slate-400 font-normal">(Min. 8 characters)</span>
+                  {t("Password")} <span className="text-slate-400 font-normal">(Min. 8 characters)</span>
                 </label>
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-700/60 dark:text-emerald-400/60" />
@@ -296,7 +352,7 @@ export default function Signup() {
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Confirm Password
+                  {t("Confirm Password")}
                 </label>
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-700/60 dark:text-emerald-400/60" />
@@ -324,7 +380,7 @@ export default function Signup() {
                 <label htmlFor="consentCheckbox" className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed cursor-pointer select-none">
                   I acknowledge this is an <strong>academic research prototype</strong> utilizing synthetic demonstration data, and consent to account processing per the{" "}
                   <Link to="/about" target="_blank" className="text-emerald-700 dark:text-emerald-400 hover:underline font-bold">
-                    Ethical Disclaimers & Privacy Notice
+                    {t("About & Clinical Ethics")}
                   </Link>.
                 </label>
               </div>
@@ -335,10 +391,10 @@ export default function Signup() {
                 className="w-full py-3 px-4 rounded-xl text-sm font-bold text-white shadow-lg bg-emerald-700 hover:bg-emerald-800 shadow-emerald-700/25 transition-all flex items-center justify-center gap-2 cursor-pointer mt-2 disabled:opacity-50"
               >
                 {isLoading ? (
-                  <span>Creating Patient Account...</span>
+                  <span>{t("Creating Account...")}</span>
                 ) : (
                   <>
-                    <span>Complete Patient Registration</span>
+                    <span>{t("Complete Patient Registration")}</span>
                     <ArrowRight className="h-4 w-4" />
                   </>
                 )}
@@ -355,7 +411,7 @@ export default function Signup() {
                 to="/login"
                 className="text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
               >
-                Already have an account? <span className="text-emerald-700 dark:text-emerald-400 font-bold underline">Sign In</span>
+                {t("Already have an account?")} <span className="text-emerald-700 dark:text-emerald-400 font-bold underline">{t("Sign In")}</span>
               </Link>
             </div>
             <div>
@@ -363,8 +419,8 @@ export default function Signup() {
                 to="/activate"
                 className="text-xs text-slate-500 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors inline-flex items-center gap-1"
               >
-                <span>🔑 Received an activation token from reception?</span>
-                <span className="text-emerald-700 dark:text-emerald-400 underline font-medium">Activate</span>
+                <span>🔑 {t("Received an activation link from reception?")}</span>
+                <span className="text-emerald-700 dark:text-emerald-400 underline font-medium">{t("Activate Account")}</span>
               </Link>
             </div>
           </div>
@@ -374,11 +430,11 @@ export default function Signup() {
         <div className="mt-6 text-center text-xs text-slate-500 dark:text-slate-400 flex flex-col sm:flex-row items-center justify-center gap-2">
           <div className="flex items-center gap-1.5">
             <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-            <span>Server-Enforced RBAC • Express Gateway Port 5000</span>
+            <span>{t("Server-Side RBAC • Express Gateway Port 5000")}</span>
           </div>
           <span className="hidden sm:inline">•</span>
           <Link to="/about" className="text-emerald-700 dark:text-emerald-400 hover:underline font-semibold">
-            About & Clinical Ethics
+            {t("About & Clinical Ethics")}
           </Link>
         </div>
       </div>
