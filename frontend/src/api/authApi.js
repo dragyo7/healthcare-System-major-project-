@@ -1,4 +1,9 @@
-const API_BASE = (import.meta.env.VITE_API_BASE_URL || "http://localhost:5000") + "/api";
+const API_BASE = (
+  import.meta.env.VITE_API_BASE_URL ||
+  import.meta.env.VITE_EXPRESS_URL ||
+  import.meta.env.VITE_API_URL ||
+  "http://127.0.0.1:5000"
+).replace(/\/api\/?$/, "") + "/api";
 
 export const authApi = {
   loginDoctor: async (email, password) => {
@@ -9,7 +14,14 @@ export const authApi = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || "Doctor login failed");
-    return { token: data.token, user: { ...data.doctor, role: "doctor", name: data.doctor?.name || "Dr. Bhumi Sharma" } };
+    return {
+      token: data.token,
+      user: {
+        ...data.doctor,
+        role: "doctor",
+        name: data.doctor?.name || data.doctor?.full_name || data.user?.name || data.user?.full_name,
+      },
+    };
   },
 
   loginPatient: async (email, password) => {
@@ -20,7 +32,14 @@ export const authApi = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || "Patient login failed");
-    return { token: data.token, user: { ...data.patient, role: "patient", name: data.patient?.full_name || "Aarav Patil" } };
+    return {
+      token: data.token,
+      user: {
+        ...data.patient,
+        role: "patient",
+        name: data.patient?.name || data.patient?.full_name || data.user?.name || data.user?.full_name,
+      },
+    };
   },
 
   loginReceptionist: async (email, password) => {
@@ -31,7 +50,15 @@ export const authApi = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || "Receptionist login failed");
-    return { token: data.token, user: { ...data.user, role: "receptionist", name: data.user?.name || "Pooja Verma" } };
+    const recData = data.receptionist || data.user || {};
+    return {
+      token: data.token,
+      user: {
+        ...recData,
+        role: "receptionist",
+        name: recData.name || recData.full_name,
+      },
+    };
   },
 
   activatePatient: async (token, password) => {
@@ -53,6 +80,28 @@ export const authApi = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || "Patient registration failed");
+    return data;
+  },
+
+  signupDoctor: async (doctorData) => {
+    const res = await fetch(`${API_BASE}/auth/doctor/signup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(doctorData),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Doctor registration failed");
+    return data;
+  },
+
+  signupReceptionist: async (receptionistData) => {
+    const res = await fetch(`${API_BASE}/auth/receptionist/signup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(receptionistData),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Receptionist registration failed");
     return data;
   },
 };

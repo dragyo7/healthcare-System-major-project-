@@ -115,12 +115,66 @@ export function AuthProvider({ children }) {
     return await authApi.activatePatient(token, password);
   };
 
+  const signUpDoctor = async (doctorData) => {
+    const res = await authApi.signupDoctor(doctorData);
+    if (res?.token && res?.doctor) {
+      const authUser = {
+        ...res.doctor,
+        token: res.token,
+        role: "doctor",
+      };
+      localStorage.setItem("cdss_token", res.token);
+      localStorage.setItem("cdss_role", "doctor");
+      localStorage.setItem("cdss_user", JSON.stringify(authUser));
+      localStorage.setItem("token", res.token);
+      localStorage.setItem("doctor", JSON.stringify(res.doctor));
+      setUser(authUser);
+      return { data: { user: authUser, token: res.token } };
+    }
+    return res;
+  };
+
   const signUpPatient = async (patientData) => {
-    return await authApi.signupPatient(patientData);
+    const res = await authApi.signupPatient(patientData);
+    if (res?.token && res?.patient) {
+      const authUser = {
+        ...res.patient,
+        token: res.token,
+        role: "patient",
+      };
+      localStorage.setItem("cdss_token", res.token);
+      localStorage.setItem("cdss_role", "patient");
+      localStorage.setItem("cdss_user", JSON.stringify(authUser));
+      localStorage.setItem("token", res.token);
+      localStorage.setItem("patient_token", res.token);
+      setUser(authUser);
+      return { data: { user: authUser, token: res.token } };
+    }
+    return res;
+  };
+
+  const signUpReceptionist = async (receptionistData) => {
+    const res = await authApi.signupReceptionist(receptionistData);
+    if (res?.token && res?.receptionist) {
+      const authUser = {
+        ...res.receptionist,
+        token: res.token,
+        role: "receptionist",
+      };
+      localStorage.setItem("cdss_token", res.token);
+      localStorage.setItem("cdss_role", "receptionist");
+      localStorage.setItem("cdss_user", JSON.stringify(authUser));
+      localStorage.setItem("token", res.token);
+      localStorage.setItem("receptionist_token", res.token);
+      localStorage.setItem("receptionist_user", JSON.stringify(res.receptionist));
+      setUser(authUser);
+      return { data: { user: authUser, token: res.token } };
+    }
+    return res;
   };
 
   const signUp = async (email, password, metadata = {}) => {
-    return await authApi.signupPatient({
+    return await signUpPatient({
       email,
       password,
       full_name: metadata.name || metadata.full_name || email.split("@")[0],
@@ -140,13 +194,16 @@ export function AuthProvider({ children }) {
         signIn,
         signOut,
         activateAccount,
+        signUpDoctor,
         signUpPatient,
+        signUpReceptionist,
         signUp,
       }}
     >
       {children}
     </AuthContext.Provider>
   );
+
 }
 
 export function useAuth() {

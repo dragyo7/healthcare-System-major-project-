@@ -167,7 +167,7 @@ export default function Activate() {
             </h1>
             <p className="text-emerald-100/90 text-sm sm:text-base leading-relaxed mb-8">
               {t(
-                "Secure single-use cryptographic token activation for provisioned healthcare practitioners, administrative staff, and patients."
+                "Secure single-use cryptographic token activation for walk-in patients registered at the reception desk."
               )}
             </p>
 

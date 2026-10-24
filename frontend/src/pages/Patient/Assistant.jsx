@@ -187,6 +187,17 @@ export default function PatientAssistant() {
                   }`}
                 >
                   <p className="whitespace-pre-wrap">{msg.content}</p>
+                  {msg.is_network_error && msg.failed_query && (
+                    <div className="pt-2">
+                      <button
+                        onClick={() => handleSend(msg.failed_query)}
+                        disabled={evaluating}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
+                      >
+                        Retry Question ↺
+                      </button>
+                    </div>
+                  )}
 
                   {/* Verification Status Badge */}
                   {!isUser && msg.status && msg.status !== "system_greeting" && (
@@ -197,7 +208,7 @@ export default function PatientAssistant() {
                           Verified Grounded in Clinical Guidelines
                         </span>
                       ) : msg.status === "conversational_greeting" || msg.status === "conversational_response" ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 border border-blue-500/20 font-semibold">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-teal-500/10 text-teal-700 dark:text-teal-400 border border-teal-500/20 font-semibold">
                           <Sparkles className="w-3.5 h-3.5" />
                           Care Assistant Connected
                         </span>

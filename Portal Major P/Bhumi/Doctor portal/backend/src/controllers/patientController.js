@@ -118,7 +118,7 @@ const getPatientDashboard = async (req, res) => {
              JOIN doctors doc ON d.doctor_id = doc.doctor_id
              JOIN users u ON doc.user_id = u.user_id
              WHERE d.patient_id = ?
-             ORDER BY d.discharge_date DESC
+             ORDER BY d.discharge_date DESC, d.discharge_id DESC
              LIMIT 1`,
             [patientId]
         );
@@ -322,7 +322,7 @@ const getPatientDischarge = async (req, res) => {
              JOIN doctors doc ON d.doctor_id = doc.doctor_id
              JOIN users u ON doc.user_id = u.user_id
              WHERE d.patient_id = ?
-             ORDER BY d.discharge_date DESC
+             ORDER BY d.discharge_date DESC, d.discharge_id DESC
              LIMIT 1`,
             [patient.patient_id]
         );
@@ -383,12 +383,16 @@ const getPatientAppointments = async (req, res) => {
 const getAvailableDoctors = async (req, res) => {
     try {
         const [doctors] = await db.execute(
-            `SELECT d.doctor_id, u.full_name, u.email, d.specialization, d.qualification,
-                    d.experience_years, d.bio
+            `SELECT d.doctor_id, u.full_name, u.email,
+                    COALESCE(NULLIF(TRIM(d.specialization), ''), 'Unspecified') AS specialization,
+                    COALESCE(NULLIF(TRIM(d.qualification), ''), 'Unspecified') AS qualification,
+                    COALESCE(d.experience_years, 0) AS experience_years,
+                    d.bio
              FROM doctors d
              JOIN users u ON d.user_id = u.user_id
              ORDER BY u.full_name ASC`
         );
+
 
         return res.status(200).json({
             count: doctors.length,
@@ -651,7 +655,7 @@ const evaluatePatientCDS = async (req, res) => {
             `SELECT diagnosis, discharge_instructions, follow_up_instructions, follow_up_date, warning_signs
              FROM discharges
              WHERE patient_id = ?
-             ORDER BY discharge_date DESC
+             ORDER BY discharge_date DESC, discharge_id DESC
              LIMIT 1`,
             [ownPatientId]
         );

@@ -19,18 +19,18 @@ export default function DashboardLayout({ children, role }) {
   const currentRole = role || user?.role || "doctor";
   let navigation = DOCTOR_NAV;
   let workspaceTitle = "Clinician Workspace";
-  let badgeColor = "bg-blue-500/10 text-blue-600 border-blue-500/20";
+  let badgeColor = "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20";
   let roleIcon = "🩺";
 
   if (currentRole === "patient") {
     navigation = PATIENT_NAV;
     workspaceTitle = "Patient Care Portal";
-    badgeColor = "bg-emerald-500/10 text-emerald-600 border-emerald-500/20";
+    badgeColor = "bg-teal-500/10 text-teal-700 dark:text-teal-400 border-teal-500/20";
     roleIcon = "🏥";
   } else if (currentRole === "receptionist") {
     navigation = RECEPTIONIST_NAV;
     workspaceTitle = "Administrative Front Desk";
-    badgeColor = "bg-purple-500/10 text-purple-600 border-purple-500/20";
+    badgeColor = "bg-emerald-600/10 text-emerald-800 dark:text-emerald-300 border-emerald-600/20";
     roleIcon = "📋";
   }
 
@@ -55,9 +55,10 @@ export default function DashboardLayout({ children, role }) {
           )}
 
           <Link to="/" className="flex items-center gap-2.5 select-none">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-primary-600 to-indigo-600 flex items-center justify-center text-white font-bold shadow-md shadow-primary-500/20 text-base">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-600 flex items-center justify-center text-white font-bold shadow-md shadow-emerald-600/20 text-base">
               CDSS
             </div>
+
             <div className="hidden sm:flex flex-col">
               <span className="font-bold text-sm tracking-tight text-slate-900 dark:text-white leading-tight">
                 CDSS Healthcare
@@ -163,7 +164,7 @@ export default function DashboardLayout({ children, role }) {
                 <Sidebar navigation={navigation} onItemClick={() => setIsSidebarOpen(false)} />
               </div>
               <div className="p-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 text-center">
-                Express Port 5000 Active
+                EHR Gateway Connected
               </div>
             </div>
           </div>

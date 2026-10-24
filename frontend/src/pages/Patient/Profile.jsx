@@ -75,7 +75,8 @@ export default function PatientProfile() {
             {profile.name || profile.full_name ? (profile.name || profile.full_name).charAt(0).toUpperCase() : "P"}
           </div>
           <h2 className="mt-4 text-lg font-bold text-foreground">{profile.name || profile.full_name || "Patient"}</h2>
-          <p className="text-xs text-muted-foreground">{profile.email || "patient@gmail.com"}</p>
+          <p className="text-xs text-muted-foreground">{profile.email || "N/A"}</p>
+
           <div className="mt-4 inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-semibold bg-rose-500/10 text-rose-600 border border-rose-500/20">
             <Heart className="w-3.5 h-3.5" />
             {t("Blood Group:") || "Blood Group:"} {profile.blood_group || "Unknown"}

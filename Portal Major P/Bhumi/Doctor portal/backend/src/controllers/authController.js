@@ -53,10 +53,18 @@ const doctorLogin = async (req, res) => {
             });
         }
 
+        // Fetch associated doctor details if available
+        const [docs] = await db.execute(
+            "SELECT doctor_id, specialization, qualification, license_number FROM doctors WHERE user_id = ?",
+            [user.user_id]
+        );
+        const docRecord = docs[0] || {};
+
         // Create JWT token
         const token = jwt.sign(
             {
                 user_id: user.user_id,
+                doctor_id: docRecord.doctor_id,
                 role: user.role
             },
             process.env.JWT_SECRET,
@@ -70,9 +78,13 @@ const doctorLogin = async (req, res) => {
             token: token,
             doctor: {
                 user_id: user.user_id,
+                doctor_id: docRecord.doctor_id,
                 name: user.full_name,
                 email: user.email,
-                role: user.role
+                role: user.role,
+                specialization: docRecord.specialization,
+                qualification: docRecord.qualification,
+                license_number: docRecord.license_number
             }
         });
 
@@ -440,12 +452,22 @@ const patientSignup = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password.trim(), 10);
         const CONSENT_DOCUMENT_VERSION = "v1.0-2026-10";
 
-        // 1. Insert into users (role is strictly 'patient' with auditable UTC consent evidence)
-        const [userResult] = await connection.execute(
-            `INSERT INTO users (full_name, email, password, role, phone, consent_timestamp, consent_version)
-             VALUES (?, ?, ?, 'patient', ?, UTC_TIMESTAMP(), ?)`,
-            [full_name.trim(), normalizedEmail, hashedPassword, phone ? phone.trim() : null, CONSENT_DOCUMENT_VERSION]
-        );
+        // Check if consent columns exist in users schema
+        const [consentCols] = await connection.execute("SHOW COLUMNS FROM users LIKE 'consent_timestamp'");
+        let userResult;
+        if (consentCols.length > 0) {
+            [userResult] = await connection.execute(
+                `INSERT INTO users (full_name, email, password, role, phone, consent_timestamp, consent_version)
+                 VALUES (?, ?, ?, 'patient', ?, UTC_TIMESTAMP(), ?)`,
+                [full_name.trim(), normalizedEmail, hashedPassword, phone ? phone.trim() : null, CONSENT_DOCUMENT_VERSION]
+            );
+        } else {
+            [userResult] = await connection.execute(
+                `INSERT INTO users (full_name, email, password, role, phone)
+                 VALUES (?, ?, ?, 'patient', ?)`,
+                [full_name.trim(), normalizedEmail, hashedPassword, phone ? phone.trim() : null]
+            );
+        }
 
         const newUserId = userResult.insertId;
 
@@ -497,6 +519,183 @@ const patientSignup = async (req, res) => {
         console.error("Patient signup error:", error);
         return res.status(500).json({
             message: "Server error during registration"
+        });
+    } finally {
+        if (connection) connection.release();
+    }
+};
+
+/**
+ * POST /api/auth/doctor/signup
+ * Body: { full_name, email, password, phone, specialization, qualification, license_number, experience_years, bio, terms_accepted }
+ * Direct self-registration for doctors:
+ * - Reject arbitrary user_id or doctor_id injection
+ * - Affirmative consent to academic research terms (terms_accepted: true)
+ * - Required fields: full_name (>=2 chars), email (valid), password (>=8 chars)
+ * - Optional license syntax check (if provided, length 4..50)
+ * - Duplicate email prevention (HTTP 400)
+ * - Hashes password with bcrypt (salt = 10)
+ * - Transactionally creates user with role='doctor' and doctor record
+ * - Signs real JWT token with { user_id, doctor_id, role: 'doctor' }
+ * - Returns HTTP 201 with token and doctor profile for immediate session establishment
+ */
+const doctorSignup = async (req, res) => {
+    let connection;
+    try {
+        const {
+            full_name,
+            email,
+            password,
+            phone,
+            specialization,
+            qualification,
+            license_number,
+            experience_years,
+            bio
+        } = req.body;
+
+        // Security Guard 1: Reject arbitrary doctor/user ID injection attempts
+        if (req.body.user_id !== undefined || req.body.doctor_id !== undefined) {
+            return res.status(400).json({
+                message: "Specifying arbitrary user or doctor identifiers is strictly prohibited."
+            });
+        }
+
+        // Security Guard 2: Affirmative consent to academic research disclaimer
+        const isConsentAccepted = req.body.terms_accepted === true || req.body.termsAccepted === true;
+        if (!isConsentAccepted) {
+            return res.status(400).json({
+                message: "Affirmative consent to the academic research disclaimer and terms (terms_accepted: true) is strictly required for registration."
+            });
+        }
+
+        if (!full_name || !email || !password) {
+            return res.status(400).json({
+                message: "Full name, email, and password are required"
+            });
+        }
+
+        if (typeof full_name !== "string" || full_name.trim().length < 2) {
+            return res.status(400).json({
+                message: "Full name must be at least 2 characters long"
+            });
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(normalizedEmail)) {
+            return res.status(400).json({
+                message: "A valid email address is required"
+            });
+        }
+
+        if (typeof password !== "string" || password.length < 8) {
+            return res.status(400).json({
+                message: "Password must be at least 8 characters long"
+            });
+        }
+
+        let normalizedLicense = null;
+        if (license_number && typeof license_number === "string" && license_number.trim()) {
+            normalizedLicense = license_number.trim();
+            if (normalizedLicense.length < 4 || normalizedLicense.length > 50) {
+                return res.status(400).json({
+                    message: "Medical registration / license number must be between 4 and 50 characters."
+                });
+            }
+        }
+
+        connection = await db.getConnection();
+        await connection.beginTransaction();
+
+        // Check if email already exists
+        const [existing] = await connection.execute(
+            "SELECT user_id, password FROM users WHERE email = ?",
+            [normalizedEmail]
+        );
+
+        if (existing.length > 0) {
+            await connection.rollback();
+            return res.status(400).json({
+                message: "Email is already registered. Please sign in or use another email."
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(password.trim(), 10);
+        const CONSENT_DOCUMENT_VERSION = "v1.0-2026-10";
+
+        // Check if consent columns exist in users schema
+        const [cols] = await connection.execute("SHOW COLUMNS FROM users LIKE 'consent_timestamp'");
+        let userResult;
+        if (cols.length > 0) {
+            [userResult] = await connection.execute(
+                `INSERT INTO users (full_name, email, password, role, phone, consent_timestamp, consent_version)
+                 VALUES (?, ?, ?, 'doctor', ?, UTC_TIMESTAMP(), ?)`,
+                [full_name.trim(), normalizedEmail, hashedPassword, phone ? phone.trim() : null, CONSENT_DOCUMENT_VERSION]
+            );
+        } else {
+            [userResult] = await connection.execute(
+                `INSERT INTO users (full_name, email, password, role, phone)
+                 VALUES (?, ?, ?, 'doctor', ?)`,
+                [full_name.trim(), normalizedEmail, hashedPassword, phone ? phone.trim() : null]
+            );
+        }
+
+        const newUserId = userResult.insertId;
+
+        // 2. Insert into doctors table
+        const [doctorResult] = await connection.execute(
+            `INSERT INTO doctors (user_id, specialization, qualification, license_number, experience_years, bio)
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [
+                newUserId,
+                specialization && specialization.trim() ? specialization.trim() : "General Medicine",
+                qualification && qualification.trim() ? qualification.trim() : "MBBS",
+                normalizedLicense,
+                experience_years ? parseInt(experience_years, 10) || 0 : 0,
+                bio && bio.trim() ? bio.trim() : ""
+            ]
+        );
+
+        const newDoctorId = doctorResult.insertId;
+
+        await connection.commit();
+
+        // Create authoritative JWT token for immediate session establishment
+        const token = jwt.sign(
+            {
+                user_id: newUserId,
+                doctor_id: newDoctorId,
+                role: "doctor"
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: "1d"
+            }
+        );
+
+        return res.status(201).json({
+            message: "Doctor registration successful",
+            token,
+            doctor: {
+                user_id: newUserId,
+                doctor_id: newDoctorId,
+                name: full_name.trim(),
+                email: normalizedEmail,
+                role: "doctor",
+                specialization: specialization && specialization.trim() ? specialization.trim() : "General Medicine",
+                qualification: qualification && qualification.trim() ? qualification.trim() : "MBBS",
+                license_number: normalizedLicense
+            }
+        });
+
+    } catch (error) {
+        if (connection) {
+            try { await connection.rollback(); } catch (_) {}
+        }
+        console.error("Doctor signup error:", error);
+        return res.status(500).json({
+            message: "Server error during doctor registration"
         });
     } finally {
         if (connection) connection.release();
@@ -603,11 +802,135 @@ const provisionReceptionist = async (req, res) => {
     }
 };
 
+/**
+ * POST /api/auth/receptionist/signup
+ * Direct self-registration for front-desk receptionists:
+ * - Affirmative consent to academic research terms (terms_accepted: true)
+ * - Required fields: full_name (>=2 chars), email (valid), password (>=8 chars)
+ * - Duplicate email prevention (HTTP 400)
+ * - Hashes password with bcrypt (salt = 10)
+ * - Inserts into users table with role = 'receptionist'
+ * - Signs real JWT token with { user_id, role: 'receptionist' }
+ * - Returns HTTP 201 with token and receptionist profile for immediate session establishment
+ */
+const receptionistSignup = async (req, res) => {
+    let connection;
+    try {
+        const { full_name, email, password, phone } = req.body;
+
+        // Security Guard: Affirmative consent to academic research disclaimer
+        const isConsentAccepted = req.body.terms_accepted === true || req.body.termsAccepted === true;
+        if (!isConsentAccepted) {
+            return res.status(400).json({
+                message: "Affirmative consent to the academic research disclaimer and terms (terms_accepted: true) is strictly required for registration."
+            });
+        }
+
+        if (!full_name || !email || !password) {
+            return res.status(400).json({
+                message: "Full name, email, and password are required"
+            });
+        }
+
+        if (typeof full_name !== "string" || full_name.trim().length < 2) {
+            return res.status(400).json({
+                message: "Full name must be at least 2 characters long"
+            });
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(normalizedEmail)) {
+            return res.status(400).json({
+                message: "A valid email address is required"
+            });
+        }
+
+        if (typeof password !== "string" || password.length < 8) {
+            return res.status(400).json({
+                message: "Password must be at least 8 characters long"
+            });
+        }
+
+        connection = await db.getConnection();
+        await connection.beginTransaction();
+
+        // Check if email already exists
+        const [existing] = await connection.execute(
+            "SELECT user_id FROM users WHERE email = ?",
+            [normalizedEmail]
+        );
+
+        if (existing.length > 0) {
+            await connection.rollback();
+            return res.status(400).json({
+                message: "Email is already registered. Please sign in or use another email."
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(password.trim(), 10);
+        const CONSENT_DOCUMENT_VERSION = "v1.0-2026-10";
+
+        const [cols] = await connection.execute("SHOW COLUMNS FROM users LIKE 'consent_timestamp'");
+        let userResult;
+        if (cols.length > 0) {
+            [userResult] = await connection.execute(
+                `INSERT INTO users (full_name, email, password, role, phone, consent_timestamp, consent_version)
+                 VALUES (?, ?, ?, 'receptionist', ?, UTC_TIMESTAMP(), ?)`,
+                [full_name.trim(), normalizedEmail, hashedPassword, phone ? phone.trim() : null, CONSENT_DOCUMENT_VERSION]
+            );
+        } else {
+            [userResult] = await connection.execute(
+                `INSERT INTO users (full_name, email, password, role, phone)
+                 VALUES (?, ?, ?, 'receptionist', ?)`,
+                [full_name.trim(), normalizedEmail, hashedPassword, phone ? phone.trim() : null]
+            );
+        }
+
+        const newUserId = userResult.insertId;
+        await connection.commit();
+
+        const token = jwt.sign(
+            {
+                user_id: newUserId,
+                role: "receptionist"
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: "1d"
+            }
+        );
+
+        return res.status(201).json({
+            message: "Receptionist registration successful",
+            token,
+            receptionist: {
+                user_id: newUserId,
+                name: full_name.trim(),
+                email: normalizedEmail,
+                role: "receptionist"
+            }
+        });
+    } catch (error) {
+        if (connection) {
+            try { await connection.rollback(); } catch (_) {}
+        }
+        console.error("Receptionist signup error:", error);
+        return res.status(500).json({
+            message: "Server error during receptionist registration"
+        });
+    } finally {
+        if (connection) connection.release();
+    }
+};
+
 module.exports = {
     doctorLogin,
+    doctorSignup,
     patientLogin,
     receptionistLogin,
     patientActivate,
     patientSignup,
-    provisionReceptionist
+    provisionReceptionist,
+    receptionistSignup
 };

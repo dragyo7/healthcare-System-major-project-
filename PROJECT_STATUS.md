@@ -54,9 +54,11 @@
 | `node scratch/test_prescription_ocr_pipeline.js` | Image upload, magic bytes, Tesseract OCR, allergy block, human review | **12 / 12** | `0` | Clinician confirmation invariant strictly enforced |
 | `node scratch/test_portal_cds_responsibilities.js` | Doctor/patient CDS, triage diversion, injection early block, citations | **25 / 25** | `0` | Clinical safety boundaries and fail-closed responses verified |
 | `node scratch/test_full_system_multi_role_e2e.js` | Multi-role end-to-end journey (Receptionist -> Doctor -> Patient) | **20 / 20** | `0` | Cross-role lifecycle and negative security matrix verified |
-| `cd frontend; npm run build` | Vite 8 + React 19 production bundle | **2,251 modules** | `0` | Clean build in 1.14s, 0 errors |
-| `browser_subagent` (Live E2E Audit) | Desktop/mobile login, signup, activation, all 3 workspaces | **15 / 15** | `0` | 15 real browser screenshots captured in `audit_evidence/audit_screenshots_oct21/` (DEC-024) |
-| **Consolidated Gate Regression Suite** | Multi-suite integration regression against `rag_healthcare_test` | **185 cases / 198 assertions** | `0` | **185 PASSED, 0 FAILED, 0 SKIPPED** across all verified suites |
+| `node scratch/test_doctor_direct_registration_e2e.js` | Direct Doctor Signup, Immediate Login, DB Persistence, Security Invariants | **36 / 36** | `0` | 100% pass across doctor signup (HTTP 201), immediate login (HTTP 200), bcrypt verification, profile updates, BOLA defense, negative auth, existing accounts, primary DB intact |
+| `node scratch/test_identity_receptionist_directory_e2e.js` | Team-Blocker Repair (Identity Isolation, CDS Gateway, Doctor Directory, Direct Receptionist Signup) | **45 / 45** | `0` | 100% pass across synthetic patient isolation (Priya vs Rohan), grounded CDS retrieval, doctor directory discoverability, appointment booking loop, direct receptionist signup, 403 RBAC |
+| `cd frontend; npm run build` | Vite 8 + React 19 production bundle | **2,252 modules** | `0` | Clean build in 915ms, 0 errors |
+| `browser_subagent` (Live E2E Audit) | Desktop/mobile login, signup, activation, all 3 workspaces | **17 / 17** | `0` | Direct doctor registration & immediate login verified in browser with screenshots saved to `audit_evidence/direct_doctor_registration_20261024/` (DEC-035) |
+| **Consolidated Gate Regression Suite** | Multi-suite integration regression against `rag_healthcare_test` | **266 cases / 279 assertions** | `0` | **266 PASSED, 0 FAILED, 0 SKIPPED** across all verified suites |
 
 ---
 

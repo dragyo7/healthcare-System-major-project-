@@ -28,8 +28,8 @@ export default function Login() {
   const { isDark, toggleTheme } = useTheme();
 
   const [role, setRole] = useState("doctor");
-  const [email, setEmail] = useState("doctor@gmail.com");
-  const [password, setPassword] = useState("doctor123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -37,14 +37,12 @@ export default function Login() {
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    if (params.get("activated") === "true") {
-      setSuccessMessage("Your account has been successfully activated! Please log in.");
-      setRole("patient");
-      setEmail("aarav@gmail.com");
-      setPassword("");
-    } else if (params.get("registered") === "true") {
-      setSuccessMessage("Your patient account has been registered! Please sign in with your credentials.");
-      setRole("patient");
+    if (params.get("registered") === "true") {
+      setSuccessMessage("Account registered successfully! Please sign in with your credentials.");
+      const regRole = params.get("role");
+      if (regRole === "doctor" || regRole === "patient" || regRole === "receptionist") {
+        setRole(regRole);
+      }
       setEmail("");
       setPassword("");
     }
@@ -53,17 +51,8 @@ export default function Login() {
   const handleRoleChange = (selectedRole) => {
     setRole(selectedRole);
     setError("");
-    if (selectedRole === "doctor") {
-      setEmail("doctor@gmail.com");
-      setPassword("doctor123");
-    } else if (selectedRole === "patient") {
-      setEmail("aarav@gmail.com");
-      setPassword("patient123");
-    } else if (selectedRole === "receptionist") {
-      setEmail("receptionist@gmail.com");
-      setPassword("receptionist123");
-    }
   };
+
 
   const handleQuickLogin = async (selectedRole) => {
     setRole(selectedRole);

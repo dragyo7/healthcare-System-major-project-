@@ -485,8 +485,9 @@ export default function SafetyAnalysisModal({
             className={`px-5 py-2.5 rounded-xl font-semibold text-xs flex items-center gap-2 shadow-md transition-all ${
               requiresOverride
                 ? "bg-rose-600 hover:bg-rose-700 text-white"
-                : "bg-blue-600 hover:bg-blue-700 text-white"
+                : "bg-emerald-600 hover:bg-emerald-700 text-white"
             }`}
+
           >
             <CheckCircle2 className="w-4 h-4" />
             <span>

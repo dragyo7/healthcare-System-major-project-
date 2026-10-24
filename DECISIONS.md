@@ -659,3 +659,104 @@
   - `npm run build`: built in 1.35s with 0 errors.
   - Primary database `rag_healthcare` verified untouched (15 tables, 176 users, 160 patients, 65 prescriptions).
   - Screenshots and artifacts stored in `audit_evidence/gap_closure_presentation_20261024/` and `audit_evidence/frontend_fork_multilingual_20261024/`.
+
+---
+
+### DEC-035: Removal of Doctor Activation Key / Token Requirement in Favor of Direct Self-Registration, Immediate Session Establishment, and Academic Credential Self-Declaration
+- **Date**: October 24, 2026
+- **Status**: Implemented & Verified E2E in Real Browser Subagents (36/36 API Tests Passed, 100%)
+- **Context**:
+  - The system previously required pre-provisioned activation keys/tokens (`/activate`) for clinicians or administrative accounts.
+  - An explicit critical override required removing any doctor activation-key requirement, invitation code requirement, manual activation gate, or separate account activation step.
+  - Doctors must be able to register directly on the unified Sign Up page, receive a properly created account in the database, establish an authenticated session immediately, and be able to log in normally using their credentials.
+  - Security safeguards (bcrypt hashing, required fields, duplicate prevention, affirmative ethics consent, RBAC role enforcement, and patient data BOLA protection) had to remain strictly enforced.
+- **Decision & Architecture**:
+  1. **Direct Doctor Registration Controller (`POST /api/auth/doctor/signup`)**:
+     - Registered in `Portal Major P/Bhumi/Doctor portal/backend/src/routes/authRoutes.js` under `authRateLimiter`.
+     - Implemented `doctorSignup` in `authController.js`:
+       * Enforces affirmative ethics and academic platform consent (`terms_accepted: true`).
+       * Validates required fields (`full_name`, `email`, `password`, `specialization`, `qualification`, `license_number`).
+       * Validates password strength (minimum 8 characters).
+       * Checks for duplicate emails across the `users` table.
+       * Hashes password using `bcrypt` (10 salt rounds).
+       * Inserts into `users` (`role: 'doctor'`) and `doctors` (`user_id`, `specialization`, `qualification`, `license_number`).
+       * Dynamically queries columns on `users` (`SHOW COLUMNS FROM users LIKE 'consent_timestamp'`) to safely persist UTC consent timestamp when the audit migration is present, while maintaining backward compatibility with unmigrated databases.
+       * Issues real JWT containing `{ user_id, doctor_id, role: 'doctor' }` and returns HTTP 201 with `{ message: "Doctor registered successfully", token, doctor }`.
+  2. **Doctor Login Hardening (`POST /api/auth/doctor/login`)**:
+     - Hardened `doctorLogin` in `authController.js` to query the `doctors` table for `doctor_id`, `specialization`, `qualification`, and `license_number`.
+     - Embeds `doctor_id` into the signed JWT token and returns the full doctor profile in the response body.
+  3. **Immediate Session Establishment in Frontend**:
+     - Added `authApi.signupDoctor(doctorData)` in `frontend/src/api/authApi.js`.
+     - Added `signUpDoctor` in `frontend/src/contexts/AuthContext.jsx`: stores `cdss_token`, `cdss_role`, `cdss_user`, `token`, and `doctor` into `localStorage`, sets `user` state, and immediately establishes the active session.
+     - On form submission in `Signup.jsx`, the doctor is immediately redirected directly to `/doctor` without requiring an intermediate login screen or activation step.
+  4. **Frontend UI Overhaul (`Signup.jsx` & `Login.jsx`)**:
+     - Built 3-role selector (`✚ Doctor`, `♡ Patient`, `▦ Receptionist`) in CareUnity emerald styling.
+     - When Doctor is selected:
+       * Form reveals `Specialization` dropdown, `Qualification` input, `Medical License Number` input, and password confirmation.
+       * Includes clear academic transparency notice: *"Registration details are self-declared for academic evaluation; independent medical board verification is not simulated."*
+       * Includes required affirmative consent checkbox for clinical decision support usage ethics.
+     - Completely removed all `/activate` links, invitation code inputs, and activation token prompts from `Signup.jsx` and `Login.jsx`.
+     - Preserved walk-in desk patient activation via `Activate.jsx` specifically for patients registered in-person at the reception desk without an initial password.
+  5. **Security & Authorization Invariants Maintained**:
+     - Password hashing via `bcrypt` remains non-negotiable.
+     - Broken Object-Level Authorization (BOLA) remains active: newly registered doctors cannot access patient dossiers to which they are not assigned (HTTP 403).
+     - Cross-role privilege escalation blocked: patient tokens are rejected with HTTP 403 on doctor endpoints.
+     - Unauthenticated access to doctor endpoints is rejected with HTTP 401.
+- **Verification Evidence**:
+  - `scratch/test_doctor_direct_registration_e2e.js`: **36 / 36 passed (100%)** across:
+    * Test A: Doctor signup HTTP 201, DB persistence in `users` and `doctors`, bcrypt hash verification.
+    * Test B: Immediate doctor login HTTP 200, valid JWT token issued, doctor profile access and update persistence across reloads.
+    * Test C: Negative tests (wrong password 401, duplicate registration 400, missing fields 400, missing consent 400, arbitrary ID injection 400, unauthenticated 401, cross-role patient token rejection 403, BOLA defense on unlinked patient records 403).
+    * Test D: Existing accounts compatibility (`doctor@gmail.com`, `aarav@gmail.com`, `receptionist@gmail.com` all pass 200).
+    * Test E: Database safety invariant (`rag_healthcare` counts 100% UNTOUCHED: 176 users, 15 doctors).
+  - Browser E2E Verification (`browser_subagent`):
+    * Direct doctor signup on `http://127.0.0.1:5173/signup` -> Doctor role selected -> Dr. Elena Vance registered -> direct landing in `/doctor` Doctor Dashboard.
+    * Immediate doctor login on `http://127.0.0.1:5173/login` -> Doctor role selected -> `dr.test.e2e.20261024@hospital.org` / `Password@123` -> direct landing in `/doctor` without activation prompts.
+    * Screenshots saved in `audit_evidence/direct_doctor_registration_20261024/`.
+  - Frontend production build (`npm run build`): Built cleanly in 769ms with 0 errors.
+
+---
+
+### DEC-036: Multi-Role Team-Blocker Repair — Patient Identity Mapping Normalization, CDS Transport Gateway Offline Recovery, Dynamic Doctor Directory Discoverability, Direct Receptionist Self-Registration, and CareUnity Unified UI
+- **Date**: October 24, 2026
+- **Status**: Implemented & Verified Across Automated (45/45 pass) & Real Browser Workflows
+- **Context**:
+  - Live testing by teammates exposed 6 critical defects blocking team usability:
+    1. Newly registered patients displayed "Welcome, [Registered Name]" on the dashboard card, but the top-right account identity displayed "Aarav Patil" and Aarav's email due to client-side fallback corruption.
+    2. Post-Discharge Assistant queries threw `Unable to evaluate post-discharge query safely: fetch failed` with a deceptive `system_error` safety-withholding status.
+    3. Patient appointment booking displayed "No physicians matching criteria" with an empty specialization dropdown; newly registered doctors were not discoverable.
+    4. Receptionist signup was gated by an "Activate your account" token requirement originally intended only for walk-in patient intake.
+    5. Inconsistent visual design (emerald/green navigation mixed with blue/navy headers and buttons).
+    6. Teammate reproducibility barriers (dual-backend port confusion between 5000/5001/8000, hardcoded URLs, and missing environment documentation).
+- **Decision & Architecture**:
+  1. **Strict Identity Chain Normalization**:
+     - Removed hardcoded fallback strings (`"Aarav Patil"`, `"Dr. Bhumi Sharma"`, `"Pooja Verma"`, `"patient@gmail.com"`) from `frontend/src/api/authApi.js` and `frontend/src/pages/Patient/Profile.jsx`.
+     - Standardized user identity resolution to check `data.patient?.name || data.patient?.full_name || data.user?.name || data.user?.full_name || data.name`.
+     - In `Login.jsx`, removed hardcoded initial form state and role-change auto-fill that overwrote user credentials with demo account emails.
+  2. **CDS Gateway Transport Hardening & Honest Error Transparency**:
+     - Standardized `frontend/src/api/ragApi.js` to strictly target `VITE_FASTAPI_URL || VITE_RAG_URL || "http://127.0.0.1:8000"`, decoupling RAG requests from Express API base URLs.
+     - In `frontend/src/pages/Patient/Assistant.jsx`, replaced misleading `system_error` safety badge with honest `Clinical Gateway Connection Error (Transport Offline)` badge and added interactive `Retry Question ↺` button on transport errors.
+  3. **Doctor Directory Discoverability & Specialization Fallback Taxonomy**:
+     - In `Portal Major P/Bhumi/Doctor portal/backend/src/controllers/patientController.js`, wrapped doctor specialization and qualification in SQL `COALESCE(NULLIF(TRIM(d.specialization), ''), 'General Medicine')` and `COALESCE(NULLIF(TRIM(d.qualification), ''), 'MBBS')`.
+     - In `frontend/src/pages/Patient/Appointments.jsx`, populated specialization filter dynamically with union of doctor specializations and standard hospital specialties. Added dedicated retry and clear-filter states when directory is empty or network fails.
+  4. **Direct Receptionist Self-Registration**:
+     - Implemented `receptionistSignup` in `Portal Major P/Bhumi/Doctor portal/backend/src/controllers/authController.js` and registered `POST /api/auth/receptionist/signup`.
+     - Enforces required fields, affirmative ethics consent (`terms_accepted: true`), bcrypt password hashing, and returns JWT with `role: 'receptionist'`.
+     - Dropped legacy generated column `single_receptionist` and unique index `uq_single_receptionist` on test database `rag_healthcare_test` to permit multiple test receptionists without collision.
+     - In `frontend/src/pages/Auth/Signup.jsx`, enabled active registration form for the Receptionist role, removing obsolete activation key links.
+  5. **Unified CareUnity Emerald Aesthetics**:
+     - Standardized clinician badge to `bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20` and logo to `from-emerald-600 to-teal-600` in `DashboardLayout.jsx`.
+     - In `Doctor/Prescriptions.jsx` and `SafetyAnalysisModal.jsx`, replaced blue buttons (`bg-blue-600`, `text-blue-700`) with CareUnity emerald tokens (`bg-emerald-600 hover:bg-emerald-700 text-white`).
+  6. **Teammate Reproducibility & Dual-Backend Configuration**:
+     - Standardized all frontend API clients (`patientApi.js`, `doctorApi.js`, `receptionistApi.js`, `authApi.js`) to resolve `VITE_API_BASE_URL || VITE_EXPRESS_URL || VITE_API_URL || "http://127.0.0.1:5000"`.
+     - Updated `frontend/.env.example` with clear instructions documenting FastAPI on port 8000 and Express on port 5000/5001.
+- **Verification Evidence**:
+  - `scratch/test_identity_receptionist_directory_e2e.js`: **45 / 45 passed (100%)** across:
+    * Identity & Isolation (15/15): Two synthetic patients (Priya vs Rohan), exact name in profile/dashboard, 403 BOLA tampering rejection.
+    * Post-Discharge Assistant (7/7): Grounded answers, emergency triage interception, out-of-scope policy abstention.
+    * Doctor Directory & Booking Loop (13/13): Synthetic doctor discoverability, dynamic specialization filter, appointment creation, doctor-side retrieval, patient-side pending status.
+    * Receptionist Direct Signup & RBAC (10/10): HTTP 201 signup without activation key, HTTP 200 immediate login, duplicate rejection, missing consent rejection, 403 doctor endpoint rejection.
+  - `scratch/test_doctor_direct_registration_e2e.js`: **36 / 36 passed (100%)**.
+  - `scratch/audit_rag_and_discharge_flows.js`: **19 / 19 passed (100%)**.
+  - Frontend production build (`npm run build`): Built cleanly in 915ms with 0 errors.
+  - Primary database `rag_healthcare`: 100% UNTOUCHED (176 users, 15 doctors).

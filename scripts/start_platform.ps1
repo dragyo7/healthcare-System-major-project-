@@ -119,7 +119,7 @@ Write-Host "====================================================================
 Write-Host "  PRIMARY APPLICATION URL : http://localhost:$FrontendPort" -ForegroundColor Green
 Write-Host "  EXPRESS EHR API GATEWAY : http://localhost:$ExpressPort/api" -ForegroundColor White
 Write-Host "  FASTAPI CDS INTERACTIVE : http://127.0.0.1:$FastApiPort/docs" -ForegroundColor White
-Write-Host "  MYSQL EHR DATABASE      : localhost:$MysqlPort (cdss_db)" -ForegroundColor White
+Write-Host "  MYSQL EHR DATABASE      : localhost:$MysqlPort (rag_healthcare)" -ForegroundColor White
 Write-Host "--------------------------------------------------------------------------" -ForegroundColor Gray
 Write-Host "  SYNTHETIC DEMO CREDENTIALS:" -ForegroundColor Cyan
 Write-Host "  1. CLINICIAN (Doctor)   : doctor@gmail.com       | password: doctor123" -ForegroundColor White

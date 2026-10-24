@@ -4,8 +4,8 @@ import { useAuth } from "../contexts/AuthContext";
 
 // Auth & Access
 import Login from "../pages/Auth/Login";
-import Activate from "../pages/Auth/Activate";
 import Signup from "../pages/Auth/Signup";
+import Activate from "../pages/Auth/Activate";
 import ForgotPassword from "../pages/Auth/ForgotPassword";
 import ResetPassword from "../pages/Auth/ResetPassword";
 
@@ -85,7 +85,14 @@ export default function AppRoutes() {
             </GuestRoute>
           }
         />
-        <Route path="/activate" element={<Activate />} />
+        <Route
+          path="/activate"
+          element={
+            <GuestRoute>
+              <Activate />
+            </GuestRoute>
+          }
+        />
         <Route path="/about" element={<About />} />
         <Route path="/home" element={<Home />} />
         <Route

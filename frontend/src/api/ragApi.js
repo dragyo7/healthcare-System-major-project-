@@ -1,7 +1,12 @@
 import axios from "axios";
 import { APP_CONFIG } from "../config/appConfig";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || APP_CONFIG.apiBaseUrl || "http://127.0.0.1:8000";
+const API_BASE_URL =
+  import.meta.env.VITE_FASTAPI_URL ||
+  import.meta.env.VITE_RAG_URL ||
+  APP_CONFIG.apiBaseUrl ||
+  "http://127.0.0.1:8000";
+
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,

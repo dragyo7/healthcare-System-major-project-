@@ -55,20 +55,42 @@ graph TD
 
 ---
 
-## 2. Login, JWT Issuance & Role-Based Access Control
+## 2. Direct Registration, Login, JWT Issuance & Role-Based Access Control
 
+### 2A. Direct Registration & Immediate Session Establishment
+**Entry Point**: `frontend/src/pages/Auth/Signup.jsx` (`handleSubmit`)
+**Trigger**: Doctor or Patient selects their role, fills in registration details, agrees to academic platform consent, and clicks Submit.
+
+#### Execution Path for Doctor Registration:
+1. `Signup.jsx` calls `authApi.signupDoctor(formData)` in `frontend/src/api/authApi.js`.
+2. Request hits Express router: `POST /api/auth/doctor/signup` in `Portal Major P/Bhumi/Doctor portal/backend/src/routes/authRoutes.js` under `authRateLimiter`.
+3. Express controller executes `doctorSignup` in `src/controllers/authController.js`:
+   - Validates required fields: `full_name`, `email`, `password`, `specialization`, `qualification`, `license_number`.
+   - Enforces affirmative consent: `terms_accepted: true`.
+   - Checks duplicate email in `users` table: `SELECT id FROM users WHERE email = ?`.
+   - Hashes password using `bcrypt.hash(password, 10)`.
+   - Dynamically inspects `users` table for `consent_timestamp` column; saves `UTC_TIMESTAMP()` if present.
+   - Inserts record into `users` (`role = 'doctor'`).
+   - Inserts record into `doctors` (`user_id`, `specialization`, `qualification`, `license_number`).
+   - Signs authoritative JWT: `jwt.sign({ user_id, doctor_id, role: 'doctor' }, JWT_SECRET, { expiresIn: '24h' })`.
+   - Returns HTTP 201 with `{ message, token, doctor: { id, user_id, doctor_id, full_name, email, role, specialization, qualification, license_number } }`.
+4. `AuthContext.jsx` receives response via `signUpDoctor`, saves `token` and `cdss_token` in `localStorage`, and updates React `user` state.
+5. `Signup.jsx` navigates immediately to `/doctor` without requiring an activation step, key, or invitation code.
+
+### 2B. Login, JWT Issuance & Role-Based Access Control
 **Entry Point**: `frontend/src/pages/Auth/Login.jsx` (`handleSubmit`)
 **Trigger**: User enters email, password, and selects role (`doctor`, `patient`, `receptionist`).
 
-### Execution Path:
-1. `Login.jsx` calls `api.post('/api/auth/<role>/login', { email, password })` defined in `frontend/src/api/authApi.js`.
-2. Request hits Express router: `src/routes/authRoutes.js` $\to$ `authRateLimiter` (`src/middleware/rateLimiter.js`).
+#### Execution Path:
+1. `Login.jsx` calls `authApi.login(email, password, role)` defined in `frontend/src/api/authApi.js`.
+2. Request hits Express router: `POST /api/auth/<role>/login` in `src/routes/authRoutes.js` $\to$ `authRateLimiter` (`src/middleware/rateLimiter.js`).
 3. Express controller executes `doctorLogin`, `patientLogin`, or `receptionistLogin` in `src/controllers/authController.js`:
    - Queries `users` table: `SELECT * FROM users WHERE email = ? AND role = ?`.
+   - If doctor, queries `doctors` table for `doctor_id`, `specialization`, `qualification`, `license_number`.
    - Compares password with `bcrypt.compare(password, user.password_hash)`.
-   - If valid, signs JWT: `jwt.sign({ id: user.id, role: user.role, email: user.email }, process.env.JWT_SECRET, { expiresIn: '24h' })`.
-   - Returns `{ token, user: { id, email, role, name } }`.
-4. Frontend `AuthContext.jsx` stores token in `localStorage.getItem('token')` and updates React state.
+   - If valid, signs JWT containing `{ user_id, doctor_id (if doctor), role: user.role, email: user.email }`.
+   - Returns `{ token, user: { id, doctor_id, email, role, name, specialization, qualification } }`.
+4. Frontend `AuthContext.jsx` stores token in `localStorage` and updates React state.
 5. `AppRoutes.jsx` `RootRedirect` reads `user.role` and navigates to role workspace:
    - `doctor` $\to$ `/doctor` (guarded by `RoleGuard allowedRoles={['doctor']}`)
    - `patient` $\to$ `/patient` (guarded by `RoleGuard allowedRoles={['patient']}`)
@@ -548,3 +570,63 @@ graph TD
   - `npm run build`: built in 1.35s with 0 errors.
   - Python `pypdf` test: verified page count = 1, text extraction verified St. Mary Hospital, diagnosis, dosage, and CDSS attestation.
   - Primary database `rag_healthcare`: 100% UNTOUCHED (15 tables, 176 users, 160 patients, 65 prescriptions).
+
+- **Change ID**: `FINAL-CDSS-DIRECT-DOCTOR-REGISTRATION-001` (DEC-035: Removal of Doctor Activation Key & Implementation of Direct Self-Registration)
+- **Problem Being Solved**:
+  1. The system previously imposed a manual activation gate / key requirement for clinicians, preventing direct public signup.
+  2. Doctors needed to be able to sign up directly through the frontend, receive a persisted account in MySQL, establish an immediate authenticated session, and enter the Doctor Workspace without entering an activation code.
+  3. Patient registration and receptionist intake needed to be preserved without regression.
+  4. Security invariants (bcrypt hashing, affirmative consent, duplicate check, role guards, BOLA) needed strict preservation.
+- **Execution Path**:
+  1. **Backend Route & Controller (`authRoutes.js`, `authController.js`)**:
+     - `POST /api/auth/doctor/signup` registered with `authRateLimiter`.
+     - Validates required fields, password length, affirmative consent, and uniqueness of email.
+     - Hashes password with `bcrypt` (10 rounds).
+     - Dynamically inspects `users` table for `consent_timestamp` column to support both migrated and unmigrated database targets.
+     - Inserts into `users` (`role = 'doctor'`) and `doctors` (`user_id`, `specialization`, `qualification`, `license_number`).
+     - Signs JWT with `{ user_id, doctor_id, role: 'doctor' }` and returns HTTP 201.
+  2. **Doctor Login Hardening (`authController.js:doctorLogin`)**:
+     - Queries `doctors` table and includes `doctor_id`, `specialization`, `qualification`, and `license_number` in both the signed JWT and response body.
+  3. **Frontend Integration (`authApi.js`, `AuthContext.jsx`, `Signup.jsx`)**:
+     - `authApi.signupDoctor` calls backend registration endpoint.
+     - `AuthContext.jsx:signUpDoctor` stores JWT tokens (`token`, `cdss_token`) in `localStorage` and updates React user state.
+     - `Signup.jsx`: Renders 3-role selector (`Doctor`, `Patient`, `Receptionist`). Doctor tab presents specialization, qualification, license number, academic credential disclaimer, and affirmative ethics consent. On submit, directs doctor straight to `/doctor`.
+     - `Login.jsx`: Generalizes login status messages; removes obsolete activation URL parameter logic.
+     - `Activate.jsx`: Kept specifically for walk-in desk patient activation; removed from normal doctor/patient user journey.
+- **Post-Change Verification**:
+  - `scratch/test_doctor_direct_registration_e2e.js`: 36/36 passed (100%).
+  - Browser E2E subagent: verified doctor registration, direct session creation, and immediate login on `http://127.0.0.1:5173`.
+  - Frontend production build (`npm run build`): 0 errors (built in 769ms).
+  - Primary database `rag_healthcare`: 100% UNTOUCHED (176 users, 15 doctors).
+
+- **Change ID**: `FINAL-CDSS-TEAM-BLOCKER-REPAIR-001` (DEC-036: Patient Identity Normalization, CDS Offline Recovery, Doctor Directory Discoverability, Direct Receptionist Signup & CareUnity Aesthetics)
+- **Problem Being Solved**:
+  1. Patient Identity Mismatch: newly registered patient account (e.g. Priya) showed "Priya" on the greeting card but top-right account showed "Aarav Patil" and Aarav's email due to fallback defaults in `authApi.js`.
+  2. Post-Discharge Assistant `fetch failed`: RAG client hit misconfigured port/route and converted network errors to misleading `system_error` safety badges.
+  3. Doctor directory was empty with no specialization options due to NULL database values and lack of fallback taxonomy.
+  4. Receptionist signup required an activation token due to missing self-registration endpoint and legacy unique index in `rag_healthcare_test`.
+  5. Inconsistent colors: emerald/green navigation with blue/navy headers and buttons.
+- **Execution Path**:
+  1. **Patient Identity Normalization**:
+     - `frontend/src/api/authApi.js`: Removed hardcoded fallback strings. Dynamic resolution across `patient.name`, `patient.full_name`, `user.name`, `user.full_name`.
+     - `frontend/src/pages/Auth/Login.jsx`: Removed hardcoded initial credentials and prevented role change from overwriting inputs with demo account emails.
+     - `frontend/src/pages/Patient/Profile.jsx`: Removed hardcoded `"patient@gmail.com"` fallback.
+  2. **Post-Discharge Assistant Transport & Offline Recovery**:
+     - `frontend/src/api/ragApi.js`: Explicitly routes CDS queries to `VITE_FASTAPI_URL` (port 8000), preventing misdirection to Express.
+     - `frontend/src/pages/Patient/Assistant.jsx`: Replaced deceptive safety status with honest offline transport banner and interactive `Retry Question ↺` button.
+  3. **Doctor Directory Discoverability**:
+     - `patientController.js`: Wrapped specialization and qualification in SQL `COALESCE` with standard defaults (`General Medicine`, `MBBS`).
+     - `Appointments.jsx`: Dynamic union of active doctor specializations and clinical taxonomy. Added clear-filters and retry buttons.
+  4. **Direct Receptionist Self-Registration**:
+     - `authController.js:receptionistSignup`: Implemented direct signup with required fields, consent gate (`terms_accepted: true`), bcrypt hashing, and JWT issuance (`role: 'receptionist'`).
+     - `authRoutes.js`: Registered `POST /api/auth/receptionist/signup`.
+     - `rag_healthcare_test`: Dropped legacy singleton constraint `uq_single_receptionist`.
+     - `Signup.jsx`: Enabled live registration form for Receptionist role.
+  5. **CareUnity Unified Emerald Theme**:
+     - `DashboardLayout.jsx`, `Prescriptions.jsx`, `SafetyAnalysisModal.jsx`: Standardized to CareUnity emerald-600 / teal tokens.
+- **Post-Change Verification**:
+  - `scratch/test_identity_receptionist_directory_e2e.js`: **45/45 passed (100%)**.
+  - `scratch/test_doctor_direct_registration_e2e.js`: **36/36 passed (100%)**.
+  - `scratch/audit_rag_and_discharge_flows.js`: **19/19 passed (100%)**.
+  - Frontend production build (`npm run build`): Built cleanly in 915ms with 0 errors.
+  - Primary database `rag_healthcare`: 100% UNTOUCHED (176 users, 15 doctors).

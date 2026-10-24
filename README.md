@@ -464,6 +464,14 @@ npm run dev
 
 ### Live Evaluation Demonstration Steps
 
+#### 0. Direct Doctor Self-Registration (Zero Activation Keys)
+1. Open `http://localhost:5173/signup` and select the **Doctor** role tab.
+2. Enter clinician details (Name, Email, Password, Specialization, Qualification, Medical License No.).
+3. Check the affirmative ethics & academic platform consent checkbox. Click "Create Doctor Account".
+   - **Observed Result**: Account is created atomically in MySQL (`users` and `doctors` tables), real JWT session is established, and doctor is redirected directly to `/doctor` without an activation key, token, or manual approval gate.
+4. Log out and log in at `http://localhost:5173/login` selecting Doctor role and entering the registered credentials.
+   - **Observed Result**: Immediate authenticated login without any secondary code or activation gate.
+
 #### 1. Doctor Prescribing & Instant Safety Alert
 1. Open `http://localhost:5173/login` and log in as Doctor (`doctor@gmail.com` / `doctor123`).
 2. Navigate to **Patients Dossier** (`/doctor/patients`) and select **Aarav Patil** (Patient #1). Note documented allergy: `Allergy: Penicillin`.

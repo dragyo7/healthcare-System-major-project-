@@ -870,9 +870,9 @@ export default function DoctorPrescriptions() {
                 type="button"
                 onClick={handleRunSafetyCheck}
                 disabled={safetyChecking}
-                className="px-4 py-2.5 rounded-xl text-xs font-bold bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 hover:bg-blue-100 flex items-center gap-2 cursor-pointer shadow-xs transition-colors"
+                className="px-4 py-2.5 rounded-xl text-xs font-bold bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 flex items-center gap-2 cursor-pointer shadow-xs transition-colors"
               >
-                <ShieldCheck className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                 <span>{safetyChecking ? "Evaluating Clinically..." : (t("Run Safety Analysis") || "Run Safety Analysis")}</span>
               </button>
 

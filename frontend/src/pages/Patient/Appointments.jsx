@@ -109,17 +109,30 @@ export default function PatientAppointments() {
     }
   };
 
-  const uniqueSpecialities = Array.from(
-    new Set(doctors.map((d) => d.specialization).filter(Boolean))
-  );
+  const standardSpecialities = [
+    "General Medicine",
+    "Cardiology",
+    "Endocrinology",
+    "Internal Medicine",
+    "Pediatrics",
+    "Neurology",
+    "Pulmonology",
+    "Orthopedics",
+  ];
+
+  const registered = doctors.map((d) => d.specialization).filter((s) => s && s !== "Unspecified");
+  const hasUnspecified = doctors.some((d) => d.specialization === "Unspecified");
+  const uniqueSpecialities = Array.from(new Set([...registered, ...standardSpecialities])).sort();
+  if (hasUnspecified) uniqueSpecialities.push("Unspecified");
 
   const filteredDoctors = doctors.filter((doc) => {
     const docName = doc.full_name || doc.name || "";
+    const docSpec = doc.specialization || "Unspecified";
     const matchesSearch =
       docName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (doc.specialization || "").toLowerCase().includes(searchTerm.toLowerCase());
+      docSpec.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesSpeciality =
-      specialityFilter === "all" || doc.specialization === specialityFilter;
+      specialityFilter === "all" || docSpec.toLowerCase() === specialityFilter.toLowerCase();
     return matchesSearch && matchesSpeciality;
   });
 
@@ -308,12 +321,41 @@ export default function PatientAppointments() {
           <div className="flex items-center justify-center p-12">
             <Loader2 className="h-8 w-8 text-emerald-600 animate-spin" />
           </div>
+        ) : error && doctors.length === 0 ? (
+          <div className="rounded-2xl border border-rose-200 dark:border-rose-900/60 p-8 text-center bg-rose-50/50 dark:bg-rose-950/20">
+            <AlertCircle className="h-10 w-10 text-rose-500 mx-auto mb-2" />
+            <p className="text-sm font-bold text-rose-800 dark:text-rose-300">
+              {t("Unable to connect to hospital doctor directory")}
+            </p>
+            <p className="text-xs text-rose-600 dark:text-rose-400 mt-1 max-w-md mx-auto">
+              {error}
+            </p>
+            <button
+              onClick={loadData}
+              className="mt-4 px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold transition-colors cursor-pointer"
+            >
+              {t("Retry Loading Directory")}
+            </button>
+          </div>
         ) : filteredDoctors.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 p-8 text-center bg-white dark:bg-slate-900/50">
             <User className="h-10 w-10 text-slate-400 mx-auto mb-2" />
             <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-              {t("No physicians matching criteria")}
+              {doctors.length === 0
+                ? t("No registered physicians currently available in directory.")
+                : t("No physicians match your search or specialization filter criteria.")}
             </p>
+            {(searchTerm || specialityFilter !== "all") && (
+              <button
+                onClick={() => {
+                  setSearchTerm("");
+                  setSpecialityFilter("all");
+                }}
+                className="mt-3 px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+              >
+                {t("Reset Filters")}
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -334,12 +376,16 @@ export default function PatientAppointments() {
                         <h3 className="font-bold text-slate-900 dark:text-white text-base">
                           Dr. {docName}
                         </h3>
-                        <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
-                          {doc.specialization || "General Medicine"}
+                        <p className={`text-xs font-semibold ${doc.specialization === "Unspecified" ? "text-amber-600 dark:text-amber-400" : "text-emerald-700 dark:text-emerald-400"}`}>
+                          {doc.specialization && doc.specialization !== "Unspecified" ? doc.specialization : t("Specialization: Unspecified")}
                         </p>
-                        {doc.qualification && (
+                        {doc.qualification && doc.qualification !== "Unspecified" ? (
                           <p className="text-[11px] text-slate-500 font-mono">
                             {doc.qualification}
+                          </p>
+                        ) : (
+                          <p className="text-[11px] text-slate-400 italic">
+                            {t("Credentials pending completion")}
                           </p>
                         )}
                       </div>
@@ -401,7 +447,7 @@ export default function PatientAppointments() {
                   Book Appointment
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Dr. {selectedDoctor.full_name || selectedDoctor.name} ({selectedDoctor.specialization || "General Medicine"})
+                  Dr. {selectedDoctor.full_name || selectedDoctor.name} ({selectedDoctor.specialization && selectedDoctor.specialization !== "Unspecified" ? selectedDoctor.specialization : "Specialization Unspecified"})
                 </p>
               </div>
             </div>
