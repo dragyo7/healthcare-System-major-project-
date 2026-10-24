@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { patientApi } from "../../api/patientApi";
+import { useLanguage } from "../../contexts/LanguageContext";
 import {
   User,
   Mail,
@@ -13,6 +14,7 @@ import {
 } from "lucide-react";
 
 export default function PatientProfile() {
+  const { t } = useLanguage();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -54,15 +56,15 @@ export default function PatientProfile() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
             <User className="w-6 h-6 text-primary" />
-            Patient Health Profile & Demographics
+            {t("Patient Health Profile & Demographics") || "Patient Health Profile & Demographics"}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Verified identity, clinical emergency contacts, and recorded physiological indicators.
+            {t("Verified identity, clinical emergency contacts, and recorded physiological indicators.") || "Verified identity, clinical emergency contacts, and recorded physiological indicators."}
           </p>
         </div>
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 w-fit">
           <ShieldCheck className="w-3.5 h-3.5" />
-          Activated EHR Profile (RBAC: Patient)
+          {t("Activated EHR Profile (RBAC: Patient)") || "Activated EHR Profile (RBAC: Patient)"}
         </span>
       </div>
 
@@ -76,24 +78,24 @@ export default function PatientProfile() {
           <p className="text-xs text-muted-foreground">{profile.email || "patient@gmail.com"}</p>
           <div className="mt-4 inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-semibold bg-rose-500/10 text-rose-600 border border-rose-500/20">
             <Heart className="w-3.5 h-3.5" />
-            Blood Group: {profile.blood_group || "Unknown"}
+            {t("Blood Group:") || "Blood Group:"} {profile.blood_group || "Unknown"}
           </div>
         </div>
 
         {/* Demographics Detail Card */}
         <div className="md:col-span-2 rounded-xl border border-border bg-card p-6 shadow-sm space-y-4">
           <h3 className="text-base font-semibold text-foreground border-b border-border/60 pb-3">
-            Identity & Contact Information
+            {t("Identity & Contact Information") || "Identity & Contact Information"}
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div>
-              <span className="text-muted-foreground font-semibold uppercase text-[11px]">Full Legal Name</span>
+              <span className="text-muted-foreground font-semibold uppercase text-[11px]">{t("Full Legal Name") || "Full Legal Name"}</span>
               <p className="text-foreground font-bold mt-0.5">{profile.name || profile.full_name || "N/A"}</p>
             </div>
 
             <div>
-              <span className="text-muted-foreground font-semibold uppercase text-[11px]">Registered Email</span>
+              <span className="text-muted-foreground font-semibold uppercase text-[11px]">{t("Registered Email") || "Registered Email"}</span>
               <p className="text-foreground font-bold mt-0.5 flex items-center gap-1">
                 <Mail className="w-3.5 h-3.5 text-primary" />
                 {profile.email || "N/A"}
@@ -101,7 +103,7 @@ export default function PatientProfile() {
             </div>
 
             <div>
-              <span className="text-muted-foreground font-semibold uppercase text-[11px]">Contact Telephone</span>
+              <span className="text-muted-foreground font-semibold uppercase text-[11px]">{t("Contact Telephone") || "Contact Telephone"}</span>
               <p className="text-foreground font-bold mt-0.5 flex items-center gap-1">
                 <Phone className="w-3.5 h-3.5 text-primary" />
                 {profile.phone || "N/A"}
@@ -109,7 +111,7 @@ export default function PatientProfile() {
             </div>
 
             <div>
-              <span className="text-muted-foreground font-semibold uppercase text-[11px]">Date of Birth / Age</span>
+              <span className="text-muted-foreground font-semibold uppercase text-[11px]">{t("Date of Birth / Age") || "Date of Birth / Age"}</span>
               <p className="text-foreground font-bold mt-0.5 flex items-center gap-1">
                 <Calendar className="w-3.5 h-3.5 text-primary" />
                 {profile.date_of_birth ? new Date(profile.date_of_birth).toLocaleDateString() : `${profile.age || "N/A"} years`}
@@ -117,12 +119,12 @@ export default function PatientProfile() {
             </div>
 
             <div>
-              <span className="text-muted-foreground font-semibold uppercase text-[11px]">Biological Sex</span>
+              <span className="text-muted-foreground font-semibold uppercase text-[11px]">{t("Biological Sex") || "Biological Sex"}</span>
               <p className="text-foreground font-bold mt-0.5">{profile.gender || "N/A"}</p>
             </div>
 
             <div>
-              <span className="text-muted-foreground font-semibold uppercase text-[11px]">Documented Drug Allergies</span>
+              <span className="text-muted-foreground font-semibold uppercase text-[11px]">{t("Documented Drug Allergies") || "Documented Drug Allergies"}</span>
               <p className="text-amber-600 font-bold mt-0.5 flex items-center gap-1">
                 <AlertCircle className="w-3.5 h-3.5" />
                 {profile.allergies || "No documented contraindications"}
@@ -130,7 +132,7 @@ export default function PatientProfile() {
             </div>
 
             <div className="sm:col-span-2">
-              <span className="text-muted-foreground font-semibold uppercase text-[11px]">Residential Address</span>
+              <span className="text-muted-foreground font-semibold uppercase text-[11px]">{t("Residential Address") || "Residential Address"}</span>
               <p className="text-foreground font-bold mt-0.5 flex items-center gap-1">
                 <Home className="w-3.5 h-3.5 text-primary" />
                 {profile.address || "123 Medical Center Way, Sector 4"}
@@ -138,7 +140,7 @@ export default function PatientProfile() {
             </div>
 
             <div className="sm:col-span-2">
-              <span className="text-muted-foreground font-semibold uppercase text-[11px]">Emergency Contact Person</span>
+              <span className="text-muted-foreground font-semibold uppercase text-[11px]">{t("Emergency Contact Person") || "Emergency Contact Person"}</span>
               <p className="text-foreground font-bold mt-0.5">
                 {profile.emergency_contact || "Primary Caregiver (+91 98765 43210)"}
               </p>

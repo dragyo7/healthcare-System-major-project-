@@ -48,7 +48,7 @@ export default function DoctorDashboard() {
         <div className="space-y-1 z-10 max-w-2xl">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-500/20 text-primary-200 text-xs font-semibold backdrop-blur-xs border border-primary-400/20">
             <Sparkles className="h-3.5 w-3.5 text-primary-300" />
-            <span>Frozen RAG v2.10 • Deterministic Clinical Intelligence</span>
+            <span>Evidence-Grounded Clinical Guidance • Safety Intelligence</span>
           </div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
             Welcome, Dr. {user?.name || "Bhumi Sharma"}

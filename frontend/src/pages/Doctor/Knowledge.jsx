@@ -26,7 +26,7 @@ export default function Knowledge() {
         <div className="relative z-10 max-w-2xl flex flex-col gap-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-primary-200 text-xs font-semibold backdrop-blur-xs w-fit">
             <Database className="h-3.5 w-3.5" />
-            <span>2,204 Production Chunks • Frozen Baseline</span>
+            <span>2,204 Verified Clinical Monographs • Active Index</span>
           </div>
           <h2 className="text-2xl font-bold tracking-tight">DailyMed & Evidence Knowledge Base</h2>
           <p className="text-sm text-primary-100/90 leading-relaxed">

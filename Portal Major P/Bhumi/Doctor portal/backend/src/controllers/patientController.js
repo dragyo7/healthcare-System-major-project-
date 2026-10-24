@@ -16,6 +16,7 @@
 const db = require("../config/db");
 const PDFDocument = require("pdfkit");
 const { sanitizePatientContext, forwardToFastAPICDS } = require("../services/cdsBridgeService");
+const { generatePrescriptionPdfStream } = require("../services/prescriptionPdfService");
 
 /**
  * Helper: Resolve the authenticated user's actual patient record
@@ -752,62 +753,21 @@ const generatePatientPrescriptionPDF = async (req, res) => {
         );
 
         // Stream PDF
-        const doc = new PDFDocument({ margin: 50 });
         res.setHeader("Content-Type", "application/pdf");
         res.setHeader("Content-Disposition", `inline; filename=prescription-${prescriptionId}.pdf`);
 
-        doc.pipe(res);
-
-        // Header
-        doc.fontSize(20).font("Helvetica-Bold").text("RAG Healthcare", { align: "center" });
-        doc.moveDown(0.5).fontSize(16).text("Medical Prescription", { align: "center" });
-        doc.moveDown();
-
-        // Doctor details
-        doc.fontSize(11).font("Helvetica-Bold");
-        doc.text(`Dr. ${prescription.doctor_name}`);
-        doc.font("Helvetica");
-        doc.text(`${prescription.specialization || ""} | ${prescription.qualification || ""}`);
-        if (prescription.license_number) {
-            doc.text(`License No.: ${prescription.license_number}`);
-        }
-        doc.moveDown();
-
-        // Patient details
-        doc.font("Helvetica-Bold").text("Patient Details");
-        doc.font("Helvetica");
-        doc.text(`Name: ${prescription.patient_name}`);
-        doc.text(`Date: ${new Date(prescription.prescription_date).toLocaleDateString()}`);
-        doc.moveDown();
-
-        // Diagnosis
-        doc.font("Helvetica-Bold").text("Diagnosis");
-        doc.font("Helvetica").text(prescription.diagnosis || "Not specified");
-        doc.moveDown();
-
-        // Medicines
-        doc.font("Helvetica-Bold").text("Medicines");
-        doc.moveDown(0.5);
-        medicines.forEach((m, idx) => {
-            doc.font("Helvetica-Bold").text(`${idx + 1}. ${m.medicine_name}`);
-            doc.font("Helvetica");
-            if (m.dosage) doc.text(`Dosage: ${m.dosage}`);
-            if (m.frequency) doc.text(`Frequency: ${m.frequency}`);
-            if (m.duration) doc.text(`Duration: ${m.duration}`);
-            if (m.instructions) doc.text(`Instructions: ${m.instructions}`);
-            doc.moveDown(0.5);
+        generatePrescriptionPdfStream({
+            prescription,
+            doctor: {
+                full_name: prescription.doctor_name,
+                specialization: prescription.specialization,
+                qualification: prescription.qualification,
+                license_number: prescription.license_number
+            },
+            patient: ownPatient,
+            medicines,
+            outputStream: res
         });
-
-        // Notes
-        if (prescription.notes) {
-            doc.moveDown();
-            doc.font("Helvetica-Bold").text("Doctor's Notes");
-            doc.font("Helvetica").text(prescription.notes);
-        }
-
-        doc.moveDown(2);
-        doc.fontSize(10).text("This prescription was generated through the RAG Healthcare system.", { align: "center" });
-        doc.end();
     } catch (error) {
         console.error("Patient PDF generation error:", error);
         return res.status(500).json({ message: "Failed to generate prescription PDF" });

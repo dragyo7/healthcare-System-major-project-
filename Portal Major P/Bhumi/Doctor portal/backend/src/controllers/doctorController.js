@@ -19,6 +19,7 @@ const {
     performOcr,
     extractCandidateFields
 } = require("../services/prescriptionOcrService");
+const { generatePrescriptionPdfStream } = require("../services/prescriptionPdfService");
 const crypto = require("crypto");
 
 // Allergy class and brand mapping for clinical safety boundary
@@ -1267,7 +1268,10 @@ const generatePrescriptionPDF = async (req, res) => {
                 p.diagnosis,
                 p.notes,
                 p.prescription_date,
-                u.full_name AS patient_name
+                u.full_name AS patient_name,
+                pt.gender,
+                pt.blood_group,
+                pt.allergies
              FROM prescriptions p
              JOIN patients pt
                 ON p.patient_id = pt.patient_id
@@ -1293,120 +1297,25 @@ const generatePrescriptionPDF = async (req, res) => {
             [prescriptionId]
         );
 
-        // Create PDF
-        const doc = new PDFDocument({
-            margin: 50
-        });
-
         res.setHeader("Content-Type", "application/pdf");
         res.setHeader(
             "Content-Disposition",
             `inline; filename=prescription-${prescriptionId}.pdf`
         );
 
-        doc.pipe(res);
-
-        // Header
-        doc
-            .fontSize(20)
-            .font("Helvetica-Bold")
-            .text("RAG Healthcare", {
-                align: "center"
-            });
-
-        doc
-            .moveDown(0.5)
-            .fontSize(16)
-            .text("Medical Prescription", {
-                align: "center"
-            });
-
-        doc.moveDown();
-
-        // Doctor details
-        doc.fontSize(11).font("Helvetica-Bold");
-        doc.text(`Dr. ${doctor.full_name}`);
-
-        doc.font("Helvetica");
-        doc.text(
-            `${doctor.specialization || ""} | ${doctor.qualification || ""}`
-        );
-
-        if (doctor.license_number) {
-            doc.text(`License No.: ${doctor.license_number}`);
-        }
-
-        doc.moveDown();
-
-        // Patient details
-        doc.font("Helvetica-Bold").text("Patient Details");
-        doc.font("Helvetica");
-
-        doc.text(`Name: ${prescription.patient_name}`);
-        doc.text(
-            `Date: ${new Date(
-                prescription.prescription_date
-            ).toLocaleDateString()}`
-        );
-
-        doc.moveDown();
-
-        // Diagnosis
-        doc.font("Helvetica-Bold").text("Diagnosis");
-        doc.font("Helvetica");
-        doc.text(prescription.diagnosis || "Not specified");
-
-        doc.moveDown();
-
-        // Medicines
-        doc.font("Helvetica-Bold").text("Medicines");
-        doc.moveDown(0.5);
-
-        medicines.forEach((medicine, index) => {
-            doc.font("Helvetica-Bold").text(
-                `${index + 1}. ${medicine.medicine_name}`
-            );
-
-            doc.font("Helvetica");
-
-            if (medicine.dosage) {
-                doc.text(`Dosage: ${medicine.dosage}`);
-            }
-
-            if (medicine.frequency) {
-                doc.text(`Frequency: ${medicine.frequency}`);
-            }
-
-            if (medicine.duration) {
-                doc.text(`Duration: ${medicine.duration}`);
-            }
-
-            if (medicine.instructions) {
-                doc.text(`Instructions: ${medicine.instructions}`);
-            }
-
-            doc.moveDown(0.5);
+        generatePrescriptionPdfStream({
+            prescription,
+            doctor,
+            patient: {
+                full_name: prescription.patient_name,
+                patient_id: prescription.patient_id,
+                gender: prescription.gender,
+                blood_group: prescription.blood_group,
+                allergies: prescription.allergies
+            },
+            medicines,
+            outputStream: res
         });
-
-        // Notes
-        if (prescription.notes) {
-            doc.moveDown();
-            doc.font("Helvetica-Bold").text("Doctor's Notes");
-            doc.font("Helvetica").text(prescription.notes);
-        }
-
-        doc.moveDown(2);
-
-        doc
-            .fontSize(10)
-            .text(
-                "This prescription was generated through the RAG Healthcare system.",
-                {
-                    align: "center"
-                }
-            );
-
-        doc.end();
 
     } catch (error) {
         console.error(
@@ -1966,17 +1875,32 @@ const uploadAndProcessPrescriptionOcr = async (req, res) => {
             ]
         );
 
-        return res.status(201).json({
+        const responsePayload = {
             message: "Prescription image uploaded and OCR processed successfully. Human review required before confirmation.",
             job_id: result.insertId,
             review_status: "pending_review",
             raw_extracted_text: raw_text,
+            raw_ocr_text: raw_text,
             candidate_fields: candidateFields,
+            parsed_medicines: candidateFields,
             confidence_score: ocr_confidence,
             detected_orientation: detected_orientation || 0,
             orientation_corrected: orientation_corrected || false,
-            requires_human_confirmation: true
-        });
+            requires_human_confirmation: true,
+            job: {
+                job_id: result.insertId,
+                patient_id: patientId,
+                doctor_id: doctorId,
+                review_status: "pending_review",
+                raw_extracted_text: raw_text,
+                raw_ocr_text: raw_text,
+                candidate_fields: candidateFields,
+                parsed_medicines: candidateFields,
+                confidence_score: ocr_confidence
+            }
+        };
+
+        return res.status(201).json(responsePayload);
 
     } catch (err) {
         console.error("Prescription OCR upload error:", err);
@@ -2034,9 +1958,12 @@ const confirmPrescriptionOcrJob = async (req, res) => {
     let connection;
     try {
         const userId = req.user.user_id;
-        const { job_id, diagnosis, notes, confirmed_medicines } = req.body;
+        const { job_id, diagnosis, notes, confirmed_medicines, medicines } = req.body;
+        const medsToConfirm = Array.isArray(confirmed_medicines) && confirmed_medicines.length > 0
+            ? confirmed_medicines
+            : (Array.isArray(medicines) && medicines.length > 0 ? medicines : null);
 
-        if (!job_id || !Array.isArray(confirmed_medicines) || confirmed_medicines.length === 0) {
+        if (!job_id || !medsToConfirm) {
             return res.status(400).json({
                 message: "job_id and a non-empty confirmed_medicines array are required"
             });
@@ -2078,7 +2005,7 @@ const confirmPrescriptionOcrJob = async (req, res) => {
             : [];
 
         const ocrContraindications = [];
-        for (const med of confirmed_medicines) {
+        for (const med of medsToConfirm) {
             const medName = (med.medicine_name || "").toLowerCase().trim();
             for (const allergy of patientAllergies) {
                 if (checkAllergyContraindication(medName, allergy)) {
@@ -2116,7 +2043,7 @@ const confirmPrescriptionOcrJob = async (req, res) => {
 
         const newPrescriptionId = rxResult.insertId;
 
-        for (const med of confirmed_medicines) {
+        for (const med of medsToConfirm) {
             await connection.execute(
                 `INSERT INTO prescription_medicines (prescription_id, medicine_name, dosage, frequency, duration, instructions)
                  VALUES (?, ?, ?, ?, ?, ?)`,
@@ -2144,7 +2071,7 @@ const confirmPrescriptionOcrJob = async (req, res) => {
             message: "Prescription successfully reviewed and created",
             prescription_id: newPrescriptionId,
             job_id: job_id,
-            medicines_count: confirmed_medicines.length
+            medicines_count: medsToConfirm.length
         });
 
     } catch (err) {

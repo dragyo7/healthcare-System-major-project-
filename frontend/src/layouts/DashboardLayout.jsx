@@ -131,7 +131,7 @@ export default function DashboardLayout({ children, role }) {
             <div className="p-4 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 flex flex-col gap-1 items-center justify-center">
               <div className="flex items-center gap-1.5">
                 <Shield className="h-3.5 w-3.5 text-emerald-500" />
-                <span>{t("Frozen RAG v2.10 • RBAC Enforced")}</span>
+                <span>{t("Clinical Safety Checks Enabled")}</span>
               </div>
               <Link to="/about" className="text-primary-600 dark:text-primary-400 hover:underline font-medium text-[11px]">
                 {t("About & Healthcare Ethics")}

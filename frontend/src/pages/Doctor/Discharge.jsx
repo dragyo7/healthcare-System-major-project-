@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { doctorApi } from "../../api/doctorApi";
+import { useLanguage } from "../../contexts/LanguageContext";
 import {
   FileText,
   User,
@@ -13,6 +14,7 @@ import {
 } from "lucide-react";
 
 export default function DoctorDischarge() {
+  const { t } = useLanguage();
   const [patients, setPatients] = useState([]);
   const [selectedPatientId, setSelectedPatientId] = useState("");
   const [loadingPatients, setLoadingPatients] = useState(true);
@@ -131,14 +133,14 @@ export default function DoctorDischarge() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
             <FileText className="w-6 h-6 text-primary" />
-            Post-Discharge Care Summary Authoring
+            {t("Post-Discharge Care Summary Authoring") || "Post-Discharge Care Summary Authoring"}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Formulate clinical discharge directives, recovery guidance, warning signs, and follow-up schedules.
+            {t("Formulate clinical discharge directives, recovery guidance, warning signs, and follow-up schedules.") || "Formulate clinical discharge directives, recovery guidance, warning signs, and follow-up schedules."}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <label className="text-xs font-semibold text-muted-foreground">Select Patient:</label>
+          <label className="text-xs font-semibold text-muted-foreground">{t("Select Patient:") || "Select Patient:"}</label>
           <select
             value={selectedPatientId}
             onChange={(e) => setSelectedPatientId(e.target.value)}
@@ -147,7 +149,7 @@ export default function DoctorDischarge() {
           >
             {patients.map((p) => (
               <option key={p.patient_id} value={p.patient_id}>
-                {p.name} (ID: #{p.patient_id})
+                {p.full_name || p.name || "Patient"} (ID: #{p.patient_id})
               </option>
             ))}
           </select>
@@ -172,12 +174,12 @@ export default function DoctorDischarge() {
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 flex flex-wrap items-center justify-between gap-4 text-xs">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-primary/20 text-primary font-bold flex items-center justify-center">
-              {selectedPatient.name.charAt(0)}
+              {(selectedPatient.full_name || selectedPatient.name || "P").charAt(0)}
             </div>
             <div>
-              <p className="font-bold text-foreground text-sm">{selectedPatient.name}</p>
+              <p className="font-bold text-foreground text-sm">{selectedPatient.full_name || selectedPatient.name || "Patient"}</p>
               <p className="text-muted-foreground">
-                Age: {selectedPatient.age || "N/A"} | Gender: {selectedPatient.gender || "N/A"} | Blood: {selectedPatient.blood_group || "N/A"}
+                {t("Age:") || "Age:"} {selectedPatient.age || "N/A"} | {t("Gender:") || "Gender:"} {selectedPatient.gender || "N/A"} | {t("Blood Group:") || "Blood Group:"} {selectedPatient.blood_group || "N/A"}
               </p>
             </div>
           </div>
@@ -193,11 +195,11 @@ export default function DoctorDischarge() {
           <div className="rounded-xl border border-border bg-card p-5 space-y-4 shadow-sm">
             <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
               <Calendar className="w-4 h-4 text-primary" />
-              Admission & Episode Details
+              {t("Admission & Episode Details") || "Admission & Episode Details"}
             </h3>
 
             <div>
-              <label className="block text-xs font-semibold text-foreground mb-1">Admission Date</label>
+              <label className="block text-xs font-semibold text-foreground mb-1">{t("Admission Date") || "Admission Date"}</label>
               <input
                 type="date"
                 required
@@ -208,7 +210,7 @@ export default function DoctorDischarge() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-foreground mb-1">Discharge Date</label>
+              <label className="block text-xs font-semibold text-foreground mb-1">{t("Discharge Date") || "Discharge Date"}</label>
               <input
                 type="date"
                 required
@@ -219,11 +221,11 @@ export default function DoctorDischarge() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-foreground mb-1">Discharge Primary Diagnosis</label>
+              <label className="block text-xs font-semibold text-foreground mb-1">{t("Discharge Primary Diagnosis") || "Discharge Primary Diagnosis"}</label>
               <input
                 type="text"
                 required
-                placeholder="e.g., Essential Hypertension, Acute Bronchitis"
+                placeholder={t("e.g., Essential Hypertension, Acute Bronchitis") || "e.g., Essential Hypertension, Acute Bronchitis"}
                 value={formData.diagnosis}
                 onChange={(e) => setFormData({ ...formData, diagnosis: e.target.value })}
                 className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background text-foreground"
@@ -231,7 +233,7 @@ export default function DoctorDischarge() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-foreground mb-1">Recommended Follow-up Date</label>
+              <label className="block text-xs font-semibold text-foreground mb-1">{t("Recommended Follow-up Date") || "Recommended Follow-up Date"}</label>
               <input
                 type="date"
                 value={formData.follow_up_date}
@@ -245,12 +247,12 @@ export default function DoctorDischarge() {
           <div className="md:col-span-2 rounded-xl border border-border bg-card p-5 space-y-4 shadow-sm">
             <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
               <FileText className="w-4 h-4 text-primary" />
-              Care Directives & Warning Escalations
+              {t("Care Directives & Warning Escalations") || "Care Directives & Warning Escalations"}
             </h3>
 
             <div>
               <label className="block text-xs font-semibold text-foreground mb-1">
-                Clinical Discharge Summary (Inpatient Course & Outcome)
+                {t("Clinical Discharge Summary (Inpatient Course & Outcome)") || "Clinical Discharge Summary (Inpatient Course & Outcome)"}
               </label>
               <textarea
                 rows={3}
@@ -264,7 +266,7 @@ export default function DoctorDischarge() {
 
             <div>
               <label className="block text-xs font-semibold text-foreground mb-1">
-                Patient Discharge Instructions (Diet, Activity & Recovery)
+                {t("Patient Discharge Instructions (Diet, Activity & Recovery)") || "Patient Discharge Instructions (Diet, Activity & Recovery)"}
               </label>
               <textarea
                 rows={3}
@@ -279,7 +281,7 @@ export default function DoctorDischarge() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-foreground mb-1">
-                  Follow-up Instructions & Tests
+                  {t("Follow-up Instructions & Tests") || "Follow-up Instructions & Tests"}
                 </label>
                 <textarea
                   rows={2}
@@ -293,7 +295,7 @@ export default function DoctorDischarge() {
               <div>
                 <label className="block text-xs font-semibold text-amber-600 dark:text-amber-400 mb-1 flex items-center gap-1">
                   <ShieldAlert className="w-3.5 h-3.5" />
-                  Red-Flag Warning Signs (Urgent ER Escalation)
+                  {t("Red-Flag Warning Signs (Urgent ER Escalation)") || "Red-Flag Warning Signs (Urgent ER Escalation)"}
                 </label>
                 <textarea
                   rows={2}
@@ -316,12 +318,12 @@ export default function DoctorDischarge() {
             {saving ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Persisting to EHR...
+                {t("Persisting to EHR...") || "Persisting to EHR..."}
               </>
             ) : (
               <>
                 <Send className="w-4 h-4" />
-                Commit Discharge Directives
+                {t("Commit Discharge Directives") || "Commit Discharge Directives"}
               </>
             )}
           </button>

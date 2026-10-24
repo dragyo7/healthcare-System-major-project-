@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { receptionistApi } from "../../api/receptionistApi";
+import { useLanguage } from "../../contexts/LanguageContext";
 import {
   Users,
   Search,
@@ -18,6 +19,7 @@ import {
 } from "lucide-react";
 
 export default function ReceptionistPatients() {
+  const { t } = useLanguage();
   const [patients, setPatients] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
@@ -168,10 +170,10 @@ export default function ReceptionistPatients() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
             <Users className="w-6 h-6 text-primary" />
-            Patient Directory & Administrative Intake
+            {t("Patient Directory & Administrative Intake") || "Patient Directory & Administrative Intake"}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Search patient records, register new admissions, and issue secure cryptographic account activation credentials.
+            {t("Search patient records, register new admissions, and issue secure cryptographic account activation credentials.") || "Search patient records, register new admissions, and issue secure cryptographic account activation credentials."}
           </p>
         </div>
 
@@ -180,7 +182,7 @@ export default function ReceptionistPatients() {
           className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition shadow-sm w-fit"
         >
           <UserPlus className="w-4 h-4" />
-          Intake New Patient
+          {t("Intake New Patient") || "Intake New Patient"}
         </button>
       </div>
 
@@ -190,7 +192,7 @@ export default function ReceptionistPatients() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold text-sm">
               <CheckCircle2 className="w-5 h-5 shrink-0" />
-              Patient Registered Successfully — Single-Use Activation Token Generated
+              {t("Patient Registered Successfully — Single-Use Activation Token Generated") || "Patient Registered Successfully — Single-Use Activation Token Generated"}
             </div>
             <button
               onClick={() => setActivationAlert(null)}
@@ -202,13 +204,13 @@ export default function ReceptionistPatients() {
 
           <div className="text-xs space-y-1 text-muted-foreground">
             <p>
-              Patient: <strong className="text-foreground">{activationAlert.name}</strong> (EHR ID: #{activationAlert.patient_id})
+              {t("Patient:") || "Patient:"} <strong className="text-foreground">{activationAlert.name}</strong> (EHR ID: #{activationAlert.patient_id})
             </p>
             <p>
-              Registered Email: <strong className="text-foreground">{activationAlert.email}</strong>
+              {t("Registered Email:") || "Registered Email:"} <strong className="text-foreground">{activationAlert.email}</strong>
             </p>
             <p className="text-emerald-700 dark:text-emerald-300">
-              Provide this cryptographic activation URL to the patient to complete password setup:
+              {t("Provide this cryptographic activation URL to the patient to complete password setup:") || "Provide this cryptographic activation URL to the patient to complete password setup:"}
             </p>
           </div>
 
@@ -224,7 +226,7 @@ export default function ReceptionistPatients() {
               className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-semibold text-xs hover:bg-emerald-700 transition"
             >
               <Copy className="w-3.5 h-3.5" />
-              {copied ? "Copied Link!" : "Copy Link"}
+              {copied ? (t("Copied!") || "Copied Link!") : (t("Copy") || "Copy Link")}
             </button>
             <a
               href={activationAlert.activation_url}
@@ -233,7 +235,7 @@ export default function ReceptionistPatients() {
               className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-border bg-background hover:bg-muted text-foreground font-semibold text-xs transition"
             >
               <ExternalLink className="w-3.5 h-3.5" />
-              Open Activation Flow
+              {t("Open Activation Flow") || "Open Activation Flow"}
             </a>
           </div>
         </div>
@@ -253,12 +255,12 @@ export default function ReceptionistPatients() {
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search by patient name, phone, or email..."
+          placeholder={t("Search by patient name, phone, or email...") || "Search by patient name, phone, or email..."}
           className="w-full bg-transparent text-sm text-foreground focus:outline-none placeholder:text-muted-foreground"
         />
         {searchTerm && (
           <button onClick={() => setSearchTerm("")} className="text-xs text-muted-foreground hover:text-foreground">
-            Clear
+            {t("Clear") || "Clear"}
           </button>
         )}
       </div>
@@ -268,23 +270,23 @@ export default function ReceptionistPatients() {
         {loading ? (
           <div className="flex items-center justify-center p-12 space-y-3">
             <Loader2 className="w-6 h-6 animate-spin text-primary" />
-            <span className="text-xs text-muted-foreground ml-2">Loading directory...</span>
+            <span className="text-xs text-muted-foreground ml-2">{t("Loading...") || "Loading directory..."}</span>
           </div>
         ) : filtered.length === 0 ? (
           <div className="p-12 text-center text-xs text-muted-foreground">
-            No patient records found matching your search.
+            {t("No patient records found matching your search.") || "No patient records found matching your search."}
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
               <thead className="bg-muted/50 text-muted-foreground uppercase text-[11px] font-semibold border-b border-border">
                 <tr>
-                  <th className="py-3 px-4">EHR ID</th>
-                  <th className="py-3 px-4">Patient Name</th>
-                  <th className="py-3 px-4">Contact</th>
-                  <th className="py-3 px-4">DOB / Age</th>
-                  <th className="py-3 px-4">Sex / Blood</th>
-                  <th className="py-3 px-4">Known Allergies</th>
+                  <th className="py-3 px-4">{t("EHR ID") || "EHR ID"}</th>
+                  <th className="py-3 px-4">{t("Patient Name") || "Patient Name"}</th>
+                  <th className="py-3 px-4">{t("Contact") || "Contact"}</th>
+                  <th className="py-3 px-4">{t("DOB / Age") || "DOB / Age"}</th>
+                  <th className="py-3 px-4">{t("Sex / Blood") || "Sex / Blood"}</th>
+                  <th className="py-3 px-4">{t("Known Allergies") || "Known Allergies"}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">

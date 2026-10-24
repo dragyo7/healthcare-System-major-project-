@@ -1,6 +1,22 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Mail, Lock, User, Phone, Eye, EyeOff, ShieldCheck, ArrowRight, CheckCircle2, AlertCircle, HeartPulse, Stethoscope, Globe, Sun, Moon } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  User,
+  Phone,
+  Eye,
+  EyeOff,
+  Globe,
+  Sun,
+  Moon,
+  CheckCircle2,
+  AlertCircle,
+  KeyRound,
+  ShieldCheck,
+  Stethoscope,
+  ClipboardList
+} from "lucide-react";
 import { authApi } from "../../api/authApi";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { useTheme } from "../../contexts/ThemeContext";
@@ -10,6 +26,7 @@ export default function Signup() {
   const { language, setLanguage, t } = useLanguage();
   const { isDark, toggleTheme } = useTheme();
 
+  const [roleTab, setRoleTab] = useState("patient"); // "patient" | "doctor" | "receptionist"
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -21,40 +38,38 @@ export default function Signup() {
   const [success, setSuccess] = useState(false);
   const [consentGiven, setConsentGiven] = useState(false);
 
-  const [roleTab, setRoleTab] = useState("patient"); // "patient" | "doctor"
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
     if (!consentGiven) {
-      setError("Please acknowledge the academic research disclaimer and consent to proceed.");
+      setError(t("Please acknowledge the academic research disclaimer and consent to proceed."));
       return;
     }
 
     if (!fullName.trim() || !email.trim() || !password) {
-      setError("Full name, email, and password are required.");
+      setError(t("Full name, email, and password are required."));
       return;
     }
 
     if (fullName.trim().length < 2) {
-      setError("Full name must be at least 2 characters.");
+      setError(t("Full name must be at least 2 characters."));
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim().toLowerCase())) {
-      setError("Please provide a valid email address.");
+      setError(t("Please provide a valid email address."));
       return;
     }
 
     if (password.length < 8) {
-      setError("Password must be at least 8 characters long.");
+      setError(t("Password must be at least 8 characters long."));
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError(t("Passwords do not match."));
       return;
     }
 
@@ -72,25 +87,27 @@ export default function Signup() {
       setSuccess(true);
       setTimeout(() => {
         navigate("/login?registered=true");
-      }, 2000);
+      }, 1800);
     } catch (err) {
-      setError(err?.message || "Patient registration failed. Please try again.");
+      setError(err?.message || t("Patient registration failed. Please try again."));
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50/90 via-teal-50/40 to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/30 flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-slate-800 dark:text-slate-100 antialiased transition-colors relative">
-      {/* Top Floating Controls: Language & Theme */}
-      <div className="absolute top-4 right-4 flex items-center gap-2 z-20">
-        <div className="flex items-center gap-1 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md p-1 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-          <Globe className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 ml-1.5" />
+    <div className="auth-page-bg min-h-screen py-6 px-4 sm:px-6 lg:px-8 flex flex-col justify-center relative transition-colors text-slate-800 dark:text-slate-100 antialiased">
+      {/* Top Floating Controls: Language Switcher & Dark/Light Theme */}
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center gap-2 z-30">
+        <div className="flex items-center gap-1 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md p-1 rounded-xl border border-emerald-900/10 dark:border-slate-700 shadow-xs">
+          <Globe className="h-3.5 w-3.5 text-emerald-700 dark:text-emerald-400 ml-1.5" />
           <button
             type="button"
             onClick={() => setLanguage("en")}
-            className={`px-2 py-1 text-xs font-semibold rounded-lg transition-colors ${
-              language === "en" ? "bg-emerald-600 text-white" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+            className={`px-2 py-1 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
+              language === "en"
+                ? "bg-emerald-700 text-white"
+                : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
             }`}
           >
             EN
@@ -98,8 +115,10 @@ export default function Signup() {
           <button
             type="button"
             onClick={() => setLanguage("hi")}
-            className={`px-2 py-1 text-xs font-semibold rounded-lg transition-colors ${
-              language === "hi" ? "bg-emerald-600 text-white" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+            className={`px-2 py-1 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
+              language === "hi"
+                ? "bg-emerald-700 text-white"
+                : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
             }`}
           >
             हिंदी
@@ -107,8 +126,10 @@ export default function Signup() {
           <button
             type="button"
             onClick={() => setLanguage("mr")}
-            className={`px-2 py-1 text-xs font-semibold rounded-lg transition-colors ${
-              language === "mr" ? "bg-emerald-600 text-white" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+            className={`px-2 py-1 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
+              language === "mr"
+                ? "bg-emerald-700 text-white"
+                : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
             }`}
           >
             मराठी
@@ -116,8 +137,10 @@ export default function Signup() {
           <button
             type="button"
             onClick={() => setLanguage("gu")}
-            className={`px-2 py-1 text-xs font-semibold rounded-lg transition-colors ${
-              language === "gu" ? "bg-emerald-600 text-white" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+            className={`px-2 py-1 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
+              language === "gu"
+                ? "bg-emerald-700 text-white"
+                : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
             }`}
           >
             ગુજરાતી
@@ -127,316 +150,361 @@ export default function Signup() {
         <button
           type="button"
           onClick={toggleTheme}
-          className="p-2 rounded-xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 shadow-sm transition-colors"
-          title="Toggle Theme"
+          className="p-2 rounded-xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-emerald-900/10 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-400 shadow-xs transition-colors cursor-pointer"
+          title={t("Toggle theme")}
         >
           {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </button>
       </div>
 
-      {/* Branding Header Area */}
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center px-4">
-        <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-600 to-emerald-700 shadow-xl shadow-emerald-600/25 text-white mb-4 ring-4 ring-emerald-100 dark:ring-emerald-900/50">
-          <HeartPulse className="h-9 w-9 text-white animate-pulse" />
-        </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-          {t("Clinical Decision Support")}
-        </h1>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 font-medium">
-          {t("Modular Healthcare Platform • Evidence-Grounded Medical Intelligence")}
-        </p>
-      </div>
+      {/* Main 2-Column Auth Layout */}
+      <div className="max-w-[1380px] w-full mx-auto my-auto auth-layout-grid">
+        {/* Left Welcome Panel (Fork CareUnity Design) */}
+        <section className="welcome-panel-emerald">
+          <header className="flex items-center justify-between gap-4 relative z-10">
+            <div className="flex items-center gap-2.5">
+              <span className="w-8 h-8 rounded-xl bg-[#c9f4df] text-[#176c58] flex items-center justify-center font-bold text-xl shadow-xs">
+                +
+              </span>
+              <span className="font-extrabold text-lg tracking-tight text-white font-['Manrope']">
+                {t("CareUnity")}
+              </span>
+            </div>
+            <span className="text-xs text-emerald-100/80 font-medium">
+              {t("One connected experience")}
+            </span>
+          </header>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
-        <div className="bg-white/95 dark:bg-slate-900/90 backdrop-blur-xl py-8 px-6 shadow-2xl shadow-emerald-950/10 rounded-2xl sm:px-10 border border-emerald-100/80 dark:border-slate-800">
-          {/* Mode Switch Tabs */}
-          <div className="flex rounded-xl bg-emerald-50 dark:bg-slate-800/80 p-1 mb-5 border border-emerald-200/60 dark:border-slate-700/60">
-            <Link
-              to="/login"
-              className="flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-white"
-            >
-              {t("Sign In")}
-            </Link>
-            <button
-              type="button"
-              className="flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 bg-emerald-700 text-white shadow-md cursor-default"
-            >
-              {t("Create Account")}
-            </button>
-          </div>
+          <div className="relative z-10 my-auto py-8 lg:py-12 max-w-[510px]">
+            <span className="inline-block text-[#b6f1d7] text-[11px] font-bold tracking-[1.8px] leading-relaxed uppercase mb-3">
+              {t("A MORE CONNECTED WAY TO CARE")}
+            </span>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight font-['Manrope'] text-white leading-[1.08] mb-5">
+              {t("Healthcare, in harmony.")}
+              <span className="text-[#64e6ae]">.</span>
+            </h1>
+            <p className="text-emerald-100/90 text-sm sm:text-base leading-relaxed mb-8">
+              {t(
+                "One secure starting point for patients, clinicians and healthcare teams—with a workspace shaped around your role."
+              )}
+            </p>
 
-          {/* Role Selection Tabs */}
-          <div className="flex rounded-lg bg-slate-100 dark:bg-slate-800 p-1 mb-5 border border-slate-200 dark:border-slate-700">
-            <button
-              type="button"
-              onClick={() => { setRoleTab("patient"); setError(""); }}
-              className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                roleTab === "patient"
-                  ? "bg-white dark:bg-slate-900 text-emerald-800 dark:text-emerald-400 shadow-xs"
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
-              }`}
-            >
-              <User className="h-3.5 w-3.5" />
-              {t("Patient Registration")}
-            </button>
-            <button
-              type="button"
-              onClick={() => { setRoleTab("doctor"); setError(""); }}
-              className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                roleTab === "doctor"
-                  ? "bg-white dark:bg-slate-900 text-emerald-800 dark:text-emerald-400 shadow-xs"
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
-              }`}
-            >
-              <Stethoscope className="h-3.5 w-3.5" />
-              {t("Doctor Onboarding")}
-            </button>
-          </div>
-
-          {roleTab === "doctor" ? (
-            /* Doctor Onboarding Guidance Panel */
-            <div className="space-y-4 py-2">
-              <div className="p-4 rounded-xl bg-emerald-50/90 dark:bg-slate-800/80 border border-emerald-200/80 dark:border-slate-700 space-y-3">
-                <div className="flex items-center gap-2 text-emerald-900 dark:text-emerald-300 font-bold text-sm">
-                  <ShieldCheck className="h-5 w-5 text-emerald-600" />
-                  <span>{t("Clinical Physician Credentialing")}</span>
-                </div>
-                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                  In compliance with hospital clinical governance and National Medical Commission (NMC) regulations, physician accounts require verified medical council registration and cannot be registered through public unverified sign-up forms.
-                </p>
-                <div className="text-xs text-slate-700 dark:text-slate-300 space-y-1.5 pt-1">
-                  <div className="flex items-start gap-1.5">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
-                    <span>Physicians are onboarded by Hospital Administration / Reception with medical license verification.</span>
-                  </div>
-                  <div className="flex items-start gap-1.5">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
-                    <span>Once onboarded, physicians receive a single-use cryptographic activation link to create their credentials securely.</span>
-                  </div>
-                </div>
+            <div className="space-y-3.5">
+              <div className="flex items-center gap-3 text-sm text-emerald-50">
+                <span className="w-6 h-6 rounded-full bg-emerald-400/20 border border-emerald-300/40 text-[#c6ffe1] flex items-center justify-center text-xs font-bold">
+                  ✓
+                </span>
+                <span>{t("Role-aware account access")}</span>
               </div>
-
-              <div className="pt-2 space-y-2.5">
-                <Link
-                  to="/activate"
-                  className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-md transition-colors"
-                >
-                  <Lock className="h-4 w-4" />
-                  {t("Have an Activation Link? Activate Account")}
-                </Link>
-                <Link
-                  to="/login"
-                  className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs transition-colors"
-                >
-                  {t("Already Activated? Doctor Sign In")}
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => setRoleTab("patient")}
-                  className="w-full text-center py-1 text-xs text-emerald-700 dark:text-emerald-400 hover:underline font-semibold cursor-pointer"
-                >
-                  {t("← Return to Patient Registration")}
-                </button>
+              <div className="flex items-center gap-3 text-sm text-emerald-50">
+                <span className="w-6 h-6 rounded-full bg-emerald-400/20 border border-emerald-300/40 text-[#c6ffe1] flex items-center justify-center text-xs font-bold">
+                  ✓
+                </span>
+                <span>{t("Connected healthcare services")}</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-emerald-50">
+                <span className="w-6 h-6 rounded-full bg-emerald-400/20 border border-emerald-300/40 text-[#c6ffe1] flex items-center justify-center text-xs font-bold">
+                  ✓
+                </span>
+                <span>{t("One unified interface")}</span>
               </div>
             </div>
-          ) : (
-            <>
-              {/* Role Notice */}
-              <div className="p-3.5 mb-5 rounded-xl bg-emerald-50/80 dark:bg-slate-800/60 border border-emerald-200/70 dark:border-slate-700/60 text-xs text-slate-700 dark:text-slate-300">
-                <div className="flex items-center gap-1.5 font-bold text-emerald-800 dark:text-emerald-400 mb-1">
-                  <User className="h-4 w-4 text-emerald-600" />
-                  <span>{t("Patient Self-Registration Portal")}</span>
-                </div>
-                <p className="text-[11px] leading-relaxed text-slate-600 dark:text-slate-400">
-                  Patients can create accounts directly to access personal health records and appointments with hospital specialists.
-                </p>
-              </div>
+          </div>
 
-              {/* Success Message */}
-              {success ? (
-                <div className="text-center py-6">
-                  <CheckCircle2 className="h-14 w-14 text-emerald-600 dark:text-emerald-400 mx-auto mb-4 animate-bounce" />
-                  <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{t("Account Created Successfully!")}</h2>
-                  <p className="text-sm text-slate-600 dark:text-slate-300 mb-6">
-                    Your patient account has been registered in the EHR system. Redirecting you to sign in...
-                  </p>
-                  <Link
-                    to="/login?registered=true"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm shadow-md shadow-emerald-700/20"
-                  >
-                    {t("Go to Sign In")} <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </div>
-              ) : (
-                <form className="space-y-4" onSubmit={handleSubmit}>
-              {error && (
-                <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" />
-                  <span>{error}</span>
-                </div>
-              )}
+          {/* Decorative Orbs */}
+          <div className="orb-decor orb-large-emerald" />
+          <div className="orb-decor orb-small-emerald" />
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                  {t("Full Name")}
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-700/60 dark:text-emerald-400/60" />
-                  <input
-                    type="text"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    required
-                    placeholder="e.g. Priya Sharma"
-                    className="block w-full pl-10 pr-3 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-hidden focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition-all"
-                  />
-                </div>
-              </div>
+          {/* Bottom Pulse Banner */}
+          <div className="relative z-10 flex items-center gap-2.5 text-xs text-emerald-100/80 pt-4">
+            <span className="pulse-dot-indicator" />
+            <span>{t("A unified platform built around your care")}</span>
+          </div>
+        </section>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                  {t("Email Address")}
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-700/60 dark:text-emerald-400/60" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    placeholder="priya@example.com"
-                    className="block w-full pl-10 pr-3 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-hidden focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition-all"
-                  />
-                </div>
-              </div>
+        {/* Right Form Panel */}
+        <section className="flex flex-col items-center justify-center p-2 sm:p-4">
+          <div className="form-card-glass">
+            <div className="mb-5 text-left">
+              <span className="inline-block text-[10px] font-bold tracking-[1.6px] text-emerald-700 dark:text-emerald-400 uppercase mb-1">
+                {t("GET STARTED")}
+              </span>
+              <h2 className="text-2xl font-bold font-['Manrope'] text-slate-900 dark:text-white tracking-tight">
+                {t("Create your account")}
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                {t("Create a patient account to get started.")}
+              </p>
+            </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                  {t("Phone Number")} <span className="text-slate-400 font-normal">(Optional)</span>
-                </label>
-                <div className="relative">
-                  <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-700/60 dark:text-emerald-400/60" />
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+91 9876543210"
-                    className="block w-full pl-10 pr-3 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-hidden focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition-all"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                  {t("Password")} <span className="text-slate-400 font-normal">(Min. 8 characters)</span>
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-700/60 dark:text-emerald-400/60" />
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    placeholder="••••••••"
-                    className="block w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-hidden focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition-all"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                  {t("Confirm Password")}
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-700/60 dark:text-emerald-400/60" />
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    placeholder="••••••••"
-                    className="block w-full pl-10 pr-3 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-hidden focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition-all"
-                  />
-                </div>
-              </div>
-
-              {/* Explicit Consent Declaration */}
-              <div className="flex items-start gap-2.5 pt-1">
-                <input
-                  type="checkbox"
-                  id="consentCheckbox"
-                  checked={consentGiven}
-                  onChange={(e) => setConsentGiven(e.target.checked)}
-                  required
-                  className="mt-0.5 h-4 w-4 rounded border-slate-300 dark:border-slate-700 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
-                />
-                <label htmlFor="consentCheckbox" className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed cursor-pointer select-none">
-                  I acknowledge this is an <strong>academic research prototype</strong> utilizing synthetic demonstration data, and consent to account processing per the{" "}
-                  <Link to="/about" target="_blank" className="text-emerald-700 dark:text-emerald-400 hover:underline font-bold">
-                    {t("About & Clinical Ethics")}
-                  </Link>.
-                </label>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full py-3 px-4 rounded-xl text-sm font-bold text-white shadow-lg bg-emerald-700 hover:bg-emerald-800 shadow-emerald-700/25 transition-all flex items-center justify-center gap-2 cursor-pointer mt-2 disabled:opacity-50"
-              >
-                {isLoading ? (
-                  <span>{t("Creating Account...")}</span>
-                ) : (
-                  <>
-                    <span>{t("Complete Patient Registration")}</span>
-                    <ArrowRight className="h-4 w-4" />
-                  </>
-                )}
-              </button>
-            </form>
-          )}
-          </>
-        )}
-
-          {/* Links */}
-          <div className="mt-6 pt-5 border-t border-slate-200 dark:border-slate-800 text-center space-y-2">
-            <div>
+            {/* Mode Switch Tabs (Sign In | Create Account) */}
+            <div className="mode-switch-pill mb-5" role="tablist">
               <Link
                 to="/login"
-                className="text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
+                role="tab"
+                aria-selected="false"
+                className="mode-tab-button"
               >
-                {t("Already have an account?")} <span className="text-emerald-700 dark:text-emerald-400 font-bold underline">{t("Sign In")}</span>
+                {t("Sign In")}
               </Link>
+              <button
+                type="button"
+                role="tab"
+                aria-selected="true"
+                className="mode-tab-button active"
+              >
+                {t("Create Account")}
+              </button>
             </div>
-            <div>
+
+            {/* Choose Your Role Label */}
+            <div className="text-[10px] font-bold tracking-[1.4px] text-slate-500 dark:text-slate-400 uppercase mb-2">
+              {t("CHOOSE YOUR ROLE")}
+            </div>
+
+            {/* Role Switch Grid */}
+            <div className="grid grid-cols-3 gap-2 mb-2" role="group">
+              <button
+                type="button"
+                onClick={() => {
+                  setRoleTab("patient");
+                  setError("");
+                }}
+                className={`role-card-btn ${roleTab === "patient" ? "selected" : ""}`}
+              >
+                <span className="role-card-symbol">♡</span>
+                <span className="text-xs font-bold">{t("Patient")}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setRoleTab("receptionist");
+                  setError("");
+                }}
+                className={`role-card-btn ${roleTab === "receptionist" ? "selected" : ""}`}
+              >
+                <span className="role-card-symbol">▦</span>
+                <span className="text-xs font-bold">{t("Reception")}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setRoleTab("doctor");
+                  setError("");
+                }}
+                className={`role-card-btn ${roleTab === "doctor" ? "selected" : ""}`}
+              >
+                <span className="role-card-symbol">✚</span>
+                <span className="text-xs font-bold">{t("Doctor")}</span>
+              </button>
+            </div>
+
+            {/* Messages */}
+            {success && (
+              <div className="mb-4 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                <span>{t("Registration successful! Redirecting to login...")}</span>
+              </div>
+            )}
+
+            {error && (
+              <div className="mb-4 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300 text-xs flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            {/* Patient Form Mode */}
+            {roleTab === "patient" ? (
+              <form onSubmit={handleSubmit} className="space-y-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    {t("Full Name")}
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <input
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      required
+                      placeholder="e.g. Priya Sharma"
+                      className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-hidden focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    {t("Email Address")}
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      placeholder="priya@example.com"
+                      className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-hidden focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    {t("Phone Number")} <span className="text-[10px] text-slate-400 font-normal">({t("Optional")})</span>
+                  </label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="+91 9876543210"
+                      className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-hidden focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      {t("Password")}
+                    </label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        placeholder="••••••••"
+                        className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-hidden focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      {t("Confirm")}
+                    </label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                        placeholder="••••••••"
+                        className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-hidden focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Informed Consent Gate */}
+                <div className="pt-1">
+                  <label className="flex items-start gap-2.5 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={consentGiven}
+                      onChange={(e) => setConsentGiven(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-500 cursor-pointer"
+                    />
+                    <span className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug">
+                      {t("I acknowledge this platform is an academic Clinical Decision Support research system and consent to my data processing under simulated clinical protocols.")}{" "}
+                      <Link to="/about" className="text-emerald-700 dark:text-emerald-400 underline font-medium">
+                        {t("Read full clinical ethics")}
+                      </Link>
+                    </span>
+                  </label>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isLoading || !consentGiven}
+                  className="submit-btn-emerald mt-3"
+                >
+                  {isLoading ? (
+                    <span>{t("Creating Account...")}</span>
+                  ) : (
+                    <span>
+                      {t("Create Patient Account")} ↗
+                    </span>
+                  )}
+                </button>
+              </form>
+            ) : roleTab === "doctor" ? (
+              /* Doctor NMC Credentialing Guidance */
+              <div className="p-4 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/40 text-slate-700 dark:text-slate-300 space-y-3">
+                <div className="flex items-center gap-2 text-blue-800 dark:text-blue-300 font-bold text-xs">
+                  <Stethoscope className="h-4 w-4" />
+                  <span>{t("Clinician Credentialing Required")}</span>
+                </div>
+                <p className="text-[11px] leading-relaxed text-slate-600 dark:text-slate-300">
+                  {t(
+                    "Doctor accounts cannot be self-registered anonymously. In compliance with National Medical Commission (NMC) regulations, clinicians must be vetted and provisioned by hospital administration."
+                  )}
+                </p>
+                <div className="text-[11px] p-2.5 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-blue-100 dark:border-slate-800 font-medium">
+                  {t("Contact hospital administration or clinic registry desk to obtain verified practitioner credentials.")}
+                </div>
+                <Link
+                  to="/login"
+                  className="block text-center py-2 px-3 rounded-xl bg-blue-700 text-white text-xs font-bold shadow-xs hover:bg-blue-800 transition-colors"
+                >
+                  {t("Return to Clinician Sign In")}
+                </Link>
+              </div>
+            ) : (
+              /* Receptionist Provisioning Guidance */
+              <div className="p-4 rounded-2xl bg-purple-50/70 dark:bg-purple-950/30 border border-purple-200/80 dark:border-purple-900/40 text-slate-700 dark:text-slate-300 space-y-3">
+                <div className="flex items-center gap-2 text-purple-800 dark:text-purple-300 font-bold text-xs">
+                  <ClipboardList className="h-4 w-4" />
+                  <span>{t("Administrative Front Desk Provisioning")}</span>
+                </div>
+                <p className="text-[11px] leading-relaxed text-slate-600 dark:text-slate-300">
+                  {t(
+                    "Receptionist accounts are provisioned directly by hospital administrative coordinators using single-use activation tokens."
+                  )}
+                </p>
+                <div className="text-[11px] p-2.5 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-purple-100 dark:border-slate-800 font-medium">
+                  {t("If you received an activation token, proceed to activate your assigned credentials.")}
+                </div>
+                <Link
+                  to="/activate"
+                  className="block text-center py-2 px-3 rounded-xl bg-purple-700 text-white text-xs font-bold shadow-xs hover:bg-purple-800 transition-colors"
+                >
+                  {t("Proceed to Account Activation")}
+                </Link>
+              </div>
+            )}
+
+            {/* Token Security Footnote */}
+            <div className="flex items-center justify-center gap-1.5 mt-4 text-[10px] text-slate-500 dark:text-slate-400">
+              <span className="text-emerald-700 dark:text-emerald-400 font-bold">◇</span>
+              <span>{t("Your session is protected with token-based authentication.")}</span>
+            </div>
+
+            {/* Account Activation Link */}
+            <div className="mt-3 text-center text-xs">
               <Link
                 to="/activate"
-                className="text-xs text-slate-500 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors inline-flex items-center gap-1"
+                className="inline-flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400 hover:underline font-semibold"
               >
-                <span>🔑 {t("Received an activation link from reception?")}</span>
-                <span className="text-emerald-700 dark:text-emerald-400 underline font-medium">{t("Activate Account")}</span>
+                <KeyRound className="h-3.5 w-3.5" />
+                <span>{t("Activate Account")}</span>
               </Link>
             </div>
           </div>
-        </div>
 
-        {/* Security & Ethical Footer */}
-        <div className="mt-6 text-center text-xs text-slate-500 dark:text-slate-400 flex flex-col sm:flex-row items-center justify-center gap-2">
-          <div className="flex items-center gap-1.5">
-            <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-            <span>{t("Server-Side RBAC • Express Gateway Port 5000")}</span>
+          <div className="mt-4 text-center text-[11px] text-slate-500 dark:text-slate-400">
+            {t("Need access help? Contact your healthcare administrator.")}
           </div>
-          <span className="hidden sm:inline">•</span>
-          <Link to="/about" className="text-emerald-700 dark:text-emerald-400 hover:underline font-semibold">
-            {t("About & Clinical Ethics")}
-          </Link>
-        </div>
+        </section>
       </div>
     </div>
   );

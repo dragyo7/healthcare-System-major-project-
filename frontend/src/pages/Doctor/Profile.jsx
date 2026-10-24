@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { doctorApi } from "../../api/doctorApi";
+import { useLanguage } from "../../contexts/LanguageContext";
 import { User, Mail, Shield, Award, Phone, Clock, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 
 export default function DoctorProfile() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [phone, setPhone] = useState("+91 98765 43210");
   const [department, setDepartment] = useState("Internal Medicine / Cardiology");
   const [room, setRoom] = useState("OPD-304");
@@ -62,14 +64,14 @@ export default function DoctorProfile() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Clinician Profile</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("Clinician Profile") || "Clinician Profile"}</h1>
           <p className="text-sm text-muted-foreground">
-            Manage your verified clinical credentials, licensing, and practice details
+            {t("Manage your verified clinical credentials, licensing, and practice details") || "Manage your verified clinical credentials, licensing, and practice details"}
           </p>
         </div>
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 w-fit">
           <Shield className="w-3.5 h-3.5" />
-          Verified Practitioner (RBAC: Doctor)
+          {t("Verified Practitioner (RBAC: Doctor)") || "Verified Practitioner (RBAC: Doctor)"}
         </span>
       </div>
 
@@ -85,7 +87,7 @@ export default function DoctorProfile() {
           <div className="mt-6 pt-6 border-t border-border/60 text-left space-y-3">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Award className="w-4 h-4 text-primary" />
-              <span>License: <strong className="text-foreground">{license}</strong></span>
+              <span>{t("License:") || "License:"} <strong className="text-foreground">{license}</strong></span>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Mail className="w-4 h-4 text-primary" />
@@ -93,19 +95,19 @@ export default function DoctorProfile() {
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock className="w-4 h-4 text-primary" />
-              <span>Roster: Mon - Fri (09:00 - 17:00)</span>
+              <span>{t("Roster: Mon - Fri (09:00 - 17:00)") || "Roster: Mon - Fri (09:00 - 17:00)"}</span>
             </div>
           </div>
         </div>
 
         {/* Edit Form */}
         <div className="md:col-span-2 rounded-xl border border-border bg-card p-6 shadow-sm">
-          <h3 className="text-base font-semibold text-foreground mb-4">Practice Details & Availability</h3>
+          <h3 className="text-base font-semibold text-foreground mb-4">{t("Practice Details & Availability") || "Practice Details & Availability"}</h3>
 
           {saved && (
             <div className="mb-4 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-sm flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4" />
-              Profile and contact settings updated successfully.
+              {t("Profile and contact settings updated successfully.") || "Profile and contact settings updated successfully."}
             </div>
           )}
 
@@ -119,7 +121,7 @@ export default function DoctorProfile() {
           <form onSubmit={handleSave} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-1">Full Legal Name</label>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">{t("Full Legal Name") || "Full Legal Name"}</label>
                 <input
                   type="text"
                   readOnly
@@ -128,7 +130,7 @@ export default function DoctorProfile() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-1">Medical Registration No.</label>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">{t("Medical Registration No.") || "Medical Registration No."}</label>
                 <input
                   type="text"
                   readOnly
@@ -140,7 +142,7 @@ export default function DoctorProfile() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-foreground mb-1">Clinical Department</label>
+                <label className="block text-xs font-semibold text-foreground mb-1">{t("Clinical Department") || "Clinical Department"}</label>
                 <input
                   type="text"
                   value={department}
@@ -149,7 +151,7 @@ export default function DoctorProfile() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-foreground mb-1">Clinic / OPD Chamber</label>
+                <label className="block text-xs font-semibold text-foreground mb-1">{t("Clinic / OPD Chamber") || "Clinic / OPD Chamber"}</label>
                 <input
                   type="text"
                   value={room}
@@ -160,7 +162,7 @@ export default function DoctorProfile() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-foreground mb-1">Hospital Emergency Ext. / Phone</label>
+              <label className="block text-xs font-semibold text-foreground mb-1">{t("Hospital Emergency Ext. / Phone") || "Hospital Emergency Ext. / Phone"}</label>
               <input
                 type="text"
                 value={phone}
@@ -176,7 +178,7 @@ export default function DoctorProfile() {
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition shadow-sm disabled:opacity-50"
               >
                 {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-                {saving ? "Saving Changes..." : "Save Profile Changes"}
+                {saving ? (t("Saving...") || "Saving Changes...") : (t("Save Profile Changes") || "Save Profile Changes")}
               </button>
             </div>
           </form>

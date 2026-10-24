@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { patientApi } from "../../api/patientApi";
+import { useLanguage } from "../../contexts/LanguageContext";
 import {
   Pill,
   Calendar,
@@ -17,6 +18,7 @@ import {
 } from "lucide-react";
 
 export default function PatientPrescriptions() {
+  const { t } = useLanguage();
   const [prescriptions, setPrescriptions] = useState([]);
   const [medications, setMedications] = useState([]);
   const [activeTab, setActiveTab] = useState("prescriptions"); // 'prescriptions' | 'regimens'
@@ -65,10 +67,10 @@ export default function PatientPrescriptions() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
             <Pill className="w-6 h-6 text-primary" />
-            My Prescriptions & Regimens
+            {t("My Prescriptions & Regimens") || "My Prescriptions & Regimens"}
           </h1>
           <p className="text-sm text-muted-foreground">
-            View authorized clinical prescription records, dosage instructions, and active medications.
+            {t("View authorized clinical prescription records, dosage instructions, and active medications.") || "View authorized clinical prescription records, dosage instructions, and active medications."}
           </p>
         </div>
 
@@ -82,7 +84,7 @@ export default function PatientPrescriptions() {
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            Prescriptions ({prescriptions.length})
+            {t("Prescriptions") || "Prescriptions"} ({prescriptions.length})
           </button>
           <button
             onClick={() => setActiveTab("regimens")}
@@ -92,7 +94,7 @@ export default function PatientPrescriptions() {
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            Active Regimens ({medications.length})
+            {t("Active Regimens") || "Active Regimens"} ({medications.length})
           </button>
         </div>
       </div>
@@ -194,13 +196,13 @@ export default function PatientPrescriptions() {
                     <div className="border-t border-border/80 bg-muted/20 p-5 space-y-4">
                       {rx.notes && (
                         <div className="p-3 rounded-lg bg-background border border-border text-xs text-foreground">
-                          <strong>Physician's Clinical Notes:</strong> {rx.notes}
+                          <strong>{t("Clinical Notes:") || "Physician's Clinical Notes:"}</strong> {rx.notes}
                         </div>
                       )}
 
                       <div className="space-y-3">
                         <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                          Prescribed Medication Table
+                          {t("Prescribed Medication Table") || "Prescribed Medication Table"}
                         </h4>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -221,22 +223,22 @@ export default function PatientPrescriptions() {
 
                               <div className="grid grid-cols-2 gap-2 text-muted-foreground pt-1">
                                 <div>
-                                  <span className="font-medium">Frequency:</span>{" "}
+                                  <span className="font-medium">{t("Frequency:") || "Frequency:"}</span>{" "}
                                   <strong className="text-foreground">{m.frequency || "Daily"}</strong>
                                 </div>
                                 <div>
-                                  <span className="font-medium">Duration:</span>{" "}
+                                  <span className="font-medium">{t("Duration:") || "Duration:"}</span>{" "}
                                   <strong className="text-foreground">{m.duration || "7 days"}</strong>
                                 </div>
                                 <div>
-                                  <span className="font-medium">Route:</span>{" "}
+                                  <span className="font-medium">{t("Route:") || "Route:"}</span>{" "}
                                   <strong className="text-foreground">{m.route || "Oral"}</strong>
                                 </div>
                               </div>
 
                               {m.instructions && (
                                 <div className="pt-2 border-t border-border/60 text-muted-foreground">
-                                  <strong>Directions:</strong> {m.instructions}
+                                  <strong>{t("Directions:") || "Directions:"}</strong> {m.instructions}
                                 </div>
                               )}
                             </div>
@@ -257,7 +259,7 @@ export default function PatientPrescriptions() {
         <div className="space-y-4">
           {medications.length === 0 ? (
             <div className="rounded-xl border border-border bg-card p-8 text-center text-xs text-muted-foreground">
-              No active medication regimens recorded.
+              {t("No active medication regimens recorded.") || "No active medication regimens recorded."}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -269,14 +271,14 @@ export default function PatientPrescriptions() {
                       {med.medicine_name || med.name}
                     </p>
                     <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-600 uppercase">
-                      Active
+                      {t("Active") || "Active"}
                     </span>
                   </div>
                   <p className="text-muted-foreground">
-                    Dosage: <strong className="text-foreground">{med.dosage || "Standard"}</strong>
+                    {t("Dosage:") || "Dosage:"} <strong className="text-foreground">{med.dosage || "Standard"}</strong>
                   </p>
                   <p className="text-muted-foreground">
-                    Frequency: <strong className="text-foreground">{med.frequency || "Once daily"}</strong>
+                    {t("Frequency:") || "Frequency:"} <strong className="text-foreground">{med.frequency || "Once daily"}</strong>
                   </p>
                   {med.instructions && (
                     <p className="p-2 rounded bg-muted/50 text-muted-foreground mt-2 border border-border/60">

@@ -626,13 +626,36 @@
      - Captured 19 pristine full-page browser screenshots into `audit_evidence/browser_verification_oct24/` verifying rendering across public auth (all 4 languages), patient portal (English & Hindi), doctor portal (English & Marathi), receptionist portal (English & Gujarati), and mobile viewport (390x844).
   5. **Safety Invariant Verification**:
      - Confirmed primary database `rag_healthcare` remained completely untouched (15 tables, 176 users, 160 patients, 65 prescriptions).
-- **Verification**:
-  - `scratch/test_account_appointment_and_cds_flow.js`: 35/35 passed.
-  - `cds_module/test_cds_gateway.py`: 9/9 passed.
-  - `multilingual_module/tests/`: 38/38 passed.
-  - `scratch/test_full_system_multi_role_e2e.js`: 20/20 passed.
-  - `scratch/test_activation_and_role_mismatch.js`: 20/20 passed.
-  - Frontend production build (`npm run build`): 0 errors, 760ms build time.
-  - Browser screenshots: 19 PNGs saved in `audit_evidence/browser_verification_oct24/`.
 
+---
 
+### DEC-034: CDSS Frontend Visual Replacement (CareUnity Emerald/White Theme), Multilingual Parity (372 Keys across EN, HI, MR, GU), Doctor-Authored Discharge Care Grounding, Real Prescription PDF Pipeline & OCR Verification
+- **Date**: October 24, 2026
+- **Status**: Implemented, Verified Across 22/22 Gap-Closure Checks & Real Browser Journey
+- **Context**:
+  - The project required a modern, professional, presentation-ready frontend aligning with the reference fork's emerald/glassmorphism design (`DM Sans`, `Manrope`, 2-column auth hero, responsive tablists, styled role selectors).
+  - The inner pages required cohesive styling, dark/light theme support with persistence, and total localization coverage across all 4 languages (`en`, `hi`, `mr`, `gu`).
+  - Prescription PDF generation needed to output real, styled `%PDF-` binaries with Hospital branding, patient/doctor metadata, medication tables, and CDSS verification attestations.
+  - Doctor-authored discharge care instructions needed end-to-end integration with the Post-Discharge Care Assistant without hallucination, maintaining strict patient data isolation.
+- **Decision & Architecture**:
+  1. **Visual Replacement & Design System**:
+     - Upgraded `frontend/src/index.css` with Google Fonts (`DM Sans`, `Manrope`, `Inter`), CareUnity 2-column grid (`.auth-page-bg`, `.auth-layout-grid`, `.welcome-panel-emerald`), glowing ambient orbs (`.orb-decor`, `.orb-large-emerald`), and glassmorphism form cards (`.form-card-glass`).
+     - Refactored `Login.jsx`, `Signup.jsx`, and `Activate.jsx` into the 2-column CareUnity layout with 3 interactive role buttons (`♡ Patient`, `▦ Receptionist`, `✚ Doctor`), single-click demo credentials, and floating language/theme switchers.
+     - Preserved modular React 19 architecture, React Router v7, and server-side RBAC while porting the fork's visual aesthetic.
+  2. **Multilingual Dictionary Expansion (372 Keys)**:
+     - Expanded `frontend/src/constants/translations.js` from 248 to 372 keys across English, Hindi, Marathi, and Gujarati in 100% parity.
+     - Wired `useLanguage` into `Doctor/Patients.jsx`, `Doctor/Prescriptions.jsx`, `Doctor/Discharge.jsx`, `Doctor/Profile.jsx`, `Patient/Prescriptions.jsx`, `Patient/MedicalHistory.jsx`, `Patient/Profile.jsx`, and `Receptionist/Patients.jsx`.
+  3. **Real Prescription PDF Generation with PDFKit**:
+     - Built `prescriptionPdfService.js` outputting authoritative clinical documents with St. Mary Hospital branding, patient identification, prescribing clinician credentials, medication table, clinical directives, and CDSS verification attestation seal.
+     - Wired into `doctorController.js` (`/api/doctor/prescriptions/:id/pdf`) and `patientController.js` (`/api/patient/prescriptions/:id/pdf`).
+     - Tested with `pypdf`: verified page count = 1, `%PDF-` binary header, text extraction of all clinical details, and strict BOLA 403/404 rejection on unauthorized access.
+  4. **Doctor-Authored Discharge Integration**:
+     - Validated doctor discharge creation (`/api/doctor/discharge`), persistence in MySQL `discharges` table, immediate patient portal reflection (`/api/patient/discharge`), and grounded AI evaluation (`/api/patient/cds`) citing the authorized plan without hallucination.
+     - Verified multi-patient isolation (Patient 2 cannot access Patient 1's discharge records).
+  5. **Prescription OCR Pipeline & Invariants**:
+     - Verified missing file 400 rejection, magic byte 400 rejection, offline Tesseract OCR candidate extraction, mandatory clinician review requirement (`pending_review`), authoritative confirmation, duplicate confirmation prevention (400), and resulting PDF generation.
+- **Verification Evidence**:
+  - `scratch/gap_closure_master_verification.js`: 22/22 passed (100%).
+  - `npm run build`: built in 1.35s with 0 errors.
+  - Primary database `rag_healthcare` verified untouched (15 tables, 176 users, 160 patients, 65 prescriptions).
+  - Screenshots and artifacts stored in `audit_evidence/gap_closure_presentation_20261024/` and `audit_evidence/frontend_fork_multilingual_20261024/`.

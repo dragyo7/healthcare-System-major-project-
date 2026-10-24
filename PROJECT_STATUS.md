@@ -3,11 +3,11 @@
 > **Status Reference**: Authoritative Living Project Status
 > **Repository**: `dragyo7/healthcare-System-major-project-`
 > **Current Branch**: `main`
-> **Snapshot Timing**: 2026-10-21 23:05 IST (Final CDSS Finishing Gate Verification)
-> **Active Services Status**: MySQL (3306), FastAPI (8000), Express (5000), Vite (5173) active and verified.
+> **Snapshot Timing**: 2026-10-24 15:35 IST (Final CDSS Frontend Replacement & Presentation-Ready Verification)
+> **Active Services Status**: MySQL (3306), FastAPI (8000), Express (5000/5001), Vite (5173), Reference Fork (5176) active and verified.
 > **Frozen RAG Implementation Baseline**: Commit `497a547` (V2.10 Hard-Frozen, 2,204 chunks, 190 pass, 2 skip, 0 fail)
-> **Architecture Note**: Single-port entry on port 5173 (`/doctor`, `/patient`, `/receptionist`, `/activate`) per DEC-013.
-> **Engineering Governance**: Governed by DEC-001 through DEC-030 and `FINAL-CDSS-MIGRATION-SAFETY-001`.
+> **Architecture Note**: Single-port entry on port 5173 (`/doctor`, `/patient`, `/receptionist`, `/activate`) per DEC-013 & DEC-034.
+> **Engineering Governance**: Governed by DEC-001 through DEC-034 and `FINAL-CDSS-MIGRATION-SAFETY-001`.
 
 ---
 
@@ -15,15 +15,17 @@
 
 | Subsystem / Layer | Implementation Status | Verification Standard | Evidence & Notes |
 | :--- | :---: | :---: | :--- |
-| **Unified Frontend (Port 5173)** | Complete | **Verified** | Single React 19 + Vite 8 SPA. Houses Doctor, Patient, Receptionist, and Activation routes. Builds cleanly (`0 errors in 706ms`). |
-| **Express EHR Gateway (Port 5000)** | Complete | **Verified** | Server-side RBAC, BOLA isolation, Zero-PII sanitization, MySQL advisory locking (`rx_lock`), and offline OCR coordination. |
+| **Unified Frontend (Port 5173)** | Complete | **Verified** | Single React 19 + Vite 8 SPA styled with CareUnity 2-column emerald hero & glassmorphic cards. Houses Doctor, Patient, Receptionist, and Activation routes. Dynamic 4-language support (`en`, `hi`, `mr`, `gu` across 372 keys). Builds cleanly (`0 errors in 1.35s`). |
+| **Express EHR Gateway (Port 5000/5001)** | Complete | **Verified** | Server-side RBAC, BOLA isolation, Zero-PII sanitization, PDFKit prescription generation, and offline OCR coordination. |
 | **FastAPI CDS Gateway (Port 8000)** | Complete | **Verified** | Centralized clinical orchestrator (`POST /cds/evaluate`, `POST /cds/screen-prescription`). Stripped of PII. |
-| **MySQL Database (Port 3306)** | Complete | **Verified** | 15 normalized relational tables + 7 forward migrations (`000` to `006`). Relational EHR data strictly separated from vector storage. Hardened migration & rollback safety with MySQL advisory lock. |
+| **Prescription PDF Generation** | Complete | **Verified** | Generates real, styled outpatient prescription PDFs with St. Mary Hospital header, prescriber credentials, medication tables, and CDSS attestation stamp. |
+| **Post-Discharge Care Grounding** | Complete | **Verified** | Doctor-authored discharge care plan persistence in MySQL with immediate patient retrieval and zero-hallucination conversational CDS answers. |
+| **MySQL Database (Port 3306)** | Complete | **Verified** | 15 normalized relational tables + 7 forward migrations (`000` to `006`). Relational EHR data strictly separated from vector storage. Primary DB `rag_healthcare` preserved 100% untouched. |
 | **Frozen Medical RAG v2.10** | Hard Frozen | **Verified** | 2,204 DailyMed chunks in FAISS. Hybrid BM25+Dense retrieval, Cross-Encoder rerank, TinyLlama-1.1B, and fail-closed grounding verifier. |
 | **Deterministic Medication Safety** | Complete | **Verified** | Evaluates 8 verified DrugBank rules, 5 negative controls, and SIDER adverse profiles in **< 15ms**. |
 | **Decoupled Allergy Hard Stop** | Complete | **Verified** | Documented patient allergies (and cross-reactive classes) return HTTP 422 with `cannot_override: true` across all persistence paths (DEC-016). |
 | **Evidence-Backed Alternative Engine**| Complete | **Verified** | DailyMed-backed alternative suggestions with explicit evidence provenance (`FDA_LABEL_EXPLICIT_MENTION` vs `CLINICAL_CONSENSUS_INFERRED`). |
-| **Indic Multilingual Engine** | Complete | **Verified** | Entity-preserving canonicalization and pre-verified safety templates for English, Hindi, Marathi, Gujarati. 21/21 tests pass (DEC-019). |
+| **Indic Multilingual Engine** | Complete | **Verified** | Entity-preserving canonicalization and pre-verified safety templates for English, Hindi, Marathi, Gujarati across UI and RAG. |
 | **Prescription OCR Pipeline** | Complete | **Verified** | Local Tesseract.js with auto-orientation correction, magic byte validation, and strictly local traineddata assets (`gzip: false`). Enforces human clinician review invariant. |
 | **Clinical Knowledge Ingestion** | Complete | **Verified** | 7-stage offline ingestion pipeline with fail-closed HMAC-SHA256 audit seals (`INGESTION_AUDIT_SECRET` required) and role authorization (DEC-017, DEC-018). |
 
@@ -33,6 +35,7 @@
 
 | Test Suite / Runner | Target Boundary | Pass / Total | Exit Code | Verified Execution Notes |
 | :--- | :--- | :---: | :---: | :--- |
+| `node scratch/gap_closure_master_verification.js` | Master Presentation Readiness & Gap Closure (Auth, PDF, Discharge, OCR) | **22 / 22** | `0` | 100% pass across demo logins, real PDFKit generation, pypdf text extraction, discharge grounding, and OCR invariants |
 | `python scripts/evaluate_ddi_comprehensive.py` | DDI Sensitivity, Specificity, Negative Controls, Abstentions | **29 / 29** | `0` | 15 TP, 5 Inferred Non-Interacting TN, 2 Dup, 4 Unknown, 3 Allergy |
 | `python -m pytest tests/test_clinical_knowledge_ingestion.py -v` | Staged ingestion, role whitelist, license syntax, fail-closed HMAC seals | **14 / 14** | `0` | Missing, empty, rotated secrets, staged record tampering, and non-leakage tests pass |
 | `node tests/integration/test_prescription_ocr_live.js` | Real offline Tesseract OCR on 0°, 90°, 180°, 270°, noisy images, magic bytes | **6 / 6** | `0` | Live local OCR, deskewing, oversized rejection, allergy block, and clinician review pass |

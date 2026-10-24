@@ -2,10 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import { Search, User, FileText, Pill, AlertTriangle, Sparkles, ArrowLeft, Calendar, Activity, ShieldCheck, Heart } from "lucide-react";
 import { doctorApi } from "../../api/doctorApi";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 export default function DoctorPatients() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [patients, setPatients] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedPatientId, setSelectedPatientId] = useState(null);
@@ -67,7 +69,7 @@ export default function DoctorPatients() {
       <div className="flex items-center justify-center min-h-[50vh]">
         <div className="text-center space-y-3">
           <div className="w-10 h-10 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-sm text-slate-500 font-medium">Loading Patient Directory...</p>
+          <p className="text-sm text-slate-500 font-medium">{t("Loading Patient Directory...")}</p>
         </div>
       </div>
     );
@@ -93,7 +95,7 @@ export default function DoctorPatients() {
                 navigate("/doctor/patients");
               }}
               className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
-              title="Back to patient directory"
+              title={t("Back to Patient Directory")}
             >
               <ArrowLeft className="h-5 w-5" />
             </button>
@@ -118,21 +120,21 @@ export default function DoctorPatients() {
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-primary-600 to-indigo-600 text-white font-bold text-xs shadow-md shadow-primary-500/20 hover:from-primary-500 hover:to-indigo-500 transition-all cursor-pointer"
             >
               <Sparkles className="h-4 w-4" />
-              <span>Launch CDS Assistant</span>
+              <span>{t("Launch CDS Assistant")}</span>
             </Link>
             <Link
               to={`/doctor/prescriptions?patient_id=${patient.patient_id}`}
               className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 font-bold text-xs transition-colors cursor-pointer"
             >
               <Pill className="h-4 w-4" />
-              <span>New Prescription</span>
+              <span>{t("New Prescription")}</span>
             </Link>
             <Link
               to={`/doctor/discharge?patient_id=${patient.patient_id}`}
               className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 font-bold text-xs transition-colors cursor-pointer"
             >
               <FileText className="h-4 w-4" />
-              <span>Discharge Summary</span>
+              <span>{t("Discharge Summary")}</span>
             </Link>
           </div>
         </div>
@@ -145,23 +147,23 @@ export default function DoctorPatients() {
             <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-3">
               <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
                 <User className="h-4 w-4 text-primary-600" />
-                <span>Patient Demographics</span>
+                <span>{t("Patient Demographics")}</span>
               </h2>
               <div className="space-y-2 text-xs">
                 <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                  <span className="text-slate-500">Phone:</span>
+                  <span className="text-slate-500">{t("Phone")}:</span>
                   <span className="font-semibold text-slate-800 dark:text-slate-200">{patient.phone || "—"}</span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                  <span className="text-slate-500">Email:</span>
+                  <span className="text-slate-500">{t("Email")}:</span>
                   <span className="font-semibold text-slate-800 dark:text-slate-200">{patient.email || "—"}</span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                  <span className="text-slate-500">Address:</span>
+                  <span className="text-slate-500">{t("Address")}:</span>
                   <span className="font-semibold text-slate-800 dark:text-slate-200">{patient.address || "—"}</span>
                 </div>
                 <div className="flex justify-between py-1">
-                  <span className="text-slate-500">Emergency Contact:</span>
+                  <span className="text-slate-500">{t("Emergency Contact")}:</span>
                   <span className="font-semibold text-slate-800 dark:text-slate-200">{patient.emergency_contact || "—"}</span>
                 </div>
               </div>
@@ -171,17 +173,17 @@ export default function DoctorPatients() {
             <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-3">
               <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
                 <Activity className="h-4 w-4 text-amber-500" />
-                <span>Recorded Symptoms</span>
+                <span>{t("Recorded Symptoms")}</span>
               </h2>
               {symptoms.length === 0 ? (
-                <p className="text-xs text-slate-400">No active symptoms on file.</p>
+                <p className="text-xs text-slate-400">{t("No active symptoms on file.")}</p>
               ) : (
                 <div className="space-y-2">
                   {symptoms.map((s, idx) => (
                     <div key={idx} className="p-2.5 rounded-xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/40 text-xs">
                       <div className="font-bold text-amber-900 dark:text-amber-300">{s.symptom_name}</div>
                       <div className="text-[11px] text-amber-700 dark:text-amber-400">
-                        Severity: {s.severity || "Moderate"} • Started: {s.onset_date ? new Date(s.onset_date).toLocaleDateString() : "Recent"}
+                        {t("Severity")}: {s.severity || "Moderate"} • {t("Started")}: {s.onset_date ? new Date(s.onset_date).toLocaleDateString() : "Recent"}
                       </div>
                     </div>
                   ))}
@@ -193,10 +195,10 @@ export default function DoctorPatients() {
             <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-3">
               <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-rose-500" />
-                <span>Allergies & Contraindications</span>
+                <span>{t("Allergies & Contraindications")}</span>
               </h2>
               {history.length === 0 ? (
-                <p className="text-xs text-slate-400">No known contraindications recorded.</p>
+                <p className="text-xs text-slate-400">{t("No known contraindications recorded.")}</p>
               ) : (
                 <div className="space-y-2">
                   {history.map((h, idx) => (
@@ -219,19 +221,19 @@ export default function DoctorPatients() {
               <div className="flex items-center justify-between">
                 <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                   <Pill className="h-5 w-5 text-primary-600" />
-                  <span>Verified Prescriptions & Active Regimens</span>
+                  <span>{t("Verified Prescriptions & Active Regimens")}</span>
                 </h2>
                 <Link
                   to={`/doctor/prescriptions?patient_id=${patient.patient_id}`}
                   className="text-xs font-bold text-primary-600 hover:underline"
                 >
-                  + Add Prescription
+                  {t("+ Add Prescription")}
                 </Link>
               </div>
 
               {prescriptions.length === 0 ? (
                 <div className="py-8 text-center text-xs text-slate-400">
-                  No previous prescriptions recorded for this patient.
+                  {t("No previous prescriptions recorded for this patient.")}
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -239,7 +241,7 @@ export default function DoctorPatients() {
                     <div key={rx.prescription_id} className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-3">
                       <div className="flex items-center justify-between text-xs">
                         <div>
-                          <span className="font-bold text-slate-900 dark:text-white">Prescription #{rx.prescription_id}</span>
+                          <span className="font-bold text-slate-900 dark:text-white">{t("Prescription")} #{rx.prescription_id}</span>
                           <span className="text-slate-400 ml-2">({new Date(rx.created_at).toLocaleDateString()})</span>
                         </div>
                         <a
@@ -248,12 +250,12 @@ export default function DoctorPatients() {
                           rel="noreferrer"
                           className="text-xs font-bold text-primary-600 hover:underline"
                         >
-                          📄 Download PDF
+                          📄 {t("Download PDF")}
                         </a>
                       </div>
 
                       <div className="text-xs text-slate-600 dark:text-slate-300">
-                        <strong>Diagnosis:</strong> {rx.diagnosis || "Clinical assessment"}
+                        <strong>{t("Diagnosis")}:</strong> {rx.diagnosis || "Clinical assessment"}
                       </div>
 
                       {rx.medicines && rx.medicines.length > 0 && (
@@ -261,11 +263,11 @@ export default function DoctorPatients() {
                           <table className="w-full text-left text-xs">
                             <thead>
                               <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-400">
-                                <th className="pb-1.5 font-bold">Medicine</th>
-                                <th className="pb-1.5 font-bold">Dosage</th>
-                                <th className="pb-1.5 font-bold">Frequency</th>
-                                <th className="pb-1.5 font-bold">Duration</th>
-                                <th className="pb-1.5 font-bold">Instructions</th>
+                                <th className="pb-1.5 font-bold">{t("Medicine")}</th>
+                                <th className="pb-1.5 font-bold">{t("Dosage")}</th>
+                                <th className="pb-1.5 font-bold">{t("Frequency")}</th>
+                                <th className="pb-1.5 font-bold">{t("Duration")}</th>
+                                <th className="pb-1.5 font-bold">{t("Instructions")}</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -293,36 +295,36 @@ export default function DoctorPatients() {
               <div className="flex items-center justify-between">
                 <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                   <FileText className="h-5 w-5 text-emerald-600" />
-                  <span>Post-Discharge Care Guidelines</span>
+                  <span>{t("Post-Discharge Care Guidelines")}</span>
                 </h2>
                 <Link
                   to={`/doctor/discharge?patient_id=${patient.patient_id}`}
                   className="text-xs font-bold text-emerald-600 hover:underline"
                 >
-                  {discharge ? "Edit Discharge Summary" : "+ Create Discharge"}
+                  {discharge ? t("Edit Discharge Summary") : t("+ Create Discharge")}
                 </Link>
               </div>
 
               {!discharge ? (
                 <div className="py-6 text-center text-xs text-slate-400">
-                  No post-discharge care record has been generated for this patient yet.
+                  {t("No post-discharge care record has been generated for this patient yet.")}
                 </div>
               ) : (
                 <div className="p-4 rounded-xl border border-emerald-200/60 dark:border-emerald-900/40 bg-emerald-50/40 dark:bg-emerald-950/20 space-y-3 text-xs">
                   <div className="flex justify-between font-bold text-emerald-900 dark:text-emerald-300">
-                    <span>Discharged: {new Date(discharge.discharge_date).toLocaleDateString()}</span>
-                    <span>Condition: {discharge.condition_at_discharge || "Stable"}</span>
+                    <span>{t("Discharged")}: {new Date(discharge.discharge_date).toLocaleDateString()}</span>
+                    <span>{t("Condition")}: {discharge.condition_at_discharge || "Stable"}</span>
                   </div>
                   <div>
-                    <strong className="text-slate-800 dark:text-slate-200">Discharge Instructions:</strong>
+                    <strong className="text-slate-800 dark:text-slate-200">{t("Discharge Instructions")}:</strong>
                     <p className="mt-1 text-slate-600 dark:text-slate-300">{discharge.discharge_instructions}</p>
                   </div>
                   <div>
-                    <strong className="text-slate-800 dark:text-slate-200">Dietary & Lifestyle Guidelines:</strong>
+                    <strong className="text-slate-800 dark:text-slate-200">{t("Dietary & Lifestyle Guidelines")}:</strong>
                     <p className="mt-1 text-slate-600 dark:text-slate-300">{discharge.dietary_guidelines || "Standard post-operative diet"}</p>
                   </div>
                   <div>
-                    <strong className="text-rose-700 dark:text-rose-400">Warning Signs & Escalation:</strong>
+                    <strong className="text-rose-700 dark:text-rose-400">{t("Red-Flag Warning Signs")}:</strong>
                     <p className="mt-1 text-slate-600 dark:text-slate-300">{discharge.warning_signs || "Seek immediate medical attention if experiencing high fever or chest pain."}</p>
                   </div>
                 </div>
@@ -341,10 +343,10 @@ export default function DoctorPatients() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Patient Directory & Clinical Dossiers
+            {t("Patient Directory & Clinical Dossiers")}
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Search authorized patient records to inspect symptoms, diagnoses, prescriptions, and launch CDS.
+            {t("Search authorized patient records to inspect symptoms, diagnoses, prescriptions, and launch CDS.")}
           </p>
         </div>
 
@@ -354,7 +356,7 @@ export default function DoctorPatients() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, phone or email..."
+            placeholder={t("Search by name, email, or phone...")}
             className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-hidden focus:border-primary-500 shadow-xs"
           />
         </div>
@@ -372,19 +374,19 @@ export default function DoctorPatients() {
           <table className="w-full text-left text-xs sm:text-sm">
             <thead>
               <tr className="border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[11px]">
-                <th className="py-3.5 px-6">Patient</th>
-                <th className="py-3.5 px-6">Age / Gender</th>
-                <th className="py-3.5 px-6">Blood Group</th>
-                <th className="py-3.5 px-6">Contact Phone</th>
-                <th className="py-3.5 px-6">Email Address</th>
-                <th className="py-3.5 px-6 text-right">Actions</th>
+                <th className="py-3.5 px-6">{t("Patient")}</th>
+                <th className="py-3.5 px-6">{t("Demographics")}</th>
+                <th className="py-3.5 px-6">{t("Blood Group")}</th>
+                <th className="py-3.5 px-6">{t("Contact")}</th>
+                <th className="py-3.5 px-6">{t("Email")}</th>
+                <th className="py-3.5 px-6 text-right">{t("Actions")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
               {filteredPatients.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="py-12 text-center text-slate-400 text-xs">
-                    No patients match your search criteria.
+                    {t("No results found")}
                   </td>
                 </tr>
               ) : (
@@ -424,12 +426,12 @@ export default function DoctorPatients() {
                           onClick={() => setSelectedPatientId(pat.patient_id)}
                           className="px-3 py-1.5 rounded-lg text-xs font-bold bg-primary-50 dark:bg-primary-950/60 text-primary-600 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-900 transition-colors cursor-pointer"
                         >
-                          View Dossier
+                          {t("View Dossier")}
                         </button>
                         <Link
                           to={`/doctor/cds?patient_id=${pat.patient_id}`}
                           className="p-1.5 rounded-lg text-xs font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900 transition-colors cursor-pointer"
-                          title="Open in CDS Assistant"
+                          title={t("Launch CDS Assistant")}
                         >
                           <Sparkles className="h-4 w-4" />
                         </Link>

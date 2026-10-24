@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { patientApi } from "../../api/patientApi";
+import { useLanguage } from "../../contexts/LanguageContext";
 import {
   Activity,
   HeartPulse,
@@ -11,6 +12,7 @@ import {
 } from "lucide-react";
 
 export default function PatientMedicalHistory() {
+  const { t } = useLanguage();
   const [history, setHistory] = useState([]);
   const [symptoms, setSymptoms] = useState([]);
   const [reports, setReports] = useState([]);
@@ -47,10 +49,10 @@ export default function PatientMedicalHistory() {
       <div className="border-b border-border pb-4">
         <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
           <Activity className="w-6 h-6 text-primary" />
-          Medical History & Clinical Profile
+          {t("Medical History & Clinical Profile") || "Medical History & Clinical Profile"}
         </h1>
         <p className="text-sm text-muted-foreground">
-          Authoritative health conditions, reported symptoms, and diagnostic laboratory records.
+          {t("Authoritative health conditions, reported symptoms, and diagnostic laboratory records.") || "Authoritative health conditions, reported symptoms, and diagnostic laboratory records."}
         </p>
       </div>
 
@@ -67,7 +69,7 @@ export default function PatientMedicalHistory() {
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
               <HeartPulse className="w-4 h-4 text-primary" />
-              Diagnosed Conditions
+              {t("Diagnosed Conditions") || "Diagnosed Conditions"}
             </h3>
             <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">
               {history.length}
@@ -79,11 +81,11 @@ export default function PatientMedicalHistory() {
               {history.map((h, idx) => (
                 <div key={idx} className="p-3 rounded-lg border border-border/60 bg-muted/20 space-y-1 text-xs">
                   <p className="font-bold text-foreground text-sm">{h.condition_name}</p>
-                  <p className="text-muted-foreground">Diagnosis: {h.diagnosis}</p>
+                  <p className="text-muted-foreground">{t("Diagnosis:") || "Diagnosis:"} {h.diagnosis}</p>
                   {h.diagnosed_date && (
                     <p className="text-[11px] text-muted-foreground flex items-center gap-1">
                       <Calendar className="w-3 h-3 text-primary" />
-                      Diagnosed: {new Date(h.diagnosed_date).toLocaleDateString()}
+                      {t("Diagnosed:") || "Diagnosed:"} {new Date(h.diagnosed_date).toLocaleDateString()}
                     </p>
                   )}
                   {h.notes && (
@@ -96,7 +98,7 @@ export default function PatientMedicalHistory() {
             </div>
           ) : (
             <p className="text-xs text-muted-foreground py-4 text-center">
-              No chronic conditions recorded.
+              {t("No chronic conditions recorded.") || "No chronic conditions recorded."}
             </p>
           )}
         </div>
@@ -106,7 +108,7 @@ export default function PatientMedicalHistory() {
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
               <Activity className="w-4 h-4 text-primary" />
-              Reported Symptoms
+              {t("Reported Symptoms") || "Reported Symptoms"}
             </h3>
             <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">
               {symptoms.length}
@@ -120,12 +122,12 @@ export default function PatientMedicalHistory() {
                   <div className="flex items-center justify-between">
                     <p className="font-bold text-foreground">{s.symptom_name}</p>
                     <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-600">
-                      Severity: {s.severity || "Reported"}
+                      {t("Severity:") || "Severity:"} {s.severity || "Reported"}
                     </span>
                   </div>
                   {s.recorded_date && (
                     <p className="text-[11px] text-muted-foreground">
-                      Reported on: {new Date(s.recorded_date).toLocaleDateString()}
+                      {t("Reported on:") || "Reported on:"} {new Date(s.recorded_date).toLocaleDateString()}
                     </p>
                   )}
                   {s.notes && <p className="text-muted-foreground">{s.notes}</p>}
@@ -134,7 +136,7 @@ export default function PatientMedicalHistory() {
             </div>
           ) : (
             <p className="text-xs text-muted-foreground py-4 text-center">
-              No recent symptoms reported.
+              {t("No recent symptoms reported.") || "No recent symptoms reported."}
             </p>
           )}
         </div>
@@ -144,7 +146,7 @@ export default function PatientMedicalHistory() {
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
               <FileCheck className="w-4 h-4 text-primary" />
-              Diagnostic Lab Reports
+              {t("Diagnostic Lab Reports") || "Diagnostic Lab Reports"}
             </h3>
             <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">
               {reports.length}
@@ -159,7 +161,7 @@ export default function PatientMedicalHistory() {
                   <p className="text-muted-foreground">{r.description || "Routine diagnostic evaluation"}</p>
                   {r.report_date && (
                     <p className="text-[11px] text-muted-foreground">
-                      Date: {new Date(r.report_date).toLocaleDateString()}
+                      {t("Date:") || "Date:"} {new Date(r.report_date).toLocaleDateString()}
                     </p>
                   )}
                 </div>
@@ -167,7 +169,7 @@ export default function PatientMedicalHistory() {
             </div>
           ) : (
             <p className="text-xs text-muted-foreground py-4 text-center">
-              No diagnostic reports on record.
+              {t("No diagnostic reports on record.") || "No diagnostic reports on record."}
             </p>
           )}
         </div>
