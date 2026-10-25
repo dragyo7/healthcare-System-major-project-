@@ -3,11 +3,11 @@
 > **Status Reference**: Authoritative Living Project Status
 > **Repository**: `dragyo7/healthcare-System-major-project-`
 > **Current Branch**: `codex/presentation-stabilization` (Baseline: `main`)
-> **Snapshot Timing**: 2026-10-25 (Patient recovery routing and truth-preserving Synthea repair, DEC-043 verified)
+> **Snapshot Timing**: 2026-10-25 (Recovery intent precedence and 10-scenario E2E clinical verification, DEC-044 verified)
 > **Active Services Status**: Targeted runtime verified with MySQL (3306), FastAPI (8000), Express (5000), and Vite (5173) using `rag_healthcare_test`; default `rag_healthcare` Express startup is blocked by pending schema migrations.
 > **Frozen RAG Implementation Baseline**: Commit `497a547` (V2.10 Hard-Frozen, 2,204 chunks, 190 pass, 2 skip, 0 fail)
 > **Architecture Note**: Single-port entry on port 5173 (`/doctor`, `/patient`, `/receptionist`, `/activate`) per DEC-013 & DEC-034.
-> **Engineering Governance**: Governed by DEC-001 through DEC-043 and `FINAL-CDSS-MIGRATION-SAFETY-001`; DEC-043 supersedes the fabricated-data portions of DEC-030.
+> **Engineering Governance**: Governed by DEC-001 through DEC-044 and `FINAL-CDSS-MIGRATION-SAFETY-001`; DEC-043 supersedes the fabricated-data portions of DEC-030.
 
 ---
 
@@ -78,7 +78,8 @@
 | `python scratch/verify_synthea_import.py --manifest ... --db-name rag_healthcare_test` | Exact Synthea identity and legacy-fabrication assertions | **5 / 5 mappings** | `0` | Patient/account linkage verified; zero old importer-marked current prescriptions remain. |
 | Playwright CLI browser session | Patient saved-plan and missing-plan journeys | **2 / 2 journeys** | `0` | Aarav receives his saved plan; Terrilyn receives an honest missing-record response; no `INVALID_CITATION` appears. |
 | `python -m pytest cds_module/test_patient_recovery_context.py scratch/test_synthea_mapping.py cds_module/test_cds_gateway.py -q` | Recovery intent, FHIR mapping, gateway regression | **13 / 13** | `0` | Includes natural recovery paraphrase and follow-up warning question; frozen RAG boundaries unchanged. |
-| **Consolidated Gate Regression Suite** | Multi-suite integration regression against `rag_healthcare_test` | **388 cases / 401 assertions** | `0` | **386 PASSED, 2 FAILED (TC-02/TC-05 fail-closed capacity limits), 0 SKIPPED** across all verified suites |
+| `node scratch/verify_e2e_10_scenarios.js` | 10 Required End-to-End Clinical Scenarios (Auth, Grounded Recovery, BOLA, Honest Absence, Frozen RAG, Safe Abstention, No Verifier Leaks, Allergy/DDI Screening, Synthea Provenance, Error Handling) | **10 / 10** | `0` | 100% pass across all 10 end-to-end integration scenarios specified in prompt (DEC-044). |
+| **Consolidated Gate Regression Suite** | Multi-suite integration regression against `rag_healthcare_test` | **398 cases / 411 assertions** | `0` | **396 PASSED, 2 FAILED (TC-02/TC-05 fail-closed capacity limits), 0 SKIPPED** across all verified suites |
 
 ---
 

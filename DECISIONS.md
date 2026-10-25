@@ -1117,6 +1117,23 @@
   - Browser: Aarav's question resolves to his saved discharge diagnosis, instructions, warning signs, and follow-up with one EHR citation. Terrilyn's identical question reports that no discharge directives exist; neither view exposes `INVALID_CITATION`.
 - **Limitations**: Synthea MedicationRequests are retained in the manifest rather than shown as current medications. A clinician must author a new plan or prescription through the normal workflow before it becomes current care.
 
+---
 
-
-
+### DEC-044 — Recovery Intent Precedence and Honest Specific-Care Abstention Invariant
+- **Date**: 2026-10-25
+- **Status**: **Accepted & Binding**
+- **Context**: During comprehensive multi-scenario regression testing, expanding `is_discharge_overview` to match recovery questions ("What care should I take?") caused it to hijack specific queries such as wound care and dressing instructions ("What wound care and surgical dressing instructions should I follow?") because they also contained "care" + "should". This caused them to match `is_discharge_overview` (returning general discharge summary with `is_grounded: true`) instead of falling through to Topic 6 (`is_wound_care_query`), which checks whether wound care instructions exist in the discharge plan and honestly discloses absence.
+- **Decision**:
+  1. **Query Precedence Ordering**: Reordered pattern evaluation in `cds_module/orchestrator.py` so that specific care domains (`is_wound_care_query`, `is_diet_query`, `is_nsaid_bp_query`) are evaluated strictly before `is_discharge_overview`.
+  2. **Mutual Exclusion Guard**: Explicitly constrained `is_discharge_overview` to require `not is_wound_care_query and not is_diet_query and not is_nsaid_bp_query`, guaranteeing that specific inquiries about absent care items (such as wound care or salt restrictions) are never swallowed by general overview logic.
+  3. **Medication Timing Omission Text Alignment**: Aligned single-medication administration timing omission phrasing to strictly preserve the clinical noun phrase `"Specific medication administration timing for {disp_med} is not documented in your discharge summary."`.
+  4. **Preserved Invariants**: The frozen FAISS index (2,204 chunks), embeddings (`bge-small-en`), BM25 lexical retriever, Cross-Encoder reranker, TinyLlama generator, and AnswerGroundingVerifier remain 100% untouched.
+- **Observed Verification**:
+  - `python -m unittest scratch/test_priority1_honest_discharge.py`: 6/6 passed (100%).
+  - `python -m pytest cds_module/test_patient_recovery_context.py -q`: 2/2 passed (100%).
+  - `python -m pytest cds_module/test_patient_recovery_context.py scratch/test_synthea_mapping.py cds_module/test_cds_gateway.py -q`: 13/13 passed (100%).
+  - `node scratch/test_priority1_post_discharge.js`: 5/5 passed (100%).
+  - `python scripts/evaluate_ddi_comprehensive.py`: 29/29 passed (100%).
+  - `python -m pytest multilingual_module/tests/ -v -q`: 38/38 passed (100%).
+  - `node scratch/verify_e2e_10_scenarios.js`: 10/10 end-to-end clinical scenarios passed (100%).
+  - `frontend production build`: 0 errors across 2,253 modules.

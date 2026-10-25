@@ -874,6 +874,13 @@ ag_healthcare 100% UNTOUCHED (176 users, 15 doctors).
   5. `scratch/verify_synthea_import.py` asserts patient/account linkage and absence of legacy invented current prescriptions.
 - **Observed browser sequence**: Patient demo login → Post-Discharge Assistant → “What care should I take?” → saved-plan summary for Aarav; Terrilyn login → same route/query → honest missing-plan response.
 
+---
 
-
-
+- **Change ID**: `PATIENT-CONTEXT-RECOVERY-PRECEDENCE-007` (DEC-044)
+- **Execution Path & Intent Precedence**:
+  1. `cds_module/orchestrator.py` receives query via `POST /cds/evaluate`.
+  2. Domain-specific pattern checks (`is_wound_care_query`, `is_diet_query`, `is_nsaid_bp_query`) evaluate *before* `is_discharge_overview`.
+  3. `is_discharge_overview` requires `not is_wound_care_query and not is_diet_query and not is_nsaid_bp_query`.
+  4. Queries targeting specific absent care topics (e.g., wound care) are prevented from being hijacked by general recovery keywords, falling through to honest absence disclosures (zero citations).
+  5. Timing omission phrasing strictly outputs `"Specific medication administration timing for {disp_med} is not documented in your discharge summary."`.
+  6. Verified end-to-end across 10 clinical scenarios in `scratch/verify_e2e_10_scenarios.js` with 100% pass rate.
