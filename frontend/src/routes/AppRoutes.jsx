@@ -114,9 +114,9 @@ export default function AppRoutes() {
         <Route
           path="/reset-password"
           element={
-            <ProtectedRoute>
+            <GuestRoute>
               <ResetPassword />
-            </ProtectedRoute>
+            </GuestRoute>
           }
         />
 

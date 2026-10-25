@@ -2,7 +2,7 @@
   "import_metadata": {
     "source_archive": "C:\\Users\\ABHYUDAYA\\OneDrive\\Desktop\\synthea_sample_data_fhir_r4_nov2021.zip",
     "archive_sha256": "6d3c5433bcae4791bc5c30469d1445b430fb4894d5c13bda15fee0584bbd7778",
-    "import_timestamp": "2026-10-25T18:10:16.709143",
+    "import_timestamp": "2026-10-25T20:08:04.763313",
     "target_database": "rag_healthcare_test",
     "time_policy": "Historical Synthea source dates retained; missing dates remain unavailable.",
     "clinical_status_policy": "MedicationRequests remain historical source data; no current prescription or clinician approval is inferred.",
@@ -29,32 +29,132 @@
         "Tree nut (substance)",
         "Peanut (substance)"
       ],
-      "active_conditions": [
-        "Body mass index 30+ - obesity (finding)",
-        "Hypertension",
-        "Social isolation (finding)",
-        "Diabetes",
-        "Hypertriglyceridemia (disorder)",
-        "Metabolic syndrome X (disorder)",
-        "Social isolation (finding)",
-        "Refugee (person)",
-        "Hyperglycemia (disorder)",
-        "Prediabetes",
-        "Social isolation (finding)",
-        "Victim of intimate partner abuse (finding)",
-        "Miscarriage in first trimester",
-        "Chronic sinusitis (disorder)",
-        "Neuropathy due to type 2 diabetes mellitus (disorder)",
-        "Social isolation (finding)",
-        "Stress (finding)",
-        "Limited social contact (finding)",
-        "Viral sinusitis (disorder)",
-        "Limited social contact (finding)",
-        "Stress (finding)",
-        "Viral sinusitis (disorder)",
-        "Severe anxiety (panic) (finding",
-        "Stress (finding)",
-        "Hyperlipidemia"
+      "source_conditions": [
+        {
+          "condition": "Body mass index 30+ - obesity (finding)",
+          "onset": "1990-05-21",
+          "status": "active"
+        },
+        {
+          "condition": "Hypertension",
+          "onset": "1991-05-27",
+          "status": "active"
+        },
+        {
+          "condition": "Social isolation (finding)",
+          "onset": "1991-05-27",
+          "status": "resolved"
+        },
+        {
+          "condition": "Diabetes",
+          "onset": "1995-06-19",
+          "status": "active"
+        },
+        {
+          "condition": "Hypertriglyceridemia (disorder)",
+          "onset": "1996-06-24",
+          "status": "active"
+        },
+        {
+          "condition": "Metabolic syndrome X (disorder)",
+          "onset": "1996-06-24",
+          "status": "active"
+        },
+        {
+          "condition": "Social isolation (finding)",
+          "onset": "1996-06-24",
+          "status": "resolved"
+        },
+        {
+          "condition": "Refugee (person)",
+          "onset": "1997-06-30",
+          "status": "active"
+        },
+        {
+          "condition": "Hyperglycemia (disorder)",
+          "onset": "2000-07-17",
+          "status": "active"
+        },
+        {
+          "condition": "Prediabetes",
+          "onset": "2000-07-17",
+          "status": "active"
+        },
+        {
+          "condition": "Social isolation (finding)",
+          "onset": "2003-08-04",
+          "status": "resolved"
+        },
+        {
+          "condition": "Victim of intimate partner abuse (finding)",
+          "onset": "2005-08-15",
+          "status": "active"
+        },
+        {
+          "condition": "Miscarriage in first trimester",
+          "onset": "2008-06-23",
+          "status": "active"
+        },
+        {
+          "condition": "Chronic sinusitis (disorder)",
+          "onset": "2010-02-21",
+          "status": "active"
+        },
+        {
+          "condition": "Neuropathy due to type 2 diabetes mellitus (disorder)",
+          "onset": "2012-09-24",
+          "status": "active"
+        },
+        {
+          "condition": "Social isolation (finding)",
+          "onset": "2012-09-24",
+          "status": "active"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2012-09-24",
+          "status": "resolved"
+        },
+        {
+          "condition": "Limited social contact (finding)",
+          "onset": "2014-10-06",
+          "status": "resolved"
+        },
+        {
+          "condition": "Viral sinusitis (disorder)",
+          "onset": "2015-06-09",
+          "status": "resolved"
+        },
+        {
+          "condition": "Limited social contact (finding)",
+          "onset": "2015-10-12",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2015-10-12",
+          "status": "resolved"
+        },
+        {
+          "condition": "Viral sinusitis (disorder)",
+          "onset": "2017-04-26",
+          "status": "resolved"
+        },
+        {
+          "condition": "Severe anxiety (panic) (finding",
+          "onset": "2018-11-05",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2019-11-11",
+          "status": "resolved"
+        },
+        {
+          "condition": "Hyperlipidemia",
+          "onset": "2020-11-16",
+          "status": "active"
+        }
       ],
       "source_medication_requests": [
         {
@@ -1145,44 +1245,192 @@
         "Penicillin V",
         "Peanut (substance)"
       ],
-      "active_conditions": [
-        "Hypertension",
-        "Victim of intimate partner abuse (finding)",
-        "Prediabetes",
-        "Anemia (disorder)",
-        "Lack of access to transportation (finding)",
-        "Stress (finding)",
-        "Stress (finding)",
-        "Victim of intimate partner abuse (finding)",
-        "Stress (finding)",
-        "Stress (finding)",
-        "Stress (finding)",
-        "Osteoarthritis of hip",
-        "Stress (finding)",
-        "Miscarriage in first trimester",
-        "Stress (finding)",
-        "Victim of intimate partner abuse (finding)",
-        "Tubal pregnancy",
-        "Stress (finding)",
-        "Victim of intimate partner abuse (finding)",
-        "Stress (finding)",
-        "Stress (finding)",
-        "Victim of intimate partner abuse (finding)",
-        "Stress (finding)",
-        "Stress (finding)",
-        "Victim of intimate partner abuse (finding)",
-        "Victim of intimate partner abuse (finding)",
-        "Stress (finding)",
-        "Hyperlipidemia",
-        "Social isolation (finding)",
-        "Stress (finding)",
-        "Chronic low back pain (finding)",
-        "Chronic neck pain (finding)",
-        "Limited social contact (finding)",
-        "Stress (finding)",
-        "Acute bronchitis (disorder)",
-        "Not in labor force (finding)",
-        "Stress (finding)"
+      "source_conditions": [
+        {
+          "condition": "Hypertension",
+          "onset": "1943-01-28",
+          "status": "active"
+        },
+        {
+          "condition": "Victim of intimate partner abuse (finding)",
+          "onset": "1943-01-28",
+          "status": "resolved"
+        },
+        {
+          "condition": "Prediabetes",
+          "onset": "1944-02-03",
+          "status": "active"
+        },
+        {
+          "condition": "Anemia (disorder)",
+          "onset": "1944-02-03",
+          "status": "active"
+        },
+        {
+          "condition": "Lack of access to transportation (finding)",
+          "onset": "1944-02-03",
+          "status": "active"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "1944-02-03",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "1947-02-20",
+          "status": "resolved"
+        },
+        {
+          "condition": "Victim of intimate partner abuse (finding)",
+          "onset": "1947-02-20",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "1956-04-12",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "1964-05-28",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "1966-06-09",
+          "status": "resolved"
+        },
+        {
+          "condition": "Osteoarthritis of hip",
+          "onset": "1970-07-09",
+          "status": "active"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "1970-07-02",
+          "status": "resolved"
+        },
+        {
+          "condition": "Miscarriage in first trimester",
+          "onset": "1972-01-13",
+          "status": "active"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "1973-07-19",
+          "status": "resolved"
+        },
+        {
+          "condition": "Victim of intimate partner abuse (finding)",
+          "onset": "1973-07-19",
+          "status": "resolved"
+        },
+        {
+          "condition": "Tubal pregnancy",
+          "onset": "1974-09-26",
+          "status": "active"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "1975-07-31",
+          "status": "resolved"
+        },
+        {
+          "condition": "Victim of intimate partner abuse (finding)",
+          "onset": "1979-08-23",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "1980-08-28",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "1985-10-03",
+          "status": "resolved"
+        },
+        {
+          "condition": "Victim of intimate partner abuse (finding)",
+          "onset": "1985-10-03",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "1989-10-26",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "1991-11-07",
+          "status": "resolved"
+        },
+        {
+          "condition": "Victim of intimate partner abuse (finding)",
+          "onset": "1992-11-12",
+          "status": "resolved"
+        },
+        {
+          "condition": "Victim of intimate partner abuse (finding)",
+          "onset": "1993-11-18",
+          "status": "active"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "1999-12-23",
+          "status": "resolved"
+        },
+        {
+          "condition": "Hyperlipidemia",
+          "onset": "2005-01-20",
+          "status": "active"
+        },
+        {
+          "condition": "Social isolation (finding)",
+          "onset": "2009-02-12",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2009-02-12",
+          "status": "resolved"
+        },
+        {
+          "condition": "Chronic low back pain (finding)",
+          "onset": "2014-02-01",
+          "status": "active"
+        },
+        {
+          "condition": "Chronic neck pain (finding)",
+          "onset": "2014-02-01",
+          "status": "active"
+        },
+        {
+          "condition": "Limited social contact (finding)",
+          "onset": "2014-03-13",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2017-03-30",
+          "status": "resolved"
+        },
+        {
+          "condition": "Acute bronchitis (disorder)",
+          "onset": "2017-12-16",
+          "status": "resolved"
+        },
+        {
+          "condition": "Not in labor force (finding)",
+          "onset": "2017-12-28",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2018-04-05",
+          "status": "active"
+        }
       ],
       "source_medication_requests": [
         {
@@ -4544,44 +4792,192 @@
         "Sulfamethoxazole / Trimethoprim",
         "Cow's milk (substance)"
       ],
-      "active_conditions": [
-        "Appendicitis",
-        "History of appendectomy",
-        "Stress (finding)",
-        "Stress (finding)",
-        "Limited social contact (finding)",
-        "Stress (finding)",
-        "Reports of violence in the environment (finding)",
-        "Stress (finding)",
-        "Stress (finding)",
-        "Body mass index 30+ - obesity (finding)",
-        "Limited social contact (finding)",
-        "Stress (finding)",
-        "Stress (finding)",
-        "Reports of violence in the environment (finding)",
-        "Stress (finding)",
-        "Reports of violence in the environment (finding)",
-        "Stress (finding)",
-        "Stress (finding)",
-        "Hyperlipidemia",
-        "Limited social contact (finding)",
-        "Localized, primary osteoarthritis of the hand",
-        "Limited social contact (finding)",
-        "Stress (finding)",
-        "Limited social contact (finding)",
-        "Stress (finding)",
-        "Coronary Heart Disease",
-        "Social isolation (finding)",
-        "Stress (finding)",
-        "Victim of intimate partner abuse (finding)",
-        "Fracture subluxation of wrist",
-        "Viral sinusitis (disorder)",
-        "Stress (finding)",
-        "Stress (finding)",
-        "Limited social contact (finding)",
-        "Social isolation (finding)",
-        "Reports of violence in the environment (finding)",
-        "Stress (finding)"
+      "source_conditions": [
+        {
+          "condition": "Appendicitis",
+          "onset": "1958-12-31",
+          "status": "active"
+        },
+        {
+          "condition": "History of appendectomy",
+          "onset": "1958-12-31",
+          "status": "active"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "1971-01-26",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "1972-02-01",
+          "status": "resolved"
+        },
+        {
+          "condition": "Limited social contact (finding)",
+          "onset": "1975-02-18",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "1976-02-24",
+          "status": "resolved"
+        },
+        {
+          "condition": "Reports of violence in the environment (finding)",
+          "onset": "1976-02-24",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "1979-03-13",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "1982-03-30",
+          "status": "resolved"
+        },
+        {
+          "condition": "Body mass index 30+ - obesity (finding)",
+          "onset": "1984-04-10",
+          "status": "active"
+        },
+        {
+          "condition": "Limited social contact (finding)",
+          "onset": "1984-04-10",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "1984-04-10",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "1986-04-22",
+          "status": "resolved"
+        },
+        {
+          "condition": "Reports of violence in the environment (finding)",
+          "onset": "1988-05-03",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "1991-05-21",
+          "status": "resolved"
+        },
+        {
+          "condition": "Reports of violence in the environment (finding)",
+          "onset": "1991-05-21",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "1993-03-23",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "1994-06-07",
+          "status": "resolved"
+        },
+        {
+          "condition": "Hyperlipidemia",
+          "onset": "1996-06-18",
+          "status": "active"
+        },
+        {
+          "condition": "Limited social contact (finding)",
+          "onset": "1997-06-24",
+          "status": "resolved"
+        },
+        {
+          "condition": "Localized, primary osteoarthritis of the hand",
+          "onset": "1999-03-27",
+          "status": "active"
+        },
+        {
+          "condition": "Limited social contact (finding)",
+          "onset": "1999-07-06",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "1999-07-06",
+          "status": "resolved"
+        },
+        {
+          "condition": "Limited social contact (finding)",
+          "onset": "2004-08-03",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2004-08-03",
+          "status": "resolved"
+        },
+        {
+          "condition": "Coronary Heart Disease",
+          "onset": "2007-08-21",
+          "status": "active"
+        },
+        {
+          "condition": "Social isolation (finding)",
+          "onset": "2007-08-21",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2007-08-21",
+          "status": "resolved"
+        },
+        {
+          "condition": "Victim of intimate partner abuse (finding)",
+          "onset": "2011-09-13",
+          "status": "resolved"
+        },
+        {
+          "condition": "Fracture subluxation of wrist",
+          "onset": "2012-07-31",
+          "status": "resolved"
+        },
+        {
+          "condition": "Viral sinusitis (disorder)",
+          "onset": "2013-05-17",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2013-05-21",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2015-10-06",
+          "status": "resolved"
+        },
+        {
+          "condition": "Limited social contact (finding)",
+          "onset": "2017-10-17",
+          "status": "active"
+        },
+        {
+          "condition": "Social isolation (finding)",
+          "onset": "2018-10-23",
+          "status": "resolved"
+        },
+        {
+          "condition": "Reports of violence in the environment (finding)",
+          "onset": "2020-11-03",
+          "status": "active"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2021-11-09",
+          "status": "active"
+        }
       ],
       "source_medication_requests": [
         {
@@ -7418,86 +7814,402 @@
       "gender": "male",
       "allergies_count": 0,
       "allergies_documented": [],
-      "active_conditions": [
-        "Risk activity involvement (finding)",
-        "Risk activity involvement (finding)",
-        "Diabetes",
-        "Hypertension",
-        "Hypertriglyceridemia (disorder)",
-        "Metabolic syndrome X (disorder)",
-        "Anemia (disorder)",
-        "Neuropathy due to type 2 diabetes mellitus (disorder)",
-        "Diabetic retinopathy associated with type II diabetes mellitus (disorder)",
-        "Atrial Fibrillation",
-        "Chronic kidney disease stage 1 (disorder)",
-        "Diabetic renal disease (disorder)",
-        "Victim of intimate partner abuse (finding)",
-        "Social isolation (finding)",
-        "Limited social contact (finding)",
-        "Stress (finding)",
-        "Not in labor force (finding)",
-        "Limited social contact (finding)",
-        "Acute viral pharyngitis (disorder)",
-        "Stress (finding)",
-        "Victim of intimate partner abuse (finding)",
-        "Victim of intimate partner abuse (finding)",
-        "Reports of violence in the environment (finding)",
-        "Limited social contact (finding)",
-        "Limited social contact (finding)",
-        "Stress (finding)",
-        "Viral sinusitis (disorder)",
-        "Stress (finding)",
-        "Not in labor force (finding)",
-        "Stress (finding)",
-        "Victim of intimate partner abuse (finding)",
-        "Limited social contact (finding)",
-        "Stress (finding)",
-        "Reports of violence in the environment (finding)",
-        "Alzheimer's disease (disorder)",
-        "Stress (finding)",
-        "Not in labor force (finding)",
-        "Limited social contact (finding)",
-        "Stress (finding)",
-        "Stress (finding)",
-        "Victim of intimate partner abuse (finding)",
-        "Stress (finding)",
-        "Social isolation (finding)",
-        "Stress (finding)",
-        "Reports of violence in the environment (finding)",
-        "Limited social contact (finding)",
-        "Stress (finding)",
-        "Not in labor force (finding)",
-        "Not in labor force (finding)",
-        "Victim of intimate partner abuse (finding)",
-        "Reports of violence in the environment (finding)",
-        "Limited social contact (finding)",
-        "Stress (finding)",
-        "Victim of intimate partner abuse (finding)",
-        "Stress (finding)",
-        "Reports of violence in the environment (finding)",
-        "Victim of intimate partner abuse (finding)",
-        "Social isolation (finding)",
-        "Limited social contact (finding)",
-        "Stress (finding)",
-        "Stress (finding)",
-        "Reports of violence in the environment (finding)",
-        "Limited social contact (finding)",
-        "Stress (finding)",
-        "Social isolation (finding)",
-        "Limited social contact (finding)",
-        "Victim of intimate partner abuse (finding)",
-        "Stress (finding)",
-        "Stress (finding)",
-        "Limited social contact (finding)",
-        "Not in labor force (finding)",
-        "Victim of intimate partner abuse (finding)",
-        "Stress (finding)",
-        "Stress (finding)",
-        "Acute bronchitis (disorder)",
-        "Stress (finding)",
-        "Victim of intimate partner abuse (finding)",
-        "Stress (finding)",
-        "Reports of violence in the environment (finding)"
+      "source_conditions": [
+        {
+          "condition": "Risk activity involvement (finding)",
+          "onset": "1953-12-24",
+          "status": "resolved"
+        },
+        {
+          "condition": "Risk activity involvement (finding)",
+          "onset": "1959-01-22",
+          "status": "active"
+        },
+        {
+          "condition": "Diabetes",
+          "onset": "1973-02-15",
+          "status": "active"
+        },
+        {
+          "condition": "Hypertension",
+          "onset": "1973-02-15",
+          "status": "active"
+        },
+        {
+          "condition": "Hypertriglyceridemia (disorder)",
+          "onset": "1974-02-21",
+          "status": "active"
+        },
+        {
+          "condition": "Metabolic syndrome X (disorder)",
+          "onset": "1974-02-21",
+          "status": "active"
+        },
+        {
+          "condition": "Anemia (disorder)",
+          "onset": "1974-02-21",
+          "status": "active"
+        },
+        {
+          "condition": "Neuropathy due to type 2 diabetes mellitus (disorder)",
+          "onset": "1978-03-16",
+          "status": "active"
+        },
+        {
+          "condition": "Diabetic retinopathy associated with type II diabetes mellitus (disorder)",
+          "onset": "1993-06-10",
+          "status": "active"
+        },
+        {
+          "condition": "Atrial Fibrillation",
+          "onset": "1996-06-27",
+          "status": "active"
+        },
+        {
+          "condition": "Chronic kidney disease stage 1 (disorder)",
+          "onset": "1998-07-09",
+          "status": "active"
+        },
+        {
+          "condition": "Diabetic renal disease (disorder)",
+          "onset": "1998-07-09",
+          "status": "active"
+        },
+        {
+          "condition": "Victim of intimate partner abuse (finding)",
+          "onset": "2007-04-05",
+          "status": "resolved"
+        },
+        {
+          "condition": "Social isolation (finding)",
+          "onset": "2011-11-24",
+          "status": "resolved"
+        },
+        {
+          "condition": "Limited social contact (finding)",
+          "onset": "2011-12-29",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2011-12-29",
+          "status": "resolved"
+        },
+        {
+          "condition": "Not in labor force (finding)",
+          "onset": "2012-01-19",
+          "status": "resolved"
+        },
+        {
+          "condition": "Limited social contact (finding)",
+          "onset": "2012-04-05",
+          "status": "resolved"
+        },
+        {
+          "condition": "Acute viral pharyngitis (disorder)",
+          "onset": "2012-06-14",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2012-08-16",
+          "status": "resolved"
+        },
+        {
+          "condition": "Victim of intimate partner abuse (finding)",
+          "onset": "2012-08-16",
+          "status": "resolved"
+        },
+        {
+          "condition": "Victim of intimate partner abuse (finding)",
+          "onset": "2012-12-27",
+          "status": "resolved"
+        },
+        {
+          "condition": "Reports of violence in the environment (finding)",
+          "onset": "2013-01-24",
+          "status": "resolved"
+        },
+        {
+          "condition": "Limited social contact (finding)",
+          "onset": "2013-03-21",
+          "status": "resolved"
+        },
+        {
+          "condition": "Limited social contact (finding)",
+          "onset": "2013-05-23",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2013-05-23",
+          "status": "resolved"
+        },
+        {
+          "condition": "Viral sinusitis (disorder)",
+          "onset": "2013-07-09",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2013-10-10",
+          "status": "resolved"
+        },
+        {
+          "condition": "Not in labor force (finding)",
+          "onset": "2014-01-09",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2014-05-15",
+          "status": "resolved"
+        },
+        {
+          "condition": "Victim of intimate partner abuse (finding)",
+          "onset": "2014-05-15",
+          "status": "resolved"
+        },
+        {
+          "condition": "Limited social contact (finding)",
+          "onset": "2014-07-17",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2014-07-17",
+          "status": "resolved"
+        },
+        {
+          "condition": "Reports of violence in the environment (finding)",
+          "onset": "2014-10-02",
+          "status": "resolved"
+        },
+        {
+          "condition": "Alzheimer's disease (disorder)",
+          "onset": "2015-03-05",
+          "status": "active"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2015-04-09",
+          "status": "resolved"
+        },
+        {
+          "condition": "Not in labor force (finding)",
+          "onset": "2015-05-07",
+          "status": "resolved"
+        },
+        {
+          "condition": "Limited social contact (finding)",
+          "onset": "2015-07-09",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2015-08-06",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2016-01-28",
+          "status": "resolved"
+        },
+        {
+          "condition": "Victim of intimate partner abuse (finding)",
+          "onset": "2016-01-28",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2016-06-23",
+          "status": "resolved"
+        },
+        {
+          "condition": "Social isolation (finding)",
+          "onset": "2017-01-26",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2017-03-30",
+          "status": "resolved"
+        },
+        {
+          "condition": "Reports of violence in the environment (finding)",
+          "onset": "2017-05-18",
+          "status": "resolved"
+        },
+        {
+          "condition": "Limited social contact (finding)",
+          "onset": "2017-06-29",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2017-08-24",
+          "status": "resolved"
+        },
+        {
+          "condition": "Not in labor force (finding)",
+          "onset": "2017-09-21",
+          "status": "resolved"
+        },
+        {
+          "condition": "Not in labor force (finding)",
+          "onset": "2017-11-02",
+          "status": "resolved"
+        },
+        {
+          "condition": "Victim of intimate partner abuse (finding)",
+          "onset": "2017-11-02",
+          "status": "resolved"
+        },
+        {
+          "condition": "Reports of violence in the environment (finding)",
+          "onset": "2018-02-22",
+          "status": "resolved"
+        },
+        {
+          "condition": "Limited social contact (finding)",
+          "onset": "2018-03-15",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2018-03-29",
+          "status": "resolved"
+        },
+        {
+          "condition": "Victim of intimate partner abuse (finding)",
+          "onset": "2018-05-24",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2018-06-28",
+          "status": "resolved"
+        },
+        {
+          "condition": "Reports of violence in the environment (finding)",
+          "onset": "2018-06-28",
+          "status": "resolved"
+        },
+        {
+          "condition": "Victim of intimate partner abuse (finding)",
+          "onset": "2018-07-26",
+          "status": "resolved"
+        },
+        {
+          "condition": "Social isolation (finding)",
+          "onset": "2018-09-20",
+          "status": "resolved"
+        },
+        {
+          "condition": "Limited social contact (finding)",
+          "onset": "2018-11-29",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2018-11-29",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2019-04-18",
+          "status": "resolved"
+        },
+        {
+          "condition": "Reports of violence in the environment (finding)",
+          "onset": "2019-06-13",
+          "status": "resolved"
+        },
+        {
+          "condition": "Limited social contact (finding)",
+          "onset": "2019-07-18",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2019-07-18",
+          "status": "resolved"
+        },
+        {
+          "condition": "Social isolation (finding)",
+          "onset": "2019-10-10",
+          "status": "resolved"
+        },
+        {
+          "condition": "Limited social contact (finding)",
+          "onset": "2019-10-24",
+          "status": "resolved"
+        },
+        {
+          "condition": "Victim of intimate partner abuse (finding)",
+          "onset": "2019-11-14",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2019-12-12",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2020-02-06",
+          "status": "resolved"
+        },
+        {
+          "condition": "Limited social contact (finding)",
+          "onset": "2020-04-16",
+          "status": "resolved"
+        },
+        {
+          "condition": "Not in labor force (finding)",
+          "onset": "2020-06-11",
+          "status": "resolved"
+        },
+        {
+          "condition": "Victim of intimate partner abuse (finding)",
+          "onset": "2020-07-02",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2020-10-01",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2020-12-10",
+          "status": "resolved"
+        },
+        {
+          "condition": "Acute bronchitis (disorder)",
+          "onset": "2021-01-25",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2021-04-29",
+          "status": "resolved"
+        },
+        {
+          "condition": "Victim of intimate partner abuse (finding)",
+          "onset": "2021-07-29",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2021-09-02",
+          "status": "resolved"
+        },
+        {
+          "condition": "Reports of violence in the environment (finding)",
+          "onset": "2021-09-16",
+          "status": "resolved"
+        }
       ],
       "source_medication_requests": [
         {
@@ -16604,33 +17316,137 @@
       "gender": "male",
       "allergies_count": 0,
       "allergies_documented": [],
-      "active_conditions": [
-        "Limited social contact (finding)",
-        "Social isolation (finding)",
-        "Sepsis (disorder)",
-        "Body mass index 30+ - obesity (finding)",
-        "Chronic sinusitis (disorder)",
-        "Prediabetes",
-        "Social isolation (finding)",
-        "Anemia (disorder)",
-        "Diabetes",
-        "Hypertension",
-        "Hyperglycemia (disorder)",
-        "Hypertriglyceridemia (disorder)",
-        "Metabolic syndrome X (disorder)",
-        "Neuropathy due to type 2 diabetes mellitus (disorder)",
-        "Social isolation (finding)",
-        "Stress (finding)",
-        "Reports of violence in the environment (finding)",
-        "Social isolation (finding)",
-        "Stress (finding)",
-        "Viral sinusitis (disorder)",
-        "Social isolation (finding)",
-        "Victim of intimate partner abuse (finding)",
-        "Stress (finding)",
-        "Victim of intimate partner abuse (finding)",
-        "Stress (finding)",
-        "Viral sinusitis (disorder)"
+      "source_conditions": [
+        {
+          "condition": "Limited social contact (finding)",
+          "onset": "1978-12-17",
+          "status": "resolved"
+        },
+        {
+          "condition": "Social isolation (finding)",
+          "onset": "1979-05-27",
+          "status": "resolved"
+        },
+        {
+          "condition": "Sepsis (disorder)",
+          "onset": "1993-06-27",
+          "status": "active"
+        },
+        {
+          "condition": "Body mass index 30+ - obesity (finding)",
+          "onset": "1994-01-02",
+          "status": "active"
+        },
+        {
+          "condition": "Chronic sinusitis (disorder)",
+          "onset": "1999-06-18",
+          "status": "active"
+        },
+        {
+          "condition": "Prediabetes",
+          "onset": "1999-10-24",
+          "status": "active"
+        },
+        {
+          "condition": "Social isolation (finding)",
+          "onset": "1999-10-24",
+          "status": "resolved"
+        },
+        {
+          "condition": "Anemia (disorder)",
+          "onset": "2001-10-28",
+          "status": "active"
+        },
+        {
+          "condition": "Diabetes",
+          "onset": "2003-11-02",
+          "status": "active"
+        },
+        {
+          "condition": "Hypertension",
+          "onset": "2003-11-02",
+          "status": "active"
+        },
+        {
+          "condition": "Hyperglycemia (disorder)",
+          "onset": "2004-11-07",
+          "status": "active"
+        },
+        {
+          "condition": "Hypertriglyceridemia (disorder)",
+          "onset": "2004-11-07",
+          "status": "active"
+        },
+        {
+          "condition": "Metabolic syndrome X (disorder)",
+          "onset": "2004-11-07",
+          "status": "active"
+        },
+        {
+          "condition": "Neuropathy due to type 2 diabetes mellitus (disorder)",
+          "onset": "2007-11-25",
+          "status": "active"
+        },
+        {
+          "condition": "Social isolation (finding)",
+          "onset": "2011-07-17",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2011-07-17",
+          "status": "resolved"
+        },
+        {
+          "condition": "Reports of violence in the environment (finding)",
+          "onset": "2011-07-17",
+          "status": "resolved"
+        },
+        {
+          "condition": "Social isolation (finding)",
+          "onset": "2013-12-29",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2013-12-29",
+          "status": "resolved"
+        },
+        {
+          "condition": "Viral sinusitis (disorder)",
+          "onset": "2014-03-24",
+          "status": "resolved"
+        },
+        {
+          "condition": "Social isolation (finding)",
+          "onset": "2015-01-04",
+          "status": "active"
+        },
+        {
+          "condition": "Victim of intimate partner abuse (finding)",
+          "onset": "2015-01-04",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2017-01-15",
+          "status": "resolved"
+        },
+        {
+          "condition": "Victim of intimate partner abuse (finding)",
+          "onset": "2017-01-15",
+          "status": "resolved"
+        },
+        {
+          "condition": "Stress (finding)",
+          "onset": "2020-02-02",
+          "status": "resolved"
+        },
+        {
+          "condition": "Viral sinusitis (disorder)",
+          "onset": "2021-06-02",
+          "status": "resolved"
+        }
       ],
       "source_medication_requests": [
         {

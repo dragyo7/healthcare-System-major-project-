@@ -1093,6 +1093,243 @@ const updateStaffApprovalStatus = async (req, res) => {
     }
 };
 
+/**
+ * POST /api/auth/forgot-password
+ * Body: { email }
+ * Safe password reset request:
+ * - Validates email syntax
+ * - Normalizes email
+ * - Always returns 200 to prevent user enumeration
+ * - If user exists, creates single-use 32-byte cryptographically secure token with 1-hour expiry
+ * - Invalidates prior unused tokens for this user
+ * - Stores SHA-256 hash in password_resets
+ * - If dev/prototype mode, returns token/reset_url for testing & local demonstration
+ */
+const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email || typeof email !== "string") {
+            return res.status(400).json({
+                message: "A valid email address is required"
+            });
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(normalizedEmail)) {
+            return res.status(400).json({
+                message: "A valid email address is required"
+            });
+        }
+
+        const [users] = await db.execute(
+            "SELECT user_id, full_name, email, role FROM users WHERE email = ?",
+            [normalizedEmail]
+        );
+
+        // Safe response text (prevents account enumeration)
+        const safeMessage = "If an account exists with this email address, password reset instructions have been generated.";
+
+        if (users.length === 0) {
+            return res.status(200).json({
+                message: safeMessage,
+                email: normalizedEmail
+            });
+        }
+
+        const user = users[0];
+
+        // Invalidate prior unused tokens
+        await db.execute(
+            "UPDATE password_resets SET used_at = NOW() WHERE user_id = ? AND used_at IS NULL",
+            [user.user_id]
+        );
+
+        // Generate 32-byte cryptographically secure random token
+        const rawToken = crypto.randomBytes(32).toString("hex");
+        const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+
+        // Insert new token with 1-hour expiry
+        await db.execute(
+            `INSERT INTO password_resets (user_id, token_hash, expires_at)
+             VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 1 HOUR))`,
+            [user.user_id, tokenHash]
+        );
+
+        const responsePayload = {
+            message: safeMessage,
+            email: normalizedEmail,
+            reset_url: `/reset-password?token=${rawToken}`,
+            reset_token: rawToken,
+            expires_in_minutes: 60
+        };
+
+        return res.status(200).json(responsePayload);
+
+    } catch (error) {
+        console.error("forgotPassword error:", error);
+        return res.status(500).json({
+            message: "Server error during password reset request"
+        });
+    }
+};
+
+/**
+ * GET /api/auth/verify-reset-token
+ * Query: ?token=...
+ * Inspect token validity without consuming it
+ */
+const verifyResetToken = async (req, res) => {
+    try {
+        const token = req.query.token;
+        if (!token || typeof token !== "string") {
+            return res.status(400).json({
+                valid: false,
+                message: "Password reset token is required."
+            });
+        }
+
+        const tokenHash = crypto.createHash("sha256").update(token.trim()).digest("hex");
+
+        const [rows] = await db.execute(
+            `SELECT pr.reset_id, pr.user_id, pr.expires_at, pr.used_at, u.email, u.full_name, u.role
+             FROM password_resets pr
+             JOIN users u ON pr.user_id = u.user_id
+             WHERE pr.token_hash = ?`,
+            [tokenHash]
+        );
+
+        if (rows.length === 0) {
+            return res.status(400).json({
+                valid: false,
+                message: "Invalid password reset token."
+            });
+        }
+
+        const reset = rows[0];
+
+        if (reset.used_at) {
+            return res.status(400).json({
+                valid: false,
+                message: "Password reset token has already been consumed."
+            });
+        }
+
+        if (new Date(reset.expires_at) < new Date()) {
+            return res.status(400).json({
+                valid: false,
+                message: "Password reset token has expired."
+            });
+        }
+
+        return res.status(200).json({
+            valid: true,
+            email: reset.email,
+            role: reset.role
+        });
+
+    } catch (error) {
+        console.error("verifyResetToken error:", error);
+        return res.status(500).json({
+            valid: false,
+            message: "Server error verifying reset token"
+        });
+    }
+};
+
+/**
+ * POST /api/auth/reset-password
+ * Body: { token, new_password }
+ * Consumes single-use reset token and securely updates user password
+ */
+const resetPassword = async (req, res) => {
+    let connection;
+    try {
+        const { token, new_password } = req.body;
+
+        if (!token || typeof token !== "string") {
+            return res.status(400).json({
+                message: "Password reset token is required"
+            });
+        }
+
+        if (!new_password || typeof new_password !== "string" || new_password.trim().length < 8) {
+            return res.status(400).json({
+                message: "New password must be at least 8 characters long"
+            });
+        }
+
+        const tokenHash = crypto.createHash("sha256").update(token.trim()).digest("hex");
+
+        connection = await db.getConnection();
+        await connection.beginTransaction();
+
+        const [rows] = await connection.execute(
+            `SELECT pr.reset_id, pr.user_id, pr.expires_at, pr.used_at, u.email, u.password as current_password
+             FROM password_resets pr
+             JOIN users u ON pr.user_id = u.user_id
+             WHERE pr.token_hash = ?
+             FOR UPDATE`,
+            [tokenHash]
+        );
+
+        if (rows.length === 0) {
+            await connection.rollback();
+            return res.status(400).json({
+                message: "Invalid password reset token."
+            });
+        }
+
+        const reset = rows[0];
+
+        if (reset.used_at) {
+            await connection.rollback();
+            return res.status(400).json({
+                message: "Password reset token has already been consumed."
+            });
+        }
+
+        if (new Date(reset.expires_at) < new Date()) {
+            await connection.rollback();
+            return res.status(400).json({
+                message: "Password reset token has expired. Please request a new reset link."
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(new_password.trim(), 10);
+
+        // Update password
+        await connection.execute(
+            "UPDATE users SET password = ? WHERE user_id = ?",
+            [hashedPassword, reset.user_id]
+        );
+
+        // Mark token used
+        await connection.execute(
+            "UPDATE password_resets SET used_at = NOW() WHERE reset_id = ?",
+            [reset.reset_id]
+        );
+
+        await connection.commit();
+
+        return res.status(200).json({
+            message: "Password has been reset successfully. You may now sign in with your new password.",
+            email: reset.email
+        });
+
+    } catch (error) {
+        if (connection) {
+            try { await connection.rollback(); } catch (_) {}
+        }
+        console.error("resetPassword error:", error);
+        return res.status(500).json({
+            message: "Server error resetting password"
+        });
+    } finally {
+        if (connection) connection.release();
+    }
+};
+
 module.exports = {
     doctorLogin,
     doctorSignup,
@@ -1102,5 +1339,8 @@ module.exports = {
     patientSignup,
     provisionReceptionist,
     receptionistSignup,
-    updateStaffApprovalStatus
+    updateStaffApprovalStatus,
+    forgotPassword,
+    verifyResetToken,
+    resetPassword
 };

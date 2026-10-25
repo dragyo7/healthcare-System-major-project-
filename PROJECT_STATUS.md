@@ -3,11 +3,12 @@
 > **Status Reference**: Authoritative Living Project Status
 > **Repository**: `dragyo7/healthcare-System-major-project-`
 > **Current Branch**: `codex/presentation-stabilization` (Baseline: `main`)
-> **Snapshot Timing**: 2026-10-25 (Recovery intent precedence and 10-scenario E2E clinical verification, DEC-044 verified)
+> **Snapshot Timing**: 2026-10-25 (Final Release Gate, Password Reset Lifecycle, Supabase Security Reality, Doctor Directory Standardization, DEC-046 verified)
 > **Active Services Status**: Targeted runtime verified with MySQL (3306), FastAPI (8000), Express (5000), and Vite (5173) using `rag_healthcare_test`; default `rag_healthcare` Express startup is blocked by pending schema migrations.
 > **Frozen RAG Implementation Baseline**: Commit `497a547` (V2.10 Hard-Frozen, 2,204 chunks, 190 pass, 2 skip, 0 fail)
 > **Architecture Note**: Single-port entry on port 5173 (`/doctor`, `/patient`, `/receptionist`, `/activate`) per DEC-013 & DEC-034.
-> **Engineering Governance**: Governed by DEC-001 through DEC-044 and `FINAL-CDSS-MIGRATION-SAFETY-001`; DEC-043 supersedes the fabricated-data portions of DEC-030.
+> **Engineering Governance**: Governed by DEC-001 through DEC-046 and `FINAL-CDSS-MIGRATION-SAFETY-001`; DEC-043 supersedes the fabricated-data portions of DEC-030.
+> **Release Gate Verdict**: **PASS — READY TO PUSH** (179/179 automated assertions passed, 26/26 browser states verified, 0 build errors).
 
 ---
 
@@ -79,6 +80,10 @@
 | Playwright CLI browser session | Patient saved-plan and missing-plan journeys | **2 / 2 journeys** | `0` | Aarav receives his saved plan; Terrilyn receives an honest missing-record response; no `INVALID_CITATION` appears. |
 | `python -m pytest cds_module/test_patient_recovery_context.py scratch/test_synthea_mapping.py cds_module/test_cds_gateway.py -q` | Recovery intent, FHIR mapping, gateway regression | **13 / 13** | `0` | Includes natural recovery paraphrase and follow-up warning question; frozen RAG boundaries unchanged. |
 | `node scratch/verify_e2e_10_scenarios.js` | 10 Required End-to-End Clinical Scenarios (Auth, Grounded Recovery, BOLA, Honest Absence, Frozen RAG, Safe Abstention, No Verifier Leaks, Allergy/DDI Screening, Synthea Provenance, Error Handling) | **10 / 10** | `0` | 100% pass across all 10 end-to-end integration scenarios specified in prompt (DEC-044). |
+| Second-Pass Engineering Audit Suite | Multi-suite independent verification: E2E 10 (10/10), DDI Benchmark (29/29), CDS Gateway Pytest (11/11), Honest Discharge (6/6), Unified Rx Gate (11/11), Allergy Bypass (3/3), OCR Pipeline (12/12), Password Security (7/7), Multilingual Matrix (12/12), Gap Closure (22/22) | **123 / 123** | `0` | 100% pass independently reproduced and verified against `rag_healthcare_test`; 22 screenshots archived in `audit_evidence/second_pass_audit_20261025/` (DEC-045). |
+| `node scratch/test_password_reset_flow.js` | Full Password Reset Lifecycle (Anti-Enumeration, Single-Use SHA-256 Token, Expiry, Replay Defense, New Login) | **21 / 21** | `0` | Migration 010, `password_resets` table in MySQL, 64-hex token validation, old password invalidation, new JWT issuance (DEC-046). |
+| `node scratch/test_supabase_security_and_deployment.js` | Supabase Security Boundary, Zero Service Key Exposure, Role Sanitization, BOLA Isolation, DNS Audit | **35 / 35** | `0` | Proves zero service keys in bundle, client role tampering blocked, server-side RBAC enforced, dead-DNS reality documented (DEC-046). |
+| **Final Release Gate Consolidated Suite** | Complete regression suite (E2E 10, DDI 29, Pytest CDS 11, Discharge 6, Unified Rx Gate 11, Allergy Bypass 3, OCR 12, Password Security 7, Multilingual 12, Gap Closure 22, Password Reset Flow 21, Supabase Security 35, Frontend Build) | **179 / 179 (100%)** | `0` | **179 PASSED, 0 FAILED, 0 SKIPPED** across all verified suites; 26/26 browser states verified and archived in `audit_evidence/final_release_gate_20261025/` (DEC-046). |
 | **Consolidated Gate Regression Suite** | Multi-suite integration regression against `rag_healthcare_test` | **398 cases / 411 assertions** | `0` | **396 PASSED, 2 FAILED (TC-02/TC-05 fail-closed capacity limits), 0 SKIPPED** across all verified suites |
 
 ---

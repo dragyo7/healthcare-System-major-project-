@@ -884,3 +884,78 @@ ag_healthcare 100% UNTOUCHED (176 users, 15 doctors).
   4. Queries targeting specific absent care topics (e.g., wound care) are prevented from being hijacked by general recovery keywords, falling through to honest absence disclosures (zero citations).
   5. Timing omission phrasing strictly outputs `"Specific medication administration timing for {disp_med} is not documented in your discharge summary."`.
   6. Verified end-to-end across 10 clinical scenarios in `scratch/verify_e2e_10_scenarios.js` with 100% pass rate.
+
+---
+
+- **Change ID**: `SECOND-PASS-ENGINEERING-AUDIT-008` (DEC-045: Second-Pass Engineering Audit, Synthea Cohort Verification, Comprehensive Runbook Architecture, and Multi-Suite Attestation)
+- **Problem Being Solved**:
+  1. Independently verify all claims and test suites without blindly trusting previous reports.
+  2. Locate, audit, and safely test the genuine Synthea FHIR R4 dataset.
+  3. Prove that synthetic patient records display accurately and honestly in the UI.
+  4. Verify the prescription safety, allergy hard-stop, and suggestion pipeline end-to-end.
+  5. Verify CDS and post-discharge recovery routing (both grounded and honest absence).
+  6. Capture clean visual evidence and author `docs/HOW_TO_RUN.md` and `docs/USER_STORIES_AND_DEMO_WORKFLOWS.md`.
+- **Execution Path**:
+  1. **Dataset Provenance Audit**: Located supplied Synthea FHIR R4 dataset archive at `C:\Users\ABHYUDAYA\OneDrive\Desktop\synthea_sample_data_fhir_r4_nov2021.zip` with SHA256 `6d3c5433bcae4791bc5c30469d1445b430fb4894d5c13bda15fee0584bbd7778`. Ran dry-run verification proving idempotent mapping (`Status: ALREADY IMPORTED`) in `rag_healthcare_test`.
+  2. **Synthea UI Attestation**: Authenticated as Terrilyn Murphy (#149) in browser. Verified Patient Dashboard (empty active medications and discharge plan displayed honestly), Medical History (25 imported conditions, 10 documented allergies), Recovery Assistant ("What care should I take?" -> honest absence disclosure), and General CDS ("What is Metformin used for?" -> DailyMed RAG answer with citations).
+  3. **Doctor Prescription Safety Gate**: Screened Aspirin 81mg for Terrilyn Murphy -> triggered non-overridable allergy hard stop (`cannot_override: true`, HTTP 422). Proposing Atorvastatin against Clarithromycin triggered severe DDI (`RUL-INT-007`) requiring documented clinician override.
+  4. **Documentation Deliverables**: Authored `docs/HOW_TO_RUN.md` (copy-pasteable PowerShell runbook) and `docs/USER_STORIES_AND_DEMO_WORKFLOWS.md` (complete user stories, acceptance criteria, demo walkthroughs).
+- **Post-Change Verification**:
+  - `node scratch/verify_e2e_10_scenarios.js`: **10 / 10 PASSED (100%)**
+  - `python scripts/evaluate_ddi_comprehensive.py`: **29 / 29 PASSED (100%)**
+  - `python -m pytest cds_module/ -v`: **11 / 11 PASSED (100%)**
+  - `python -m unittest scratch/test_priority1_honest_discharge.py`: **6 / 6 PASSED (100%)**
+  - `node scratch/test_priority2_unified_prescription_gate.js`: **11 / 11 PASSED (100%)**
+  - `node scratch/test_adversarial_allergy_bypass.js`: **3 / 3 PASSED (100%)**
+  - `node scratch/test_prescription_ocr_pipeline.js`: **12 / 12 PASSED (100%)**
+  - `node scratch/test_patient_credential_security_audit.js`: **7 / 7 PASSED (100%)**
+  - `node scratch/test_multilingual_independent_audit.js`: **12 / 12 PASSED (100%)**
+  - `node scratch/gap_closure_master_verification.js`: **22 / 22 PASSED (100%)**
+  - 22 screenshots archived in `audit_evidence/second_pass_audit_20261025/` with structured JSON evidence manifest.
+  - Primary database `rag_healthcare`: **100% UNTOUCHED**.
+
+---
+
+- **Change ID**: `FINAL-RELEASE-GATE-009` (DEC-046: Final Release Gate Attestation: Password Reset Lifecycle, Supabase Security Reality, Doctor Directory Standardization, and Antigravity Browser Release Evidence)
+- **Problem Being Solved**:
+  1. Complete the missing frontend-to-backend password recovery and reset lifecycle.
+  2. Audit Supabase integration reality, ensure zero service-role keys exposed in frontend bundle, and test role-spoofing defense.
+  3. Clean, standardize, and verify the physician directory in database and UI, removing duplicate test records.
+  4. Capture 26 genuine browser workflow states using Antigravity browser agent and index them in a release gate evidence manifest.
+  5. Validate 100% regression test compliance across all 12 core test suites (179 automated assertions) and verify Git push readiness.
+- **Execution Path**:
+  1. **Password Reset Full Lifecycle**:
+     - Database: Applied `migrations/010_create_password_resets.sql` cleanly to `rag_healthcare_test`.
+     - Backend: Implemented `POST /api/auth/forgot-password`, `GET /api/auth/verify-reset-token`, and `POST /api/auth/reset-password` in `authController.js` and `authRoutes.js`.
+     - Frontend: Updated `ForgotPassword.jsx` to dispatch to the backend API. Refactored `ResetPassword.jsx` to verify single-use tokens on mount and submit updates to Express. Wrapped `/reset-password` in `<GuestRoute>` in `AppRoutes.jsx`.
+     - Verified: `test_password_reset_flow.js` passes 21/21 assertions.
+  2. **Supabase Security & RBAC Boundary**:
+     - Verified `frontend/.env` points to dead-DNS host; zero service-role keys in bundle.
+     - Verified `authService.js` client role sanitization and server-side RBAC in Express gateway.
+     - Verified: `test_supabase_security_and_deployment.js` passes 35/35 assertions.
+  3. **Doctor Directory Standardization**:
+     - Audited and cleaned 43 test artifact records from `rag_healthcare_test.doctors` via `scratch/clean_doctor_directory.js`.
+     - Reassigned 40 appointments to Dr. Rahul Sharma (`doctor_id = 1`) with 0 orphaned appointments and 0 orphaned prescriptions.
+     - Standardized 4 canonical approved clinicians: Dr. Rahul Sharma (Cardiology), Dr. Priya Nair (General Medicine), Dr. Elena Vance (Cardiology), and Dr. Kavita Verma (Neurology).
+     - Added `WHERE u.staff_status = 'approved'` filtering to `patientController.js` and `receptionistController.js`.
+  4. **Antigravity Browser Verification (26 States)**:
+     - Executed 26 required states across light/dark modes, logins, doctor roster, Synthea patient dossiers, allergy hard stops, severe DDI warnings, prescription PDF generation, grounded recovery assistant, honest absence disclosures, Hindi UI, and mobile viewports.
+     - Packaged screenshots and generated `audit_evidence/final_release_gate_20261025/evidence_manifest.json`.
+- **Post-Change Verification**:
+  - `node scratch/verify_e2e_10_scenarios.js`: **10 / 10 PASSED (100%)**
+  - `python scripts/evaluate_ddi_comprehensive.py`: **29 / 29 PASSED (100%)**
+  - `python -m pytest cds_module/ -v`: **11 / 11 PASSED (100%)**
+  - `python -m unittest scratch/test_priority1_honest_discharge.py`: **6 / 6 PASSED (100%)**
+  - `node scratch/test_priority2_unified_prescription_gate.js`: **11 / 11 PASSED (100%)**
+  - `node scratch/test_adversarial_allergy_bypass.js`: **3 / 3 PASSED (100%)**
+  - `node scratch/test_prescription_ocr_pipeline.js`: **12 / 12 PASSED (100%)**
+  - `node scratch/test_patient_credential_security_audit.js`: **7 / 7 PASSED (100%)**
+  - `node scratch/test_multilingual_independent_audit.js`: **12 / 12 PASSED (100%)**
+  - `node scratch/gap_closure_master_verification.js`: **22 / 22 PASSED (100%)**
+  - `node scratch/test_password_reset_flow.js`: **21 / 21 PASSED (100%)**
+  - `node scratch/test_supabase_security_and_deployment.js`: **35 / 35 PASSED (100%)**
+  - `cd frontend; npm run build`: **0 ERRORS (2,253 modules built in 851ms)**
+  - Browser Verification: **26 / 26 States Verified & Captured**.
+  - Total automated assertions: **179 / 179 PASSED (100%)**.
+  - Primary database `rag_healthcare`: **100% UNTOUCHED**.
+  - Final Release Gate Decision: **PASS — READY TO PUSH**.

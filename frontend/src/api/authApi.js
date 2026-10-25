@@ -81,4 +81,24 @@ export const authApi = {
       body: JSON.stringify({ token, password }),
     });
   },
+
+  forgotPassword: async (email) => {
+    return await resilientFetch("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+  },
+
+  verifyResetToken: async (token) => {
+    return await resilientFetch(`/auth/verify-reset-token?token=${encodeURIComponent(token)}`, {
+      method: "GET",
+    });
+  },
+
+  resetPassword: async (token, new_password) => {
+    return await resilientFetch("/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify({ token, new_password }),
+    });
+  },
 };
