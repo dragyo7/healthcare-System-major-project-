@@ -1097,6 +1097,26 @@
   - Cross-Patient RBAC: Patient 153 downloading Patient 150's prescription PDF rejected with HTTP 403 Forbidden.
   - Frontend Build: `npm run build` completed in 878ms with 0 errors across 2,253 modules.
 
+---
+
+### DEC-043 — Patient Recovery Intent Routing and Truth-Preserving Synthea Repair
+- **Date**: 2026-10-25
+- **Status**: **Accepted; supersedes the fabricated-data portions of DEC-030**
+- **Context**: Browser reproduction showed that the ordinary question “What care should I take?” bypassed the authenticated discharge-plan resolver and reached general reference RAG, exposing verifier diagnostics. Review also proved that the DEC-030 importer invented medication regimens, blood groups, emergency contacts, clinician verification, appointments, and one discharge plan.
+- **Decision**:
+  1. Patient recovery questions and natural paraphrases resolve against the authenticated patient's latest saved discharge record before general RAG. A missing plan returns an explicit no-record response; no generic treatment is substituted.
+  2. The frozen FAISS index, retrievers, reranker, generator, grounding thresholds, verifier, and emergency intercept remain unchanged.
+  3. Patient suggestions are derived from the loaded discharge state and saved prescriptions. Unconditional Amlodipine and other fixed-drug suggestions are removed. Raw verifier codes are replaced with a patient-facing explanation while fail-closed status is preserved.
+  4. Patient switches invalidate pending doctor-CDS requests and clear loading state, preventing stale response presentation.
+  5. Synthea `MedicationRequest` fields are copied only from `dosageInstruction`; absent dose, frequency, route, duration, or instructions remain `null`. MedicationRequests are historical synthetic source records and are not converted into current prescriptions or clinician-reviewed treatment.
+  6. Import configuration comes from arguments/environment; manifests record source resource fields plus exact destination user/patient IDs. Cleanup requires those exact mappings. The focused repair deletes only rows matching the old importer's unique markers and nulls only its known invented demographic values.
+- **Observed verification**:
+  - `13 passed` for the focused recovery, mapping, and CDS gateway pytest set.
+  - Frontend production build: 2,253 modules, 0 errors (bundle-size warning remains).
+  - `rag_healthcare_test`: five exact Synthea account mappings verified; legacy invented current prescriptions removed.
+  - Browser: Aarav's question resolves to his saved discharge diagnosis, instructions, warning signs, and follow-up with one EHR citation. Terrilyn's identical question reports that no discharge directives exist; neither view exposes `INVALID_CITATION`.
+- **Limitations**: Synthea MedicationRequests are retained in the manifest rather than shown as current medications. A clinician must author a new plan or prescription through the normal workflow before it becomes current care.
+
 
 
 

@@ -411,6 +411,7 @@ class CDSOrchestrator:
 
         is_warning_query = (
             any(w in q_lower for w in ["warning sign", "warning signs", "danger sign", "danger signs"])
+            or any(w in q_lower for w in ["watch for", "look out for", "be concerned about", "when should i worry"])
             or ("emergency" in q_lower and any(w in q_lower for w in ["seek", "go", "hospital", "care", "when", "signs"]))
             or any(w in combined_query for w in ["चेतावनी", "खतरे के लक्षण", "आपातकालीन देखभाल", "चेतावणी", "धोक्याची लक्षणे", "કટોકટી ચિહ્નો", "ચેતવણી ચિહ્નો"])
         )
@@ -424,6 +425,16 @@ class CDSOrchestrator:
         is_discharge_overview = (
             ("discharge" in q_lower and any(w in q_lower for w in ["instruction", "instructions", "summary", "understand", "tell", "explain", "about"]))
             or any(w in q_lower for w in ["summarize the instructions", "summarise the instructions", "summary of instructions", "summarize instructions", "instructions you just cited"])
+            or (
+                any(w in q_lower for w in ["care", "recovery", "recover", "aftercare"])
+                and any(w in q_lower for w in ["what", "which", "should", "need", "plan", "instruction", "do", "take"])
+            )
+            or any(w in q_lower for w in [
+                "what should i do after going home",
+                "how should i look after myself",
+                "how should i care for myself",
+                "what else should i do",
+            ])
             or any(w in combined_query for w in ["डिस्चार्ज निर्देश", "डिस्चार्ज के बारे", "डिस्चार्ज सूचना", "डिस्चार्ज बद्दल", "ડિસ્ચાર્જ સૂચનાઓ", "ડિસ્ચાર્જ વિશે"])
         )
 

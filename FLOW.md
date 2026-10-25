@@ -856,6 +856,24 @@ ag_healthcare 100% UNTOUCHED (176 users, 15 doctors).
   - Frontend production build (`npm run build`): 0 errors across 2,253 modules.
   - Primary database `rag_healthcare`: 100% UNTOUCHED.
 
+---
+
+- **Change ID**: `PATIENT-CONTEXT-SYNTHEA-REPAIR-006` (DEC-043)
+- **Patient recovery execution path**:
+  1. `frontend/src/pages/Patient/Assistant.jsx` loads `/api/patient/discharge` and `/api/patient/medications` for record-derived suggestions.
+  2. The authenticated request posts to `/api/patient/cds`; Express resolves only `req.user.user_id`, enforces the patient BOLA check, loads that patient's records, and removes PII through `sanitizePatientContext`.
+  3. `cds_module/orchestrator.py::_resolve_discharge_care_query` recognizes ordinary recovery intent and paraphrases before the frozen RAG call.
+  4. If a discharge exists, only saved diagnosis, instructions, warnings, and follow-up are returned with the EHR discharge citation. If no discharge exists, the response abstains with zero citations and names the missing record.
+  5. General medical-reference RAG remains available for other questions, unchanged and fail-closed. Patient UI hides internal verifier diagnostics but does not convert withheld output into an answer.
+- **Context isolation**: Doctor patient changes increment the active request generation, reset loading, clear the prior dossier/query/response, and ignore any late result from the previous patient.
+- **Synthea path**:
+  1. `scratch/import_synthea_cohort.py` receives archive/database/manifest settings through CLI or environment.
+  2. `extract_medication_request` copies actual FHIR `dosageInstruction` fields and preserves missing fields as `null`.
+  3. The manifest labels records historical synthetic data and records source UUID/resource IDs plus destination user/patient IDs.
+  4. `scratch/repair_synthea_import.py` validates those mappings and targets only old importer markers. `scratch/cleanup_synthea_cohort.py` refuses broad pattern cleanup without exact manifest ownership.
+  5. `scratch/verify_synthea_import.py` asserts patient/account linkage and absence of legacy invented current prescriptions.
+- **Observed browser sequence**: Patient demo login → Post-Discharge Assistant → “What care should I take?” → saved-plan summary for Aarav; Terrilyn login → same route/query → honest missing-plan response.
+
 
 
 

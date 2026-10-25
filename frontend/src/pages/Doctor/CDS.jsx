@@ -76,6 +76,11 @@ export default function DoctorCDS() {
 
   useEffect(() => {
     activePatientIdRef.current = selectedPatientId;
+    // Invalidate any request started for the previously selected patient.
+    // The request may still complete, but it must not keep the new patient's UI
+    // loading or place its response in the new patient's context.
+    activeRequestIdRef.current += 1;
+    setLoading(false);
   }, [selectedPatientId]);
 
   // Load patient dossier whenever selectedPatientId changes

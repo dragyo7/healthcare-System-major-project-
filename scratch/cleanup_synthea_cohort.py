@@ -1,84 +1,81 @@
-"""
-scratch/cleanup_synthea_cohort.py
+"""Preview or remove only records owned by one Synthea import manifest."""
 
-Scoped cleanup script that removes ONLY imported Synthea demonstration records
-from rag_healthcare_test. Leaves existing baseline accounts completely untouched.
-"""
+import argparse
+import json
+import os
 
-import sys
 import mysql.connector
 
-# Ensure UTF-8 output on Windows console
-if sys.platform == "win32":
-    import io
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
-    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
-def run_cleanup():
-    db_config = {
-        "host": "localhost",
-        "user": "root",
-        "password": "bhumi",
-        "database": "rag_healthcare_test"
-    }
-    
+def run_cleanup(manifest_path: str, db_config: dict, apply: bool = False):
+    with open(manifest_path, encoding="utf-8") as handle:
+        manifest = json.load(handle)
+    entries = manifest.get("patients", [])
+    expected = [
+        (item.get("account_email"), item.get("destination") or {})
+        for item in entries
+        if (item.get("destination") or {}).get("user_id") and (item.get("destination") or {}).get("patient_id")
+    ]
+    if not expected:
+        raise RuntimeError("Manifest contains no destination IDs; cleanup ownership cannot be established.")
+
     conn = mysql.connector.connect(**db_config)
     cur = conn.cursor(dictionary=True)
-    
-    print("Finding Synthea demo accounts in rag_healthcare_test...")
-    cur.execute("SELECT user_id, full_name, email FROM users WHERE email LIKE 'synthea.%@demo.local'")
-    users = cur.fetchall()
-    
-    if not users:
-        print("No Synthea demo accounts found. Database is already clean.")
+    owned = []
+    for email, destination in expected:
+        user_id, patient_id = destination["user_id"], destination["patient_id"]
+        if "medical_history_ids" not in destination or "medical_report_ids" not in destination:
+            conn.close()
+            raise RuntimeError(f"Manifest lacks exact child-record ownership for {email}; cleanup refused.")
+        cur.execute(
+            "SELECT u.user_id, u.email, p.patient_id FROM users u JOIN patients p ON p.user_id = u.user_id WHERE u.user_id = %s AND p.patient_id = %s AND u.email = %s",
+            (user_id, patient_id, email),
+        )
+        row = cur.fetchone()
+        if not row:
+            conn.close()
+            raise RuntimeError(f"Ownership mismatch for manifest mapping: {email}, user {user_id}, patient {patient_id}")
+        row["medical_history_ids"] = destination["medical_history_ids"]
+        row["medical_report_ids"] = destination["medical_report_ids"]
+        owned.append(row)
+
+    print(f"Exact import-owned records: {owned}")
+    if not apply:
         conn.close()
+        print("Preview only. Re-run with --apply to delete these exact manifest-owned records.")
         return
-        
-    user_ids = [u["user_id"] for u in users]
-    print(f"Found {len(user_ids)} Synthea demo users: {[u['email'] for u in users]}")
-    
-    # Find associated patient_ids
-    cur.execute(f"SELECT patient_id FROM patients WHERE user_id IN ({','.join(str(i) for i in user_ids)})")
-    patients = cur.fetchall()
-    patient_ids = [p["patient_id"] for p in patients]
-    print(f"Found {len(patient_ids)} associated patient records: {patient_ids}")
-    
+
     try:
-        conn.start_transaction()
-        if patient_ids:
-            p_in = ','.join(str(i) for i in patient_ids)
-            
-            # Find prescription_ids
-            cur.execute(f"SELECT prescription_id FROM prescriptions WHERE patient_id IN ({p_in})")
-            rx_ids = [r["prescription_id"] for r in cur.fetchall()]
-            if rx_ids:
-                rx_in = ','.join(str(i) for i in rx_ids)
-                cur.execute(f"DELETE FROM prescription_medicines WHERE prescription_id IN ({rx_in})")
-                print(f"Deleted prescription_medicines for prescriptions: {rx_ids}")
-                
-            cur.execute(f"DELETE FROM prescriptions WHERE patient_id IN ({p_in})")
-            print("Deleted prescriptions.")
-            cur.execute(f"DELETE FROM discharges WHERE patient_id IN ({p_in})")
-            print("Deleted discharges.")
-            cur.execute(f"DELETE FROM appointments WHERE patient_id IN ({p_in})")
-            print("Deleted appointments.")
-            cur.execute(f"DELETE FROM medical_history WHERE patient_id IN ({p_in})")
-            print("Deleted medical_history.")
-            cur.execute(f"DELETE FROM medical_reports WHERE patient_id IN ({p_in})")
-            print("Deleted medical_reports.")
-            cur.execute(f"DELETE FROM patients WHERE patient_id IN ({p_in})")
-            print("Deleted patients.")
-            
-        cur.execute(f"DELETE FROM users WHERE user_id IN ({','.join(str(i) for i in user_ids)})")
-        print("Deleted users.")
-        
         conn.commit()
-        print("\nCleanup transaction committed successfully. All Synthea demo records removed cleanly.")
-    except Exception as ex:
+        conn.start_transaction()
+        for row in owned:
+            patient_id, user_id = row["patient_id"], row["user_id"]
+            for history_id in row["medical_history_ids"]:
+                cur.execute("DELETE FROM medical_history WHERE history_id = %s AND patient_id = %s", (history_id, patient_id))
+            for report_id in row["medical_report_ids"]:
+                cur.execute("DELETE FROM medical_reports WHERE report_id = %s AND patient_id = %s", (report_id, patient_id))
+            for table in ("prescriptions", "discharges", "appointments", "medical_history", "medical_reports"):
+                cur.execute(f"SELECT COUNT(*) AS count FROM {table} WHERE patient_id = %s", (patient_id,))
+                if cur.fetchone()["count"]:
+                    raise RuntimeError(f"Cleanup refused: patient {patient_id} has records not owned by this manifest in {table}.")
+            cur.execute("DELETE FROM patients WHERE patient_id = %s AND user_id = %s", (patient_id, user_id))
+            cur.execute("DELETE FROM users WHERE user_id = %s AND email = %s", (user_id, row["email"]))
+        conn.commit()
+    except Exception:
         conn.rollback()
-        print(f"ERROR: Cleanup failed and rolled back: {ex}")
+        raise
     finally:
         conn.close()
 
+
 if __name__ == "__main__":
-    run_cleanup()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--manifest", default=os.getenv("SYNTHEA_MANIFEST"), required=os.getenv("SYNTHEA_MANIFEST") is None)
+    parser.add_argument("--db-host", default=os.getenv("DB_HOST", "127.0.0.1"))
+    parser.add_argument("--db-port", type=int, default=int(os.getenv("DB_PORT", "3306")))
+    parser.add_argument("--db-user", default=os.getenv("DB_USER", "root"))
+    parser.add_argument("--db-password", default=os.getenv("DB_PASSWORD"))
+    parser.add_argument("--db-name", default=os.getenv("DB_NAME", "rag_healthcare_test"))
+    parser.add_argument("--apply", action="store_true")
+    args = parser.parse_args()
+    run_cleanup(args.manifest, {"host": args.db_host, "port": args.db_port, "user": args.db_user, "password": args.db_password, "database": args.db_name}, apply=args.apply)
