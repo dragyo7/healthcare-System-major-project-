@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { doctorApi } from "../../api/doctorApi";
 import { useLanguage } from "../../contexts/LanguageContext";
 import {
@@ -11,19 +11,22 @@ import {
   Send,
   Loader2,
   ShieldAlert,
+  Info,
 } from "lucide-react";
 
 export default function DoctorDischarge() {
   const { t } = useLanguage();
   const [patients, setPatients] = useState([]);
   const [selectedPatientId, setSelectedPatientId] = useState("");
+  const [dischargeId, setDischargeId] = useState(null);
   const [loadingPatients, setLoadingPatients] = useState(true);
   const [loadingDischarge, setLoadingDischarge] = useState(false);
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [loadError, setLoadError] = useState("");
 
-  const [formData, setFormData] = useState({
+  const defaultFormData = () => ({
     admission_date: new Date().toISOString().split("T")[0],
     discharge_date: new Date().toISOString().split("T")[0],
     diagnosis: "",
@@ -33,6 +36,9 @@ export default function DoctorDischarge() {
     follow_up_date: "",
     warning_signs: "",
   });
+
+  const [formData, setFormData] = useState(defaultFormData());
+  const activeRequestRef = useRef(0);
 
   useEffect(() => {
     async function loadPatients() {
@@ -52,15 +58,31 @@ export default function DoctorDischarge() {
   }, []);
 
   useEffect(() => {
-    if (!selectedPatientId) return;
+    if (!selectedPatientId) {
+      setDischargeId(null);
+      setFormData(defaultFormData());
+      return;
+    }
+
+    const requestId = ++activeRequestRef.current;
+    setLoadingDischarge(true);
+    setLoadError("");
+    setErrorMsg("");
+    setSuccessMsg("");
+    // Clear stale form state immediately so other patient's data is not visible
+    setDischargeId(null);
+    setFormData(defaultFormData());
+
     async function loadPatientDischarge() {
-      setLoadingDischarge(true);
-      setErrorMsg("");
-      setSuccessMsg("");
       try {
         const res = await doctorApi.getPatientDischarge(selectedPatientId);
-        if (res && res.discharge) {
-          const d = res.discharge;
+        // Ignore stale/late responses if user switched patient
+        if (requestId !== activeRequestRef.current) return;
+
+        // Support both direct record { discharge_id, ... } or wrapper { discharge: { ... } }
+        const d = res?.discharge || res;
+        if (d && d.discharge_id) {
+          setDischargeId(d.discharge_id);
           setFormData({
             admission_date: d.admission_date ? d.admission_date.split("T")[0] : "",
             discharge_date: d.discharge_date ? d.discharge_date.split("T")[0] : "",
@@ -72,33 +94,27 @@ export default function DoctorDischarge() {
             warning_signs: d.warning_signs || "",
           });
         } else {
-          setFormData({
-            admission_date: new Date().toISOString().split("T")[0],
-            discharge_date: new Date().toISOString().split("T")[0],
-            diagnosis: "",
-            discharge_summary: "",
-            discharge_instructions: "",
-            follow_up_instructions: "",
-            follow_up_date: "",
-            warning_signs: "",
-          });
+          // Patient has no discharge record on file yet — honest empty state
+          setDischargeId(null);
+          setFormData(defaultFormData());
         }
       } catch (err) {
-        // Not fatal, might be no discharge record yet
-        setFormData({
-          admission_date: new Date().toISOString().split("T")[0],
-          discharge_date: new Date().toISOString().split("T")[0],
-          diagnosis: "",
-          discharge_summary: "",
-          discharge_instructions: "",
-          follow_up_instructions: "",
-          follow_up_date: "",
-          warning_signs: "",
-        });
+        if (requestId !== activeRequestRef.current) return;
+        // Distinguish genuine load failure from absent record
+        const msg = err?.message || "";
+        if (msg.includes("404") || msg.toLowerCase().includes("not found")) {
+          setDischargeId(null);
+          setFormData(defaultFormData());
+        } else {
+          setLoadError("Failed to retrieve discharge record: " + msg);
+        }
       } finally {
-        setLoadingDischarge(false);
+        if (requestId === activeRequestRef.current) {
+          setLoadingDischarge(false);
+        }
       }
     }
+
     loadPatientDischarge();
   }, [selectedPatientId]);
 
@@ -113,11 +129,21 @@ export default function DoctorDischarge() {
     setSuccessMsg("");
 
     try {
-      await doctorApi.createDischarge({
+      const payload = {
         patient_id: parseInt(selectedPatientId),
+        ...(dischargeId ? { discharge_id: dischargeId } : {}),
         ...formData,
-      });
-      setSuccessMsg("Post-discharge summary and care instructions saved to EHR successfully.");
+      };
+
+      const res = await doctorApi.createDischarge(payload);
+      if (res?.discharge_id) {
+        setDischargeId(res.discharge_id);
+      }
+      setSuccessMsg(
+        dischargeId
+          ? "Discharge care directives updated successfully in EHR (Episode #" + (res?.discharge_id || dischargeId) + ")."
+          : "Discharge care plan committed successfully to EHR (Episode #" + res?.discharge_id + ")."
+      );
     } catch (err) {
       setErrorMsg(err.message || "Failed to record post-discharge care.");
     } finally {
@@ -156,6 +182,13 @@ export default function DoctorDischarge() {
         </div>
       </div>
 
+      {loadError && (
+        <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm flex items-center gap-3">
+          <AlertTriangle className="w-5 h-5 shrink-0" />
+          <span>{loadError}</span>
+        </div>
+      )}
+
       {errorMsg && (
         <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm flex items-center gap-3">
           <AlertTriangle className="w-5 h-5 shrink-0" />
@@ -183,8 +216,21 @@ export default function DoctorDischarge() {
               </p>
             </div>
           </div>
-          <div className="text-muted-foreground">
-            EHR ID: <strong className="text-foreground">#{selectedPatient.patient_id}</strong>
+          <div className="flex items-center gap-3">
+            {dischargeId ? (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                Active Episode #{dischargeId}
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30">
+                <Info className="w-3.5 h-3.5" />
+                New Discharge Episode
+              </span>
+            )}
+            <div className="text-muted-foreground">
+              EHR ID: <strong className="text-foreground">#{selectedPatient.patient_id}</strong>
+            </div>
           </div>
         </div>
       )}
@@ -319,6 +365,11 @@ export default function DoctorDischarge() {
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
                 {t("Persisting to EHR...") || "Persisting to EHR..."}
+              </>
+            ) : dischargeId ? (
+              <>
+                <Send className="w-4 h-4" />
+                {t("Update Discharge Directives") || "Update Discharge Directives"}
               </>
             ) : (
               <>

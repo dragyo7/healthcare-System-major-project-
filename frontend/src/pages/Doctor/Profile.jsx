@@ -7,10 +7,10 @@ import { User, Mail, Shield, Award, Phone, Clock, CheckCircle2, AlertCircle, Loa
 export default function DoctorProfile() {
   const { user } = useAuth();
   const { t } = useLanguage();
-  const [phone, setPhone] = useState("+91 98765 43210");
-  const [department, setDepartment] = useState("Internal Medicine / Cardiology");
-  const [room, setRoom] = useState("OPD-304");
-  const [license, setLicense] = useState("MCI-2018-849201");
+  const [phone, setPhone] = useState("");
+  const [department, setDepartment] = useState("");
+  const [room, setRoom] = useState("");
+  const [license, setLicense] = useState("");
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -29,8 +29,8 @@ export default function DoctorProfile() {
           if (data.doctor.bio) setRoom(data.doctor.bio);
         }
       } catch (err) {
-        // Fallback gracefully to default state if profile fetch fails
         console.warn("Could not load backend doctor profile:", err.message);
+        if (isMounted) setError("Could not load clinician profile from electronic health records.");
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -87,7 +87,7 @@ export default function DoctorProfile() {
           <div className="mt-6 pt-6 border-t border-border/60 text-left space-y-3">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Award className="w-4 h-4 text-primary" />
-              <span>{t("License:") || "License:"} <strong className="text-foreground">{license}</strong></span>
+              <span>{t("License:") || "License:"} <strong className="text-foreground">{license || t("Not documented") || "Not documented"}</strong></span>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Mail className="w-4 h-4 text-primary" />
@@ -134,7 +134,7 @@ export default function DoctorProfile() {
                 <input
                   type="text"
                   readOnly
-                  value={license}
+                  value={license || "Not documented"}
                   className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-muted/50 text-muted-foreground cursor-not-allowed"
                 />
               </div>
@@ -147,6 +147,7 @@ export default function DoctorProfile() {
                   type="text"
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
+                  placeholder="e.g. Internal Medicine / Cardiology"
                   className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary/20"
                 />
               </div>
@@ -156,6 +157,7 @@ export default function DoctorProfile() {
                   type="text"
                   value={room}
                   onChange={(e) => setRoom(e.target.value)}
+                  placeholder="e.g. OPD-304"
                   className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary/20"
                 />
               </div>
@@ -167,6 +169,7 @@ export default function DoctorProfile() {
                 type="text"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
+                placeholder="+91 XXXXX XXXXX"
                 className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary/20"
               />
             </div>

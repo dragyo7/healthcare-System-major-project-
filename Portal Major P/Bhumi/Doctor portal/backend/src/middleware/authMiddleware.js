@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
+const db = require("../config/db");
 
-const authenticateDoctor = (req, res, next) => {
+const authenticateDoctor = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
 
@@ -29,7 +30,46 @@ const authenticateDoctor = (req, res, next) => {
             });
         }
 
-        req.user = decoded;
+        // Real-time persisted authorization check:
+        // Ensures revoked, suspended, deleted, or pending accounts cannot bypass with an active JWT
+        const [users] = await db.execute(
+            "SELECT user_id, role, staff_status FROM users WHERE user_id = ?",
+            [decoded.user_id]
+        );
+
+        if (users.length === 0) {
+            return res.status(401).json({
+                message: "User account no longer exists",
+                error: "USER_NOT_FOUND"
+            });
+        }
+
+        const currentUser = users[0];
+        const status = currentUser.staff_status;
+
+        if (status !== "approved") {
+            if (status === "pending_approval") {
+                return res.status(403).json({
+                    message: "Staff account is pending clinical administration approval. Unrestricted access to patient dossiers and prescription operations is prohibited.",
+                    error: "STAFF_APPROVAL_PENDING"
+                });
+            }
+            if (status === "revoked" || status === "suspended") {
+                return res.status(403).json({
+                    message: `Staff account access has been ${status}. Access prohibited.`,
+                    error: `STAFF_${status.toUpperCase()}`
+                });
+            }
+            return res.status(403).json({
+                message: "Staff account authorization is missing or unverified. Access prohibited.",
+                error: "STAFF_AUTHORIZATION_REQUIRED"
+            });
+        }
+
+        req.user = {
+            ...decoded,
+            staff_status: currentUser.staff_status
+        };
 
         next();
 
@@ -80,7 +120,7 @@ const authenticatePatient = (req, res, next) => {
     }
 };
 
-const authenticateReceptionist = (req, res, next) => {
+const authenticateReceptionist = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
 
@@ -103,7 +143,46 @@ const authenticateReceptionist = (req, res, next) => {
             });
         }
 
-        req.user = decoded;
+        // Real-time persisted authorization check:
+        // Ensures revoked, suspended, deleted, or pending accounts cannot bypass with an active JWT
+        const [users] = await db.execute(
+            "SELECT user_id, role, staff_status FROM users WHERE user_id = ?",
+            [decoded.user_id]
+        );
+
+        if (users.length === 0) {
+            return res.status(401).json({
+                message: "User account no longer exists",
+                error: "USER_NOT_FOUND"
+            });
+        }
+
+        const currentUser = users[0];
+        const status = currentUser.staff_status;
+
+        if (status !== "approved") {
+            if (status === "pending_approval") {
+                return res.status(403).json({
+                    message: "Staff account is pending administration approval. Front-desk operations are prohibited.",
+                    error: "STAFF_APPROVAL_PENDING"
+                });
+            }
+            if (status === "revoked" || status === "suspended") {
+                return res.status(403).json({
+                    message: `Staff account access has been ${status}. Access prohibited.`,
+                    error: `STAFF_${status.toUpperCase()}`
+                });
+            }
+            return res.status(403).json({
+                message: "Staff account authorization is missing or unverified. Access prohibited.",
+                error: "STAFF_AUTHORIZATION_REQUIRED"
+            });
+        }
+
+        req.user = {
+            ...decoded,
+            staff_status: currentUser.staff_status
+        };
 
         next();
 

@@ -87,28 +87,22 @@ const sanitizePatientContext = (patientData) => {
 
     const rawDischarge = patientData.discharge;
     let dischargeContext = null;
-    if (rawDischarge) {
-        if (rawDischarge.diagnosis && !diagnoses.includes(rawDischarge.diagnosis)) {
-            diagnoses.push(`Discharge Diagnosis: ${rawDischarge.diagnosis}`);
-        }
-        if (rawDischarge.discharge_instructions) {
-            medicalHistory.push(`Discharge Care Instructions: ${rawDischarge.discharge_instructions}`);
-        }
-        if (rawDischarge.warning_signs) {
-            medicalHistory.push(`Discharge Warning Signs: ${rawDischarge.warning_signs}`);
-        }
-        if (rawDischarge.follow_up_instructions) {
-            medicalHistory.push(`Discharge Follow-up Instructions: ${rawDischarge.follow_up_instructions}`);
-        }
-        if (rawDischarge.follow_up_date) {
-            medicalHistory.push(`Follow-up Scheduled Date: ${rawDischarge.follow_up_date}`);
-        }
+    if (rawDischarge && (rawDischarge.discharge_instructions || rawDischarge.diagnosis || rawDischarge.warning_signs || rawDischarge.follow_up_instructions || rawDischarge.discharge_id)) {
         dischargeContext = {
+            has_discharge: true,
+            discharge_id: rawDischarge.discharge_id || null,
+            discharge_date: rawDischarge.discharge_date ? String(rawDischarge.discharge_date).substring(0, 10) : null,
+            discharge_diagnosis: rawDischarge.diagnosis || null,
             diagnosis: rawDischarge.diagnosis || null,
             discharge_instructions: rawDischarge.discharge_instructions || null,
+            discharge_summary: rawDischarge.discharge_summary || null,
             warning_signs: rawDischarge.warning_signs || null,
             follow_up_instructions: rawDischarge.follow_up_instructions || null,
-            follow_up_date: rawDischarge.follow_up_date || null
+            follow_up_date: rawDischarge.follow_up_date ? String(rawDischarge.follow_up_date).substring(0, 10) : null
+        };
+    } else {
+        dischargeContext = {
+            has_discharge: false
         };
     }
 

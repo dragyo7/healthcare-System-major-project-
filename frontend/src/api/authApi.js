@@ -1,19 +1,11 @@
-const API_BASE = (
-  import.meta.env.VITE_API_BASE_URL ||
-  import.meta.env.VITE_EXPRESS_URL ||
-  import.meta.env.VITE_API_URL ||
-  "http://127.0.0.1:5000"
-).replace(/\/api\/?$/, "") + "/api";
+import { resilientFetch } from "./client";
 
 export const authApi = {
   loginDoctor: async (email, password) => {
-    const res = await fetch(`${API_BASE}/auth/doctor/login`, {
+    const data = await resilientFetch("/auth/doctor/login", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Doctor login failed");
     return {
       token: data.token,
       user: {
@@ -25,13 +17,10 @@ export const authApi = {
   },
 
   loginPatient: async (email, password) => {
-    const res = await fetch(`${API_BASE}/auth/patient/login`, {
+    const data = await resilientFetch("/auth/patient/login", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Patient login failed");
     return {
       token: data.token,
       user: {
@@ -43,13 +32,10 @@ export const authApi = {
   },
 
   loginReceptionist: async (email, password) => {
-    const res = await fetch(`${API_BASE}/auth/receptionist/login`, {
+    const data = await resilientFetch("/auth/receptionist/login", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Receptionist login failed");
     const recData = data.receptionist || data.user || {};
     return {
       token: data.token,
@@ -61,47 +47,38 @@ export const authApi = {
     };
   },
 
-  activatePatient: async (token, password) => {
-    const res = await fetch(`${API_BASE}/auth/patient/activate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, password }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Account activation failed");
-    return data;
-  },
-
   signupPatient: async (patientData) => {
-    const res = await fetch(`${API_BASE}/auth/patient/signup`, {
+    return await resilientFetch("/auth/patient/signup", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(patientData),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Patient registration failed");
-    return data;
   },
 
   signupDoctor: async (doctorData) => {
-    const res = await fetch(`${API_BASE}/auth/doctor/signup`, {
+    return await resilientFetch("/auth/doctor/signup", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(doctorData),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Doctor registration failed");
-    return data;
   },
 
   signupReceptionist: async (receptionistData) => {
-    const res = await fetch(`${API_BASE}/auth/receptionist/signup`, {
+    return await resilientFetch("/auth/receptionist/signup", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(receptionistData),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Receptionist registration failed");
-    return data;
+  },
+
+  activateAccount: async ({ token, password }) => {
+    return await resilientFetch("/auth/patient/activate", {
+      method: "POST",
+      body: JSON.stringify({ token, password }),
+    });
+  },
+
+  activatePatient: async (token, password) => {
+    return await resilientFetch("/auth/patient/activate", {
+      method: "POST",
+      body: JSON.stringify({ token, password }),
+    });
   },
 };

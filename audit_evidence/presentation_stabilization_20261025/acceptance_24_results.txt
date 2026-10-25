@@ -1,0 +1,125 @@
+================================================================================
+           LIVE CDSS ACCEPTANCE TESTING & VERIFICATION SUITE
+================================================================================
+Timestamp: 2026-10-25T06:39:48.474Z
+Evidence Directory: E:\Major Project Code\audit_evidence\presentation_stabilization_20261025
+
+>>> PREFLIGHT: SECURITY & ENVIRONMENT VERIFICATION <<<
+[OK] FastAPI Gateway (port 8000) Health: 200 OK | Index Chunks: 2204
+[OK] Express Test Backend (port 5001) Health: 200 OK
+[OK] Doctor Authentication Verified (Dr. Rahul Sharma)
+[OK] Patient 1 Authentication Verified (Aarav Patil, Patient ID 1)
+[OK] Patient 2 Authentication Verified (Ananya Deshmukh, Patient ID 2)
+[OK] Receptionist Authentication Verified (Pooja Verma)
+
+>>> SECTION A: DOCTOR MEDICAL INFORMATION (TC-01 TO TC-06) <<<
+
+Running TC-01: Atorvastatin indications...
+[PASS] [TC-01] Doctor Info - Atorvastatin Indications
+
+Running TC-02: Metformin boxed warning / precautions...
+[PASS] [TC-02] Doctor Info - Metformin Boxed Warning (Lactic Acidosis)
+
+Running TC-03: Atorvastatin adverse effects...
+[PASS] [TC-03] Doctor Info - Atorvastatin Adverse Effects (Myopathy / Rhabdomyolysis)
+
+Running TC-04: Lisinopril + Potassium Chloride DDI...
+[PASS] [TC-04] Doctor Info - Lisinopril + Potassium DDI Guidance
+
+Running TC-05: Metformin starting dose...
+[PASS] [TC-05] Doctor Info - Metformin Adult Starting Dose
+
+Running TC-06: Metformin starting dose (Paraphrase)...
+[PASS] [TC-06] Doctor Info - Metformin Starting Dose Paraphrase
+
+>>> SECTION B: PATIENT DISCHARGE INFORMATION (TC-07 TO TC-14) <<<
+
+Running TC-07: Patient discharge diet instruction...
+[PASS] [TC-07] Patient Discharge - Discharge Diet Directive
+
+Running TC-08: Patient medication timing...
+[PASS] [TC-08] Patient Discharge - Discharge Medication Timing
+
+Running TC-09: Patient lab orders / monitoring (BMP)...
+[PASS] [TC-09] Patient Discharge - Documented Lab Orders (Repeat BMP)
+
+Running TC-10: Patient follow-up recommendation...
+[PASS] [TC-10] Patient Discharge - Recommended Follow-up Directive
+
+Running TC-11: Follow-up vs booked appointment distinction...
+[PASS] [TC-11] Patient Discharge - Appointment vs Follow-up Distinction
+
+Running TC-12: Missing instruction abstention (exercise routine)...
+[PASS] [TC-12] Patient Discharge - Unprescribed Routine Abstention (Zero Fabrication)
+
+Running TC-13: Patient with no discharge records...
+[PASS] [TC-13] Patient Discharge - Patient Without Discharge Record Notification
+
+Running TC-14: Ambiguous follow-up question...
+[PASS] [TC-14] Patient Discharge - Ambiguous Follow-up Guidance
+
+>>> SECTION C: DETERMINISTIC PRESCRIPTION SAFETY (TC-15 TO TC-19) <<<
+
+Running TC-15: Warfarin + Aspirin screening (RUL-INT-001)...
+[PASS] [TC-15] Rx Safety - Warfarin + Aspirin Major Bleeding DDI Alert
+
+Running TC-16: Lipitor + Biaxin Brand Normalization...
+[PASS] [TC-16] Rx Safety - Lipitor + Biaxin Brand Normalization to Atorvastatin + Clarithromycin
+
+Running TC-17: Amoxicillin candidate with Penicillin allergy...
+[PASS] [TC-17] Rx Safety - Amoxicillin Allergen Hard Stop (HTTP 422 cannot_override)
+
+Running TC-18: Unindexed candidate screening...
+[PASS] [TC-18] Rx Safety - Unindexed Candidate Honest Handling (NO_MATCHING_LOCAL_RULE)
+
+Running TC-19: Direct manual entry vs OCR extraction parity...
+[PASS] [TC-19] Rx Safety - Direct Manual vs OCR Extraction Parity
+
+>>> SECTION D: SAFETY & FAILURE BEHAVIOR (TC-20 TO TC-24) <<<
+
+Running TC-20: Emergency symptom triage interception...
+[PASS] [TC-20] Safety & Failure - Emergency Symptom Triage Interception (EMS Diversion)
+
+Running TC-21: Prompt-Injection Defense...
+[PASS] [TC-21] Safety & Failure - Prompt-Injection Defense & Guardrail Hardening
+
+Running TC-22: Safe policy abstention on unindexed condition...
+[PASS] [TC-22] Safety & Failure - Unindexed Entity Fail-Closed Policy Abstention
+
+Running TC-23: Technical failure distinction...
+[PASS] [TC-23] Safety & Failure - Technical Failure Distinguished from Safe Check
+
+Running TC-24: Role-based authorization & security boundary...
+[PASS] [TC-24] Security Boundary - Unauthorized & Cross-Role Access Blocked (HTTP 401/403)
+
+>>> SECTION E: MULTILINGUAL MEANING & FIDELITY (EN, HI, MR, GU) <<<
+
+Evaluating Multilingual: Supported Medicine
+   [EN] Status: 200 | Pass: true | Latency: 35245ms
+   [HI] Status: 200 | Pass: true | Latency: 35119ms
+   [MR] Status: 200 | Pass: true | Latency: 38493ms
+   [GU] Status: 200 | Pass: true | Latency: 37131ms
+
+Evaluating Multilingual: Discharge Instruction
+   [EN] Status: 200 | Pass: true | Latency: 21ms
+   [HI] Status: 200 | Pass: true | Latency: 98ms
+   [MR] Status: 200 | Pass: true | Latency: 19ms
+   [GU] Status: 200 | Pass: true | Latency: 14ms
+
+Evaluating Multilingual: Emergency Handling
+   [EN] Status: 200 | Pass: true | Latency: 8ms
+   [HI] Status: 200 | Pass: true | Latency: 12ms
+   [MR] Status: 200 | Pass: true | Latency: 14ms
+   [GU] Status: 200 | Pass: true | Latency: 12ms
+
+>>> SECTION F: CONCURRENCY & DUPLICATE PREVENTION <<<
+
+Testing Concurrent Double Booking of Identical Slot...
+[PASS] [CONC-01] Concurrency - Double Booking Slot Conflict (HTTP 409)
+
+================================================================================
+SUMMARY: 25 PASSED, 0 FAILED (100.0%)
+Results written to:
+ - E:\Major Project Code\audit_evidence\presentation_stabilization_20261025\ACCEPTANCE_RESULTS.json
+ - E:\Major Project Code\audit_evidence\presentation_stabilization_20261025\ACCEPTANCE_RESULTS.md
+================================================================================

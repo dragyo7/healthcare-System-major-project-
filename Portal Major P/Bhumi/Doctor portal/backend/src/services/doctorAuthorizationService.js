@@ -39,12 +39,17 @@ const isDoctorAuthorizedForPatient = async (doctorId, patientId) => {
         `SELECT 1
          FROM appointments
          WHERE doctor_id = ? AND patient_id = ?
+         AND status IN ('scheduled', 'confirmed', 'completed')
          UNION
          SELECT 1
          FROM prescriptions
          WHERE doctor_id = ? AND patient_id = ?
+         UNION
+         SELECT 1
+         FROM discharges
+         WHERE doctor_id = ? AND patient_id = ?
          LIMIT 1`,
-        [doctorId, patientId, doctorId, patientId]
+        [doctorId, patientId, doctorId, patientId, doctorId, patientId]
     );
 
     return rows.length > 0;

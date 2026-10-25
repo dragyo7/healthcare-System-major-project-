@@ -193,13 +193,17 @@ async function main() {
 
         console.log("  ✓ Synthetic baseline EHR actors & records populated.");
 
-        // 3. Run remaining migrations (001 -> 005)
+        // 3. Run remaining migrations (001 -> 009)
         const remainingMigrations = [
             "001_add_receptionist_role.sql",
             "002_create_discharges_table.sql",
             "003_create_prescription_ocr_jobs.sql",
             "004_create_account_activations.sql",
-            "005_create_prescription_idempotency_keys.sql"
+            "005_create_prescription_idempotency_keys.sql",
+            "006_add_consent_audit_to_users.sql",
+            "007_enforce_single_receptionist_and_appointment_statuses.sql",
+            "008_add_staff_status_approval_lifecycle.sql",
+            "009_add_confirmed_by_doctor_id_to_ocr_jobs.sql"
         ];
 
         console.log("► [Step 4] Applying remaining migrations in sequence...");

@@ -99,9 +99,9 @@ export default function DoctorDashboard() {
             </div>
           </div>
           <div className="text-2xl font-extrabold text-slate-900 dark:text-white">
-            {stats.today_appointments ?? todayAppointments.length ?? 0}
+            {stats.upcoming_appointments ?? 0}
           </div>
-          <span className="text-[11px] text-slate-400">Scheduled consultations</span>
+          <span className="text-[11px] text-slate-400">Scheduled & confirmed</span>
         </div>
 
         <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs">
@@ -112,9 +112,9 @@ export default function DoctorDashboard() {
             </div>
           </div>
           <div className="text-2xl font-extrabold text-slate-900 dark:text-white">
-            {stats.active_prescriptions ?? "12"}
+            {stats.active_prescriptions ?? 0}
           </div>
-          <span className="text-[11px] text-slate-400">Screened for interactions</span>
+          <span className="text-[11px] text-slate-400">Active regimens (&lt; 30 days)</span>
         </div>
 
         <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs">
@@ -125,7 +125,7 @@ export default function DoctorDashboard() {
             </div>
           </div>
           <div className="text-2xl font-extrabold text-slate-900 dark:text-white">
-            {stats.pending_followups ?? "3"}
+            {stats.pending_followups ?? 0}
           </div>
           <span className="text-[11px] text-slate-400">Post-discharge reviews</span>
         </div>

@@ -170,21 +170,16 @@ const registerPatient = async (req, res) => {
 
         await connection.beginTransaction();
 
-        // Secure patient provisioning:
-        // No universal/default password fallback. Accounts require individual activation.
-        let hashedPassword;
-        let rawActivationToken = null;
-        let isActivationPending = false;
-
-        if (password && typeof password === "string" && password.trim().length >= 8) {
-            // Explicit password provided
-            hashedPassword = await bcrypt.hash(password.trim(), 10);
-        } else {
-            // Unactivated account: set random sentinel hash impossible to match via bcrypt
-            isActivationPending = true;
-            hashedPassword = `!ACTIVATION_PENDING$${crypto.randomUUID()}`;
-            rawActivationToken = crypto.randomBytes(32).toString("hex");
+        // Direct Active Patient Provisioning with Mandatory Secure Unique Password:
+        // Ordinary signup / intake does not require activation tokens, invitation codes, or manual activation links.
+        // Predictable shared passwords (e.g. 'patient123') are strictly forbidden.
+        if (!password || typeof password !== "string" || password.trim().length < 8) {
+            return res.status(400).json({
+                message: "A secure patient-chosen password (at least 8 characters) is required for registration.",
+                field: "password"
+            });
         }
+        const hashedPassword = await bcrypt.hash(password.trim(), 10);
 
         // 1. Insert user
         const [userResult] = await connection.execute(
@@ -211,41 +206,31 @@ const registerPatient = async (req, res) => {
                 blood_group || null,
                 address || null,
                 emergency_contact ? String(emergency_contact).trim().slice(0, 100) : null,
-                allergies || "No known allergies"
+                allergies && String(allergies).trim() ? String(allergies).trim() : null
             ]
         );
 
         const newPatientId = patientResult.insertId;
 
-        // 3. If activation pending, store hashed token (single-use, 72h expiry)
-        if (isActivationPending && rawActivationToken) {
-            const tokenHash = crypto.createHash("sha256").update(rawActivationToken).digest("hex");
-            await connection.execute(
-                `INSERT INTO account_activations (user_id, token_hash, expires_at)
-                 VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 72 HOUR))`,
-                [newUserId, tokenHash]
-            );
-        }
+        // Step 3: Account is directly active (no activation token required)
 
         await connection.commit();
 
         const responsePayload = {
-            message: isActivationPending
-                ? "Patient registered successfully. Account activation is pending password setup."
-                : "Patient registered successfully",
+            message: "Patient registered successfully. Account is active.",
             patient: {
                 patient_id: newPatientId,
                 user_id: newUserId,
                 full_name: full_name.trim(),
                 email: email.toLowerCase().trim(),
                 phone: phone.trim(),
-                account_status: isActivationPending ? "activation_pending" : "active",
+                account_status: "active",
                 date_of_birth: normalizedDob,
                 gender: gender || null,
                 blood_group: blood_group || null,
                 address: address || null,
                 emergency_contact: emergency_contact || null,
-                allergies: allergies || "No known allergies"
+                allergies: allergies && String(allergies).trim() ? String(allergies).trim() : null
             },
             patient_id: newPatientId,
             user_id: newUserId,
@@ -253,11 +238,7 @@ const registerPatient = async (req, res) => {
             email: email.toLowerCase().trim()
         };
 
-        if (isActivationPending && rawActivationToken) {
-            const baseUrl = process.env.CLIENT_URL || process.env.PATIENT_PORTAL_URL || "http://localhost:5173";
-            responsePayload.activation_url = `${baseUrl}/activate?token=${rawActivationToken}`;
-            responsePayload.activation_token = rawActivationToken;
-        }
+        // No activation URL/token workflow
 
         return res.status(201).json(responsePayload);
 
@@ -351,16 +332,31 @@ const createAppointment = async (req, res) => {
             resolvedEndTime = `${endH}:${endM}:00`;
         }
 
-        // Prevent doctor double-booking
+        // Prevent doctor double-booking (interval overlap check)
         const [conflict] = await db.execute(
             `SELECT appointment_id FROM appointments
-             WHERE doctor_id = ? AND appointment_date = ? AND start_time = ?
-               AND status IN ('scheduled', 'confirmed')`,
-            [doctor_id, appointment_date, start_time]
+             WHERE doctor_id = ? AND appointment_date = ?
+               AND status IN ('scheduled', 'confirmed')
+               AND (start_time < ? AND end_time > ?)`,
+            [doctor_id, appointment_date, resolvedEndTime, start_time]
         );
         if (conflict.length > 0) {
             return res.status(409).json({
                 message: "Physician already has a consultation scheduled at this date and time."
+            });
+        }
+
+        // Prevent patient double-booking (interval overlap check)
+        const [patConflict] = await db.execute(
+            `SELECT appointment_id FROM appointments
+             WHERE patient_id = ? AND appointment_date = ?
+               AND status IN ('scheduled', 'confirmed')
+               AND (start_time < ? AND end_time > ?)`,
+            [patient_id, appointment_date, resolvedEndTime, start_time]
+        );
+        if (patConflict.length > 0) {
+            return res.status(409).json({
+                message: "Patient already has a consultation scheduled at this date and time."
             });
         }
 
@@ -411,7 +407,7 @@ const updateAppointmentStatus = async (req, res) => {
         }
 
         const [apptRows] = await db.execute(
-            "SELECT appointment_id, doctor_id, appointment_date, start_time, status FROM appointments WHERE appointment_id = ?",
+            "SELECT appointment_id, doctor_id, patient_id, appointment_date, start_time, end_time, status FROM appointments WHERE appointment_id = ?",
             [appointmentId]
         );
 
@@ -448,17 +444,28 @@ const updateAppointmentStatus = async (req, res) => {
             });
         }
 
-        // If approving/confirming/scheduling, ensure no double booking
+        // If approving/confirming/scheduling, ensure no double booking via interval overlap
         if (newStatus === "scheduled" || newStatus === "confirmed") {
+            let apptEndTime = appt.end_time;
+            if (!apptEndTime) {
+                const [hours, minutes] = String(appt.start_time).split(":");
+                const startMins = parseInt(hours, 10) * 60 + parseInt(minutes || "0", 10);
+                const endMins = startMins + 30;
+                const endH = String(Math.floor(endMins / 60) % 24).padStart(2, "0");
+                const endM = String(endMins % 60).padStart(2, "0");
+                apptEndTime = `${endH}:${endM}:00`;
+            }
+
             const [conflict] = await db.execute(
                 `SELECT appointment_id FROM appointments
-                 WHERE doctor_id = ? AND appointment_date = ? AND start_time = ?
-                   AND status IN ('scheduled', 'confirmed') AND appointment_id != ?`,
-                [appt.doctor_id, appt.appointment_date, appt.start_time, appointmentId]
+                 WHERE doctor_id = ? AND appointment_date = ?
+                   AND status IN ('scheduled', 'confirmed') AND appointment_id != ?
+                   AND (start_time < ? AND end_time > ?)`,
+                [appt.doctor_id, appt.appointment_date, appointmentId, apptEndTime, appt.start_time]
             );
             if (conflict.length > 0) {
                 return res.status(409).json({
-                    message: "Cannot approve appointment: Another appointment is already scheduled for this physician at this date and time."
+                    message: "Cannot approve appointment: Another appointment is already scheduled for this physician during this time window."
                 });
             }
         }
@@ -552,19 +559,18 @@ const registerDoctor = async (req, res) => {
             }
         }
 
+        // Direct Active Physician Provisioning with Mandatory Secure Unique Password:
+        // Ordinary signup / intake does not require activation tokens, invitation codes, or manual activation links.
+        if (!password || typeof password !== "string" || password.trim().length < 8) {
+            return res.status(400).json({
+                message: "A secure physician account password (at least 8 characters) is required.",
+                field: "password"
+            });
+        }
+
         await connection.beginTransaction();
 
-        let hashedPassword;
-        let rawActivationToken = null;
-        let isActivationPending = false;
-
-        if (password && typeof password === "string" && password.trim().length >= 8) {
-            hashedPassword = await bcrypt.hash(password.trim(), 10);
-        } else {
-            isActivationPending = true;
-            hashedPassword = `!ACTIVATION_PENDING$${crypto.randomUUID()}`;
-            rawActivationToken = crypto.randomBytes(32).toString("hex");
-        }
+        const hashedPassword = await bcrypt.hash(password.trim(), 10);
 
         // 1. Insert user
         const [userResult] = await connection.execute(
@@ -596,23 +602,10 @@ const registerDoctor = async (req, res) => {
 
         const newDoctorId = docResult.insertId;
 
-        // 3. If activation pending, store hashed token (single-use, 72h expiry)
-        if (isActivationPending && rawActivationToken) {
-            const tokenHash = crypto.createHash("sha256").update(rawActivationToken).digest("hex");
-            await connection.execute(
-                `INSERT INTO account_activations (user_id, token_hash, expires_at)
-                 VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 72 HOUR))`,
-                [newUserId, tokenHash]
-            );
-        }
-
         await connection.commit();
 
-        const baseUrl = req.headers.origin || "http://localhost:5173";
         const responsePayload = {
-            message: isActivationPending
-                ? "Physician registered successfully. Account activation is pending password setup."
-                : "Physician registered successfully with active credentials.",
+            message: "Physician registered successfully with active credentials.",
             doctor: {
                 doctor_id: newDoctorId,
                 user_id: newUserId,
@@ -622,14 +615,9 @@ const registerDoctor = async (req, res) => {
                 specialization: specialization.trim(),
                 qualification: qualification ? qualification.trim() : "MBBS",
                 license_number: license_number ? license_number.trim() : null,
-                account_status: isActivationPending ? "activation_pending" : "active"
+                account_status: "active"
             }
         };
-
-        if (isActivationPending && rawActivationToken) {
-            responsePayload.activation_url = `${baseUrl}/activate?token=${rawActivationToken}`;
-            responsePayload.activation_token = rawActivationToken;
-        }
 
         return res.status(201).json(responsePayload);
 

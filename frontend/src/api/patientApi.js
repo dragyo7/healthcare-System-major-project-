@@ -1,80 +1,46 @@
-const API_BASE = (
-  import.meta.env.VITE_API_BASE_URL ||
-  import.meta.env.VITE_EXPRESS_URL ||
-  import.meta.env.VITE_API_URL ||
-  "http://127.0.0.1:5000"
-).replace(/\/api\/?$/, "") + "/api";
-
-
-function getAuthHeaders() {
-  const token = localStorage.getItem("cdss_token") || localStorage.getItem("patient_token");
-  return {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
-}
+import { resilientFetch, getApiBase, getAuthHeaders } from "./client";
 
 export const patientApi = {
   getProfile: async () => {
-    const res = await fetch(`${API_BASE}/patient/profile`, { headers: getAuthHeaders() });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to load patient profile");
-    return data;
+    return await resilientFetch("/patient/profile");
   },
 
   getDashboard: async () => {
-    const res = await fetch(`${API_BASE}/patient/dashboard`, { headers: getAuthHeaders() });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to load patient dashboard");
-    return data;
+    return await resilientFetch("/patient/dashboard");
   },
 
   getMedicalHistory: async () => {
-    const res = await fetch(`${API_BASE}/patient/medical-history`, { headers: getAuthHeaders() });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to load medical history");
-    return data;
+    return await resilientFetch("/patient/medical-history");
   },
 
   getPrescriptions: async () => {
-    const res = await fetch(`${API_BASE}/patient/prescriptions`, { headers: getAuthHeaders() });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to load prescriptions");
+    const data = await resilientFetch("/patient/prescriptions");
     return data.prescriptions || [];
   },
 
   getMedications: async () => {
-    const res = await fetch(`${API_BASE}/patient/medications`, { headers: getAuthHeaders() });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to load active medications");
+    const data = await resilientFetch("/patient/medications");
     return data.medications || [];
   },
 
   getDischarge: async () => {
-    const res = await fetch(`${API_BASE}/patient/discharge`, { headers: getAuthHeaders() });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to load discharge care guidelines");
+    const data = await resilientFetch("/patient/discharge");
     return data.discharge || null;
   },
 
   getAppointments: async () => {
-    const res = await fetch(`${API_BASE}/patient/appointments`, { headers: getAuthHeaders() });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to load patient appointments");
+    const data = await resilientFetch("/patient/appointments");
     return data.appointments || [];
   },
 
   getDoctors: async () => {
-    const res = await fetch(`${API_BASE}/patient/doctors`, { headers: getAuthHeaders() });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to load doctor directory");
+    const data = await resilientFetch("/patient/doctors");
     return data.doctors || [];
   },
 
   requestAppointment: async ({ doctor_id, appointment_date, appointment_time, reason }) => {
-    const res = await fetch(`${API_BASE}/patient/appointments`, {
+    return await resilientFetch("/patient/appointments", {
       method: "POST",
-      headers: getAuthHeaders(),
       body: JSON.stringify({
         doctor_id,
         appointment_date,
@@ -82,45 +48,34 @@ export const patientApi = {
         reason,
       }),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to submit appointment request");
-    return data;
   },
 
   cancelAppointment: async (appointmentId, reason) => {
-    const res = await fetch(`${API_BASE}/patient/appointments/${appointmentId}/cancel`, {
+    return await resilientFetch(`/patient/appointments/${appointmentId}/cancel`, {
       method: "PATCH",
-      headers: getAuthHeaders(),
       body: JSON.stringify({ reason }),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to cancel appointment");
-    return data;
   },
 
   evaluateCDS: async ({ clinicalQuery, language = "en", conversationHistory = [] }) => {
-    const res = await fetch(`${API_BASE}/patient/cds`, {
+    return await resilientFetch("/patient/cds", {
       method: "POST",
-      headers: getAuthHeaders(),
+      timeoutMs: 90000,
       body: JSON.stringify({
         clinical_query: clinicalQuery,
         language,
         conversation_history: conversationHistory,
       }),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || `Post-discharge CDS query failed (${res.status})`);
-    return data;
   },
 
   getPrescriptionPDFUrl: (prescriptionId) => {
-    return `${API_BASE}/patient/prescriptions/${prescriptionId}/pdf`;
+    return `${getApiBase()}/patient/prescriptions/${prescriptionId}/pdf`;
   },
 
   downloadPrescriptionPDF: async (prescriptionId) => {
-    const res = await fetch(`${API_BASE}/patient/prescriptions/${prescriptionId}/pdf`, {
-      headers: getAuthHeaders(),
-    });
+    const url = `${getApiBase()}/patient/prescriptions/${prescriptionId}/pdf`;
+    const res = await fetch(url, { headers: getAuthHeaders() });
     if (!res.ok) {
       const err = await res.json().catch(() => ({ message: "Failed to download PDF" }));
       throw new Error(err.message || `Download failed (${res.status})`);

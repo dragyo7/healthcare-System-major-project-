@@ -410,7 +410,11 @@ export default function PatientAppointments() {
                   <div className="pt-4 mt-3 border-t border-slate-100 dark:border-slate-800">
                     <button
                       onClick={() => {
+                        const tomorrow = new Date(Date.now() + 86400000).toISOString().split("T")[0];
                         setSelectedDoctor(doc);
+                        setAppointmentDate(tomorrow);
+                        setAppointmentTime("10:00");
+                        setReason("Routine cardiology follow-up");
                         setError("");
                         setSuccess("");
                       }}

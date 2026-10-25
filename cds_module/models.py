@@ -7,6 +7,22 @@ from typing import Optional, List, Dict, Any, Union
 from pydantic import BaseModel, Field, model_validator
 
 
+class DischargeRecord(BaseModel):
+    """
+    Explicit typed clinical discharge record with existence, episode provenance, and care directives.
+    """
+    has_discharge: bool = Field(default=False, description="True if a genuine discharge summary exists for this episode.")
+    discharge_id: Optional[int] = Field(default=None, description="Episode discharge ID.")
+    discharge_date: Optional[str] = Field(default=None, description="Calendar date of clinical discharge.")
+    discharge_diagnosis: Optional[str] = Field(default=None, description="Primary clinician-authored discharge diagnosis.")
+    discharge_instructions: Optional[str] = Field(default=None, description="Clinician-authored care directives and medication instructions.")
+    discharge_summary: Optional[str] = Field(default=None, description="Clinical hospital course summary.")
+    warning_signs: Optional[str] = Field(default=None, description="Personalized post-discharge recovery warning signs.")
+    follow_up_instructions: Optional[str] = Field(default=None, description="Follow-up consultation directives.")
+    follow_up_date: Optional[str] = Field(default=None, description="Scheduled follow-up calendar date.")
+    lab_instructions: Optional[str] = Field(default=None, description="Specific laboratory testing orders or monitoring directives.")
+
+
 class PatientContext(BaseModel):
     """
     Sanitized request-scoped patient clinical context.
@@ -23,7 +39,15 @@ class PatientContext(BaseModel):
     )
     medical_history: List[str] = Field(default_factory=list, description="Relevant past medical history.")
     lab_summaries: List[str] = Field(default_factory=list, description="Summaries of pertinent laboratory tests.")
+    discharge_record: Optional[DischargeRecord] = Field(default=None, description="Authoritative clinical discharge episode record.")
     discharge_context: Optional[Dict[str, Any]] = Field(default=None, description="Discharge instructions, warning signs, and follow-up plan.")
+    discharge_instructions: Optional[str] = Field(default=None, description="Clinician-authored discharge care directives.")
+    warning_signs: Optional[str] = Field(default=None, description="Personalized post-discharge recovery warning signs.")
+    follow_up_instructions: Optional[str] = Field(default=None, description="Follow-up clinical consultation instructions.")
+    follow_up_date: Optional[str] = Field(default=None, description="Scheduled follow-up calendar date.")
+    discharge_diagnosis: Optional[str] = Field(default=None, description="Primary clinical discharge diagnosis.")
+
+    model_config = {"extra": "allow"}
 
 
 class CDSEvaluateRequest(BaseModel):

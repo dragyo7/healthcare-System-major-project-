@@ -36,7 +36,24 @@ export default function DoctorPatients() {
     loadPatients();
   }, [location]);
 
+  const handleDownloadPdf = async (prescriptionId) => {
+    try {
+      const blob = await doctorApi.downloadPrescriptionPDF(prescriptionId);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Prescription-${prescriptionId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      alert(err.message || "Failed to download prescription PDF");
+    }
+  };
+
   useEffect(() => {
+    let isCancelled = false;
     async function loadDossier() {
       if (!selectedPatientId) {
         setDossier(null);
@@ -45,14 +62,23 @@ export default function DoctorPatients() {
       setDossierLoading(true);
       try {
         const details = await doctorApi.getPatientDetails(selectedPatientId);
-        setDossier(details);
+        if (!isCancelled) {
+          setDossier(details);
+        }
       } catch (err) {
-        setError(`Failed to load patient dossier: ${err.message}`);
+        if (!isCancelled) {
+          setError(`Failed to load patient dossier: ${err.message}`);
+        }
       } finally {
-        setDossierLoading(false);
+        if (!isCancelled) {
+          setDossierLoading(false);
+        }
       }
     }
     loadDossier();
+    return () => {
+      isCancelled = true;
+    };
   }, [selectedPatientId]);
 
   const filteredPatients = patients.filter((p) => {
@@ -244,14 +270,13 @@ export default function DoctorPatients() {
                           <span className="font-bold text-slate-900 dark:text-white">{t("Prescription")} #{rx.prescription_id}</span>
                           <span className="text-slate-400 ml-2">({new Date(rx.created_at).toLocaleDateString()})</span>
                         </div>
-                        <a
-                          href={`http://localhost:5000/api/doctor/prescriptions/${rx.prescription_id}/pdf`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-xs font-bold text-primary-600 hover:underline"
+                        <button
+                          type="button"
+                          onClick={() => handleDownloadPdf(rx.prescription_id)}
+                          className="text-xs font-bold text-primary-600 hover:underline cursor-pointer bg-transparent border-0 p-0 inline-flex items-center gap-1"
                         >
                           📄 {t("Download PDF")}
-                        </a>
+                        </button>
                       </div>
 
                       <div className="text-xs text-slate-600 dark:text-slate-300">

@@ -34,6 +34,32 @@ const doctorLogin = async (req, res) => {
             });
         }
 
+        if (!("staff_status" in user)) {
+            return res.status(500).json({
+                message: "Database schema error: staff_status column is missing. Refusing login to prevent authorization downgrade.",
+                error: "AUTHORIZATION_SCHEMA_MISSING"
+            });
+        }
+
+        if (user.staff_status !== "approved") {
+            if (user.staff_status === "pending_approval") {
+                return res.status(403).json({
+                    message: "Doctor account registration is pending clinical administration approval.",
+                    error: "STAFF_APPROVAL_PENDING"
+                });
+            }
+            if (user.staff_status === "revoked" || user.staff_status === "suspended") {
+                return res.status(403).json({
+                    message: `Doctor account access has been ${user.staff_status}. Clinical access prohibited.`,
+                    error: `STAFF_${user.staff_status.toUpperCase()}`
+                });
+            }
+            return res.status(403).json({
+                message: "Doctor account authorization is missing or unverified. Access prohibited.",
+                error: "STAFF_AUTHORIZATION_REQUIRED"
+            });
+        }
+
         if (!user.password) {
             return res.status(401).json({
                 message: "Invalid email or password"
@@ -202,6 +228,32 @@ const receptionistLogin = async (req, res) => {
         if (user.password && user.password.startsWith("!ACTIVATION_PENDING$")) {
             return res.status(403).json({
                 message: "Account activation pending. Please contact administrator."
+            });
+        }
+
+        if (!("staff_status" in user)) {
+            return res.status(500).json({
+                message: "Database schema error: staff_status column is missing. Refusing login to prevent authorization downgrade.",
+                error: "AUTHORIZATION_SCHEMA_MISSING"
+            });
+        }
+
+        if (user.staff_status !== "approved") {
+            if (user.staff_status === "pending_approval") {
+                return res.status(403).json({
+                    message: "Receptionist account registration is pending administration approval.",
+                    error: "STAFF_APPROVAL_PENDING"
+                });
+            }
+            if (user.staff_status === "revoked" || user.staff_status === "suspended") {
+                return res.status(403).json({
+                    message: `Receptionist account access has been ${user.staff_status}. Administrative access prohibited.`,
+                    error: `STAFF_${user.staff_status.toUpperCase()}`
+                });
+            }
+            return res.status(403).json({
+                message: "Receptionist account authorization is missing or unverified. Access prohibited.",
+                error: "STAFF_AUTHORIZATION_REQUIRED"
             });
         }
 
@@ -471,18 +523,18 @@ const patientSignup = async (req, res) => {
 
         const newUserId = userResult.insertId;
 
-        // 2. Insert into patients
+        // 2. Insert into patients (preserve unknown values as null; do not fabricate defaults)
         const [patientResult] = await connection.execute(
             `INSERT INTO patients (user_id, date_of_birth, gender, blood_group, address, emergency_contact, allergies)
              VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [
                 newUserId,
-                date_of_birth || "1990-01-01",
-                gender || "Other",
-                blood_group || "O+",
+                date_of_birth || null,
+                gender || null,
+                blood_group || null,
                 address || null,
                 emergency_contact || null,
-                allergies || "None"
+                allergies && allergies.trim() ? allergies.trim() : null
             ]
         );
 
@@ -624,19 +676,28 @@ const doctorSignup = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password.trim(), 10);
         const CONSENT_DOCUMENT_VERSION = "v1.0-2026-10";
 
-        // Check if consent columns exist in users schema
-        const [cols] = await connection.execute("SHOW COLUMNS FROM users LIKE 'consent_timestamp'");
+        // Check if staff_status column exists in users schema - fail visibly if missing
+        const [staffCols] = await connection.execute("SHOW COLUMNS FROM users LIKE 'staff_status'");
+        if (staffCols.length === 0) {
+            await connection.rollback();
+            return res.status(500).json({
+                message: "Database schema error: staff_status column is missing. Registration refused to prevent authorization downgrade.",
+                error: "AUTHORIZATION_SCHEMA_MISSING"
+            });
+        }
+
+        const [consentCols] = await connection.execute("SHOW COLUMNS FROM users LIKE 'consent_timestamp'");
         let userResult;
-        if (cols.length > 0) {
+        if (consentCols.length > 0) {
             [userResult] = await connection.execute(
-                `INSERT INTO users (full_name, email, password, role, phone, consent_timestamp, consent_version)
-                 VALUES (?, ?, ?, 'doctor', ?, UTC_TIMESTAMP(), ?)`,
+                `INSERT INTO users (full_name, email, password, role, phone, staff_status, consent_timestamp, consent_version)
+                 VALUES (?, ?, ?, 'doctor', ?, 'pending_approval', UTC_TIMESTAMP(), ?)`,
                 [full_name.trim(), normalizedEmail, hashedPassword, phone ? phone.trim() : null, CONSENT_DOCUMENT_VERSION]
             );
         } else {
             [userResult] = await connection.execute(
-                `INSERT INTO users (full_name, email, password, role, phone)
-                 VALUES (?, ?, ?, 'doctor', ?)`,
+                `INSERT INTO users (full_name, email, password, role, phone, staff_status)
+                 VALUES (?, ?, ?, 'doctor', ?, 'pending_approval')`,
                 [full_name.trim(), normalizedEmail, hashedPassword, phone ? phone.trim() : null]
             );
         }
@@ -661,28 +722,18 @@ const doctorSignup = async (req, res) => {
 
         await connection.commit();
 
-        // Create authoritative JWT token for immediate session establishment
-        const token = jwt.sign(
-            {
-                user_id: newUserId,
-                doctor_id: newDoctorId,
-                role: "doctor"
-            },
-            process.env.JWT_SECRET,
-            {
-                expiresIn: "1d"
-            }
-        );
-
+        // Do NOT issue privileged active JWT token for self-registered doctors. Require clinical administrator approval.
         return res.status(201).json({
-            message: "Doctor registration successful",
-            token,
+            message: "Doctor registration submitted successfully. Account is pending clinical administration approval before patient access is granted.",
+            staff_status: "pending_approval",
+            token: null,
             doctor: {
                 user_id: newUserId,
                 doctor_id: newDoctorId,
                 name: full_name.trim(),
                 email: normalizedEmail,
                 role: "doctor",
+                staff_status: "pending_approval",
                 specialization: specialization && specialization.trim() ? specialization.trim() : "General Medicine",
                 qualification: qualification && qualification.trim() ? qualification.trim() : "MBBS",
                 license_number: normalizedLicense
@@ -714,6 +765,30 @@ const doctorSignup = async (req, res) => {
 const provisionReceptionist = async (req, res) => {
     let connection;
     try {
+        const operatorSecret = req.headers["x-operator-secret"] || req.headers["x-admin-secret"];
+        const configuredSecret = (process.env.OPERATOR_SECRET && process.env.OPERATOR_SECRET.trim().length > 0)
+            ? process.env.OPERATOR_SECRET.trim()
+            : null;
+        const hasValidSecret = Boolean(configuredSecret && operatorSecret && operatorSecret === configuredSecret);
+
+        let hasValidStaffAuth = false;
+        if (req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) {
+            try {
+                const token = req.headers.authorization.split(" ")[1];
+                const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                if (decoded && (decoded.role === "receptionist" || decoded.role === "admin")) {
+                    hasValidStaffAuth = true;
+                }
+            } catch (_) {}
+        }
+
+        if (!hasValidSecret && !hasValidStaffAuth) {
+            return res.status(403).json({
+                message: "Unauthorized: Protected administrative provisioning requires operator secret or authorized administrator credentials.",
+                error: "ADMINISTRATIVE_AUTHORIZATION_REQUIRED"
+            });
+        }
+
         const { full_name, email, password, phone } = req.body;
 
         if (!full_name || !email || !password) {
@@ -871,18 +946,28 @@ const receptionistSignup = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password.trim(), 10);
         const CONSENT_DOCUMENT_VERSION = "v1.0-2026-10";
 
-        const [cols] = await connection.execute("SHOW COLUMNS FROM users LIKE 'consent_timestamp'");
+        // Check if staff_status column exists in users schema - fail visibly if missing
+        const [staffCols] = await connection.execute("SHOW COLUMNS FROM users LIKE 'staff_status'");
+        if (staffCols.length === 0) {
+            await connection.rollback();
+            return res.status(500).json({
+                message: "Database schema error: staff_status column is missing. Registration refused to prevent authorization downgrade.",
+                error: "AUTHORIZATION_SCHEMA_MISSING"
+            });
+        }
+
+        const [consentCols] = await connection.execute("SHOW COLUMNS FROM users LIKE 'consent_timestamp'");
         let userResult;
-        if (cols.length > 0) {
+        if (consentCols.length > 0) {
             [userResult] = await connection.execute(
-                `INSERT INTO users (full_name, email, password, role, phone, consent_timestamp, consent_version)
-                 VALUES (?, ?, ?, 'receptionist', ?, UTC_TIMESTAMP(), ?)`,
+                `INSERT INTO users (full_name, email, password, role, phone, staff_status, consent_timestamp, consent_version)
+                 VALUES (?, ?, ?, 'receptionist', ?, 'pending_approval', UTC_TIMESTAMP(), ?)`,
                 [full_name.trim(), normalizedEmail, hashedPassword, phone ? phone.trim() : null, CONSENT_DOCUMENT_VERSION]
             );
         } else {
             [userResult] = await connection.execute(
-                `INSERT INTO users (full_name, email, password, role, phone)
-                 VALUES (?, ?, ?, 'receptionist', ?)`,
+                `INSERT INTO users (full_name, email, password, role, phone, staff_status)
+                 VALUES (?, ?, ?, 'receptionist', ?, 'pending_approval')`,
                 [full_name.trim(), normalizedEmail, hashedPassword, phone ? phone.trim() : null]
             );
         }
@@ -890,25 +975,17 @@ const receptionistSignup = async (req, res) => {
         const newUserId = userResult.insertId;
         await connection.commit();
 
-        const token = jwt.sign(
-            {
-                user_id: newUserId,
-                role: "receptionist"
-            },
-            process.env.JWT_SECRET,
-            {
-                expiresIn: "1d"
-            }
-        );
-
+        // Do NOT issue privileged active JWT token for self-registered receptionists. Require administration approval.
         return res.status(201).json({
-            message: "Receptionist registration successful",
-            token,
+            message: "Receptionist registration submitted successfully. Staff access is pending administration approval before front-desk operations can be performed.",
+            staff_status: "pending_approval",
+            token: null,
             receptionist: {
                 user_id: newUserId,
                 name: full_name.trim(),
                 email: normalizedEmail,
-                role: "receptionist"
+                role: "receptionist",
+                staff_status: "pending_approval"
             }
         });
     } catch (error) {
@@ -924,6 +1001,98 @@ const receptionistSignup = async (req, res) => {
     }
 };
 
+/**
+ * PATCH /api/auth/staff/:userId/approval
+ * Protected clinical administration approval lifecycle for staff accounts.
+ * Allows approved administrators / operators to transition staff_status between:
+ * - 'approved', 'suspended', 'revoked', 'pending_approval'
+ * Enforces:
+ * - Operator secret or approved receptionist token required (HTTP 403)
+ * - Self-approval prevention (actor cannot approve their own account)
+ * - Target role verification (patients do not have staff approval lifecycle)
+ */
+const updateStaffApprovalStatus = async (req, res) => {
+    try {
+        const targetUserId = parseInt(req.params.userId, 10);
+        const { status } = req.body;
+
+        if (isNaN(targetUserId)) {
+            return res.status(400).json({ message: "Invalid user ID" });
+        }
+
+        const validStatuses = ["approved", "suspended", "revoked", "pending_approval"];
+        if (!status || !validStatuses.includes(status)) {
+            return res.status(400).json({
+                message: `Status must be one of: ${validStatuses.join(", ")}`
+            });
+        }
+
+        const operatorSecret = req.headers["x-operator-secret"] || req.headers["x-admin-secret"];
+        const configuredSecret = (process.env.OPERATOR_SECRET && process.env.OPERATOR_SECRET.trim().length > 0)
+            ? process.env.OPERATOR_SECRET.trim()
+            : null;
+        let isAuthorizedOperator = Boolean(configuredSecret && operatorSecret && operatorSecret === configuredSecret);
+        let callerUserId = null;
+
+        if (req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) {
+            try {
+                const token = req.headers.authorization.split(" ")[1];
+                const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                callerUserId = decoded.user_id;
+                if (decoded.role === "receptionist" || decoded.role === "admin") {
+                    const [callerRows] = await db.execute("SELECT staff_status FROM users WHERE user_id = ?", [callerUserId]);
+                    if (callerRows.length > 0 && callerRows[0].staff_status === "approved") {
+                        isAuthorizedOperator = true;
+                    }
+                }
+            } catch (_) {}
+        }
+
+        // Prevent self-approval / self-modification for all staff accounts
+        if (callerUserId && callerUserId === targetUserId) {
+            return res.status(403).json({
+                message: "Self-approval prohibited: Clinicians and staff cannot alter their own approval status.",
+                error: "SELF_APPROVAL_PROHIBITED"
+            });
+        }
+
+        if (!isAuthorizedOperator) {
+            return res.status(403).json({
+                message: "Unauthorized: Operator secret or approved administrator session required to modify staff approval status.",
+                error: "ADMINISTRATIVE_AUTHORIZATION_REQUIRED"
+            });
+        }
+
+        // Fetch target user
+        const [targetUsers] = await db.execute("SELECT user_id, full_name, email, role, staff_status FROM users WHERE user_id = ?", [targetUserId]);
+        if (targetUsers.length === 0) {
+            return res.status(404).json({ message: "Staff user not found" });
+        }
+
+        const targetUser = targetUsers[0];
+        if (targetUser.role === "patient") {
+            return res.status(400).json({
+                message: "Patient accounts do not participate in the staff approval lifecycle."
+            });
+        }
+
+        await db.execute("UPDATE users SET staff_status = ? WHERE user_id = ?", [status, targetUserId]);
+
+        return res.status(200).json({
+            message: `Staff account status successfully updated to '${status}'.`,
+            user_id: targetUserId,
+            full_name: targetUser.full_name,
+            role: targetUser.role,
+            previous_status: targetUser.staff_status,
+            staff_status: status
+        });
+
+    } catch (error) {
+        console.error("updateStaffApprovalStatus error:", error);
+        return res.status(500).json({ message: "Server error updating staff approval status" });
+    }
+};
+
 module.exports = {
     doctorLogin,
     doctorSignup,
@@ -932,5 +1101,6 @@ module.exports = {
     patientActivate,
     patientSignup,
     provisionReceptionist,
-    receptionistSignup
+    receptionistSignup,
+    updateStaffApprovalStatus
 };

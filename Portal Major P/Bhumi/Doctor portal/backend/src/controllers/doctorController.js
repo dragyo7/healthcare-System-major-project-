@@ -33,6 +33,41 @@ const ALLERGY_CLASS_MAP = {
     macrolide: ["erythromycin", "clarithromycin", "azithromycin"]
 };
 
+const CANONICAL_BRAND_MAP = {
+    lipitor: "atorvastatin",
+    zocor: "simvastatin",
+    crestor: "rosuvastatin",
+    biaxin: "clarithromycin",
+    zithromax: "azithromycin",
+    keflex: "cephalexin",
+    augmentin: "amoxicillin",
+    amoxil: "amoxicillin",
+    tylenol: "acetaminophen",
+    panadol: "acetaminophen",
+    paracetamol: "acetaminophen",
+    advil: "ibuprofen",
+    motrin: "ibuprofen",
+    aleve: "naproxen",
+    plavix: "clopidogrel",
+    coumadin: "warfarin",
+    glucophage: "metformin",
+    lasix: "furosemide"
+};
+
+function getCanonicalDrugAliases(name) {
+    if (!name) return [];
+    const raw = String(name).toLowerCase().trim();
+    const cleaned = raw.replace(/\b\d+(\.\d+)?\s*(mg|mcg|g|ml|tab|tablet|cap|capsule)?\b/gi, "").trim();
+    const tokens = cleaned.split(/[\s,\-_/]+/).filter(t => t.length > 2);
+    const aliases = new Set([raw, cleaned, ...tokens]);
+    for (const token of Array.from(aliases)) {
+        if (CANONICAL_BRAND_MAP[token]) {
+            aliases.add(CANONICAL_BRAND_MAP[token]);
+        }
+    }
+    return Array.from(aliases);
+}
+
 function checkAllergyContraindication(candidateDrugName, documentedAllergy) {
     if (!candidateDrugName || !documentedAllergy) return false;
     const drug = candidateDrugName.toLowerCase().trim();
@@ -78,10 +113,13 @@ function computePrescriptionPayloadHash(patient_id, diagnosis, notes, medicines)
         instructions: (m.instructions || "").trim().toLowerCase()
     })).sort((a, b) => a.medicine_name.localeCompare(b.medicine_name));
 
+    let cleanNotes = (notes || "").trim();
+    cleanNotes = cleanNotes.replace(/^\[(EMERGENCY )?CLINICIAN OVERRIDE[^\]]*\]\s*/i, "").trim().toLowerCase();
+
     const canonical = {
         patient_id: Number(patient_id),
         diagnosis: (diagnosis || "").trim().toLowerCase(),
-        notes: (notes || "").trim().toLowerCase(),
+        notes: cleanNotes,
         medicines: normalizedMedicines
     };
 
@@ -149,15 +187,20 @@ const getDoctorDashboard = async (req, res) => {
 
         const doctorId = doctors[0].doctor_id;
 
-        // Total patients
+        // Total authorized patients (across confirmed/completed appointments, prescriptions, or discharges)
         const [patientCount] = await db.execute(
             `SELECT COUNT(DISTINCT patient_id) AS total_patients
-             FROM appointments
-             WHERE doctor_id = ?`,
-            [doctorId]
+             FROM (
+                 SELECT patient_id FROM appointments WHERE doctor_id = ? AND status IN ('scheduled', 'confirmed', 'completed')
+                 UNION
+                 SELECT patient_id FROM prescriptions WHERE doctor_id = ?
+                 UNION
+                 SELECT patient_id FROM discharges WHERE doctor_id = ?
+             ) AS auth_patients`,
+            [doctorId, doctorId, doctorId]
         );
 
-        // Today's completed appointments
+        // Today's completed consultations
         const [todayCompleted] = await db.execute(
             `SELECT COUNT(*) AS today_completed
              FROM appointments
@@ -167,12 +210,12 @@ const getDoctorDashboard = async (req, res) => {
             [doctorId]
         );
 
-        // Upcoming scheduled appointments
+        // Upcoming scheduled / confirmed appointments
         const [upcoming] = await db.execute(
             `SELECT COUNT(*) AS upcoming_appointments
              FROM appointments
              WHERE doctor_id = ?
-             AND status = 'scheduled'
+             AND status IN ('scheduled', 'confirmed')
              AND (
                  appointment_date > CURDATE()
                  OR (
@@ -183,10 +226,79 @@ const getDoctorDashboard = async (req, res) => {
             [doctorId]
         );
 
+        // Active medications prescribed by this doctor (within 30 days)
+        const [activeMeds] = await db.execute(
+            `SELECT COUNT(DISTINCT pm.medicine_id) AS active_prescriptions
+             FROM prescription_medicines pm
+             JOIN prescriptions p ON pm.prescription_id = p.prescription_id
+             WHERE p.doctor_id = ?
+             AND p.prescription_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)`,
+            [doctorId]
+        );
+
+        // Genuinely pending post-discharge follow-up reviews authored by this doctor
+        const [followups] = await db.execute(
+            `SELECT COUNT(*) AS pending_followups
+             FROM discharges
+             WHERE doctor_id = ?
+             AND follow_up_date >= CURDATE()`,
+            [doctorId]
+        );
+
+        // Today's appointments list
+        const [todayAppts] = await db.execute(
+            `SELECT a.appointment_id, a.patient_id, a.appointment_date, a.start_time, a.end_time,
+                    a.status, a.reason, u.full_name AS patient_name, pt.gender, pt.date_of_birth
+             FROM appointments a
+             JOIN patients pt ON a.patient_id = pt.patient_id
+             JOIN users u ON pt.user_id = u.user_id
+             WHERE a.doctor_id = ?
+             AND a.appointment_date = CURDATE()
+             ORDER BY a.start_time ASC`,
+            [doctorId]
+        );
+
+        // Recent authorized patients
+        const [recentPatients] = await db.execute(
+            `SELECT pt.patient_id, u.full_name, u.email, u.phone,
+                    pt.gender, pt.date_of_birth, pt.allergies,
+                    MAX(CASE WHEN a.status = 'completed' AND a.appointment_date <= CURDATE() THEN a.appointment_date ELSE NULL END) AS last_visit
+             FROM patients pt
+             JOIN users u ON pt.user_id = u.user_id
+             LEFT JOIN appointments a ON pt.patient_id = a.patient_id AND a.doctor_id = ?
+             WHERE EXISTS (
+                 SELECT 1 FROM appointments ap WHERE ap.patient_id = pt.patient_id AND ap.doctor_id = ? AND ap.status IN ('scheduled', 'confirmed', 'completed')
+             ) OR EXISTS (
+                 SELECT 1 FROM prescriptions pr WHERE pr.patient_id = pt.patient_id AND pr.doctor_id = ?
+             ) OR EXISTS (
+                 SELECT 1 FROM discharges ds WHERE ds.patient_id = pt.patient_id AND ds.doctor_id = ?
+             )
+             GROUP BY pt.patient_id, u.full_name, u.email, u.phone, pt.gender, pt.date_of_birth, pt.allergies
+             ORDER BY last_visit DESC
+             LIMIT 5`,
+            [doctorId, doctorId, doctorId, doctorId]
+        );
+
+        const totalPatientsNum = Number(patientCount[0].total_patients || 0);
+        const upcomingNum = Number(upcoming[0].upcoming_appointments || 0);
+        const completedNum = Number(todayCompleted[0].today_completed || 0);
+        const activeMedsNum = Number(activeMeds[0].active_prescriptions || 0);
+        const followupsNum = Number(followups[0].pending_followups || 0);
+
         res.status(200).json({
-            total_patients: patientCount[0].total_patients,
-            today_completed: todayCompleted[0].today_completed,
-            upcoming_appointments: upcoming[0].upcoming_appointments
+            stats: {
+                total_patients: totalPatientsNum,
+                upcoming_appointments: upcomingNum,
+                today_completed: completedNum,
+                today_appointments: todayAppts.length,
+                active_prescriptions: activeMedsNum,
+                pending_followups: followupsNum
+            },
+            total_patients: totalPatientsNum,
+            upcoming_appointments: upcomingNum,
+            today_completed: completedNum,
+            today_appointments: todayAppts,
+            recent_patients: recentPatients
         });
 
     } catch (error) {
@@ -213,9 +325,12 @@ const getPatients = async (req, res) => {
                 p.allergies
              FROM patients p
              JOIN users u ON p.user_id = u.user_id
-             JOIN appointments a ON p.patient_id = a.patient_id
-             JOIN doctors d ON a.doctor_id = d.doctor_id
-             WHERE d.user_id = ?`;
+             JOIN doctors d ON d.user_id = ?
+             WHERE (
+                 EXISTS (SELECT 1 FROM appointments a WHERE a.patient_id = p.patient_id AND a.doctor_id = d.doctor_id AND a.status IN ('scheduled', 'confirmed', 'completed'))
+                 OR EXISTS (SELECT 1 FROM prescriptions pr WHERE pr.patient_id = p.patient_id AND pr.doctor_id = d.doctor_id)
+                 OR EXISTS (SELECT 1 FROM discharges ds WHERE ds.patient_id = p.patient_id AND ds.doctor_id = d.doctor_id)
+             )`;
         const params = [req.user.user_id];
 
         if (search) {
@@ -345,6 +460,31 @@ const getPatientDetails = async (req, res) => {
             [patientId]
         );
 
+        // Group prescriptions and medicines
+        const rxMap = new Map();
+        for (const row of prescriptions) {
+            if (!rxMap.has(row.prescription_id)) {
+                rxMap.set(row.prescription_id, {
+                    prescription_id: row.prescription_id,
+                    diagnosis: row.diagnosis,
+                    prescription_date: row.prescription_date,
+                    created_at: row.prescription_date,
+                    notes: row.notes,
+                    medicines: []
+                });
+            }
+            if (row.medicine_name) {
+                rxMap.get(row.prescription_id).medicines.push({
+                    medicine_name: row.medicine_name,
+                    dosage: row.dosage,
+                    frequency: row.frequency,
+                    duration: row.duration,
+                    instructions: row.instructions
+                });
+            }
+        }
+        const groupedPrescriptions = Array.from(rxMap.values());
+
         // Appointment history
         const [appointments] = await db.execute(
             `SELECT
@@ -360,13 +500,36 @@ const getPatientDetails = async (req, res) => {
             [patientId]
         );
 
+        // Query latest discharge record
+        const [dischargeRows] = await db.execute(
+            `SELECT d.*, u.full_name AS doctor_name
+             FROM discharges d
+             JOIN doctors doc ON d.doctor_id = doc.doctor_id
+             JOIN users u ON doc.user_id = u.user_id
+             WHERE d.patient_id = ?
+             ORDER BY d.discharge_date DESC LIMIT 1`,
+            [patientId]
+        );
+
+        const patientData = patient[0] ? {
+            ...patient[0],
+            dob: patient[0].date_of_birth
+        } : null;
+
+        const mappedSymptoms = symptoms.map(s => ({
+            ...s,
+            symptom_name: s.symptoms || s.description || "Unspecified symptom",
+            onset_date: s.reported_date
+        }));
+
         res.status(200).json({
-            patient: patient[0],
+            patient: patientData,
             medical_history: medicalHistory,
-            symptoms: symptoms,
+            symptoms: mappedSymptoms,
             medical_reports: reports,
-            prescriptions: prescriptions,
-            appointments: appointments
+            prescriptions: groupedPrescriptions,
+            appointments: appointments,
+            discharge: dischargeRows[0] || null
         });
 
     } catch (error) {
@@ -462,11 +625,386 @@ const getDoctorAppointments = async (req, res) => {
         });
     }
 };
-const createPrescription = async (req, res) => {
+/**
+ * Shared, authoritative server-side prescription safety gate and atomic persistence engine.
+ * Used identically by both direct prescription creation and OCR confirmation routes.
+ */
+async function executePrescriptionSafetyGateAndPersist({
+    doctorId,
+    patientId,
+    diagnosis,
+    notes,
+    medicines,
+    safetyOverride = false,
+    safetyOverrideReason = null,
+    idempotencyKey = "",
+    source = "direct",
+    ocrJobId = null
+}) {
     const connection = await db.getConnection();
     let lockName = null;
     let lockAcquired = false;
 
+    try {
+        // Compute canonical SHA-256 request hash for idempotency evaluation
+        const requestHash = computePrescriptionPayloadHash(patientId, diagnosis, notes, medicines);
+
+        // Concurrency lock scoped to OCR job, idempotency key, or (doctor, patient)
+        if (source === "ocr_confirmation" && ocrJobId) {
+            lockName = `rx_ocr_job_${ocrJobId}`;
+        } else if (idempotencyKey) {
+            lockName = `rx_idemp_${doctorId}_${idempotencyKey}`;
+        } else {
+            lockName = `rx_lock_${doctorId}_${patientId}`;
+        }
+
+        try {
+            const [lockRes] = await connection.execute('SELECT GET_LOCK(?, 10) AS acquired', [lockName]);
+            lockAcquired = lockRes[0]?.acquired === 1;
+        } catch (lockErr) {
+            console.error("Prescription concurrency lock error:", lockErr.message);
+            return {
+                status: 503,
+                data: {
+                    message: "Service temporarily unavailable due to concurrency lock error. Please retry.",
+                    error: "CONCURRENCY_LOCK_ERROR"
+                }
+            };
+        }
+
+        if (!lockAcquired) {
+            return {
+                status: 503,
+                data: {
+                    message: "Unable to obtain prescription lock within timeout. Please retry.",
+                    error: "CONCURRENCY_TIMEOUT"
+                }
+            };
+        }
+
+        // If this is an OCR confirmation, ensure it has not already been confirmed under this lock
+        if (source === "ocr_confirmation" && ocrJobId) {
+            const [existingJobRows] = await connection.execute(
+                `SELECT review_status, confirmed_prescription_id FROM prescription_ocr_jobs WHERE job_id = ?`,
+                [ocrJobId]
+            );
+            if (existingJobRows.length > 0 && existingJobRows[0].review_status === "confirmed") {
+                return {
+                    status: 200,
+                    data: {
+                        message: "Duplicate confirmation prevented: OCR prescription already confirmed.",
+                        prescription_id: existingJobRows[0].confirmed_prescription_id,
+                        duplicate_prevented: true,
+                        ocr_already_confirmed: true
+                    }
+                };
+            }
+        }
+
+        // 1. If Idempotency-Key is provided, check existing idempotency records for this doctor
+        if (idempotencyKey) {
+            const [existingKeys] = await connection.execute(
+                `SELECT idempotency_key, doctor_id, patient_id, request_hash, prescription_id, response_body
+                 FROM prescription_idempotency_keys
+                 WHERE idempotency_key = ? AND doctor_id = ?`,
+                [idempotencyKey, doctorId]
+            );
+
+            if (existingKeys.length > 0) {
+                const existing = existingKeys[0];
+                if (existing.request_hash === requestHash && Number(existing.patient_id) === Number(patientId)) {
+                    // Exact replay: return cached response
+                    let parsedResponse = {};
+                    try {
+                        parsedResponse = typeof existing.response_body === "string"
+                            ? JSON.parse(existing.response_body)
+                            : existing.response_body;
+                    } catch (e) {
+                        parsedResponse = { prescription_id: existing.prescription_id };
+                    }
+                    return {
+                        status: 200,
+                        data: {
+                            ...parsedResponse,
+                            prescription_id: existing.prescription_id,
+                            duplicate_prevented: true,
+                            idempotent_replay: true
+                        }
+                    };
+                } else {
+                    // Reused key with different payload or patient: 409 Conflict
+                    return {
+                        status: 409,
+                        data: {
+                            message: "Idempotency key reused with different request payload or patient",
+                            error: "IDEMPOTENCY_CONFLICT"
+                        }
+                    };
+                }
+            }
+        } else {
+            // 2. Fallback deduplication: Check for identical prescription submitted within 15 seconds
+            const [recent] = await connection.execute(
+                `SELECT prescription_id, diagnosis, notes FROM prescriptions
+                 WHERE doctor_id = ? AND patient_id = ?
+                 AND prescription_date >= NOW() - INTERVAL 15 SECOND
+                 ORDER BY prescription_id DESC LIMIT 1`,
+                [doctorId, patientId]
+            );
+
+            if (recent.length > 0) {
+                const [recentMeds] = await connection.execute(
+                    `SELECT medicine_name, dosage, frequency, duration, instructions FROM prescription_medicines WHERE prescription_id = ?`,
+                    [recent[0].prescription_id]
+                );
+                const recentHash = computePrescriptionPayloadHash(
+                    patientId,
+                    recent[0].diagnosis,
+                    recent[0].notes,
+                    recentMeds
+                );
+
+                if (recentHash === requestHash) {
+                    return {
+                        status: 200,
+                        data: {
+                            message: "Duplicate submission prevented: prescription already recorded.",
+                            prescription_id: recent[0].prescription_id,
+                            duplicate_prevented: true
+                        }
+                    };
+                }
+            }
+        }
+
+        // Safety Boundary: screen candidate medicines against documented patient allergies
+        const [patientAllergyRows] = await connection.execute(
+            `SELECT allergies FROM patients WHERE patient_id = ?`,
+            [patientId]
+        );
+        const allergiesStr = patientAllergyRows[0]?.allergies || "";
+        const patientAllergies = allergiesStr
+            ? allergiesStr.split(",").map(a => a.trim().toLowerCase()).filter(a => a && a !== "none" && a !== "nil")
+            : [];
+
+        const contraindications = [];
+        for (const med of medicines) {
+            const medName = (med.medicine_name || "").toLowerCase().trim();
+            for (const allergy of patientAllergies) {
+                if (checkAllergyContraindication(medName, allergy)) {
+                    contraindications.push(
+                        `ALLERGY CONTRAINDICATION: Patient has documented allergy to '${allergy}', matching candidate drug '${med.medicine_name}'.`
+                    );
+                }
+            }
+        }
+
+        // Server-Side Safety Revalidation: Screen candidate medicines against patient's active prescriptions for severe DDIs
+        let severeInteractions = [];
+        let safetyScreenFailed = false;
+        try {
+            const [activeRxRows] = await connection.execute(
+                `SELECT pm.medicine_name, MAX(pr.prescription_date) AS max_date
+                 FROM prescriptions pr
+                 JOIN prescription_medicines pm ON pr.prescription_id = pm.prescription_id
+                 WHERE pr.patient_id = ?
+                 GROUP BY pm.medicine_name
+                 ORDER BY max_date DESC LIMIT 20`,
+                [patientId]
+            );
+            const activeMeds = activeRxRows.map(r => r.medicine_name).filter(Boolean);
+            const candidateMedNames = medicines.map(m => m.medicine_name).filter(Boolean);
+
+            if (candidateMedNames.length > 0) {
+                const screenRes = await forwardToFastAPIPrescriptionScreen({
+                    allergies: patientAllergies,
+                    active_conditions: [],
+                    candidate_medications: candidateMedNames,
+                    active_medications: activeMeds
+                });
+
+                if (Array.isArray(screenRes.contraindications)) {
+                    for (const c of screenRes.contraindications) {
+                        if (!contraindications.includes(c)) contraindications.push(c);
+                    }
+                }
+
+                // Filter for major/critical interactions that involve at least one candidate medication being prescribed (with canonical alias expansion)
+                const candidateAliases = candidateMedNames.flatMap(n => getCanonicalDrugAliases(n));
+                const major = (screenRes.interactions || []).filter(i => {
+                    if (!["major", "critical", "high"].includes(String(i.severity).toLowerCase())) {
+                        return false;
+                    }
+                    const pair = (i.drug_pair || []).map(p => String(p).toLowerCase().trim());
+                    return pair.some(d => candidateAliases.some(c => c === d || c.includes(d) || d.includes(c)));
+                });
+                if (major.length > 0) {
+                    severeInteractions = major;
+                }
+            }
+        } catch (screenErr) {
+            console.warn("Server-side prescription safety revalidation warning:", screenErr.message);
+            safetyScreenFailed = true;
+        }
+
+        // STRICT SAFETY INVARIANT 1: Documented patient allergy contraindications CANNOT be bypassed under any circumstances
+        if (contraindications.length > 0) {
+            return {
+                status: 422,
+                data: {
+                    message: "Prescription strictly blocked by clinical safety boundary: Documented patient allergy contraindications cannot be overridden.",
+                    rule_id: "ALLERGY_RULE",
+                    contraindications,
+                    cannot_override: true
+                }
+            };
+        }
+
+        // STRICT SAFETY INVARIANT 2: Fail-closed if safety service is unreachable (cannot bypass via text override)
+        if (safetyScreenFailed) {
+            return {
+                status: 503,
+                data: {
+                    message: "Clinical safety verification service unavailable. Cannot verify safety of proposed prescription.",
+                    error: "SAFETY_SERVICE_UNAVAILABLE"
+                }
+            };
+        }
+
+        // STRICT SAFETY INVARIANT 3: Severe DDIs require documented clinician override reason
+        if (severeInteractions.length > 0) {
+            const hasValidDdiOverride = safetyOverride === true &&
+                typeof safetyOverrideReason === "string" &&
+                safetyOverrideReason.trim().length >= 5;
+
+            if (!hasValidDdiOverride) {
+                return {
+                    status: 422,
+                    data: {
+                        message: "Prescription rejected by clinical safety boundary due to severe drug interaction.",
+                        rule_id: severeInteractions[0]?.rule_id || "SEVERE_DDI_RULE",
+                        severe_interactions: severeInteractions,
+                        safety_override_required: true,
+                        requires_clinician_reason: true
+                    }
+                };
+            }
+        }
+
+        // Clinician override audit trail in notes
+        let finalNotes = notes || null;
+        if (safetyOverride && safetyOverrideReason) {
+            const overridePrefix = safetyScreenFailed
+                ? `[EMERGENCY CLINICIAN OVERRIDE - SAFETY SERVICE OUTAGE: ${safetyOverrideReason.trim()}]`
+                : `[CLINICIAN OVERRIDE: ${safetyOverrideReason.trim()}]`;
+            finalNotes = finalNotes ? `${overridePrefix} ${finalNotes}` : overridePrefix;
+        }
+
+        // Start transaction
+        await connection.beginTransaction();
+
+        // Create prescription
+        const [prescriptionResult] = await connection.execute(
+            `INSERT INTO prescriptions
+             (doctor_id, patient_id, diagnosis, notes)
+             VALUES (?, ?, ?, ?)`,
+            [doctorId, patientId, diagnosis || (source === "ocr_confirmation" ? "Prescription via Verified Clinical OCR" : null), finalNotes]
+        );
+
+        const prescriptionId = prescriptionResult.insertId;
+
+        // Add medicines
+        for (const medicine of medicines) {
+            await connection.execute(
+                `INSERT INTO prescription_medicines
+                 (prescription_id, medicine_name, dosage, frequency, duration, instructions)
+                 VALUES (?, ?, ?, ?, ?, ?)`,
+                [
+                    prescriptionId,
+                    medicine.medicine_name,
+                    medicine.dosage || null,
+                    medicine.frequency || null,
+                    medicine.duration || null,
+                    medicine.instructions || (source === "ocr_confirmation" ? "As instructed" : null)
+                ]
+            );
+        }
+
+        // If from OCR confirmation, update OCR job record atomically
+        if (source === "ocr_confirmation" && ocrJobId) {
+            const [updateJobRes] = await connection.execute(
+                `UPDATE prescription_ocr_jobs
+                 SET review_status = 'confirmed', confirmed_prescription_id = ?, confirmed_by_doctor_id = ?
+                 WHERE job_id = ? AND review_status != 'confirmed'`,
+                [prescriptionId, doctorId, ocrJobId]
+            );
+            if (updateJobRes.affectedRows === 0) {
+                await connection.rollback();
+                return {
+                    status: 409,
+                    data: {
+                        message: "OCR job has already been confirmed by another clinician",
+                        error: "OCR_ALREADY_CONFIRMED"
+                    }
+                };
+            }
+        }
+
+        const successResponse = {
+            message: source === "ocr_confirmation"
+                ? "Prescription successfully reviewed and created"
+                : "Prescription created successfully",
+            prescription_id: prescriptionId,
+            ...(ocrJobId ? { job_id: ocrJobId, medicines_count: medicines.length } : {}),
+            ...(idempotencyKey ? { idempotency_key: idempotencyKey } : {})
+        };
+
+        // Persist idempotency record if key was provided (pure INSERT without overwrite)
+        if (idempotencyKey) {
+            await connection.execute(
+                `INSERT INTO prescription_idempotency_keys
+                 (idempotency_key, doctor_id, patient_id, request_hash, prescription_id, response_body)
+                 VALUES (?, ?, ?, ?, ?, ?)`,
+                [
+                    idempotencyKey,
+                    doctorId,
+                    patientId,
+                    requestHash,
+                    prescriptionId,
+                    JSON.stringify(successResponse)
+                ]
+            );
+        }
+
+        await connection.commit();
+
+        return {
+            status: 201,
+            data: successResponse
+        };
+
+    } catch (error) {
+        try { await connection.rollback(); } catch (_) {}
+        console.error("Prescription safety gate persistence error:", error);
+        return {
+            status: 500,
+            data: {
+                message: "Server error creating prescription: " + error.message
+            }
+        };
+    } finally {
+        if (lockAcquired) {
+            try {
+                await connection.execute('SELECT RELEASE_LOCK(?)', [lockName]);
+            } catch (relErr) {
+                console.warn("Could not release advisory lock for prescription:", relErr.message);
+            }
+        }
+        connection.release();
+    }
+}
+
+const createPrescription = async (req, res) => {
     try {
         const userId = req.user.user_id;
 
@@ -474,11 +1012,13 @@ const createPrescription = async (req, res) => {
             patient_id,
             diagnosis,
             notes,
-            medicines
+            medicines,
+            safety_override,
+            safety_override_reason
         } = req.body;
 
         // Validate required fields
-        if (!patient_id || !medicines || medicines.length === 0) {
+        if (!patient_id || !medicines || !Array.isArray(medicines) || medicines.length === 0) {
             return res.status(400).json({
                 message: "Patient ID and at least one medicine are required"
             });
@@ -502,282 +1042,28 @@ const createPrescription = async (req, res) => {
             });
         }
 
-        // Compute canonical SHA-256 request hash for idempotency evaluation
-        const requestHash = computePrescriptionPayloadHash(patient_id, diagnosis, notes, medicines);
-
         // Client-supplied idempotency key (header or body)
         const idempotencyKey = (req.headers["idempotency-key"] || req.body.idempotency_key || "").toString().trim();
 
-        // Atomic Idempotency: Acquire per-(doctor, patient) advisory lock to serialize concurrent submissions
-        lockName = `rx_lock_${doctorId}_${patient_id}`;
-        try {
-            const [lockRes] = await connection.execute('SELECT GET_LOCK(?, 10) AS acquired', [lockName]);
-            lockAcquired = lockRes[0]?.acquired === 1;
-        } catch (lockErr) {
-            console.error("Prescription concurrency lock error:", lockErr.message);
-            return res.status(503).json({
-                message: "Service temporarily unavailable due to concurrency lock error. Please retry."
-            });
-        }
-
-        if (!lockAcquired) {
-            return res.status(503).json({
-                message: "Unable to obtain prescription lock within timeout. Please retry."
-            });
-        }
-
-        // 1. If Idempotency-Key is provided, check existing idempotency records for this doctor
-        if (idempotencyKey) {
-            const [existingKeys] = await connection.execute(
-                `SELECT idempotency_key, doctor_id, patient_id, request_hash, prescription_id, response_body
-                 FROM prescription_idempotency_keys
-                 WHERE idempotency_key = ? AND doctor_id = ?`,
-                [idempotencyKey, doctorId]
-            );
-
-            if (existingKeys.length > 0) {
-                const existing = existingKeys[0];
-                if (existing.request_hash === requestHash) {
-                    // Exact replay: return cached response
-                    let parsedResponse = {};
-                    try {
-                        parsedResponse = typeof existing.response_body === "string"
-                            ? JSON.parse(existing.response_body)
-                            : existing.response_body;
-                    } catch (e) {
-                        parsedResponse = { prescription_id: existing.prescription_id };
-                    }
-                    return res.status(200).json({
-                        ...parsedResponse,
-                        prescription_id: existing.prescription_id,
-                        duplicate_prevented: true,
-                        idempotent_replay: true
-                    });
-                } else {
-                    // Reused key with different payload: 409 Conflict
-                    return res.status(409).json({
-                        message: "Idempotency key reused with different request payload",
-                        error: "IDEMPOTENCY_CONFLICT"
-                    });
-                }
-            }
-        } else {
-            // 2. Fallback deduplication: Check for identical prescription submitted within 15 seconds
-            const [recent] = await connection.execute(
-                `SELECT prescription_id, diagnosis, notes FROM prescriptions
-                 WHERE doctor_id = ? AND patient_id = ?
-                 AND prescription_date >= NOW() - INTERVAL 15 SECOND
-                 ORDER BY prescription_id DESC LIMIT 1`,
-                [doctorId, patient_id]
-            );
-
-            if (recent.length > 0) {
-                const [recentMeds] = await connection.execute(
-                    `SELECT medicine_name, dosage, frequency, duration, instructions FROM prescription_medicines WHERE prescription_id = ?`,
-                    [recent[0].prescription_id]
-                );
-                const recentHash = computePrescriptionPayloadHash(
-                    patient_id,
-                    recent[0].diagnosis,
-                    recent[0].notes,
-                    recentMeds
-                );
-
-                if (recentHash === requestHash) {
-                    return res.status(200).json({
-                        message: "Duplicate submission prevented: prescription already recorded.",
-                        prescription_id: recent[0].prescription_id,
-                        duplicate_prevented: true
-                    });
-                }
-                // If recentHash !== requestHash (e.g. dosage changed from 5mg to 10mg), it legitimately proceeds!
-            }
-        }
-
-        // Safety Boundary: screen candidate medicines against documented patient allergies
-        const [patientAllergyRows] = await connection.execute(
-            `SELECT allergies FROM patients WHERE patient_id = ?`,
-            [patient_id]
-        );
-        const allergiesStr = patientAllergyRows[0]?.allergies || "";
-        const patientAllergies = allergiesStr
-            ? allergiesStr.split(",").map(a => a.trim().toLowerCase()).filter(a => a && a !== "none" && a !== "nil")
-            : [];
-
-        const contraindications = [];
-        for (const med of medicines) {
-            const medName = (med.medicine_name || "").toLowerCase().trim();
-            for (const allergy of patientAllergies) {
-                if (checkAllergyContraindication(medName, allergy)) {
-                    contraindications.push(
-                        `ALLERGY CONTRAINDICATION: Patient has documented allergy to '${allergy}', matching candidate drug '${med.medicine_name}'.`
-                    );
-                }
-            }
-        }
-
-        // Server-Side Safety Revalidation: Screen candidate medicines against patient's active prescriptions for severe DDIs
-        let severeInteractions = [];
-        try {
-            const [activeRxRows] = await connection.execute(
-                `SELECT pm.medicine_name, MAX(pr.prescription_date) AS max_date
-                 FROM prescriptions pr
-                 JOIN prescription_medicines pm ON pr.prescription_id = pm.prescription_id
-                 WHERE pr.patient_id = ?
-                 GROUP BY pm.medicine_name
-                 ORDER BY max_date DESC LIMIT 20`,
-                [patient_id]
-            );
-            const activeMeds = activeRxRows.map(r => r.medicine_name).filter(Boolean);
-            const candidateMedNames = medicines.map(m => m.medicine_name).filter(Boolean);
-
-            if (candidateMedNames.length > 0) {
-                const screenRes = await forwardToFastAPIPrescriptionScreen({
-                    allergies: patientAllergies,
-                    active_conditions: [],
-                    candidate_medications: candidateMedNames,
-                    active_medications: activeMeds
-                });
-
-                if (Array.isArray(screenRes.contraindications)) {
-                    for (const c of screenRes.contraindications) {
-                        if (!contraindications.includes(c)) contraindications.push(c);
-                    }
-                }
-
-                // Filter for major/critical interactions that involve at least one candidate medication being prescribed
-                const candidateNamesLower = candidateMedNames.map(n => n.toLowerCase().trim());
-                const major = (screenRes.interactions || []).filter(i => {
-                    if (!["major", "critical", "high"].includes(String(i.severity).toLowerCase())) {
-                        return false;
-                    }
-                    const pair = (i.drug_pair || []).map(p => String(p).toLowerCase().trim());
-                    return pair.some(d => candidateNamesLower.some(c => c.includes(d) || d.includes(c)));
-                });
-                if (major.length > 0) {
-                    severeInteractions = major;
-                }
-            }
-        } catch (screenErr) {
-            console.warn("Server-side prescription safety revalidation warning:", screenErr.message);
-            // Fail closed if safety service is unreachable
-            if (!req.body.safety_override) {
-                return res.status(503).json({
-                    message: "Clinical safety verification service unavailable. Cannot verify safety of proposed prescription.",
-                    error: "SAFETY_SERVICE_UNAVAILABLE"
-                });
-            }
-        }
-
-        // STRICT SAFETY INVARIANT: Documented patient allergy contraindications CANNOT be bypassed under any circumstances
-        if (contraindications.length > 0) {
-            return res.status(422).json({
-                message: "Prescription strictly blocked by clinical safety boundary: Documented patient allergy contraindications cannot be overridden.",
-                rule_id: "ALLERGY_RULE",
-                contraindications,
-                cannot_override: true
-            });
-        }
-
-        // Severe DDIs require documented clinician override reason
-        if (severeInteractions.length > 0) {
-            const hasValidOverride = req.body.safety_override === true &&
-                typeof req.body.safety_override_reason === "string" &&
-                req.body.safety_override_reason.trim().length >= 5;
-
-            if (!hasValidOverride) {
-                return res.status(422).json({
-                    message: "Prescription rejected by clinical safety boundary due to severe drug interaction.",
-                    rule_id: severeInteractions[0]?.rule_id || "SEVERE_DDI_RULE",
-                    severe_interactions: severeInteractions,
-                    safety_override_required: true,
-                    requires_clinician_reason: true
-                });
-            }
-        }
-
-        // Clinician override audit trail in notes
-        let finalNotes = notes || null;
-        if (req.body.safety_override && req.body.safety_override_reason) {
-            const overrideBanner = `[CLINICIAN OVERRIDE: ${req.body.safety_override_reason.trim()}]`;
-            finalNotes = finalNotes ? `${overrideBanner} ${finalNotes}` : overrideBanner;
-        }
-
-        // Start transaction
-        await connection.beginTransaction();
-
-        // Create prescription
-        const [prescriptionResult] = await connection.execute(
-            `INSERT INTO prescriptions
-             (doctor_id, patient_id, diagnosis, notes)
-             VALUES (?, ?, ?, ?)`,
-            [doctorId, patient_id, diagnosis || null, finalNotes]
-        );
-
-        const prescriptionId = prescriptionResult.insertId;
-
-        // Add medicines
-        for (const medicine of medicines) {
-            await connection.execute(
-                `INSERT INTO prescription_medicines
-                 (prescription_id, medicine_name, dosage, frequency, duration, instructions)
-                 VALUES (?, ?, ?, ?, ?, ?)`,
-                [
-                    prescriptionId,
-                    medicine.medicine_name,
-                    medicine.dosage || null,
-                    medicine.frequency || null,
-                    medicine.duration || null,
-                    medicine.instructions || null
-                ]
-            );
-        }
-
-        const successResponse = {
-            message: "Prescription created successfully",
-            prescription_id: prescriptionId,
-            ...(idempotencyKey ? { idempotency_key: idempotencyKey } : {})
-        };
-
-        // Persist idempotency record if key was provided
-        if (idempotencyKey) {
-            await connection.execute(
-                `INSERT INTO prescription_idempotency_keys
-                 (idempotency_key, doctor_id, patient_id, request_hash, prescription_id, response_body)
-                 VALUES (?, ?, ?, ?, ?, ?)`,
-                [
-                    idempotencyKey,
-                    doctorId,
-                    patient_id,
-                    requestHash,
-                    prescriptionId,
-                    JSON.stringify(successResponse)
-                ]
-            );
-        }
-
-        await connection.commit();
-
-        res.status(201).json(successResponse);
-
-    } catch (error) {
-        await connection.rollback();
-
-        console.error("Create prescription error:", error);
-
-        res.status(500).json({
-            message: "Server error"
+        const result = await executePrescriptionSafetyGateAndPersist({
+            doctorId,
+            patientId: patient_id,
+            diagnosis,
+            notes,
+            medicines,
+            safetyOverride: safety_override,
+            safetyOverrideReason: safety_override_reason,
+            idempotencyKey,
+            source: "direct"
         });
 
-    } finally {
-        if (lockAcquired) {
-            try {
-                await connection.execute('SELECT RELEASE_LOCK(?)', [lockName]);
-            } catch (relErr) {
-                console.warn("Could not release advisory lock for prescription:", relErr.message);
-            }
-        }
-        connection.release();
+        return res.status(result.status).json(result.data);
+
+    } catch (error) {
+        console.error("Create prescription error:", error);
+        return res.status(500).json({
+            message: "Server error"
+        });
     }
 };
 const getPatientPrescriptions = async (req, res) => {
@@ -877,6 +1163,39 @@ const createAppointment = async (req, res) => {
         if (!authorized) {
             return res.status(403).json({
                 message: "You do not have authorization to schedule appointments for this patient"
+            });
+        }
+
+        // Compute effective end time
+        let effectiveEndTime = end_time;
+        if (!effectiveEndTime) {
+            const [sh, sm] = start_time.split(":").map(Number);
+            const totalMins = (sh || 0) * 60 + (sm || 0) + 30;
+            const eh = Math.floor(totalMins / 60) % 24;
+            const em = totalMins % 60;
+            effectiveEndTime = `${String(eh).padStart(2, "0")}:${String(em).padStart(2, "0")}:00`;
+        }
+
+        // Interval overlap check for doctor and patient
+        const [conflictAppointments] = await db.execute(
+            `SELECT appointment_id, doctor_id, patient_id
+             FROM appointments
+             WHERE appointment_date = ?
+               AND status IN ('pending', 'scheduled', 'confirmed')
+               AND (doctor_id = ? OR patient_id = ?)
+               AND (start_time < ? AND COALESCE(end_time, ADDTIME(start_time, '00:30:00')) > ?)`,
+            [appointment_date, doctorId, patient_id, effectiveEndTime, start_time]
+        );
+
+        if (conflictAppointments.length > 0) {
+            const conflict = conflictAppointments[0];
+            const isDoc = conflict.doctor_id === doctorId;
+            return res.status(409).json({
+                message: isDoc
+                    ? "Appointment time conflict: Doctor already has an overlapping appointment in this interval."
+                    : "Appointment time conflict: Patient already has an overlapping appointment in this interval.",
+                error: "APPOINTMENT_CONFLICT",
+                conflicting_appointment_id: conflict.appointment_id
             });
         }
 
@@ -986,6 +1305,41 @@ const updateAppointmentStatus = async (req, res) => {
             return res.status(400).json({
                 message: `Invalid appointment status transition: Cannot transition appointment from '${currentStatus}' to '${newStatus}'.`
             });
+        }
+
+        // Interval overlap check on status transition to scheduled or confirmed
+        if (["scheduled", "confirmed"].includes(newStatus)) {
+            const apptDate = appointment.appointment_date;
+            const apptStart = appointment.start_time;
+            let apptEnd = appointment.end_time;
+            if (!apptEnd && apptStart) {
+                const [sh, sm] = String(apptStart).split(":").map(Number);
+                const totalMins = (sh || 0) * 60 + (sm || 0) + 30;
+                const eh = Math.floor(totalMins / 60) % 24;
+                const em = totalMins % 60;
+                apptEnd = `${String(eh).padStart(2, "0")}:${String(em).padStart(2, "0")}:00`;
+            }
+
+            if (apptDate && apptStart && apptEnd) {
+                const [conflicts] = await db.execute(
+                    `SELECT appointment_id, doctor_id, patient_id
+                     FROM appointments
+                     WHERE appointment_date = ?
+                       AND appointment_id != ?
+                       AND status IN ('pending', 'scheduled', 'confirmed')
+                       AND (doctor_id = ? OR patient_id = ?)
+                       AND (start_time < ? AND COALESCE(end_time, ADDTIME(start_time, '00:30:00')) > ?)`,
+                    [apptDate, appointmentId, doctorId, appointment.patient_id, apptEnd, apptStart]
+                );
+
+                if (conflicts.length > 0) {
+                    return res.status(409).json({
+                        message: "Cannot confirm or schedule appointment: interval conflict with another active appointment.",
+                        error: "APPOINTMENT_CONFLICT",
+                        conflicting_appointment_id: conflicts[0].appointment_id
+                    });
+                }
+            }
         }
 
         // Update status
@@ -1955,10 +2309,18 @@ const getPrescriptionOcrJob = async (req, res) => {
  * Explicitly confirms OCR candidates after clinician review and creates authoritative prescription.
  */
 const confirmPrescriptionOcrJob = async (req, res) => {
-    let connection;
     try {
         const userId = req.user.user_id;
-        const { job_id, diagnosis, notes, confirmed_medicines, medicines } = req.body;
+        const {
+            job_id,
+            diagnosis,
+            notes,
+            confirmed_medicines,
+            medicines,
+            safety_override,
+            safety_override_reason
+        } = req.body;
+
         const medsToConfirm = Array.isArray(confirmed_medicines) && confirmed_medicines.length > 0
             ? confirmed_medicines
             : (Array.isArray(medicines) && medicines.length > 0 ? medicines : null);
@@ -1994,92 +2356,27 @@ const confirmPrescriptionOcrJob = async (req, res) => {
             return res.status(403).json({ message: "You are not authorized to confirm prescriptions for this patient" });
         }
 
-        // Safety Boundary: screen confirmed medicines against documented patient allergies
-        const [patientRows] = await db.execute(
-            `SELECT allergies FROM patients WHERE patient_id = ?`,
-            [job.patient_id]
-        );
-        const allergiesStr = patientRows[0]?.allergies || "";
-        const patientAllergies = allergiesStr
-            ? allergiesStr.split(",").map(a => a.trim().toLowerCase()).filter(a => a && a !== "none" && a !== "nil")
-            : [];
+        const idempotencyKey = (req.headers["idempotency-key"] || req.body.idempotency_key || `ocr_job_${job_id}`).toString().trim();
 
-        const ocrContraindications = [];
-        for (const med of medsToConfirm) {
-            const medName = (med.medicine_name || "").toLowerCase().trim();
-            for (const allergy of patientAllergies) {
-                if (checkAllergyContraindication(medName, allergy)) {
-                    ocrContraindications.push(
-                        `ALLERGY CONTRAINDICATION: Patient has documented allergy to '${allergy}', matching OCR-extracted candidate drug '${med.medicine_name}'.`
-                    );
-                }
-            }
-        }
-
-        // STRICT SAFETY INVARIANT: Documented patient allergy contraindications CANNOT be bypassed via OCR confirmation
-        if (ocrContraindications.length > 0) {
-            return res.status(422).json({
-                message: "OCR prescription confirmation strictly rejected by clinical safety boundary: Documented patient allergy contraindications cannot be overridden.",
-                contraindications: ocrContraindications,
-                rule_id: "ALLERGY_RULE",
-                cannot_override: true
-            });
-        }
-
-        // Use transaction for prescription + medicines creation
-        connection = await db.getConnection();
-        await connection.beginTransaction();
-
-        const [rxResult] = await connection.execute(
-            `INSERT INTO prescriptions (doctor_id, patient_id, prescription_date, diagnosis, notes)
-             VALUES (?, ?, NOW(), ?, ?)`,
-            [
-                doctorId,
-                job.patient_id,
-                diagnosis || "Prescription via Verified Clinical OCR",
-                notes || "Confirmed from prescription image OCR scan"
-            ]
-        );
-
-        const newPrescriptionId = rxResult.insertId;
-
-        for (const med of medsToConfirm) {
-            await connection.execute(
-                `INSERT INTO prescription_medicines (prescription_id, medicine_name, dosage, frequency, duration, instructions)
-                 VALUES (?, ?, ?, ?, ?, ?)`,
-                [
-                    newPrescriptionId,
-                    med.medicine_name,
-                    med.dosage || null,
-                    med.frequency || null,
-                    med.duration || null,
-                    med.instructions || "As instructed"
-                ]
-            );
-        }
-
-        await connection.execute(
-            `UPDATE prescription_ocr_jobs
-             SET review_status = 'confirmed', confirmed_prescription_id = ?
-             WHERE job_id = ?`,
-            [newPrescriptionId, job_id]
-        );
-
-        await connection.commit();
-
-        return res.status(201).json({
-            message: "Prescription successfully reviewed and created",
-            prescription_id: newPrescriptionId,
-            job_id: job_id,
-            medicines_count: medsToConfirm.length
+        // Route through the single shared server-side safety gate and atomic persistence engine
+        const result = await executePrescriptionSafetyGateAndPersist({
+            doctorId,
+            patientId: job.patient_id,
+            diagnosis: diagnosis || "Prescription via Verified Clinical OCR",
+            notes: notes || "Confirmed from prescription image OCR scan",
+            medicines: medsToConfirm,
+            safetyOverride: safety_override,
+            safetyOverrideReason: safety_override_reason,
+            idempotencyKey,
+            source: "ocr_confirmation",
+            ocrJobId: job.job_id
         });
 
+        return res.status(result.status).json(result.data);
+
     } catch (err) {
-        if (connection) await connection.rollback();
         console.error("Confirm OCR prescription error:", err);
         return res.status(500).json({ message: "Server error confirming prescription: " + err.message });
-    } finally {
-        if (connection) connection.release();
     }
 };
 
@@ -2108,4 +2405,5 @@ module.exports = {
     uploadAndProcessPrescriptionOcr,
     getPrescriptionOcrJob,
     confirmPrescriptionOcrJob,
+    executePrescriptionSafetyGateAndPersist,
 };

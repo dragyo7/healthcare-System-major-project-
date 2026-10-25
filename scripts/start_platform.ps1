@@ -1,20 +1,37 @@
 <#
 .SYNOPSIS
-  start_platform.ps1 - Production Orchestrator for the Clinical Decision Support System (CDSS)
-  Launches and health-checks all backend and frontend services, reporting the unified application URL.
+  start_platform.ps1 - Orchestrator for the Clinical Decision Support System (CDSS)
+  Launches and verifies actual dependency readiness for all services in either Demo or Production mode.
+
+.PARAMETER Mode
+  "Demo" (default): Runs against isolated test database 'rag_healthcare_test' on port 5001.
+  "Production": Runs against primary database 'rag_healthcare' on port 5000.
 #>
+
+param(
+    [ValidateSet("Demo", "Production")]
+    [string]$Mode = "Demo"
+)
 
 $ErrorActionPreference = "Continue"
 
 Write-Host "==========================================================================" -ForegroundColor Cyan
 Write-Host "       MODULAR AI CLINICAL DECISION SUPPORT SYSTEM (CDSS) LAUNCHER        " -ForegroundColor Cyan
+Write-Host "       Mode: $Mode | Primary DB is protected and untouched in Demo mode   " -ForegroundColor Cyan
 Write-Host "==========================================================================" -ForegroundColor Cyan
 
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 $MysqlPort = 3306
 $FastApiPort = 8000
-$ExpressPort = 5000
 $FrontendPort = 5173
+
+if ($Mode -eq "Demo") {
+    $ExpressPort = 5001
+    $TargetDb = "rag_healthcare_test"
+} else {
+    $ExpressPort = 5000
+    $TargetDb = "rag_healthcare"
+}
 
 function Test-PortOpen ($Port) {
     try {
@@ -33,10 +50,19 @@ function Test-PortOpen ($Port) {
     }
 }
 
+function Test-HttpEndpoint ($Url) {
+    try {
+        $response = Invoke-RestMethod -Uri $Url -Method Get -TimeoutSec 3 -ErrorAction Stop
+        return $response
+    } catch {
+        return $null
+    }
+}
+
 # 1. Check / Launch MySQL Server (Port 3306)
 Write-Host "`n[1/4] Verifying MySQL EHR Database (Port $MysqlPort)..." -ForegroundColor Yellow
 if (Test-PortOpen $MysqlPort) {
-    Write-Host "  -> MySQL Database is already active on port $MysqlPort." -ForegroundColor Green
+    Write-Host "  -> MySQL Database is active on port $MysqlPort." -ForegroundColor Green
 } else {
     Write-Host "  -> Launching local MySQL Server instance..." -ForegroundColor Gray
     $mysqldPath = "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysqld.exe"
@@ -56,47 +82,56 @@ if (Test-PortOpen $MysqlPort) {
 
 # 2. Check / Launch FastAPI CDS Gateway & Frozen RAG V2.10 (Port 8000)
 Write-Host "`n[2/4] Verifying FastAPI CDS Gateway & Frozen RAG Engine (Port $FastApiPort)..." -ForegroundColor Yellow
-if (Test-PortOpen $FastApiPort) {
-    Write-Host "  -> FastAPI CDS Gateway is already active on port $FastApiPort." -ForegroundColor Green
+$fastApiHealth = Test-HttpEndpoint "http://127.0.0.1:$FastApiPort/health"
+if ($fastApiHealth -and $fastApiHealth.status -eq "healthy") {
+    Write-Host "  -> FastAPI CDS Gateway is verified healthy on port $FastApiPort (Index ready: $($fastApiHealth.index_ready))." -ForegroundColor Green
 } else {
     Write-Host "  -> Launching FastAPI CDS Gateway (rag_module.api:app)..." -ForegroundColor Gray
     Start-Process -FilePath "powershell.exe" -ArgumentList "-NoExit", "-Command", "cd `"$RepoRoot`"; python -m uvicorn rag_module.api:app --host 127.0.0.1 --port $FastApiPort" -WindowStyle Minimized
     $ready = $false
     for ($i = 0; $i -lt 15; $i++) {
         Start-Sleep -Seconds 1
-        if (Test-PortOpen $FastApiPort) { $ready = $true; break }
+        $h = Test-HttpEndpoint "http://127.0.0.1:$FastApiPort/health"
+        if ($h -and $h.status -eq "healthy") { $ready = $true; break }
     }
     if ($ready) {
-        Write-Host "  -> FastAPI CDS Gateway online on port $FastApiPort." -ForegroundColor Green
+        Write-Host "  -> FastAPI CDS Gateway online and verified healthy on port $FastApiPort." -ForegroundColor Green
     } else {
         Write-Host "  [WARN] FastAPI Gateway took longer than expected. Check Python environment." -ForegroundColor Yellow
     }
 }
 
-# 3. Check / Launch Express EHR Backend with OCR (Port 5000)
-Write-Host "`n[3/4] Verifying Express EHR Clinical Backend (Port $ExpressPort)..." -ForegroundColor Yellow
-if (Test-PortOpen $ExpressPort) {
-    Write-Host "  -> Express EHR Backend is already active on port $ExpressPort." -ForegroundColor Green
+# 3. Check / Launch Express EHR Backend (Port 5001 in Demo, Port 5000 in Production)
+Write-Host "`n[3/4] Verifying Express EHR Clinical Backend (Port $ExpressPort, Database: $TargetDb)..." -ForegroundColor Yellow
+$expressHealth = Test-HttpEndpoint "http://127.0.0.1:$ExpressPort/api/health"
+if ($expressHealth -and $expressHealth.status -eq "healthy") {
+    Write-Host "  -> Express EHR Backend is verified healthy on port $ExpressPort (DB: $($expressHealth.services.database_name))." -ForegroundColor Green
 } else {
-    $backendDir = Join-Path $RepoRoot "Portal Major P\Bhumi\Doctor portal\backend"
-    Write-Host "  -> Launching Express EHR Backend..." -ForegroundColor Gray
-    Start-Process -FilePath "powershell.exe" -ArgumentList "-NoExit", "-Command", "cd `"$backendDir`"; node server.js" -WindowStyle Minimized
+    if ($Mode -eq "Demo") {
+        Write-Host "  -> Launching isolated test Express EHR Backend on port $ExpressPort..." -ForegroundColor Gray
+        Start-Process -FilePath "powershell.exe" -ArgumentList "-NoExit", "-Command", "cd `"$RepoRoot`"; node scripts/start_test_backend.js" -WindowStyle Minimized
+    } else {
+        $backendDir = Join-Path $RepoRoot "Portal Major P\Bhumi\Doctor portal\backend"
+        Write-Host "  -> Launching production Express EHR Backend on port $ExpressPort..." -ForegroundColor Gray
+        Start-Process -FilePath "powershell.exe" -ArgumentList "-NoExit", "-Command", "cd `"$backendDir`"; node server.js" -WindowStyle Minimized
+    }
     $ready = $false
-    for ($i = 0; $i -lt 10; $i++) {
+    for ($i = 0; $i -lt 12; $i++) {
         Start-Sleep -Seconds 1
-        if (Test-PortOpen $ExpressPort) { $ready = $true; break }
+        $h = Test-HttpEndpoint "http://127.0.0.1:$ExpressPort/api/health"
+        if ($h -and $h.status -eq "healthy") { $ready = $true; break }
     }
     if ($ready) {
-        Write-Host "  -> Express EHR Backend online on port $ExpressPort." -ForegroundColor Green
+        Write-Host "  -> Express EHR Backend online and verified healthy on port $ExpressPort." -ForegroundColor Green
     } else {
-        Write-Host "  [WARN] Express Backend took longer than expected to initialize." -ForegroundColor Yellow
+        Write-Host "  [WARN] Express Backend took longer than expected to initialize. Check database connectivity." -ForegroundColor Yellow
     }
 }
 
 # 4. Check / Launch Unified Frontend (Port 5173)
 Write-Host "`n[4/4] Verifying Unified CDSS Frontend (Port $FrontendPort)..." -ForegroundColor Yellow
 if (Test-PortOpen $FrontendPort) {
-    Write-Host "  -> Unified CDSS Frontend is already active on port $FrontendPort." -ForegroundColor Green
+    Write-Host "  -> Unified CDSS Frontend is active on port $FrontendPort." -ForegroundColor Green
 } else {
     $frontendDir = Join-Path $RepoRoot "frontend"
     Write-Host "  -> Launching Vite Dev Server for Unified Frontend..." -ForegroundColor Gray
@@ -116,14 +151,14 @@ if (Test-PortOpen $FrontendPort) {
 Write-Host "`n==========================================================================" -ForegroundColor Cyan
 Write-Host "                  CDSS PLATFORM OPERATIONAL SUMMARY                       " -ForegroundColor Cyan
 Write-Host "==========================================================================" -ForegroundColor Cyan
+Write-Host "  OPERATING MODE          : $Mode" -ForegroundColor Green
 Write-Host "  PRIMARY APPLICATION URL : http://localhost:$FrontendPort" -ForegroundColor Green
-Write-Host "  EXPRESS EHR API GATEWAY : http://localhost:$ExpressPort/api" -ForegroundColor White
+Write-Host "  EXPRESS EHR API GATEWAY : http://127.0.0.1:$ExpressPort/api" -ForegroundColor White
 Write-Host "  FASTAPI CDS INTERACTIVE : http://127.0.0.1:$FastApiPort/docs" -ForegroundColor White
-Write-Host "  MYSQL EHR DATABASE      : localhost:$MysqlPort (rag_healthcare)" -ForegroundColor White
+Write-Host "  MYSQL EHR DATABASE      : localhost:$MysqlPort ($TargetDb)" -ForegroundColor White
 Write-Host "--------------------------------------------------------------------------" -ForegroundColor Gray
-Write-Host "  SYNTHETIC DEMO CREDENTIALS:" -ForegroundColor Cyan
-Write-Host "  1. CLINICIAN (Doctor)   : doctor@gmail.com       | password: doctor123" -ForegroundColor White
-Write-Host "  2. FRONT DESK (Admin)   : receptionist@gmail.com | password: receptionist123" -ForegroundColor White
-Write-Host "  3. PATIENT (Care)       : aarav@gmail.com        | password: patient123" -ForegroundColor White
-Write-Host "  4. ACCOUNT ACTIVATION   : http://localhost:$FrontendPort/activate" -ForegroundColor White
+Write-Host "  VERIFIED DEMO CREDENTIALS (Demo Mode):" -ForegroundColor Cyan
+Write-Host "  1. CLINICIAN (Doctor)   : doctor@gmail.com       | password: Doctor@123" -ForegroundColor White
+Write-Host "  2. FRONT DESK (Admin)   : receptionist@gmail.com | password: Reception@123" -ForegroundColor White
+Write-Host "  3. PATIENT (Care)       : aarav@gmail.com        | password: Patient@123" -ForegroundColor White
 Write-Host "==========================================================================`n" -ForegroundColor Cyan

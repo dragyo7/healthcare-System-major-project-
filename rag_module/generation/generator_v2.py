@@ -50,9 +50,12 @@ class MedicalGenerator:
 
         cleaned = text.strip()
 
-        # 1. Clean conversational filler, affirmations, list numbers, and boilerplate
+        # 1. Clean conversational filler, affirmations, list numbers, system prompt echoes, and boilerplate
         filler_patterns = [
             r"^(?:Sure!|Certainly!|Yes,\s*|No,\s*|Here (?:is|are)[^:\n]*:?|Based on the provided (?:passages|evidence)[^:\n]*:?|The passage states that\s*)\s*",
+            r"^(?:According to|Based on|As stated in)\s+(?:the\s+)?(?:provided|given|available)?\s*(?:evidence(?:-grounded)?(?:\s+medical\s+AI\s+assistant(?:\s+communicat(?:\w+)?\s+with\s+a\s+(?:healthcare\s+professional|patient))?)?|passages?|text|assistant|guidelines?|sources?|records?)[^,.:\n]*[,:\n]\s*",
+            r"^According to (?:the (?:given|provided) )?(?:evidence(?:-grounded)?(?:\s+medical\s+AI\s+assistant(?:\s+communicat(?:\w+)?\s+with\s+a\s+(?:healthcare\s+professional|patient))?)?|passages?|text|guidelines?|information)[^,\n:]*[,:\n]\s*",
+            r"^(?:The\s+)?(?:given|provided)\s+(?:evidence(?:-grounded)?(?:\s+medical\s+AI\s+assistant|\s+summary)?|passages?|text|information|sources?)\s+(?:communicat\w+|answers|states|describes|contains)[^,.:\n]*[,:\n]\s*",
             r"^(?:\d+\.\s*|\*\s*|- \s*)",
         ]
         for pat in filler_patterns:

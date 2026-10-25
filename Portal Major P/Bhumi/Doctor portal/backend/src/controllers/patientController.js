@@ -452,13 +452,25 @@ const requestAppointment = async (req, res) => {
             return res.status(404).json({ message: "Selected physician does not exist" });
         }
 
-        // 2. Prevent doctor double-booking
+        // Resolve end_time: default to +30 mins if not provided
+        let calcEndTime = end_time;
+        if (!calcEndTime) {
+            const [hours, minutes] = effectiveStartTime.split(":");
+            const startMins = parseInt(hours, 10) * 60 + parseInt(minutes || "0", 10);
+            const endMins = startMins + 30;
+            const endH = String(Math.floor(endMins / 60) % 24).padStart(2, "0");
+            const endM = String(endMins % 60).padStart(2, "0");
+            calcEndTime = `${endH}:${endM}:00`;
+        }
+
+        // 2. Prevent doctor double-booking (interval overlap check)
         const [existingDoctorSlots] = await connection.execute(
             `SELECT appointment_id FROM appointments
-             WHERE doctor_id = ? AND appointment_date = ? AND start_time = ?
+             WHERE doctor_id = ? AND appointment_date = ?
                AND status IN ('pending', 'scheduled', 'confirmed')
+               AND (start_time < ? AND end_time > ?)
              FOR UPDATE`,
-            [doctor_id, appointment_date, effectiveStartTime]
+            [doctor_id, appointment_date, calcEndTime, effectiveStartTime]
         );
 
         if (existingDoctorSlots.length > 0) {
@@ -468,13 +480,14 @@ const requestAppointment = async (req, res) => {
             });
         }
 
-        // 3. Prevent patient double-booking
+        // 3. Prevent patient double-booking (interval overlap check)
         const [existingPatientSlots] = await connection.execute(
             `SELECT appointment_id FROM appointments
-             WHERE patient_id = ? AND appointment_date = ? AND start_time = ?
+             WHERE patient_id = ? AND appointment_date = ?
                AND status IN ('pending', 'scheduled', 'confirmed')
+               AND (start_time < ? AND end_time > ?)
              FOR UPDATE`,
-            [patient.patient_id, appointment_date, effectiveStartTime]
+            [patient.patient_id, appointment_date, calcEndTime, effectiveStartTime]
         );
 
         if (existingPatientSlots.length > 0) {
@@ -485,7 +498,6 @@ const requestAppointment = async (req, res) => {
         }
 
         // 4. Create appointment with status 'pending'
-        const calcEndTime = end_time || effectiveStartTime;
         const [insertResult] = await connection.execute(
             `INSERT INTO appointments (doctor_id, patient_id, appointment_date, start_time, end_time, reason, status)
              VALUES (?, ?, ?, ?, ?, ?, 'pending')`,
@@ -652,7 +664,8 @@ const evaluatePatientCDS = async (req, res) => {
 
         // 4. Retrieve own discharge instructions (if any)
         const [discharges] = await db.execute(
-            `SELECT diagnosis, discharge_instructions, follow_up_instructions, follow_up_date, warning_signs
+            `SELECT discharge_id, discharge_date, diagnosis, discharge_summary,
+                    discharge_instructions, follow_up_instructions, follow_up_date, warning_signs, status
              FROM discharges
              WHERE patient_id = ?
              ORDER BY discharge_date DESC, discharge_id DESC

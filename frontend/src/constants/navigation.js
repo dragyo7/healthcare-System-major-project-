@@ -34,5 +34,5 @@ export const RECEPTIONIST_NAV = [
   { label: "Front Desk Dashboard", path: "/receptionist", icon: LayoutDashboard },
   { label: "Patient Directory & Reg", path: "/receptionist/patients", icon: Users },
   { label: "Appointment Queue", path: "/receptionist/appointments", icon: Calendar },
-  { label: "Doctor Schedules", path: "/receptionist/doctors", icon: Activity },
+  { label: "Doctor Roster", path: "/receptionist/doctors", icon: Activity },
 ];

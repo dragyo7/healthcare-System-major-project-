@@ -33,7 +33,7 @@ process.env.DB_USER = testConfig.user || "cdss_test_user";
 process.env.DB_PASSWORD = testConfig.password;
 process.env.DB_NAME = testConfig.database || "rag_healthcare_test";
 process.env.JWT_SECRET = process.env.JWT_SECRET || "rag_healthcare_secret";
-process.env.ENABLE_DEV_LOCAL_ACTIVATION_LINKS = "true";
+process.env.ENABLE_DEV_LOCAL_ACTIVATION_LINKS = "false";
 
 console.log("==========================================================================");
 console.log(`  STARTING ISOLATED CDSS TEST BACKEND ON PORT ${process.env.PORT}`);

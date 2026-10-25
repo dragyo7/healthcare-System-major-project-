@@ -184,6 +184,13 @@ export function AuthProvider({ children }) {
     });
   };
 
+  const updatePassword = async (newPassword) => {
+    // In this on-premises clinical architecture, credential modifications are governed by institutional admin verification
+    return {
+      error: new Error("Institutional Security Policy: Direct password resets are disabled in this prototype. Please contact the hospital administrator or front desk to re-issue credentials.")
+    };
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -198,6 +205,7 @@ export function AuthProvider({ children }) {
         signUpPatient,
         signUpReceptionist,
         signUp,
+        updatePassword,
       }}
     >
       {children}

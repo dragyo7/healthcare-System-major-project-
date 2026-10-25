@@ -75,6 +75,7 @@ export default function ReceptionistDoctors() {
       full_name: "",
       email: "",
       phone: "",
+      password: "",
       specialization: "General Medicine",
       qualification: "MBBS, MD",
       license_number: "",
@@ -109,6 +110,9 @@ export default function ReceptionistDoctors() {
     else if (formData.phone.trim().length < 7 || formData.phone.trim().length > 20) {
       errs.phone = "Phone must be between 7 and 20 digits.";
     }
+    if (!formData.password || formData.password.trim().length < 8) {
+      errs.password = "Initial password must be at least 8 characters long.";
+    }
     if (!formData.specialization.trim()) errs.specialization = "Specialization is required.";
 
     if (Object.keys(errs).length > 0) {
@@ -122,6 +126,7 @@ export default function ReceptionistDoctors() {
         full_name: formData.full_name.trim(),
         email: formData.email.trim(),
         phone: formData.phone.trim(),
+        password: formData.password.trim(),
         specialization: formData.specialization.trim(),
         qualification: formData.qualification.trim(),
         license_number: formData.license_number.trim(),
@@ -304,7 +309,7 @@ export default function ReceptionistDoctors() {
                   </p>
                 </div>
 
-                {createdDoctorInfo.activation_url && (
+                {createdDoctorInfo.activation_url ? (
                   <div className="p-4 rounded-xl border border-primary/30 bg-primary/5 space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold uppercase tracking-wider text-primary">
@@ -326,6 +331,10 @@ export default function ReceptionistDoctors() {
                         <span>{copiedLink ? "Copied!" : "Copy"}</span>
                       </button>
                     </div>
+                  </div>
+                ) : (
+                  <div className="p-3 rounded-xl border border-border bg-muted/40 text-xs text-muted-foreground">
+                    Direct physician account activated. The physician may sign in immediately using their email (<strong>{createdDoctorInfo.doctor?.email}</strong>) and assigned initial password.
                   </div>
                 )}
 
@@ -366,7 +375,7 @@ export default function ReceptionistDoctors() {
                   {fieldErrors.full_name && <p className="text-[11px] text-destructive mt-1">{fieldErrors.full_name}</p>}
                 </div>
 
-                {/* Email & Phone */}
+                {/* Email, Phone & Initial Password */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-semibold text-foreground mb-1">
@@ -401,6 +410,24 @@ export default function ReceptionistDoctors() {
                     />
                     {fieldErrors.phone && <p className="text-[11px] text-destructive mt-1">{fieldErrors.phone}</p>}
                   </div>
+                </div>
+
+                {/* Initial Account Password */}
+                <div>
+                  <label className="block text-xs font-semibold text-foreground mb-1">
+                    {t("Initial Account Password")} <span className="text-destructive">*</span>
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={formData.password}
+                    onChange={(e) => handleInputChange("password", e.target.value)}
+                    placeholder="Minimum 8 characters"
+                    className={`w-full px-3 py-2 text-xs sm:text-sm rounded-xl border bg-background text-foreground focus:outline-hidden ${
+                      fieldErrors.password ? "border-destructive ring-1 ring-destructive" : "border-border focus:border-primary"
+                    }`}
+                  />
+                  {fieldErrors.password && <p className="text-[11px] text-destructive mt-1">{fieldErrors.password}</p>}
                 </div>
 
                 {/* Specialization & Qualification */}

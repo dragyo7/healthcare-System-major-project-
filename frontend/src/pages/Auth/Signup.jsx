@@ -83,7 +83,7 @@ export default function Signup() {
 
     try {
       if (roleTab === "doctor") {
-        await signUpDoctor({
+        const res = await signUpDoctor({
           full_name: fullName.trim(),
           email: email.trim().toLowerCase(),
           password,
@@ -95,11 +95,17 @@ export default function Signup() {
         });
 
         setSuccess(true);
-        setTimeout(() => {
-          navigate("/doctor");
-        }, 800);
+        if (res?.staff_status === "pending_approval" || !res?.data?.token) {
+          setTimeout(() => {
+            navigate("/login?pending_approval=true&role=doctor");
+          }, 1200);
+        } else {
+          setTimeout(() => {
+            navigate("/doctor");
+          }, 800);
+        }
       } else if (roleTab === "receptionist") {
-        await signUpReceptionist({
+        const res = await signUpReceptionist({
           full_name: fullName.trim(),
           email: email.trim().toLowerCase(),
           password,
@@ -108,9 +114,15 @@ export default function Signup() {
         });
 
         setSuccess(true);
-        setTimeout(() => {
-          navigate("/receptionist");
-        }, 800);
+        if (res?.staff_status === "pending_approval" || !res?.data?.token) {
+          setTimeout(() => {
+            navigate("/login?pending_approval=true&role=receptionist");
+          }, 1200);
+        } else {
+          setTimeout(() => {
+            navigate("/receptionist");
+          }, 800);
+        }
       } else {
         await signUpPatient({
           full_name: fullName.trim(),

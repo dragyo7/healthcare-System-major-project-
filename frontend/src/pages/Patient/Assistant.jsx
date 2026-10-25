@@ -77,11 +77,19 @@ export default function PatientAssistant() {
     setMessages((prev) => [...prev, userMessage]);
     setInputQuery("");
     setEvaluating(true);
-
     try {
+      const conversationHistory = messages
+        .filter((m) => m.content && (m.role === "user" || m.role === "bot") && !m.is_technical_error && !m.is_network_error && !m.status?.includes("transport") && !m.status?.includes("timeout") && m.status !== "technical_error")
+        .slice(-6)
+        .map((m) => ({
+          role: m.role === "bot" ? "assistant" : "user",
+          content: m.content,
+        }));
+
       const response = await patientApi.evaluateCDS({
         clinicalQuery: textToSend,
         language,
+        conversationHistory,
       });
 
       const botMessage = {
@@ -97,13 +105,35 @@ export default function PatientAssistant() {
 
       setMessages((prev) => [...prev, botMessage]);
     } catch (err) {
+      const isNet = err.isNetworkError || err.status === 0 || (typeof err.message === "string" && (err.message.includes("fetch") || err.message.includes("Failed") || err.message.includes("unreachable")));
+      const isTimeout = err.isTimeout || err.status === 504;
+      const isAuth = err.isAuthError || err.status === 401 || err.status === 403;
+
+      let userMsg = "Technical communication error: Unable to contact the clinical gateway.";
+      let errStatus = "transport_error";
+
+      if (isNet) {
+        userMsg = "Connection to the hospital EHR gateway failed (service offline or ports unreachable). Please verify the backend service is running.";
+        errStatus = "transport_offline";
+      } else if (isTimeout) {
+        userMsg = "The clinical reasoning engine request timed out (>60s). Please retry your question.";
+        errStatus = "gateway_timeout";
+      } else if (isAuth) {
+        userMsg = "Your clinical session has expired. Please sign in again to review post-discharge care instructions.";
+        errStatus = "authentication_required";
+      } else if (err.message) {
+        userMsg = `Technical gateway error: ${err.message}.`;
+        errStatus = "technical_error";
+      }
+
       setMessages((prev) => [
         ...prev,
         {
           role: "bot",
-          content: `Unable to evaluate post-discharge query safely: ${err.message}. If experiencing severe discomfort, seek urgent emergency care.`,
-          status: "system_error",
-          is_error: true,
+          content: `${userMsg} (If you are experiencing acute physical distress, please seek immediate emergency care.)`,
+          status: errStatus,
+          is_technical_error: true,
+          failed_query: textToSend,
         },
       ]);
     } finally {
@@ -187,7 +217,7 @@ export default function PatientAssistant() {
                   }`}
                 >
                   <p className="whitespace-pre-wrap">{msg.content}</p>
-                  {msg.is_network_error && msg.failed_query && (
+                  {(msg.is_network_error || msg.is_technical_error || msg.failed_query) && msg.failed_query && (
                     <div className="pt-2">
                       <button
                         onClick={() => handleSend(msg.failed_query)}
@@ -205,7 +235,12 @@ export default function PatientAssistant() {
                       {msg.status === "verified_grounded" || msg.status === "grounded" ? (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 font-semibold">
                           <CheckCircle2 className="w-3.5 h-3.5" />
-                          Verified Grounded in Clinical Guidelines
+                          Verified Grounded in Authorized Hospital Care Directives
+                        </span>
+                      ) : msg.status === "educational_guidance" ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 border border-blue-500/20 font-semibold">
+                          <BookOpen className="w-3.5 h-3.5" />
+                          Educational Guidance (General Pharmacology)
                         </span>
                       ) : msg.status === "conversational_greeting" || msg.status === "conversational_response" ? (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-teal-500/10 text-teal-700 dark:text-teal-400 border border-teal-500/20 font-semibold">
@@ -216,6 +251,11 @@ export default function PatientAssistant() {
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20 font-semibold">
                           <AlertOctagon className="w-3.5 h-3.5" />
                           Emergency Intercept Escalation
+                        </span>
+                      ) : msg.is_technical_error || msg.status?.includes("transport") || msg.status?.includes("timeout") || msg.status === "technical_error" ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-600 border border-rose-500/20 font-semibold">
+                          <AlertTriangle className="w-3.5 h-3.5" />
+                          Service Unavailable ({msg.status})
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/20 font-semibold">
@@ -247,25 +287,30 @@ export default function PatientAssistant() {
                         Medication Safety Alerts ({msg.drug_interactions.length})
                       </p>
                       <div className="space-y-1.5">
-                        {msg.drug_interactions.map((di, dIdx) => (
-                          <div key={dIdx} className="text-foreground border-l-2 border-amber-500 pl-2">
-                            <span className="font-semibold">{di.drug1} + {di.drug2}</span>
-                            <span className="ml-2 px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-500/20 text-amber-700 uppercase">
-                              {di.severity}
-                            </span>
-                            <p className="text-muted-foreground mt-0.5">{di.description || di.effect}</p>
-                          </div>
-                        ))}
+                        {msg.drug_interactions.map((di, dIdx) => {
+                          const pairLabel = Array.isArray(di.drug_pair)
+                            ? di.drug_pair.join(" + ")
+                            : (di.drug1 && di.drug2 ? `${di.drug1} + ${di.drug2}` : (di.drug_pair || "Medication Alert"));
+                          return (
+                            <div key={dIdx} className="text-foreground border-l-2 border-amber-500 pl-2">
+                              <span className="font-semibold">{pairLabel}</span>
+                              <span className="ml-2 px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-500/20 text-amber-700 uppercase">
+                                {di.severity}
+                              </span>
+                              <p className="text-muted-foreground mt-0.5">{di.description || di.effect || di.clinical_consequence}</p>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
 
-                  {/* DailyMed Citations */}
+                  {/* Evidence Citations & Clinical Sources */}
                   {!isUser && msg.citations && msg.citations.length > 0 && (
                     <div className="space-y-1.5 pt-1">
                       <p className="text-[11px] font-bold text-muted-foreground uppercase flex items-center gap-1">
                         <BookOpen className="w-3.5 h-3.5 text-primary" />
-                        FDA DailyMed Evidence Citations ({msg.citations.length})
+                        Evidence Citations & Sources ({msg.citations.length})
                       </p>
                       <div className="space-y-1">
                         {msg.citations.map((c, cIdx) => (
@@ -273,8 +318,22 @@ export default function PatientAssistant() {
                             key={cIdx}
                             className="p-2 rounded bg-background border border-border/80 text-[11px] text-muted-foreground"
                           >
-                            <strong className="text-foreground">{c.source || "DailyMed Label"}:</strong>{" "}
-                            {c.text || c.snippet || JSON.stringify(c)}
+                            <div className="font-semibold text-foreground">
+                              {c.url ? (
+                                <a
+                                  href={c.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-primary hover:underline font-medium"
+                                >
+                                  {c.title || c.source_name || c.source || `Evidence Source #${cIdx + 1}`}
+                                </a>
+                              ) : (
+                                <span>{c.title || c.source_name || c.source || `Evidence Source #${cIdx + 1}`}</span>
+                              )}
+                            </div>
+                            {c.publisher && <div className="text-[10px] text-muted-foreground/80">{c.publisher}</div>}
+                            {c.text && <p className="mt-0.5 italic text-slate-600 dark:text-slate-300">"{c.text}"</p>}
                           </div>
                         ))}
                       </div>

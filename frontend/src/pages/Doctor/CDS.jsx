@@ -319,7 +319,11 @@ export default function DoctorCDS() {
                         }`}
                       >
                         <div className="font-bold flex items-center justify-between">
-                          <span>{f.drugs ? f.drugs.join(" ⇄ ") : f.rule_id}</span>
+                          <span>
+                            {f.drugs
+                              ? (Array.isArray(f.drugs) ? f.drugs.join(" ⇄ ") : f.drugs)
+                              : (Array.isArray(f.drug_pair) ? f.drug_pair.join(" ⇄ ") : (f.rule_id || "Drug Interaction"))}
+                          </span>
                           <span className="uppercase text-[10px] px-2 py-0.5 rounded font-black">
                             {f.severity}
                           </span>
@@ -345,12 +349,28 @@ export default function DoctorCDS() {
                         className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 text-xs"
                       >
                         <div className="flex justify-between items-center text-[11px] font-bold text-primary-600 dark:text-primary-400">
-                          <span>{c.source || `DailyMed Monograph Chunk ${c.doc_id || idx + 1}`}</span>
-                          <span>Score: {c.score ? c.score.toFixed(3) : "Verified"}</span>
+                          {c.url ? (
+                            <a
+                              href={c.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="hover:underline font-semibold"
+                            >
+                              {c.title || c.source_name || c.source || `Evidence Reference #${idx + 1}`}
+                            </a>
+                          ) : (
+                            <span>{c.title || c.source_name || c.source || `Evidence Reference #${idx + 1}`}</span>
+                          )}
+                          <span>Score: {typeof c.score === "number" ? c.score.toFixed(3) : "Verified"}</span>
                         </div>
-                        <p className="mt-1 text-slate-600 dark:text-slate-300 text-[11px] italic">
-                          "{c.text || c.chunk_text}"
-                        </p>
+                        {c.publisher && (
+                          <div className="text-[10px] text-slate-400 mt-0.5">Publisher: {c.publisher}</div>
+                        )}
+                        {(c.text || c.chunk_text) && (
+                          <p className="mt-1 text-slate-600 dark:text-slate-300 text-[11px] italic">
+                            "{c.text || c.chunk_text}"
+                          </p>
+                        )}
                       </div>
                     ))}
                   </div>

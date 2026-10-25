@@ -438,7 +438,7 @@ async function runAudit() {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${patientToken}`
+                "Authorization": `Bearer ${patient2Token}`
             }
         }, {
             clinical_query: "Can I take Zylophantazine 800mg with my dinner?"

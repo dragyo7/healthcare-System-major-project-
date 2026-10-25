@@ -166,6 +166,8 @@ async function runTests() {
                 job_id: jobId,
                 diagnosis: "Essential Hypertension & Dyslipidemia (Post-OCR Review)",
                 notes: "Clinically reviewed and verified from prescription image scan",
+                safety_override: true,
+                safety_override_reason: "Clinical benefit outweighs potential risk; hepatic enzymes monitored closely during concurrent clarithromycin therapy",
                 confirmed_medicines: [
                     {
                         medicine_name: "Amlodipine",

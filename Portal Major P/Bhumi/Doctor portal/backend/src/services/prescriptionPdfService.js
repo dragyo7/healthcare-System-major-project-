@@ -50,8 +50,8 @@ function generatePrescriptionPdfStream({
     const patientName = patient?.full_name || prescription?.patient_name || "Authorized Patient";
     const patientId = patient?.patient_id || prescription?.patient_id || "N/A";
     const gender = patient?.gender || prescription?.gender || "Unspecified";
-    const bloodGroup = patient?.blood_group || prescription?.blood_group || "Recorded";
-    const rawAllergies = patient?.allergies || prescription?.allergies || "None documented";
+    const bloodGroup = patient?.blood_group || prescription?.blood_group || "Not documented";
+    const rawAllergies = (patient?.allergies || prescription?.allergies || "").trim();
 
     doc.fillColor("#334155").fontSize(8).font("Helvetica-Bold").text("PATIENT IDENTIFICATION", 55, 158);
     doc.fillColor(textDark).fontSize(11).font("Helvetica-Bold").text(patientName, 55, 170);
@@ -59,10 +59,12 @@ function generatePrescriptionPdfStream({
        .text(`Patient ID: #${patientId}   |   Gender: ${gender}   |   Blood Group: ${bloodGroup}`, 55, 185)
        .text("Documented Allergies: ", 55, 199);
 
-    if (rawAllergies && rawAllergies.toLowerCase() !== "none" && rawAllergies.toLowerCase() !== "nil") {
+    if (rawAllergies && rawAllergies.toLowerCase() !== "none" && rawAllergies.toLowerCase() !== "nil" && !rawAllergies.toLowerCase().includes("no known") && !rawAllergies.toLowerCase().includes("nkda")) {
         doc.fillColor("#dc2626").font("Helvetica-Bold").text(rawAllergies, 155, 199);
-    } else {
+    } else if (rawAllergies && (rawAllergies.toLowerCase().includes("no known") || rawAllergies.toLowerCase().includes("nkda"))) {
         doc.fillColor(primaryEmerald).font("Helvetica").text("No known drug allergies (NKDA)", 155, 199);
+    } else {
+        doc.fillColor(textMuted).font("Helvetica").text("Not documented", 155, 199);
     }
 
     // Right Column: Prescribing Doctor Details

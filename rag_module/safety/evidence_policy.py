@@ -125,7 +125,8 @@ COMMON_STOPWORDS = {
     "week", "weeks", "month", "months", "year", "years", "time", "times",
     "take", "takes", "took", "taken", "taking", "call", "calling", "visit", "go", "get",
     "need", "needs", "needed", "want", "wants", "help", "information", "info", "details", "detail",
-    "occur", "occurs", "occurred", "occurring"
+    "occur", "occurs", "occurred", "occurring",
+    "commonly", "frequently", "typically", "usually", "normally", "primarily", "properly", "correctly", "safely", "together", "concomitantly"
 }
 
 GENERAL_CLINICAL_TERMS = {
@@ -154,7 +155,9 @@ GENERAL_CLINICAL_TERMS = {
     "concentration", "concentrations", "mg", "ml", "oral", "intravenous", "injection",
     "maximum", "max", "minimum", "min", "daily", "schedule", "routine", "emergency", "urgent", "attention",
     "alone", "cause", "causes", "causing", "consider", "considering", "know", "hypoglycemia", "elevate", "elevation",
-    "reduce", "reduction", "increase", "increases", "increased", "lowering", "lower", "high", "low"
+    "reduce", "reduction", "increase", "increases", "increased", "lowering", "lower", "high", "low",
+    # Common clinical inquiry adverbs
+    "commonly", "frequently", "typically", "usually", "generally", "primarily", "normally", "safely", "properly", "correctly", "together", "concomitantly"
 }
 
 
@@ -323,10 +326,10 @@ class EvidencePolicyEngine:
         if query_words:
             matched_words = 0
             for w in query_words:
-                clean_w = re.sub(r'(s|es|ing|ed)$', '', w)
+                clean_w = "use" if w in ("used", "uses", "using") else re.sub(r'(s|es|ing|ed)$', '', w)
                 matched = (
                     re.search(r'\b' + re.escape(w) + r'\b', combined_top_text) is not None or
-                    (len(clean_w) >= 3 and re.search(r'\b' + re.escape(clean_w) + r'\b', combined_top_text) is not None)
+                    (len(clean_w) >= 3 and re.search(r'\b' + re.escape(clean_w) + r'(?:s|es|ing|ed|age)?\b', combined_top_text) is not None)
                 )
                 if not matched and self.normalizer:
                     norm = self.normalizer.normalize_term(w)
@@ -346,12 +349,12 @@ class EvidencePolicyEngine:
 
         # Out of domain check:
         # A query is out of domain if substantive query word overlap is extremely low (< 35%),
-        # or if subject tokens exist and either none matched or fewer than 35% of them matched with no clinical intent.
+        # UNLESS the clinical subject entity matched strongly (>= 50%) AND clinical intent is present.
         has_clinical_intent = any(w in GENERAL_CLINICAL_TERMS for w in query_words)
         subject_match_ratio = (len(matched_tokens) / len(subject_tokens)) if subject_tokens else 1.0
         is_out_of_domain = bool(
             query_words and (
-                overlap_ratio < 0.35 or
+                (overlap_ratio < 0.35 and (not has_clinical_intent or subject_match_ratio < 0.5)) or
                 (not has_clinical_intent and subject_match_ratio < 0.5)
             )
         )

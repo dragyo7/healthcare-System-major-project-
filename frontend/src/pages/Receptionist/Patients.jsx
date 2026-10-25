@@ -27,12 +27,13 @@ export default function ReceptionistPatients() {
   const [showModal, setShowModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
-  const [activationAlert, setActivationAlert] = useState(null);
+  const [registeredPatientAlert, setRegisteredPatientAlert] = useState(null);
   const [copied, setCopied] = useState(false);
 
   const [formData, setFormData] = useState({
     full_name: "",
     email: "",
+    password: "",
     phone: "",
     date_of_birth: "",
     gender: "Male",
@@ -97,6 +98,10 @@ export default function ReceptionistPatients() {
       setFormError("Please enter a valid phone number (at least 7 digits).");
       return;
     }
+    if (!formData.password || formData.password.trim().length < 8) {
+      setFormError("Please enter a secure initial password for the patient (at least 8 characters).");
+      return;
+    }
     if (formData.date_of_birth) {
       const parts = formData.date_of_birth.split("-");
       const year = parseInt(parts[0], 10);
@@ -112,26 +117,17 @@ export default function ReceptionistPatients() {
     try {
       const created = await receptionistApi.registerPatient(formData);
       
-      // Compute the canonical frontend activation link
-      let actUrl = created.activation_url || (created.patient && created.patient.activation_url);
-      const actToken = created.activation_token || (created.patient && created.patient.activation_token);
-      if (actToken) {
-        actUrl = `${window.location.origin}/activate?token=${actToken}`;
-      } else if (actUrl && actUrl.includes(":5175")) {
-        actUrl = actUrl.replace(":5175", ":5173");
-      }
-
-      setActivationAlert({
+      setRegisteredPatientAlert({
         name: created.full_name || (created.patient && created.patient.full_name) || formData.full_name,
         patient_id: created.patient_id || (created.patient && created.patient.patient_id),
         email: formData.email,
-        activation_url: actUrl,
       });
 
       setShowModal(false);
       setFormData({
         full_name: "",
         email: "",
+        password: "",
         phone: "",
         date_of_birth: "",
         gender: "Male",
@@ -186,16 +182,16 @@ export default function ReceptionistPatients() {
         </button>
       </div>
 
-      {/* Cryptographic Account Activation Banner */}
-      {activationAlert && (
-        <div className="p-5 rounded-xl bg-emerald-500/10 border-2 border-emerald-500/30 text-foreground space-y-3">
+      {/* Patient Registration Success Banner */}
+      {registeredPatientAlert && (
+        <div className="p-5 rounded-xl bg-emerald-500/10 border-2 border-emerald-500/30 text-foreground space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold text-sm">
               <CheckCircle2 className="w-5 h-5 shrink-0" />
-              {t("Patient Registered Successfully — Single-Use Activation Token Generated") || "Patient Registered Successfully — Single-Use Activation Token Generated"}
+              {t("Patient Registered Successfully — Account is Active") || "Patient Registered Successfully — Account is Active"}
             </div>
             <button
-              onClick={() => setActivationAlert(null)}
+              onClick={() => setRegisteredPatientAlert(null)}
               className="text-muted-foreground hover:text-foreground text-xs p-1"
             >
               <X className="w-4 h-4" />
@@ -204,39 +200,14 @@ export default function ReceptionistPatients() {
 
           <div className="text-xs space-y-1 text-muted-foreground">
             <p>
-              {t("Patient:") || "Patient:"} <strong className="text-foreground">{activationAlert.name}</strong> (EHR ID: #{activationAlert.patient_id})
+              {t("Patient:") || "Patient:"} <strong className="text-foreground">{registeredPatientAlert.name}</strong> (EHR ID: #{registeredPatientAlert.patient_id})
             </p>
             <p>
-              {t("Registered Email:") || "Registered Email:"} <strong className="text-foreground">{activationAlert.email}</strong>
+              {t("Registered Email:") || "Registered Email:"} <strong className="text-foreground">{registeredPatientAlert.email}</strong>
             </p>
-            <p className="text-emerald-700 dark:text-emerald-300">
-              {t("Provide this cryptographic activation URL to the patient to complete password setup:") || "Provide this cryptographic activation URL to the patient to complete password setup:"}
+            <p className="text-emerald-700 dark:text-emerald-300 font-medium">
+              {t("The patient account has been created and is active. The patient can sign in directly with their registered email.") || "The patient account has been created and is active. The patient can sign in directly with their registered email."}
             </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 pt-1">
-            <input
-              type="text"
-              readOnly
-              value={activationAlert.activation_url}
-              className="flex-1 min-w-[280px] px-3 py-1.5 rounded-lg border border-border bg-background text-xs font-mono text-foreground"
-            />
-            <button
-              onClick={copyActivationLink}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-semibold text-xs hover:bg-emerald-700 transition"
-            >
-              <Copy className="w-3.5 h-3.5" />
-              {copied ? (t("Copied!") || "Copied Link!") : (t("Copy") || "Copy Link")}
-            </button>
-            <a
-              href={activationAlert.activation_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-border bg-background hover:bg-muted text-foreground font-semibold text-xs transition"
-            >
-              <ExternalLink className="w-3.5 h-3.5" />
-              {t("Open Activation Flow") || "Open Activation Flow"}
-            </a>
           </div>
         </div>
       )}
@@ -393,6 +364,21 @@ export default function ReceptionistPatients() {
 
                 <div>
                   <label className="block font-semibold text-slate-800 dark:text-slate-200 mb-1">
+                    Initial Password * (Min 8 chars)
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    name="password"
+                    placeholder="••••••••"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-800 dark:text-slate-200 mb-1">
                     Mobile Phone *
                   </label>
                   <input
@@ -518,10 +504,10 @@ export default function ReceptionistPatients() {
                   {submitting ? (
                     <>
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      Provisioning Patient...
+                      Registering Patient...
                     </>
                   ) : (
-                    "Register & Generate Token"
+                    "Register Patient Account"
                   )}
                 </button>
               </div>

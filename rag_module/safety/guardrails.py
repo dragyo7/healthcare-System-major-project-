@@ -9,12 +9,12 @@ from rag_module.config.rag_config import DEFAULT_CONFIG
 # Emergency regex patterns for acute life-threatening medical crises
 EMERGENCY_PATTERNS = [
     r'\b(chest\s+pain|crushing\s+chest|heart\s+attack|myocardial\s+infarction)\b',
-    r'\b(can\'?t\s+breathe|severe\s+shortness\s+of\s+breath|difficulty\s+breathing|choking|asphyxi)\b',
+    r'\b(can\'?t\s+breathe|cannot\s+breathe|severe\s+shortness\s+of\s+breath|difficulty\s+breathing|choking|asphyxi|lips\s+turning\s+blue|blue\s+lips|cyanosis|gasping\s+for\s+air)\b',
     r'\b(stroke|facial\s+droop|slurred\s+speech|sudden\s+numbness|arm\s+weakness)\b',
-    r'\b(anaphylaxis|throat\s+closing|severe\s+allergic\s+reaction)\b',
+    r'\b(anaphylaxis|throat\s+(?:is\s+)?(?:closing|swelling)|trouble\s+swallowing\s+after|severe\s+allergic\s+reaction)\b',
     r'\b(suicide|kill\s+myself|end\s+my\s+life|self\s+harm)\b',
     r'\b(unconscious|unresponsive|severe\s+bleeding|coughing\s+(?:up\s+)?blood|vomiting\s+blood)\b',
-    r'\b(poisoning|poisoned|drank\s+(?:bleach|acid|chemical|pesticide|detergent|toxic)|swallowed\s+(?:bleach|battery|acid|chemical|poison))\b'
+    r'\b(poisoning|poisoned|overdose|overdosed|swallowed\s+(?:an?\s+)?(?:entire\s+)?bottle|bottle\s+of\s+(?:\d+\s+)?(?:pills|tablets|medication)|swallowed\s+\d+\s+pills|drank\s+(?:bleach|acid|chemical|pesticide|detergent|toxic)|swallowed\s+(?:bleach|battery|acid|chemical|poison))\b'
 ]
 
 # Prompt injection and delimiter hijacking patterns

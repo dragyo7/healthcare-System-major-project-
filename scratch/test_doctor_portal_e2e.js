@@ -184,8 +184,17 @@ async function runE2E() {
             headers: { "Authorization": `Bearer ${doctorToken}` }
         });
 
-        // Query MySQL directly to cross-verify
-        const [patientsCount] = await db.execute("SELECT COUNT(DISTINCT patient_id) AS total FROM appointments WHERE doctor_id = 1");
+        // Query MySQL directly to cross-verify with authorized patient definition
+        const [patientsCount] = await db.execute(`
+            SELECT COUNT(DISTINCT patient_id) AS total
+            FROM (
+                SELECT patient_id FROM appointments WHERE doctor_id = 1 AND status IN ('scheduled', 'confirmed', 'completed')
+                UNION
+                SELECT patient_id FROM prescriptions WHERE doctor_id = 1
+                UNION
+                SELECT patient_id FROM discharges WHERE doctor_id = 1
+            ) AS auth_patients
+        `);
         const [completedCount] = await db.execute("SELECT COUNT(*) AS total FROM appointments WHERE doctor_id = 1 AND appointment_date = CURDATE() AND status = 'completed'");
 
         const pass = res.status === 200 &&
@@ -445,7 +454,7 @@ async function runE2E() {
             const pass1 = statusRes1.status === 200 && check1[0]?.status === "completed";
             record(7.3, "APPOINTMENTS", "Transition status: scheduled -> completed verified in MySQL", pass1, `Status in DB: ${check1[0]?.status}`);
 
-            // Update status to 'cancelled'
+            // Update status to 'cancelled' (should be rejected since 'completed' is terminal)
             const statusRes2 = await httpRequest({
                 hostname: "localhost",
                 port: 5000,
@@ -457,8 +466,8 @@ async function runE2E() {
                 }
             }, { status: "cancelled" });
             const [check2] = await db.execute("SELECT status FROM appointments WHERE appointment_id = ?", [createdAppointmentId]);
-            const pass2 = statusRes2.status === 200 && check2[0]?.status === "cancelled";
-            record(7.4, "APPOINTMENTS", "Transition status: completed -> cancelled verified in MySQL", pass2, `Status in DB: ${check2[0]?.status}`);
+            const pass2 = statusRes2.status === 400 && check2[0]?.status === "completed";
+            record(7.4, "APPOINTMENTS", "Terminal status: completed -> cancelled rejected with HTTP 400", pass2, `Status code: ${statusRes2.status}, Status in DB: ${check2[0]?.status}`);
         }
     } catch (e) {
         record(7.1, "APPOINTMENTS", "Appointment lifecycle", false, e.message);

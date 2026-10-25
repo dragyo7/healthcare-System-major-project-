@@ -8,7 +8,8 @@ const {
     patientActivate,
     patientSignup,
     provisionReceptionist,
-    receptionistSignup
+    receptionistSignup,
+    updateStaffApprovalStatus
 } = require("../controllers/authController");
 const { authRateLimiter } = require("../middleware/rateLimiter");
 
@@ -24,5 +25,6 @@ router.post("/patient/signup", patientSignup);
 router.post("/receptionist/login", receptionistLogin);
 router.post("/receptionist/signup", receptionistSignup);
 router.post("/receptionist/provision", provisionReceptionist);
+router.patch("/staff/:userId/approval", updateStaffApprovalStatus);
 
 module.exports = router;

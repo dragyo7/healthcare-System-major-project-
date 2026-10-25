@@ -1,178 +1,102 @@
-const API_BASE = (
-  import.meta.env.VITE_API_BASE_URL ||
-  import.meta.env.VITE_EXPRESS_URL ||
-  import.meta.env.VITE_API_URL ||
-  "http://127.0.0.1:5000"
-).replace(/\/api\/?$/, "") + "/api";
-
-
-function getAuthHeaders() {
-  const token = localStorage.getItem("cdss_token") || localStorage.getItem("token");
-  return {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
-}
+import { resilientFetch, getApiBase, getAuthHeaders } from "./client";
 
 export const doctorApi = {
   getProfile: async () => {
-    const res = await fetch(`${API_BASE}/doctor/profile`, { headers: getAuthHeaders() });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to load doctor profile");
-    return data;
+    return await resilientFetch("/doctor/profile");
   },
 
   updateProfile: async (profileData) => {
-    const res = await fetch(`${API_BASE}/doctor/profile`, {
+    return await resilientFetch("/doctor/profile", {
       method: "PUT",
-      headers: getAuthHeaders(),
       body: JSON.stringify(profileData),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to update profile");
-    return data;
   },
 
   getDashboard: async () => {
-    const res = await fetch(`${API_BASE}/doctor/dashboard`, { headers: getAuthHeaders() });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to load dashboard metrics");
-    return data;
+    return await resilientFetch("/doctor/dashboard");
   },
 
   getPatients: async (search = "") => {
     const q = search ? `?search=${encodeURIComponent(search)}` : "";
-    const res = await fetch(`${API_BASE}/doctor/patients${q}`, { headers: getAuthHeaders() });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch patients list");
+    const data = await resilientFetch(`/doctor/patients${q}`);
     return data.patients || [];
   },
 
   getPatientDetails: async (patientId) => {
-    const res = await fetch(`${API_BASE}/doctor/patients/${patientId}`, { headers: getAuthHeaders() });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || `Failed to fetch patient #${patientId}`);
-    return data;
+    return await resilientFetch(`/doctor/patients/${patientId}`);
   },
 
   getPatientPrescriptions: async (patientId) => {
-    const res = await fetch(`${API_BASE}/doctor/patients/${patientId}/prescriptions`, { headers: getAuthHeaders() });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch prescriptions");
+    const data = await resilientFetch(`/doctor/patients/${patientId}/prescriptions`);
     return data.prescriptions || [];
   },
 
   getPatientDischarge: async (patientId) => {
-    const res = await fetch(`${API_BASE}/doctor/patients/${patientId}/discharge`, { headers: getAuthHeaders() });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch discharge records");
+    const data = await resilientFetch(`/doctor/patients/${patientId}/discharge`);
     return data.discharge || null;
   },
 
   getAppointments: async () => {
-    const res = await fetch(`${API_BASE}/doctor/appointments`, { headers: getAuthHeaders() });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch doctor appointments");
+    const data = await resilientFetch("/doctor/appointments");
     return data.appointments || [];
   },
 
   createAppointment: async (appointmentData) => {
-    const res = await fetch(`${API_BASE}/doctor/appointments`, {
+    return await resilientFetch("/doctor/appointments", {
       method: "POST",
-      headers: getAuthHeaders(),
       body: JSON.stringify(appointmentData),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to schedule appointment");
-    return data;
   },
 
   updateAppointmentStatus: async (appointmentId, status) => {
-    const res = await fetch(`${API_BASE}/doctor/appointments/${appointmentId}/status`, {
+    return await resilientFetch(`/doctor/appointments/${appointmentId}/status`, {
       method: "PUT",
-      headers: getAuthHeaders(),
       body: JSON.stringify({ status }),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to update appointment status");
-    return data;
   },
 
   getSchedule: async () => {
-    const res = await fetch(`${API_BASE}/doctor/schedule`, { headers: getAuthHeaders() });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch doctor schedule");
+    const data = await resilientFetch("/doctor/schedule");
     return data.schedule || [];
   },
 
   createSchedule: async (scheduleData) => {
-    const res = await fetch(`${API_BASE}/doctor/schedule`, {
+    return await resilientFetch("/doctor/schedule", {
       method: "POST",
-      headers: getAuthHeaders(),
       body: JSON.stringify(scheduleData),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to create schedule");
-    return data;
   },
 
   deleteSchedule: async (scheduleId) => {
-    const res = await fetch(`${API_BASE}/doctor/schedule/${scheduleId}`, {
+    return await resilientFetch(`/doctor/schedule/${scheduleId}`, {
       method: "DELETE",
-      headers: getAuthHeaders(),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to delete schedule item");
-    return data;
   },
 
   createPrescription: async (prescriptionData, idempotencyKey = null) => {
     const key = idempotencyKey || prescriptionData?.idempotency_key;
-    const headers = getAuthHeaders();
+    const headers = {};
     if (key) {
       headers["Idempotency-Key"] = key;
     }
-    const res = await fetch(`${API_BASE}/doctor/prescriptions`, {
+    return await resilientFetch("/doctor/prescriptions", {
       method: "POST",
       headers,
       body: JSON.stringify(prescriptionData),
     });
-    const data = await res.json();
-    if (!res.ok) {
-      const err = new Error(data.message || "Failed to save prescription");
-      err.contraindications = data.contraindications;
-      err.rule_id = data.rule_id;
-      err.status = res.status;
-      err.error = data.error;
-      throw err;
-    }
-    return data;
   },
 
   createDischarge: async (dischargeData) => {
-    const res = await fetch(`${API_BASE}/doctor/discharge`, {
+    return await resilientFetch("/doctor/discharge", {
       method: "POST",
-      headers: getAuthHeaders(),
       body: JSON.stringify(dischargeData),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to record discharge care");
-    return data;
-  },
-
-  getPatientDischarge: async (patientId) => {
-    const res = await fetch(`${API_BASE}/doctor/patients/${patientId}/discharge`, {
-      headers: getAuthHeaders(),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch patient discharge records");
-    return data;
   },
 
   evaluateCDS: async ({ patientId, clinicalQuery, candidateMedications = [], language = "auto", conversationHistory = [] }) => {
-    const res = await fetch(`${API_BASE}/doctor/cds`, {
+    return await resilientFetch("/doctor/cds", {
       method: "POST",
-      headers: getAuthHeaders(),
+      timeoutMs: 90000,
       body: JSON.stringify({
         patient_id: patientId,
         clinical_query: clinicalQuery,
@@ -181,28 +105,22 @@ export const doctorApi = {
         conversation_history: conversationHistory,
       }),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || `CDS evaluation failed (${res.status})`);
-    return data;
   },
 
   screenPrescription: async ({ patientId, candidateMedications = [] }) => {
-    const res = await fetch(`${API_BASE}/doctor/prescriptions/screen`, {
+    return await resilientFetch("/doctor/prescriptions/screen", {
       method: "POST",
-      headers: getAuthHeaders(),
       body: JSON.stringify({
         patient_id: patientId,
         candidate_medications: candidateMedications,
       }),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || `Prescription screening failed (${res.status})`);
-    return data;
   },
 
   uploadPrescriptionOcr: async (formData) => {
     const token = localStorage.getItem("cdss_token") || localStorage.getItem("token");
-    const res = await fetch(`${API_BASE}/doctor/prescriptions/upload-ocr`, {
+    const targetUrl = `${getApiBase()}/doctor/prescriptions/upload-ocr`;
+    const res = await fetch(targetUrl, {
       method: "POST",
       headers: {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -215,29 +133,19 @@ export const doctorApi = {
   },
 
   getPrescriptionOcrJob: async (jobId) => {
-    const res = await fetch(`${API_BASE}/doctor/prescriptions/ocr-jobs/${jobId}`, {
-      headers: getAuthHeaders(),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to fetch OCR job status");
-    return data;
+    return await resilientFetch(`/doctor/prescriptions/ocr-jobs/${jobId}`);
   },
 
   confirmPrescriptionOcr: async (jobId, confirmedData) => {
-    const res = await fetch(`${API_BASE}/doctor/prescriptions/confirm-ocr`, {
+    return await resilientFetch("/doctor/prescriptions/confirm-ocr", {
       method: "POST",
-      headers: getAuthHeaders(),
       body: JSON.stringify({ job_id: jobId, ...confirmedData }),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to finalize OCR prescription");
-    return data;
   },
 
   downloadPrescriptionPDF: async (prescriptionId) => {
-    const res = await fetch(`${API_BASE}/doctor/prescriptions/${prescriptionId}/pdf`, {
-      headers: getAuthHeaders(),
-    });
+    const url = `${getApiBase()}/doctor/prescriptions/${prescriptionId}/pdf`;
+    const res = await fetch(url, { headers: getAuthHeaders() });
     if (!res.ok) {
       const err = await res.json().catch(() => ({ message: "Failed to download PDF" }));
       throw new Error(err.message || `Download failed (${res.status})`);

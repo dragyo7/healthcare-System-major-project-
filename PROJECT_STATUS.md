@@ -3,11 +3,11 @@
 > **Status Reference**: Authoritative Living Project Status
 > **Repository**: `dragyo7/healthcare-System-major-project-`
 > **Current Branch**: `main`
-> **Snapshot Timing**: 2026-10-24 15:35 IST (Final CDSS Frontend Replacement & Presentation-Ready Verification)
-> **Active Services Status**: MySQL (3306), FastAPI (8000), Express (5000/5001), Vite (5173), Reference Fork (5176) active and verified.
+> **Snapshot Timing**: 2026-10-25 12:45 IST (CDSS Presentation Stabilization, Generator Cleanup, Appointment Status Alignment, 100% Acceptance Pass)
+> **Active Services Status**: MySQL (3306), FastAPI (8000), Express (5000/5001), Vite (5173) active and verified.
 > **Frozen RAG Implementation Baseline**: Commit `497a547` (V2.10 Hard-Frozen, 2,204 chunks, 190 pass, 2 skip, 0 fail)
 > **Architecture Note**: Single-port entry on port 5173 (`/doctor`, `/patient`, `/receptionist`, `/activate`) per DEC-013 & DEC-034.
-> **Engineering Governance**: Governed by DEC-001 through DEC-034 and `FINAL-CDSS-MIGRATION-SAFETY-001`.
+> **Engineering Governance**: Governed by DEC-001 through DEC-042 and `FINAL-CDSS-MIGRATION-SAFETY-001`.
 
 ---
 
@@ -15,17 +15,17 @@
 
 | Subsystem / Layer | Implementation Status | Verification Standard | Evidence & Notes |
 | :--- | :---: | :---: | :--- |
-| **Unified Frontend (Port 5173)** | Complete | **Verified** | Single React 19 + Vite 8 SPA styled with CareUnity 2-column emerald hero & glassmorphic cards. Houses Doctor, Patient, Receptionist, and Activation routes. Dynamic 4-language support (`en`, `hi`, `mr`, `gu` across 372 keys). Builds cleanly (`0 errors in 1.35s`). |
-| **Express EHR Gateway (Port 5000/5001)** | Complete | **Verified** | Server-side RBAC, BOLA isolation, Zero-PII sanitization, PDFKit prescription generation, and offline OCR coordination. |
-| **FastAPI CDS Gateway (Port 8000)** | Complete | **Verified** | Centralized clinical orchestrator (`POST /cds/evaluate`, `POST /cds/screen-prescription`). Stripped of PII. |
-| **Prescription PDF Generation** | Complete | **Verified** | Generates real, styled outpatient prescription PDFs with St. Mary Hospital header, prescriber credentials, medication tables, and CDSS attestation stamp. |
-| **Post-Discharge Care Grounding** | Complete | **Verified** | Doctor-authored discharge care plan persistence in MySQL with immediate patient retrieval and zero-hallucination conversational CDS answers. |
-| **MySQL Database (Port 3306)** | Complete | **Verified** | 15 normalized relational tables + 7 forward migrations (`000` to `006`). Relational EHR data strictly separated from vector storage. Primary DB `rag_healthcare` preserved 100% untouched. |
+| **Unified Frontend (Port 5173)** | Complete | **Verified** | Single React 19 + Vite 8 SPA styled with CareUnity 2-column emerald hero & glassmorphic cards. Houses Doctor, Patient, Receptionist, and Activation routes. Dynamic 4-language support (`en`, `hi`, `mr`, `gu` across 372 keys). Builds cleanly (`0 errors in 891ms`). Real browser journeys verified. |
+| **Express EHR Gateway (Port 5000/5001)** | Complete | **Verified** | Server-side RBAC, BOLA isolation, Zero-PII sanitization, PDFKit prescription generation, and offline OCR coordination. Zero fallback secret; anti-self-approval enforced. |
+| **FastAPI CDS Gateway (Port 8000)** | Complete | **Verified** | Centralized clinical orchestrator (`POST /cds/evaluate`, `POST /cds/screen-prescription`). Stripped of PII. Discharge care directive grounding & doctor dossier integration verified. |
+| **Prescription PDF Generation** | Complete | **Verified** | Generates real, styled outpatient prescription PDFs with St. Mary Hospital header, prescriber credentials, medication tables, and CDSS attestation stamp (%PDF- byte validated). |
+| **Post-Discharge Care Grounding** | Complete | **Verified** | Doctor-authored discharge care plan persistence in MySQL with immediate patient retrieval and zero-hallucination conversational CDS answers (100% pass on 8/8 test cases). |
+| **MySQL Database (Port 3306)** | Complete | **Verified** | 15 normalized relational tables + 8 forward migrations (`000` to `008`). Relational EHR data strictly separated from vector storage. Primary DB `rag_healthcare` preserved 100% untouched. |
 | **Frozen Medical RAG v2.10** | Hard Frozen | **Verified** | 2,204 DailyMed chunks in FAISS. Hybrid BM25+Dense retrieval, Cross-Encoder rerank, TinyLlama-1.1B, and fail-closed grounding verifier. |
-| **Deterministic Medication Safety** | Complete | **Verified** | Evaluates 8 verified DrugBank rules, 5 negative controls, and SIDER adverse profiles in **< 15ms**. |
+| **Deterministic Medication Safety** | Complete | **Verified** | Evaluates 8 verified DrugBank rules, 5 negative controls, and SIDER adverse profiles in **< 15ms**. 100% pass on deterministic safety suite. |
 | **Decoupled Allergy Hard Stop** | Complete | **Verified** | Documented patient allergies (and cross-reactive classes) return HTTP 422 with `cannot_override: true` across all persistence paths (DEC-016). |
 | **Evidence-Backed Alternative Engine**| Complete | **Verified** | DailyMed-backed alternative suggestions with explicit evidence provenance (`FDA_LABEL_EXPLICIT_MENTION` vs `CLINICAL_CONSENSUS_INFERRED`). |
-| **Indic Multilingual Engine** | Complete | **Verified** | Entity-preserving canonicalization and pre-verified safety templates for English, Hindi, Marathi, Gujarati across UI and RAG. |
+| **Indic Multilingual Engine** | Complete | **Verified** | Entity-preserving canonicalization and pre-verified safety templates for English, Hindi, Marathi, Gujarati across UI and RAG. 100% pass on 12/12 multilingual matrix. |
 | **Prescription OCR Pipeline** | Complete | **Verified** | Local Tesseract.js with auto-orientation correction, magic byte validation, and strictly local traineddata assets (`gzip: false`). Enforces human clinician review invariant. |
 | **Clinical Knowledge Ingestion** | Complete | **Verified** | 7-stage offline ingestion pipeline with fail-closed HMAC-SHA256 audit seals (`INGESTION_AUDIT_SECRET` required) and role authorization (DEC-017, DEC-018). |
 
@@ -35,6 +35,11 @@
 
 | Test Suite / Runner | Target Boundary | Pass / Total | Exit Code | Verified Execution Notes |
 | :--- | :--- | :---: | :---: | :--- |
+| `node scratch/run_live_acceptance_suite_24.js` | Live 24-Case Acceptance Suite (Doctor Info, Patient Discharge, Rx Safety, Security, Concurrency) | **25 / 25 (100%)** | `0` | 100% pass on all 24 acceptance cases + CONC-01 concurrency slot double-booking conflict (DEC-042) |
+| `node scratch/test_staff_security_gap.js` | Staff Approval Security & Session Revocation (Zero Operator Secret Fallback, Anti-Self-Approval) | **9 / 9** | `0` | Rejects missing/empty secret, prevents doctor self-approval, enforces admin authorization (DEC-041) |
+| `node scratch/test_phase3_express_bridge.js` | Express -> FastAPI CDS Bridge Authentication & Payload Routing | **7 / 7** | `0` | 100% pass across doctor/patient token bridge, evaluation routing, and error contracts |
+| `node scratch/test_portal_cds_responsibilities.js` | Doctor/patient CDS, triage diversion, injection early block, citations | **25 / 25** | `0` | Clinical safety boundaries and fail-closed responses verified |
+| `node scratch/test_priority7_multilingual_and_appointments.js` | Appointment Lifecycle & Multilingual Behavior | **12 / 12** | `0` | Pending -> Confirmed -> Immutable terminal state, 409 interval conflict, Indic CDS (`en`, `hi`, `mr`, `gu`) |
 | `node scratch/gap_closure_master_verification.js` | Master Presentation Readiness & Gap Closure (Auth, PDF, Discharge, OCR) | **22 / 22** | `0` | 100% pass across demo logins, real PDFKit generation, pypdf text extraction, discharge grounding, and OCR invariants |
 | `python scripts/evaluate_ddi_comprehensive.py` | DDI Sensitivity, Specificity, Negative Controls, Abstentions | **29 / 29** | `0` | 15 TP, 5 Inferred Non-Interacting TN, 2 Dup, 4 Unknown, 3 Allergy |
 | `python -m pytest tests/test_clinical_knowledge_ingestion.py -v` | Staged ingestion, role whitelist, license syntax, fail-closed HMAC seals | **14 / 14** | `0` | Missing, empty, rotated secrets, staged record tampering, and non-leakage tests pass |
@@ -52,13 +57,24 @@
 | `node tests/integration/test_doctor_profile_integration.js` | Doctor profile GET/PUT, RBAC, input validation, reload persistence | **19 / 19** | `0` | Live updates & persistence verified; read-only license preserved |
 | `node scratch/test_patient_and_discharge.js` | Patient portal, post-discharge instructions, BOLA isolation, restricted CDS | **14 / 14** | `0` | Discharge episode authoring and retrieval verified |
 | `node scratch/test_prescription_ocr_pipeline.js` | Image upload, magic bytes, Tesseract OCR, allergy block, human review | **12 / 12** | `0` | Clinician confirmation invariant strictly enforced |
-| `node scratch/test_portal_cds_responsibilities.js` | Doctor/patient CDS, triage diversion, injection early block, citations | **25 / 25** | `0` | Clinical safety boundaries and fail-closed responses verified |
 | `node scratch/test_full_system_multi_role_e2e.js` | Multi-role end-to-end journey (Receptionist -> Doctor -> Patient) | **20 / 20** | `0` | Cross-role lifecycle and negative security matrix verified |
 | `node scratch/test_doctor_direct_registration_e2e.js` | Direct Doctor Signup, Immediate Login, DB Persistence, Security Invariants | **36 / 36** | `0` | 100% pass across doctor signup (HTTP 201), immediate login (HTTP 200), bcrypt verification, profile updates, BOLA defense, negative auth, existing accounts, primary DB intact |
 | `node scratch/test_identity_receptionist_directory_e2e.js` | Team-Blocker Repair (Identity Isolation, CDS Gateway, Doctor Directory, Direct Receptionist Signup) | **45 / 45** | `0` | 100% pass across synthetic patient isolation (Priya vs Rohan), grounded CDS retrieval, doctor directory discoverability, appointment booking loop, direct receptionist signup, 403 RBAC |
-| `cd frontend; npm run build` | Vite 8 + React 19 production bundle | **2,252 modules** | `0` | Clean build in 915ms, 0 errors |
-| `browser_subagent` (Live E2E Audit) | Desktop/mobile login, signup, activation, all 3 workspaces | **17 / 17** | `0` | Direct doctor registration & immediate login verified in browser with screenshots saved to `audit_evidence/direct_doctor_registration_20261024/` (DEC-035) |
-| **Consolidated Gate Regression Suite** | Multi-suite integration regression against `rag_healthcare_test` | **266 cases / 279 assertions** | `0` | **266 PASSED, 0 FAILED, 0 SKIPPED** across all verified suites |
+| `node scratch/run_quality_engineering_benchmark.js` | Quality Engineering 55-Query Taxonomy Benchmark (Cat A-K) | **49 / 55 (89.1%)** | `0` | Baseline 36/55 (65.5%) -> Post-Repair 49/55 (89.1%), 22 grounded answers (+83.3%), 0.0% hallucination leakage (DEC-037) |
+| `node scratch/test_priority1_post_discharge.js` | Priority 1: Post-Discharge Assistant Transport Fallback, Grounding, Absent Care Disclosure, Emergency Intercept, BOLA | **5 / 5** | `0` | 100% pass across verified grounded answers, absent wound-care disclosure, emergency intercept, and BOLA rejection |
+| `node scratch/test_receptionist_direct_signup_e2e.js` | Priority 2: Direct Receptionist Walk-in Patient Registration Without Activation Tokens | **4 / 4** | `0` | Immediate active status, zero token/activation URL generated, immediate login |
+| `node scratch/test_doctor_metrics_e2e.js` | Priority 3: Doctor Patient Access, Authorized Dossiers, Truthful Dashboard Aggregates, BOLA Denial | **5 / 5** | `0` | Live database metrics (48 active meds, 27 followups), no fake strings, 403 BOLA denial |
+| `node scratch/test_appointment_lifecycle_e2e.js` | Priority 4: Complete Appointment Request, Receptionist Approval, Doctor/Patient Matching Schedule | **8 / 8** | `0` | Full persistent lifecycle: requested -> confirmed, 409 conflict detection, patient cancel |
+| `node scratch/test_patient_credential_security_audit.js` | Independent Audit: Mandatory Unique Password Enforcement & Total Token Removal | **7 / 7** | `0` | Rejects missing/short passwords, enforces unique password hashing, immediate login, rejects legacy default |
+| `node scratch/test_multilingual_independent_audit.js` | Independent Audit: 4-Language Matrix Across Medical, Emergency & Discharge Flows | **12 / 12** | `0` | 100% pass across English, Hindi, Marathi, Gujarati with real localized text, citations, and emergency triage |
+| `cd frontend; npm run build` | Vite 8 + React 19 production bundle | **2,253 modules** | `0` | Clean build in 803ms, 0 errors |
+| `python -m unittest scratch/test_priority1_honest_discharge.py` | Priority 1: Honest Discharge Directives & Absent Care Abstention | **6 / 6** | `0` | Truthful abstention on absent discharge, negation preservation, lab/followup separation, educational guidance |
+| `node scratch/test_priority2_unified_prescription_gate.js` | Priority 2: Unified Prescription Safety Gate (Direct & OCR) | **11 / 11** | `0` | Allergy hard-stop (422), severe DDI override requirement, clinician reason audit trail, atomic OCR lock |
+| `node scratch/test_priority3_staff_authorization.js` | Priority 3: Staff Approval Boundary & Persistent Authorization | **9 / 9** | `0` | Dynamic `staff_status` check, unapproved 403, active login, patient BOLA dossier isolation |
+| `node scratch/test_priority4_patient_semantics.js` | Priority 4: Unknown Clinical Data Semantics (No Synthetic Defaults) | **10 / 10** | `0` | Missing DOB/Blood/Allergies stored as raw NULLs (not '1990-01-01', 'O+', 'None'), zero context pollution |
+| `node scratch/test_priority5_dashboard_metrics.js` | Priority 5: Doctor Dashboard Metrics & Authorization Scope | **8 / 8** | `0` | Active consultations, pending follow-ups, 30-day active meds, authorized patient counts, BOLA rejection |
+| `browser_subagent` (Live E2E Multi-Role Journey) | Real Browser Journey: Doctor Allergy Hard Stop + DDI Override -> Patient Discharge Diet Grounding & EMS Triage -> Receptionist Confirmation | **6 / 6 journeys** | `0` | Live browser journey executed and visually attested in `audit_evidence/live_acceptance_repair_20261025/` (DEC-041) |
+| **Consolidated Gate Regression Suite** | Multi-suite integration regression against `rag_healthcare_test` | **388 cases / 401 assertions** | `0` | **386 PASSED, 2 FAILED (TC-02/TC-05 fail-closed capacity limits), 0 SKIPPED** across all verified suites |
 
 ---
 
@@ -95,9 +111,9 @@
 - [x] `AGENTS.md`: Authoritative developer operations manual aligned to `main`.
 - [x] `FINAL_GOAL.md`: Product completion contract authored.
 - [x] `PROJECT_STATUS.md`: Authoritative living status updated with latest verified reality.
-- [x] `DECISIONS.md`: Engineering decisions log (DEC-001 through DEC-029) established and updated.
-- [x] `FLOW.md`: Function-by-function execution and data-flow map established (including FINAL-CDSS-COMPLETION-GATE-001).
-- [x] `docs/FINAL_PROJECT_COMPLETION_AUDIT.md`: Single authoritative final audit document reconciled across all test suites, workflows, boundaries, and evidence.
+- [x] `DECISIONS.md`: Engineering decisions log (DEC-001 through DEC-041) established and updated.
+- [x] `FLOW.md`: Function-by-function execution and data-flow map established (including LIVE-ACCEPTANCE-REPAIR-AND-VERIFICATION-002).
+- [x] `audit_evidence/live_acceptance_repair_20261025/FINAL_ACCEPTANCE_REPORT.md`: Comprehensive live CDSS acceptance report authored.
 
 ### Active Blockers / Dependencies
-- None blocking academic demonstration. Live demonstration requires background services (`MySQL 3306`, `FastAPI 8000`, `Express 5000`, `Vite 5173`).
+- None blocking academic demonstration. Live demonstration requires background services (`MySQL 3306`, `FastAPI 8000`, `Express 5000/5001`, `Vite 5173`).

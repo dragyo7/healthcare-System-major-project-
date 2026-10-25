@@ -45,6 +45,14 @@ export default function Login() {
       }
       setEmail("");
       setPassword("");
+    } else if (params.get("pending_approval") === "true") {
+      setSuccessMessage("Staff registration received. Your account is pending administrative verification before privileged access is granted.");
+      const regRole = params.get("role");
+      if (regRole === "doctor" || regRole === "receptionist") {
+        setRole(regRole);
+      }
+      setEmail("");
+      setPassword("");
     }
   }, [location]);
 
