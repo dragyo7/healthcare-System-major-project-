@@ -2,13 +2,13 @@
 
 > **Status Reference**: Authoritative Living Project Status
 > **Repository**: `dragyo7/healthcare-System-major-project-`
-> **Current Branch**: `codex/presentation-stabilization` (Baseline: `main`)
-> **Snapshot Timing**: 2026-10-25 (Final Release Gate, Password Reset Lifecycle, Supabase Security Reality, Doctor Directory Standardization, DEC-046 verified)
-> **Active Services Status**: Targeted runtime verified with MySQL (3306), FastAPI (8000), Express (5000), and Vite (5173) using `rag_healthcare_test`; default `rag_healthcare` Express startup is blocked by pending schema migrations.
-> **Frozen RAG Implementation Baseline**: Commit `497a547` (V2.10 Hard-Frozen, 2,204 chunks, 190 pass, 2 skip, 0 fail)
-> **Architecture Note**: Single-port entry on port 5173 (`/doctor`, `/patient`, `/receptionist`, `/activate`) per DEC-013 & DEC-034.
-> **Engineering Governance**: Governed by DEC-001 through DEC-046 and `FINAL-CDSS-MIGRATION-SAFETY-001`; DEC-043 supersedes the fabricated-data portions of DEC-030.
-> **Release Gate Verdict**: **PASS — READY TO PUSH** (179/179 automated assertions passed, 26/26 browser states verified, 0 build errors).
+> **Current Branch**: `main`
+> **Snapshot Timing**: 2026-10-25 (Final Mission: Teammate Portability, Appointment Interval Calculus, Multi-Resource Concurrency Engine, Migration 011, DEC-047 verified)
+> **Active Services Status**: Verified portable runtime across MySQL (3306), FastAPI (8000), Express (5000/5001), and Vite (5173) using isolated `rag_healthcare_test`; `scripts/doctor.ps1` reports 14/14 healthy checks.
+> **Frozen RAG Implementation Baseline**: Commit `497a547` (V2.10 Hard-Frozen, 2,204 chunks, 193 pass, 2 skip, 0 fail)
+> **Architecture Note**: Single-port unified entry on port 5173 (`/doctor`, `/patient`, `/receptionist`, `/activate`, `/reset-password`) per DEC-013, DEC-034, DEC-046.
+> **Engineering Governance**: Governed by DEC-001 through DEC-047 and `FINAL-CDSS-MIGRATION-SAFETY-001`.
+> **Release Gate Verdict**: **PASS — TEAMMATE-READY AND END-TO-END VERIFIED** (202/202 automated assertions passed across core suites, 30/30 browser states verified, 14/14 doctor diagnostic checks passed, 0 build errors).
 
 ---
 
@@ -36,6 +36,8 @@
 
 | Test Suite / Runner | Target Boundary | Pass / Total | Exit Code | Verified Execution Notes |
 | :--- | :--- | :---: | :---: | :--- |
+| `powershell ./scripts/doctor.ps1` | Teammate Environment Portability & Service Readiness (14 Pre-flight Checks) | **14 / 14 (100%)** | `0` | Automated environment diagnostic verifying Node >= 18, Python >= 3.9, Git, MySQL 3306, FastAPI 8000, Express 5000/5001, Vite 5173, FAISS index, Synthea archive SHA-256, DDI rules, and HTTP probes |
+| `node scratch/test_appointment_concurrency_and_conflicts.js` | Appointment Interval Validation, Operating Hours, Half-Open Interleaving & Multi-Resource Concurrency (12 Scenarios) | **23 / 23 (100%)** | `0` | Verified 09:00-17:00 Mon-Sat clinic hours, 15-120m bounds, `[start, end)` half-open intervals, rescheduling, BOLA ownership, and sorted multi-resource advisory locking (`['appt_doc_*', 'appt_pat_*'].sort()`) |
 | `node scratch/run_live_acceptance_suite_24.js` | Live 24-Case Acceptance Suite (Doctor Info, Patient Discharge, Rx Safety, Security, Concurrency) | **25 / 25 (100%)** | `0` | 100% pass on all 24 acceptance cases + CONC-01 concurrency slot double-booking conflict (DEC-042) |
 | `node scratch/test_staff_security_gap.js` | Staff Approval Security & Session Revocation (Zero Operator Secret Fallback, Anti-Self-Approval) | **9 / 9** | `0` | Rejects missing/empty secret, prevents doctor self-approval, enforces admin authorization (DEC-041) |
 | `node scratch/test_phase3_express_bridge.js` | Express -> FastAPI CDS Bridge Authentication & Payload Routing | **7 / 7** | `0` | 100% pass across doctor/patient token bridge, evaluation routing, and error contracts |

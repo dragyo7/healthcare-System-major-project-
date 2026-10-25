@@ -7,6 +7,7 @@ const {
     registerPatient,
     getAppointments,
     createAppointment,
+    rescheduleAppointment,
     updateAppointmentStatus
 } = require("../controllers/receptionistController");
 
@@ -21,6 +22,7 @@ router.get("/patients", getPatients);
 router.post("/patients", registerPatient);
 router.get("/appointments", getAppointments);
 router.post("/appointments", createAppointment);
+router.patch("/appointments/:id/reschedule", rescheduleAppointment);
 router.patch("/appointments/:id/status", updateAppointmentStatus);
 
 module.exports = router;

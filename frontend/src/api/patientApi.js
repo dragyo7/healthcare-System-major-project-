@@ -57,6 +57,13 @@ export const patientApi = {
     });
   },
 
+  rescheduleAppointment: async (appointmentId, rescheduleData) => {
+    return await resilientFetch(`/patient/appointments/${appointmentId}/reschedule`, {
+      method: "PATCH",
+      body: JSON.stringify(rescheduleData),
+    });
+  },
+
   evaluateCDS: async ({ clinicalQuery, language = "en", conversationHistory = [] }) => {
     return await resilientFetch("/patient/cds", {
       method: "POST",

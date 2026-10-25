@@ -1,8 +1,8 @@
 {
   "import_metadata": {
-    "source_archive": "C:\\Users\\ABHYUDAYA\\OneDrive\\Desktop\\synthea_sample_data_fhir_r4_nov2021.zip",
+    "source_archive": "E:\\Major Project Code\\data\\synthea\\synthea_sample_data_fhir_r4_nov2021.zip",
     "archive_sha256": "6d3c5433bcae4791bc5c30469d1445b430fb4894d5c13bda15fee0584bbd7778",
-    "import_timestamp": "2026-10-25T20:08:04.763313",
+    "import_timestamp": "2026-10-25T22:51:57.414800",
     "target_database": "rag_healthcare_test",
     "time_policy": "Historical Synthea source dates retained; missing dates remain unavailable.",
     "clinical_status_policy": "MedicationRequests remain historical source data; no current prescription or clinician approval is inferred.",

@@ -26,6 +26,15 @@ export default function ReceptionistAppointments() {
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
 
+  const [rescheduleModal, setRescheduleModal] = useState({
+    open: false,
+    appointment: null,
+    newDate: "",
+    newStartTime: "10:00:00",
+    error: "",
+    submitting: false,
+  });
+
   const [formData, setFormData] = useState({
     patient_id: "",
     doctor_id: "",
@@ -64,15 +73,16 @@ export default function ReceptionistAppointments() {
   }, []);
 
   useEffect(() => {
-    if (!showModal) return;
+    if (!showModal && !rescheduleModal.open) return;
     const handleKeyDown = (e) => {
       if (e.key === "Escape") {
         setShowModal(false);
+        setRescheduleModal((prev) => ({ ...prev, open: false }));
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [showModal]);
+  }, [showModal, rescheduleModal.open]);
 
   const handleStatusChange = async (appointmentId, newStatus) => {
     try {
@@ -82,6 +92,27 @@ export default function ReceptionistAppointments() {
       );
     } catch (err) {
       alert("Failed to update status: " + err.message);
+    }
+  };
+
+  const handleRescheduleSubmit = async (e) => {
+    e.preventDefault();
+    if (!rescheduleModal.appointment) return;
+    setRescheduleModal((prev) => ({ ...prev, submitting: true, error: "" }));
+
+    try {
+      await receptionistApi.rescheduleAppointment(rescheduleModal.appointment.appointment_id, {
+        appointment_date: rescheduleModal.newDate,
+        start_time: rescheduleModal.newStartTime,
+      });
+      setRescheduleModal({ open: false, appointment: null, newDate: "", newStartTime: "10:00:00", error: "", submitting: false });
+      loadData();
+    } catch (err) {
+      setRescheduleModal((prev) => ({
+        ...prev,
+        submitting: false,
+        error: err.message || "Failed to reschedule appointment.",
+      }));
     }
   };
 
@@ -250,6 +281,22 @@ export default function ReceptionistAppointments() {
                       {["scheduled", "confirmed"].includes((a.status || "").toLowerCase()) && (
                         <>
                           <button
+                            onClick={() =>
+                              setRescheduleModal({
+                                open: true,
+                                appointment: a,
+                                newDate: a.appointment_date ? new Date(a.appointment_date).toISOString().split("T")[0] : "",
+                                newStartTime: a.start_time || "10:00:00",
+                                error: "",
+                                submitting: false,
+                              })
+                            }
+                            className="px-2 py-1 rounded bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 font-semibold text-[11px] transition cursor-pointer"
+                            title={t("Reschedule consultation slot")}
+                          >
+                            {t("Reschedule")}
+                          </button>
+                          <button
                             onClick={() => handleStatusChange(a.appointment_id, "completed")}
                             className="px-2 py-1 rounded bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 font-semibold text-[11px] transition cursor-pointer"
                             title={t("Mark Completed")}
@@ -415,6 +462,115 @@ export default function ReceptionistAppointments() {
                     </>
                   ) : (
                     "Confirm Booking"
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Reschedule Modal */}
+      {rescheduleModal.open && rescheduleModal.appointment && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="bg-card w-full max-w-md rounded-2xl border border-border p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-border">
+              <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-primary" />
+                {t("Reschedule Consultation")} #{rescheduleModal.appointment.appointment_id}
+              </h2>
+              <button
+                onClick={() => setRescheduleModal((prev) => ({ ...prev, open: false }))}
+                className="p-1 rounded-lg text-muted-foreground hover:bg-muted transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-3 bg-muted/40 rounded-xl space-y-1 text-xs">
+              <p className="font-semibold text-foreground">
+                {t("Patient")}: {rescheduleModal.appointment.patient_name || `Patient #${rescheduleModal.appointment.patient_id}`}
+              </p>
+              <p className="text-muted-foreground">
+                {t("Physician")}: Dr. {rescheduleModal.appointment.doctor_name || "Specialist"}
+              </p>
+              <p className="text-[11px] text-primary/80 font-medium">
+                Clinic Operating Hours: 09:00 - 17:00 (Mon - Sat)
+              </p>
+            </div>
+
+            {rescheduleModal.error && (
+              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 shrink-0" />
+                <span>{rescheduleModal.error}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleRescheduleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1">
+                  {t("New Appointment Date")}
+                </label>
+                <input
+                  type="date"
+                  required
+                  value={rescheduleModal.newDate}
+                  min={new Date().toISOString().split("T")[0]}
+                  onChange={(e) =>
+                    setRescheduleModal((prev) => ({ ...prev, newDate: e.target.value }))
+                  }
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-xs focus:ring-2 focus:ring-primary focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1">
+                  {t("New Start Time")} (09:00 - 17:00)
+                </label>
+                <select
+                  value={rescheduleModal.newStartTime}
+                  onChange={(e) =>
+                    setRescheduleModal((prev) => ({ ...prev, newStartTime: e.target.value }))
+                  }
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-xs focus:ring-2 focus:ring-primary focus:outline-none"
+                >
+                  <option value="09:00:00">09:00 AM</option>
+                  <option value="09:30:00">09:30 AM</option>
+                  <option value="10:00:00">10:00 AM</option>
+                  <option value="10:30:00">10:30 AM</option>
+                  <option value="11:00:00">11:00 AM</option>
+                  <option value="11:30:00">11:30 AM</option>
+                  <option value="12:00:00">12:00 PM</option>
+                  <option value="12:30:00">12:30 PM</option>
+                  <option value="14:00:00">02:00 PM</option>
+                  <option value="14:30:00">02:30 PM</option>
+                  <option value="15:00:00">03:00 PM</option>
+                  <option value="15:30:00">03:30 PM</option>
+                  <option value="16:00:00">04:00 PM</option>
+                  <option value="16:30:00">04:30 PM</option>
+                </select>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-border">
+                <button
+                  type="button"
+                  onClick={() => setRescheduleModal((prev) => ({ ...prev, open: false }))}
+                  className="px-3 py-1.5 rounded-lg border border-border hover:bg-muted text-xs font-semibold transition"
+                >
+                  {t("Cancel")}
+                </button>
+                <button
+                  type="submit"
+                  disabled={rescheduleModal.submitting}
+                  className="px-4 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition shadow-xs disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  {rescheduleModal.submitting ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      {t("Rescheduling...")}
+                    </>
+                  ) : (
+                    t("Confirm Reschedule")
                   )}
                 </button>
               </div>

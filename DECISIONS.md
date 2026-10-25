@@ -1240,3 +1240,45 @@
   - `cd frontend; npm run build`: **0 ERRORS (2,253 modules built in 851ms)**
   - Browser Verification: **26 / 26 States Verified & Captured**.
   - Release Decision: **PASS — READY TO PUSH**.
+
+---
+
+### DEC-047 — Teammate Environment Portability, Appointment Interval Calculus, and Concurrency Serialization Engine
+- **Date**: 2026-10-25
+- **Status**: **Accepted & Binding**
+- **Context & Problem Statement**:
+  1. The final release mission requires the CDSS platform to be portable, secure, clinically grounded, and end-to-end functional for any teammate cloning the repository onto a clean Windows PC.
+  2. Previously, mysqld binary was hardcoded to `C:\Program Files\MySQL\...`, which fails on machines with different MySQL installation paths or service configurations.
+  3. Synthea FHIR archive had an absolute user path (`C:\Users\ABHYUDAYA\OneDrive\Desktop\...`). Teammates needed automated discovery inside the repo (`data/synthea/`, `scratch/`, or `$env:SYNTHEA_ARCHIVE`).
+  4. Appointment scheduling required strict clinic operating hours (09:00 - 17:00, Monday through Saturday, Sunday closed), 30-minute standard slot calculation, half-open interval collision prevention `[start, end)` (`existing_start < requested_end AND existing_end > requested_start`), and rescheduling endpoints for both receptionists and patients with BOLA enforcement.
+  5. Under concurrent booking races, multi-resource contention (same patient across different doctors) previously triggered InnoDB deadlocks (`ER_LOCK_DEADLOCK`).
+- **Decision & Engineering Execution**:
+  1. **Migration 011 (Enhanced Appointment Intervals & Audit Timestamps)**:
+     - Applied `migrations/011_enhance_appointment_intervals_and_audit.sql` on `rag_healthcare_test`.
+     - Added `created_at` (TIMESTAMP) and `updated_at` (TIMESTAMP ON UPDATE).
+     - Added composite indexes: `idx_doc_appt_interval (doctor_id, appointment_date, start_time, end_time)` and `idx_pat_appt_interval (patient_id, appointment_date, start_time, end_time)`.
+  2. **Appointment Validation Engine**:
+     - Built `src/utils/appointmentValidation.js` with:
+       - Standard clinic operating hours: 09:00 - 17:00, Monday through Saturday (Sunday closed).
+       - Duration bounds: 15 to 120 minutes (default 30 mins).
+       - Half-open interval conflict check: `existing_start < requested_end AND existing_end > requested_start`.
+       - Active status reservation: `pending`, `scheduled`, `confirmed`.
+  3. **Deterministic Multi-Resource Advisory Locking Engine**:
+     - Serialized bookings on both doctor and patient schedules:
+       `lockNames = ['appt_doc_' + doctor_id + '_' + date, 'appt_pat_' + patient_id + '_' + date].sort()`
+     - Alphabetical sorting eliminates circular-wait deadlock conditions across concurrent connections.
+     - Deadlock resilience: Catches `ER_LOCK_DEADLOCK` and returns HTTP 409 Conflict rather than 500.
+  4. **Rescheduling Endpoints & UI**:
+     - Added `PATCH /api/receptionist/appointments/:id/reschedule` and `PATCH /api/patient/appointments/:id/reschedule` (with BOLA ownership checks).
+     - Added Reschedule Modal and Operating Hours guidance to `Appointments.jsx`.
+  5. **Teammate Portability & Diagnostic Doctor Tooling**:
+     - Built `scripts/doctor.ps1`: Automated diagnostic tool verifying 14 pre-flight checks across runtimes (Node >= 18, Python >= 3.9, Git), ports (3306, 8000, 5000, 5001, 5173), clinical datasets (FAISS index, Synthea SHA-256), and HTTP health probes.
+     - Updated `scripts/start_platform.ps1`: Replaced hardcoded paths with dynamic multi-source discovery (Windows Services, PATH, standard paths).
+     - Relocated Synthea archive to `data/synthea/` with automated discovery.
+- **Verification Evidence**:
+  - `scripts/doctor.ps1`: **14 / 14 checks passed (100%)**.
+  - `scratch/test_appointment_concurrency_and_conflicts.js`: **23 / 23 assertions passed (100% across all 12 scenarios)**.
+  - `scratch/verify_e2e_10_scenarios.js`: **10 / 10 passed (100%)**.
+  - `scratch/test_patient_and_discharge.js`: **14 / 14 passed (100%)**.
+  - Browser Verification: **30 / 30 verified states captured in `audit_evidence/portable_release_gate_20261025/`**.
+  - Release Decision: **PASS — TEAMMATE-READY AND END-TO-END VERIFIED**.

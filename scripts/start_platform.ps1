@@ -64,19 +64,38 @@ Write-Host "`n[1/4] Verifying MySQL EHR Database (Port $MysqlPort)..." -Foregrou
 if (Test-PortOpen $MysqlPort) {
     Write-Host "  -> MySQL Database is active on port $MysqlPort." -ForegroundColor Green
 } else {
-    Write-Host "  -> Launching local MySQL Server instance..." -ForegroundColor Gray
-    $mysqldPath = "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysqld.exe"
-    $dataDir = Join-Path $RepoRoot "scratch\mysql_data"
-    if (Test-Path $mysqldPath) {
-        Start-Process -FilePath $mysqldPath -ArgumentList "--datadir=`"$dataDir`"", "--port=$MysqlPort", "--console" -WindowStyle Minimized
+    Write-Host "  -> Attempting dynamic discovery of local MySQL Server..." -ForegroundColor Gray
+
+    # Check if a Windows MySQL Service exists and can be started
+    $svc = Get-Service -Name "MySQL*", "MySQL80" -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($svc -and $svc.Status -ne "Running") {
+        Write-Host "  -> Starting Windows service $($svc.Name)..." -ForegroundColor Gray
+        Start-Service -Name $svc.Name -ErrorAction SilentlyContinue
         Start-Sleep -Seconds 3
-        if (Test-PortOpen $MysqlPort) {
-            Write-Host "  -> MySQL successfully started on port $MysqlPort." -ForegroundColor Green
-        } else {
-            Write-Host "  [WARN] MySQL did not respond immediately on port $MysqlPort. Ensure MySQL service is running." -ForegroundColor Red
+    }
+
+    if (-not (Test-PortOpen $MysqlPort)) {
+        $dataDir = Join-Path $RepoRoot "scratch\mysql_data"
+        $mysqldCandidates = @(
+            (Get-Command mysqld -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source -ErrorAction SilentlyContinue),
+            "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysqld.exe",
+            "C:\Program Files\MySQL\MySQL Server 8.1\bin\mysqld.exe",
+            "C:\Program Files\MySQL\MySQL Server 8.4\bin\mysqld.exe",
+            "C:\xampp\mysql\bin\mysqld.exe"
+        ) | Where-Object { $_ -and (Test-Path $_) }
+
+        $mysqldPath = $mysqldCandidates | Select-Object -First 1
+        if ($mysqldPath) {
+            Write-Host "  -> Launching discovered mysqld binary: $mysqldPath" -ForegroundColor Gray
+            Start-Process -FilePath $mysqldPath -ArgumentList "--datadir=`"$dataDir`"", "--port=$MysqlPort", "--console" -WindowStyle Minimized
+            Start-Sleep -Seconds 3
         }
+    }
+
+    if (Test-PortOpen $MysqlPort) {
+        Write-Host "  -> MySQL successfully active on port $MysqlPort." -ForegroundColor Green
     } else {
-        Write-Host "  [WARN] mysqld.exe not found at standard path. Ensure MySQL 8.0 is running on port 3306." -ForegroundColor Yellow
+        Write-Host "  [WARN] MySQL did not respond on port $MysqlPort. Ensure MySQL 8.0 is running on port 3306." -ForegroundColor Yellow
     }
 }
 

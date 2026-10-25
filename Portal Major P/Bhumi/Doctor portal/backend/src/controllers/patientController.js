@@ -17,6 +17,7 @@ const db = require("../config/db");
 const PDFDocument = require("pdfkit");
 const { sanitizePatientContext, forwardToFastAPICDS } = require("../services/cdsBridgeService");
 const { generatePrescriptionPdfStream } = require("../services/prescriptionPdfService");
+const { validateClinicHours, checkAppointmentConflict } = require("../utils/appointmentValidation");
 
 /**
  * Helper: Resolve the authenticated user's actual patient record
@@ -410,8 +411,15 @@ const getAvailableDoctors = async (req, res) => {
  * Patient requests a consultation appointment with a selected physician.
  * Body: { doctor_id, appointment_date, start_time, end_time, reason }
  */
+/**
+ * POST /api/patient/appointments
+ * Patient requests a consultation appointment with a selected physician.
+ * Validates clinic operating hours (09:00 - 17:00, Mon-Sat) and serialized conflict prevention.
+ * Body: { doctor_id, appointment_date, start_time, end_time, reason }
+ */
 const requestAppointment = async (req, res) => {
-    let connection;
+    let connection = null;
+    let lockNames = [];
     try {
         const patient = await getAuthenticatedPatient(req.user.user_id);
         if (!patient) {
@@ -427,16 +435,25 @@ const requestAppointment = async (req, res) => {
             });
         }
 
-        const apptDate = new Date(appointment_date);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        if (isNaN(apptDate.getTime()) || apptDate < today) {
-            return res.status(400).json({
-                message: "Appointment date must be today or a future date"
-            });
+        // Validate clinic hours (09:00 - 17:00, Monday-Saturday, Sunday closed)
+        const hoursCheck = validateClinicHours(appointment_date, effectiveStartTime, end_time);
+        if (!hoursCheck.valid) {
+            return res.status(400).json({ message: hoursCheck.message });
         }
 
         connection = await db.getConnection();
+
+        // Concurrency serialization locks on both doctor and patient schedules for the date
+        // Sorted alphabetically to guarantee deadlock-free locking order across connections
+        lockNames = [
+            `appt_doc_${doctor_id}_${appointment_date}`,
+            `appt_pat_${patient.patient_id}_${appointment_date}`
+        ].sort();
+
+        for (const lk of lockNames) {
+            await connection.execute("SELECT GET_LOCK(?, 10) AS lock_acquired", [lk]);
+        }
+
         await connection.beginTransaction();
 
         // 1. Verify doctor exists
@@ -453,56 +470,25 @@ const requestAppointment = async (req, res) => {
             return res.status(404).json({ message: "Selected physician does not exist" });
         }
 
-        // Resolve end_time: default to +30 mins if not provided
-        let calcEndTime = end_time;
-        if (!calcEndTime) {
-            const [hours, minutes] = effectiveStartTime.split(":");
-            const startMins = parseInt(hours, 10) * 60 + parseInt(minutes || "0", 10);
-            const endMins = startMins + 30;
-            const endH = String(Math.floor(endMins / 60) % 24).padStart(2, "0");
-            const endM = String(endMins % 60).padStart(2, "0");
-            calcEndTime = `${endH}:${endM}:00`;
-        }
+        // 2. Prevent doctor and patient slot overlaps (half-open [start, end))
+        const conflictCheck = await checkAppointmentConflict(connection, {
+            doctorId: doctor_id,
+            patientId: patient.patient_id,
+            appointmentDate: appointment_date,
+            startTime: hoursCheck.startTime,
+            endTime: hoursCheck.endTime
+        });
 
-        // 2. Prevent doctor double-booking (interval overlap check)
-        const [existingDoctorSlots] = await connection.execute(
-            `SELECT appointment_id FROM appointments
-             WHERE doctor_id = ? AND appointment_date = ?
-               AND status IN ('pending', 'scheduled', 'confirmed')
-               AND (start_time < ? AND end_time > ?)
-             FOR UPDATE`,
-            [doctor_id, appointment_date, calcEndTime, effectiveStartTime]
-        );
-
-        if (existingDoctorSlots.length > 0) {
+        if (conflictCheck.conflict) {
             await connection.rollback();
-            return res.status(409).json({
-                message: "The requested time slot is already reserved for this physician. Please choose another time or date."
-            });
+            return res.status(409).json({ message: conflictCheck.message });
         }
 
-        // 3. Prevent patient double-booking (interval overlap check)
-        const [existingPatientSlots] = await connection.execute(
-            `SELECT appointment_id FROM appointments
-             WHERE patient_id = ? AND appointment_date = ?
-               AND status IN ('pending', 'scheduled', 'confirmed')
-               AND (start_time < ? AND end_time > ?)
-             FOR UPDATE`,
-            [patient.patient_id, appointment_date, calcEndTime, effectiveStartTime]
-        );
-
-        if (existingPatientSlots.length > 0) {
-            await connection.rollback();
-            return res.status(409).json({
-                message: "You already have a consultation booked or pending at this date and time."
-            });
-        }
-
-        // 4. Create appointment with status 'pending'
+        // 3. Create appointment with status 'pending'
         const [insertResult] = await connection.execute(
             `INSERT INTO appointments (doctor_id, patient_id, appointment_date, start_time, end_time, reason, status)
              VALUES (?, ?, ?, ?, ?, ?, 'pending')`,
-            [doctor_id, patient.patient_id, appointment_date, effectiveStartTime, calcEndTime, reason || null]
+            [doctor_id, patient.patient_id, appointment_date, hoursCheck.startTime, hoursCheck.endTime, reason || null]
         );
 
         await connection.commit();
@@ -515,8 +501,8 @@ const requestAppointment = async (req, res) => {
                 doctor_name: doctorRows[0].full_name,
                 patient_id: patient.patient_id,
                 appointment_date,
-                start_time: effectiveStartTime,
-                end_time: calcEndTime,
+                start_time: hoursCheck.startTime,
+                end_time: hoursCheck.endTime,
                 reason: reason || null,
                 status: "pending"
             }
@@ -527,9 +513,146 @@ const requestAppointment = async (req, res) => {
             try { await connection.rollback(); } catch (_) {}
         }
         console.error("Patient requestAppointment error:", error);
+        if (error.code === 'ER_LOCK_DEADLOCK') {
+            return res.status(409).json({ message: "Scheduling conflict detected due to concurrent booking attempt." });
+        }
         return res.status(500).json({ message: "Server error scheduling appointment request" });
     } finally {
-        if (connection) connection.release();
+        if (connection) {
+            if (lockNames && lockNames.length > 0) {
+                for (const lk of lockNames) {
+                    try { await connection.execute("SELECT RELEASE_LOCK(?)", [lk]); } catch (_) {}
+                }
+            }
+            connection.release();
+        }
+    }
+};
+
+/**
+ * PATCH /api/patient/appointments/:id/reschedule
+ * Patient reschedules their own appointment with conflict checking.
+ */
+const reschedulePatientAppointment = async (req, res) => {
+    let connection = null;
+    let lockNames = [];
+    try {
+        const patient = await getAuthenticatedPatient(req.user.user_id);
+        if (!patient) {
+            return res.status(404).json({ message: "Patient record not found" });
+        }
+
+        const appointmentId = parseInt(req.params.id, 10);
+        if (isNaN(appointmentId)) {
+            return res.status(400).json({ message: "Invalid appointment ID" });
+        }
+
+        const { appointment_date, start_time, appointment_time, end_time, reason } = req.body || {};
+        const effectiveStartTime = start_time || appointment_time;
+
+        if (!appointment_date || !effectiveStartTime) {
+            return res.status(400).json({
+                message: "appointment_date and start_time are required to reschedule"
+            });
+        }
+
+        // Validate clinic hours (09:00 - 17:00, Mon-Sat)
+        const hoursCheck = validateClinicHours(appointment_date, effectiveStartTime, end_time);
+        if (!hoursCheck.valid) {
+            return res.status(400).json({ message: hoursCheck.message });
+        }
+
+        connection = await db.getConnection();
+
+        const [rows] = await connection.execute(
+            "SELECT appointment_id, doctor_id, patient_id, appointment_date, start_time, end_time, status FROM appointments WHERE appointment_id = ?",
+            [appointmentId]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: "Appointment not found" });
+        }
+
+        const appt = rows[0];
+
+        // BOLA authorization check
+        if (appt.patient_id !== patient.patient_id) {
+            return res.status(403).json({
+                message: "Access denied: You are not authorized to reschedule this appointment"
+            });
+        }
+
+        const currentStatus = (appt.status || "pending").toLowerCase();
+        if (["completed", "cancelled", "rejected"].includes(currentStatus)) {
+            return res.status(400).json({
+                message: `Cannot reschedule appointment with terminal status '${currentStatus}'`
+            });
+        }
+
+        lockNames = [
+            `appt_doc_${appt.doctor_id}_${appointment_date}`,
+            `appt_pat_${patient.patient_id}_${appointment_date}`
+        ].sort();
+
+        for (const lk of lockNames) {
+            await connection.execute("SELECT GET_LOCK(?, 10) AS lock_acquired", [lk]);
+        }
+
+        await connection.beginTransaction();
+
+        // Check for doctor and patient conflicts, excluding current appointment
+        const conflictCheck = await checkAppointmentConflict(connection, {
+            doctorId: appt.doctor_id,
+            patientId: patient.patient_id,
+            appointmentDate: appointment_date,
+            startTime: hoursCheck.startTime,
+            endTime: hoursCheck.endTime,
+            excludeAppointmentId: appointmentId
+        });
+
+        if (conflictCheck.conflict) {
+            await connection.rollback();
+            return res.status(409).json({ message: conflictCheck.message });
+        }
+
+        await connection.execute(
+            `UPDATE appointments
+             SET appointment_date = ?, start_time = ?, end_time = ?, reason = COALESCE(?, reason), status = 'pending'
+             WHERE appointment_id = ?`,
+            [appointment_date, hoursCheck.startTime, hoursCheck.endTime, reason || null, appointmentId]
+        );
+
+        await connection.commit();
+
+        return res.status(200).json({
+            message: "Appointment reschedule requested successfully. Pending review by clinic reception.",
+            appointment_id: appointmentId,
+            doctor_id: appt.doctor_id,
+            patient_id: patient.patient_id,
+            appointment_date,
+            start_time: hoursCheck.startTime,
+            end_time: hoursCheck.endTime,
+            status: "pending"
+        });
+
+    } catch (error) {
+        if (connection) {
+            try { await connection.rollback(); } catch (_) {}
+        }
+        console.error("Patient reschedulePatientAppointment error:", error);
+        if (error.code === 'ER_LOCK_DEADLOCK') {
+            return res.status(409).json({ message: "Scheduling conflict detected due to concurrent booking attempt." });
+        }
+        return res.status(500).json({ message: "Server error rescheduling appointment" });
+    } finally {
+        if (connection) {
+            if (lockNames && lockNames.length > 0) {
+                for (const lk of lockNames) {
+                    try { await connection.execute("SELECT RELEASE_LOCK(?)", [lk]); } catch (_) {}
+                }
+            }
+            connection.release();
+        }
     }
 };
 
@@ -802,6 +925,7 @@ module.exports = {
     getPatientAppointments,
     getAvailableDoctors,
     requestAppointment,
+    reschedulePatientAppointment,
     cancelPatientAppointment,
     evaluatePatientCDS,
     generatePatientPrescriptionPDF

@@ -43,4 +43,11 @@ export const receptionistApi = {
       body: JSON.stringify({ status }),
     });
   },
+
+  rescheduleAppointment: async (appointmentId, rescheduleData) => {
+    return await resilientFetch(`/receptionist/appointments/${appointmentId}/reschedule`, {
+      method: "PATCH",
+      body: JSON.stringify(rescheduleData),
+    });
+  },
 };

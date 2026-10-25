@@ -23,7 +23,24 @@ Before starting the platform, ensure that the following runtime environments and
 
 ---
 
-## 2. Repository Layout & Architecture
+## 2. Automated Diagnostic Doctor Check (Step 0)
+
+Before starting services or executing tests, run the comprehensive environment diagnostic:
+
+```powershell
+# From the repository root:
+powershell -ExecutionPolicy Bypass -File ./scripts/doctor.ps1
+```
+
+This diagnostic probe verifies 14 pre-flight readiness criteria:
+- **Runtimes & CLI Tools**: Node.js (>= 18), Python (>= 3.9), Git.
+- **Port Bindings**: Port 3306 (MySQL), Port 8000 (FastAPI), Port 5000/5001 (Express), Port 5173 (Vite).
+- **Clinical Artifacts**: Production FAISS Vector Index (`index_v2.bin`, `meta_v2.pkl` with 2,204 chunks), Synthea FHIR R4 Archive SHA-256 validation (`6D3C5433BCAE4791BC5C30469D1445B430FB4894D5C13BDA15FEE0584BBD7778`), and DrugBank interaction rules.
+- **Live HTTP Health Probes**: FastAPI `/health`, Express Dev `/health`, and Express Test `/health`.
+
+---
+
+## 3. Repository Layout & Architecture
 
 The system consists of three decoupled layers communicating over localhost REST interfaces:
 
@@ -42,17 +59,21 @@ E:\Major Project Code\
 │   └── Bhumi/Doctor portal/
 │       └── backend/               # Express EHR Backend & OCR Pipeline (Port 5000 / 5001)
 │           ├── server.js          # Entry point
-│           ├── src/controllers/   # doctorController, patientController, prescriptionController
+│           ├── src/controllers/   # doctorController, patientController, receptionistController
 │           └── src/middleware/    # authMiddleware, databaseSafetyGuard.js
 ├── frontend/                      # Unified React 18 + Vite Clinical Portal (Port 5173)
 │   ├── src/                       # Components, Pages, State Context, API clients
 │   └── package.json
+├── data/                          # Production indices, clinical rules, and Synthea archive
+│   ├── faiss_index/               # 2,204 chunks production index
+│   ├── synthea/                   # synthea_sample_data_fhir_r4_nov2021.zip
+│   └── rules/                     # DrugBank & SIDER interaction rules
 └── audit_evidence/                # Verification reports, screenshots, Synthea manifests
 ```
 
 ---
 
-## 3. Environment Variables Configuration
+## 4. Environment Variables Configuration
 
 Copy the example environment template or configure the environment variables as shown below. 
 
@@ -99,13 +120,13 @@ $env:FASTAPI_PORT = "8000"
 
 ---
 
-## 4. Database Setup & Safe Migration Order
+## 5. Database Setup & Safe Migration Order
 
 The platform enforces strict isolation between:
 1. `rag_healthcare`: Primary production database (Protected by `databaseSafetyGuard.js`).
 2. `rag_healthcare_test`: Isolated verification and demonstration database.
 
-### Step 4.1: Start MySQL Server
+### Step 5.1: Start MySQL Server
 If MySQL is not already running as a Windows service, launch it via PowerShell:
 
 ```powershell
@@ -120,7 +141,7 @@ Verify port 3306 is listening:
 Get-NetTCPConnection -LocalPort 3306 -State Listen
 ```
 
-### Step 4.2: Prepare the Isolated Test Database
+### Step 5.2: Prepare the Isolated Test Database
 Execute the schema creation and migrations against `rag_healthcare_test`:
 
 ```powershell
@@ -135,9 +156,11 @@ mysql -u root -p rag_healthcare_test < "Portal Major P\Bhumi\Doctor portal\backe
 mysql -u root -p rag_healthcare_test < "Portal Major P\Bhumi\Doctor portal\backend\src\migrations\003_create_prescription_ocr_jobs.sql"
 mysql -u root -p rag_healthcare_test < "Portal Major P\Bhumi\Doctor portal\backend\src\migrations\004_account_activation_and_roles.sql"
 mysql -u root -p rag_healthcare_test < "migrations\010_create_password_resets.sql"
+mysql -u root -p rag_healthcare_test < "migrations\011_enhance_appointment_intervals_and_audit.sql"
 
 # Standardize and clean doctor directory (deterministic referential integrity):
 node scratch/clean_doctor_directory.js
+```
 ```
 
 ---

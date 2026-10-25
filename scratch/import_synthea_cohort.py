@@ -413,12 +413,22 @@ def run_import(zip_path: str, manifest_path: str, db_config: dict, dry_run: bool
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Import Synthea FHIR R4 presentation cohort")
-    parser.add_argument("--archive", default=os.getenv("SYNTHEA_ARCHIVE"), help="Path to the Synthea FHIR R4 ZIP archive")
+    default_archive = os.getenv("SYNTHEA_ARCHIVE")
+    if not default_archive:
+        repo_data_zip = os.path.join(REPO_ROOT, "data", "synthea", "synthea_sample_data_fhir_r4_nov2021.zip")
+        repo_scratch_zip = os.path.join(REPO_ROOT, "scratch", "synthea_sample_data_fhir_r4_nov2021.zip")
+        desktop_zip = os.path.join(os.path.expanduser("~"), "OneDrive", "Desktop", "synthea_sample_data_fhir_r4_nov2021.zip")
+        for candidate in [repo_data_zip, repo_scratch_zip, desktop_zip]:
+            if os.path.isfile(candidate):
+                default_archive = candidate
+                break
+
+    parser.add_argument("--archive", default=default_archive, help="Path to the Synthea FHIR R4 ZIP archive")
     parser.add_argument("--manifest", default=os.getenv("SYNTHEA_MANIFEST", DEFAULT_MANIFEST_PATH))
     parser.add_argument("--db-host", default=os.getenv("DB_HOST", "127.0.0.1"))
     parser.add_argument("--db-port", type=int, default=int(os.getenv("DB_PORT", "3306")))
     parser.add_argument("--db-user", default=os.getenv("DB_USER", "root"))
-    parser.add_argument("--db-password", default=os.getenv("DB_PASSWORD"))
+    parser.add_argument("--db-password", default=os.getenv("DB_PASSWORD", "bhumi"))
     parser.add_argument("--db-name", default=os.getenv("DB_NAME", "rag_healthcare_test"))
     parser.add_argument("--patient-password-hash", default=os.getenv("SYNTHEA_PATIENT_PASSWORD_HASH"))
     parser.add_argument("--dry-run", action="store_true", help="Preview mapping outcomes without modifying database")
@@ -428,7 +438,7 @@ if __name__ == "__main__":
     # Default to dry-run unless --live explicitly passed
     is_dry = not args.live
     if not args.archive:
-        parser.error("--archive or SYNTHEA_ARCHIVE is required")
+        parser.error("--archive or SYNTHEA_ARCHIVE is required (or place archive in data/synthea/)")
     run_import(
         zip_path=args.archive,
         manifest_path=args.manifest,

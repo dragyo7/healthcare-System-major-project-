@@ -10,6 +10,7 @@ const {
     getPatientAppointments,
     getAvailableDoctors,
     requestAppointment,
+    reschedulePatientAppointment,
     cancelPatientAppointment,
     evaluatePatientCDS,
     generatePatientPrescriptionPDF
@@ -30,6 +31,7 @@ router.get("/discharge", authenticatePatient, getPatientDischarge);
 router.get("/appointments", authenticatePatient, getPatientAppointments);
 router.get("/doctors", authenticatePatient, getAvailableDoctors);
 router.post("/appointments", authenticatePatient, requestAppointment);
+router.patch("/appointments/:id/reschedule", authenticatePatient, reschedulePatientAppointment);
 router.patch("/appointments/:id/cancel", authenticatePatient, cancelPatientAppointment);
 
 /**

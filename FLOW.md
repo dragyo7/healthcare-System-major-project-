@@ -927,35 +927,29 @@ ag_healthcare 100% UNTOUCHED (176 users, 15 doctors).
   1. **Password Reset Full Lifecycle**:
      - Database: Applied `migrations/010_create_password_resets.sql` cleanly to `rag_healthcare_test`.
      - Backend: Implemented `POST /api/auth/forgot-password`, `GET /api/auth/verify-reset-token`, and `POST /api/auth/reset-password` in `authController.js` and `authRoutes.js`.
-     - Frontend: Updated `ForgotPassword.jsx` to dispatch to the backend API. Refactored `ResetPassword.jsx` to verify single-use tokens on mount and submit updates to Express. Wrapped `/reset-password` in `<GuestRoute>` in `AppRoutes.jsx`.
-     - Verified: `test_password_reset_flow.js` passes 21/21 assertions.
-  2. **Supabase Security & RBAC Boundary**:
-     - Verified `frontend/.env` points to dead-DNS host; zero service-role keys in bundle.
-     - Verified `authService.js` client role sanitization and server-side RBAC in Express gateway.
-     - Verified: `test_supabase_security_and_deployment.js` passes 35/35 assertions.
-  3. **Doctor Directory Standardization**:
-     - Audited and cleaned 43 test artifact records from `rag_healthcare_test.doctors` via `scratch/clean_doctor_directory.js`.
-     - Reassigned 40 appointments to Dr. Rahul Sharma (`doctor_id = 1`) with 0 orphaned appointments and 0 orphaned prescriptions.
-     - Standardized 4 canonical approved clinicians: Dr. Rahul Sharma (Cardiology), Dr. Priya Nair (General Medicine), Dr. Elena Vance (Cardiology), and Dr. Kavita Verma (Neurology).
-     - Added `WHERE u.staff_status = 'approved'` filtering to `patientController.js` and `receptionistController.js`.
-  4. **Antigravity Browser Verification (26 States)**:
-     - Executed 26 required states across light/dark modes, logins, doctor roster, Synthea patient dossiers, allergy hard stops, severe DDI warnings, prescription PDF generation, grounded recovery assistant, honest absence disclosures, Hindi UI, and mobile viewports.
-     - Packaged screenshots and generated `audit_evidence/final_release_gate_20261025/evidence_manifest.json`.
+- **Current Change (2026-10-25 — Teammate Environment Portability & Appointment Concurrency Hardening)**:
+  1. **Migration 011 & Interval Calculus**:
+     - Applied `migrations/011_enhance_appointment_intervals_and_audit.sql` to `rag_healthcare_test`.
+     - Built `src/utils/appointmentValidation.js`: Enforces clinic operating hours (09:00 - 17:00, Mon-Sat, Sunday closed), half-open interval overlap prevention `[start, end)` (`existing_start < requested_end AND existing_end > requested_start`), and duration bounds (15-120 minutes).
+  2. **Deterministic Multi-Resource Concurrency Engine**:
+     - Serialized concurrent appointment requests on both doctor and patient schedules:
+       `lockNames = ['appt_doc_' + doctor_id + '_' + date, 'appt_pat_' + patient_id + '_' + date].sort()`
+     - Alphabetical sorting prevents circular-wait deadlocks across multiple connections.
+     - Deadlock resilience: Catches `ER_LOCK_DEADLOCK` and returns HTTP 409 Conflict.
+  3. **Rescheduling Endpoints & Receptionist UI**:
+     - Added `PATCH /api/receptionist/appointments/:id/reschedule` and `PATCH /api/patient/appointments/:id/reschedule` (with BOLA ownership checks).
+     - Enhanced Receptionist `Appointments.jsx` with Reschedule Modal and Operating Hours validation.
+  4. **Teammate Portability & Diagnostic Doctor Tooling**:
+     - Created `scripts/doctor.ps1`: Automated pre-flight health diagnostic verifying runtimes (Node >= 18, Python >= 3.9, Git), ports (3306, 8000, 5000, 5001, 5173), datasets (FAISS index, Synthea SHA-256), and HTTP endpoints (14/14 checks passed).
+     - Enhanced `scripts/start_platform.ps1` with dynamic multi-source MySQL discovery.
+     - Auto-discovered Synthea FHIR archive in `data/synthea/` without user-specific path dependency.
 - **Post-Change Verification**:
+  - `powershell -ExecutionPolicy Bypass -File ./scripts/doctor.ps1`: **14 / 14 CHECKS PASSED (100%)**
+  - `node scratch/test_appointment_concurrency_and_conflicts.js`: **23 / 23 ASSERTIONS PASSED (100%)**
   - `node scratch/verify_e2e_10_scenarios.js`: **10 / 10 PASSED (100%)**
-  - `python scripts/evaluate_ddi_comprehensive.py`: **29 / 29 PASSED (100%)**
-  - `python -m pytest cds_module/ -v`: **11 / 11 PASSED (100%)**
-  - `python -m unittest scratch/test_priority1_honest_discharge.py`: **6 / 6 PASSED (100%)**
-  - `node scratch/test_priority2_unified_prescription_gate.js`: **11 / 11 PASSED (100%)**
-  - `node scratch/test_adversarial_allergy_bypass.js`: **3 / 3 PASSED (100%)**
+  - `scratch/test_patient_and_discharge.js`: **14 / 14 PASSED (100%)**
   - `node scratch/test_prescription_ocr_pipeline.js`: **12 / 12 PASSED (100%)**
-  - `node scratch/test_patient_credential_security_audit.js`: **7 / 7 PASSED (100%)**
-  - `node scratch/test_multilingual_independent_audit.js`: **12 / 12 PASSED (100%)**
-  - `node scratch/gap_closure_master_verification.js`: **22 / 22 PASSED (100%)**
-  - `node scratch/test_password_reset_flow.js`: **21 / 21 PASSED (100%)**
-  - `node scratch/test_supabase_security_and_deployment.js`: **35 / 35 PASSED (100%)**
-  - `cd frontend; npm run build`: **0 ERRORS (2,253 modules built in 851ms)**
-  - Browser Verification: **26 / 26 States Verified & Captured**.
-  - Total automated assertions: **179 / 179 PASSED (100%)**.
-  - Primary database `rag_healthcare`: **100% UNTOUCHED**.
-  - Final Release Gate Decision: **PASS — READY TO PUSH**.
+  - `node scratch/test_activation_and_role_mismatch.js`: **12 / 12 PASSED (100%)**
+  - Browser Verification: **30 / 30 States Verified & Captured in `audit_evidence/portable_release_gate_20261025/`**.
+  - Primary database `rag_healthcare`: **100% UNTOUCHED & PROTECTED**.
+  - Final Release Verdict: **PASS — TEAMMATE-READY AND END-TO-END VERIFIED**.
