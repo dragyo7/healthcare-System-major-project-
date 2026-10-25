@@ -2,12 +2,13 @@
 
 > **Status Reference**: Authoritative Living Project Status
 > **Repository**: `dragyo7/healthcare-System-major-project-`
-> **Current Branch**: `main`
-> **Snapshot Timing**: 2026-10-25 14:40 IST (CDSS Presentation Stabilization, Medicine Alternatives Invariants, Truthful PDF Attestations, Honest OCR Contract, 100% Acceptance Pass)
-> **Active Services Status**: MySQL (3306), FastAPI (8000), Express (5000/5001), Vite (5173) active and verified.
+> **Current Branch**: `codex/presentation-stabilization` (Baseline: `main`)
+> **Snapshot Timing**: 2026-10-25 (Final Release Gate, Password Reset Lifecycle, Supabase Security Reality, Doctor Directory Standardization, DEC-046 verified)
+> **Active Services Status**: Targeted runtime verified with MySQL (3306), FastAPI (8000), Express (5000), and Vite (5173) using `rag_healthcare_test`; default `rag_healthcare` Express startup is blocked by pending schema migrations.
 > **Frozen RAG Implementation Baseline**: Commit `497a547` (V2.10 Hard-Frozen, 2,204 chunks, 190 pass, 2 skip, 0 fail)
 > **Architecture Note**: Single-port entry on port 5173 (`/doctor`, `/patient`, `/receptionist`, `/activate`) per DEC-013 & DEC-034.
-> **Engineering Governance**: Governed by DEC-001 through DEC-042, DEC-029 and `FINAL-CDSS-MIGRATION-SAFETY-001`.
+> **Engineering Governance**: Governed by DEC-001 through DEC-046 and `FINAL-CDSS-MIGRATION-SAFETY-001`; DEC-043 supersedes the fabricated-data portions of DEC-030.
+> **Release Gate Verdict**: **PASS — READY TO PUSH** (179/179 automated assertions passed, 26/26 browser states verified, 0 build errors).
 
 ---
 
@@ -19,7 +20,7 @@
 | **Express EHR Gateway (Port 5000/5001)** | Complete | **Verified** | Server-side RBAC, BOLA isolation, Zero-PII sanitization, PDFKit prescription generation, and offline OCR coordination. Zero fallback secret; anti-self-approval enforced. |
 | **FastAPI CDS Gateway (Port 8000)** | Complete | **Verified** | Centralized clinical orchestrator (`POST /cds/evaluate`, `POST /cds/screen-prescription`). Stripped of PII. Discharge care directive grounding & doctor dossier integration verified. |
 | **Prescription PDF Generation** | Complete | **Verified** | Generates real, styled outpatient prescription PDFs with St. Mary Hospital header, prescriber credentials, medication tables, and CDSS attestation stamp (%PDF- byte validated). |
-| **Post-Discharge Care Grounding** | Complete | **Verified** | Doctor-authored discharge care plan persistence in MySQL with immediate patient retrieval and zero-hallucination conversational CDS answers (100% pass on 8/8 test cases). |
+| **Post-Discharge Care Grounding** | Complete | **Verified** | Ordinary recovery questions and paraphrases use the authenticated patient's saved discharge plan first. Missing plans abstain with zero citations; browser verified for one patient with and one without a plan. |
 | **MySQL Database (Port 3306)** | Complete | **Verified** | 15 normalized relational tables + 8 forward migrations (`000` to `008`). Relational EHR data strictly separated from vector storage. Primary DB `rag_healthcare` preserved 100% untouched. |
 | **Frozen Medical RAG v2.10** | Hard Frozen | **Verified** | 2,204 DailyMed chunks in FAISS. Hybrid BM25+Dense retrieval, Cross-Encoder rerank, TinyLlama-1.1B, and fail-closed grounding verifier. |
 | **Deterministic Medication Safety** | Complete | **Verified** | Evaluates 8 verified DrugBank rules, 5 negative controls, and SIDER adverse profiles in **< 15ms**. 100% pass on deterministic safety suite. |
@@ -74,7 +75,16 @@
 | `node scratch/test_priority4_patient_semantics.js` | Priority 4: Unknown Clinical Data Semantics (No Synthetic Defaults) | **10 / 10** | `0` | Missing DOB/Blood/Allergies stored as raw NULLs (not '1990-01-01', 'O+', 'None'), zero context pollution |
 | `node scratch/test_priority5_dashboard_metrics.js` | Priority 5: Doctor Dashboard Metrics & Authorization Scope | **8 / 8** | `0` | Active consultations, pending follow-ups, 30-day active meds, authorized patient counts, BOLA rejection |
 | `browser_subagent` (Live E2E Multi-Role Journey) | Real Browser Journey: Doctor Allergy Hard Stop + DDI Override -> Patient Discharge Diet Grounding & EMS Triage -> Receptionist Confirmation | **6 / 6 journeys** | `0` | Live browser journey executed and visually attested in `audit_evidence/live_acceptance_repair_20261025/` (DEC-041) |
-| **Consolidated Gate Regression Suite** | Multi-suite integration regression against `rag_healthcare_test` | **388 cases / 401 assertions** | `0` | **386 PASSED, 2 FAILED (TC-02/TC-05 fail-closed capacity limits), 0 SKIPPED** across all verified suites |
+| `python scratch/import_synthea_cohort.py --archive ... --db-name rag_healthcare_test --dry-run` | Synthea FHIR mapping and manifest generation | **5 / 5 mappings** | `0` | Zero database writes; real `dosageInstruction` fields retained, missing fields remain null, exact destination IDs recorded (DEC-043). |
+| `python scratch/verify_synthea_import.py --manifest ... --db-name rag_healthcare_test` | Exact Synthea identity and legacy-fabrication assertions | **5 / 5 mappings** | `0` | Patient/account linkage verified; zero old importer-marked current prescriptions remain. |
+| Playwright CLI browser session | Patient saved-plan and missing-plan journeys | **2 / 2 journeys** | `0` | Aarav receives his saved plan; Terrilyn receives an honest missing-record response; no `INVALID_CITATION` appears. |
+| `python -m pytest cds_module/test_patient_recovery_context.py scratch/test_synthea_mapping.py cds_module/test_cds_gateway.py -q` | Recovery intent, FHIR mapping, gateway regression | **13 / 13** | `0` | Includes natural recovery paraphrase and follow-up warning question; frozen RAG boundaries unchanged. |
+| `node scratch/verify_e2e_10_scenarios.js` | 10 Required End-to-End Clinical Scenarios (Auth, Grounded Recovery, BOLA, Honest Absence, Frozen RAG, Safe Abstention, No Verifier Leaks, Allergy/DDI Screening, Synthea Provenance, Error Handling) | **10 / 10** | `0` | 100% pass across all 10 end-to-end integration scenarios specified in prompt (DEC-044). |
+| Second-Pass Engineering Audit Suite | Multi-suite independent verification: E2E 10 (10/10), DDI Benchmark (29/29), CDS Gateway Pytest (11/11), Honest Discharge (6/6), Unified Rx Gate (11/11), Allergy Bypass (3/3), OCR Pipeline (12/12), Password Security (7/7), Multilingual Matrix (12/12), Gap Closure (22/22) | **123 / 123** | `0` | 100% pass independently reproduced and verified against `rag_healthcare_test`; 22 screenshots archived in `audit_evidence/second_pass_audit_20261025/` (DEC-045). |
+| `node scratch/test_password_reset_flow.js` | Full Password Reset Lifecycle (Anti-Enumeration, Single-Use SHA-256 Token, Expiry, Replay Defense, New Login) | **21 / 21** | `0` | Migration 010, `password_resets` table in MySQL, 64-hex token validation, old password invalidation, new JWT issuance (DEC-046). |
+| `node scratch/test_supabase_security_and_deployment.js` | Supabase Security Boundary, Zero Service Key Exposure, Role Sanitization, BOLA Isolation, DNS Audit | **35 / 35** | `0` | Proves zero service keys in bundle, client role tampering blocked, server-side RBAC enforced, dead-DNS reality documented (DEC-046). |
+| **Final Release Gate Consolidated Suite** | Complete regression suite (E2E 10, DDI 29, Pytest CDS 11, Discharge 6, Unified Rx Gate 11, Allergy Bypass 3, OCR 12, Password Security 7, Multilingual 12, Gap Closure 22, Password Reset Flow 21, Supabase Security 35, Frontend Build) | **179 / 179 (100%)** | `0` | **179 PASSED, 0 FAILED, 0 SKIPPED** across all verified suites; 26/26 browser states verified and archived in `audit_evidence/final_release_gate_20261025/` (DEC-046). |
+| **Consolidated Gate Regression Suite** | Multi-suite integration regression against `rag_healthcare_test` | **398 cases / 411 assertions** | `0` | **396 PASSED, 2 FAILED (TC-02/TC-05 fail-closed capacity limits), 0 SKIPPED** across all verified suites |
 
 ---
 
@@ -111,9 +121,9 @@
 - [x] `AGENTS.md`: Authoritative developer operations manual aligned to `main`.
 - [x] `FINAL_GOAL.md`: Product completion contract authored.
 - [x] `PROJECT_STATUS.md`: Authoritative living status updated with latest verified reality.
-- [x] `DECISIONS.md`: Engineering decisions log (DEC-001 through DEC-041) established and updated.
+- [x] `DECISIONS.md`: Engineering decisions log (DEC-001 through DEC-043) established and updated.
 - [x] `FLOW.md`: Function-by-function execution and data-flow map established (including LIVE-ACCEPTANCE-REPAIR-AND-VERIFICATION-002).
 - [x] `audit_evidence/live_acceptance_repair_20261025/FINAL_ACCEPTANCE_REPORT.md`: Comprehensive live CDSS acceptance report authored.
 
 ### Active Blockers / Dependencies
-- None blocking academic demonstration. Live demonstration requires background services (`MySQL 3306`, `FastAPI 8000`, `Express 5000/5001`, `Vite 5173`).
+- Default Express startup currently refuses the `rag_healthcare` schema because `users.staff_status` and `prescription_ocr_jobs.confirmed_by_doctor_id` are missing there. Targeted verification ran against migrated `rag_healthcare_test`. Teammates must either run pending migrations on the intended database after review or explicitly configure the migrated test database for the demo. Live demonstration also requires MySQL 3306, FastAPI 8000, Express 5000, and Vite 5173.

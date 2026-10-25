@@ -411,6 +411,7 @@ class CDSOrchestrator:
 
         is_warning_query = (
             any(w in q_lower for w in ["warning sign", "warning signs", "danger sign", "danger signs"])
+            or any(w in q_lower for w in ["watch for", "look out for", "be concerned about", "when should i worry"])
             or ("emergency" in q_lower and any(w in q_lower for w in ["seek", "go", "hospital", "care", "when", "signs"]))
             or any(w in combined_query for w in ["चेतावनी", "खतरे के लक्षण", "आपातकालीन देखभाल", "चेतावणी", "धोक्याची लक्षणे", "કટોકટી ચિહ્નો", "ચેતવણી ચિહ્નો"])
         )
@@ -419,12 +420,6 @@ class CDSOrchestrator:
             any(w in q_lower for w in ["follow-up", "follow up", "followup", "appointment", "appointments", "next visit", "doctor visit", "see the doctor", "see doctor", "doctor again", "visit the doctor"])
             or ("test" in q_lower and any(w in q_lower for w in ["lab", "need", "do i", "blood", "electrolytes"]))
             or any(w in combined_query for w in ["फॉलो-अप", "अपॉइंटमेंट", "जांच", "टेस्ट", "तपासणी", "भेट", "એપોઇન્ટમેન્ટ", "ટેસ્ટ", "डॉक्टर को दिखाएं", "डॉक्टरांना भेटा", "ડૉક્ટરને મળવું"])
-        )
-
-        is_discharge_overview = (
-            ("discharge" in q_lower and any(w in q_lower for w in ["instruction", "instructions", "summary", "understand", "tell", "explain", "about"]))
-            or any(w in q_lower for w in ["summarize the instructions", "summarise the instructions", "summary of instructions", "summarize instructions", "instructions you just cited"])
-            or any(w in combined_query for w in ["डिस्चार्ज निर्देश", "डिस्चार्ज के बारे", "डिस्चार्ज सूचना", "डिस्चार्ज बद्दल", "ડિસ્ચાર્જ સૂચનાઓ", "ડિસ્ચાર્જ વિશે"])
         )
 
         is_nsaid_bp_query = (
@@ -442,6 +437,27 @@ class CDSOrchestrator:
         is_diet_query = (
             any(w in q_lower for w in ["diet", "food", "nutrition", "salt", "sodium", "eating", "meal", "ahar", "bhojan", "khorak"])
             or any(w in combined_query for w in ["आहार", "भोजन", "खाना", "मीठ", "नमक", "ખોરાક", "મીઠું"])
+        )
+
+        is_discharge_overview = (
+            not is_wound_care_query
+            and not is_diet_query
+            and not is_nsaid_bp_query
+            and (
+                ("discharge" in q_lower and any(w in q_lower for w in ["instruction", "instructions", "summary", "understand", "tell", "explain", "about"]))
+                or any(w in q_lower for w in ["summarize the instructions", "summarise the instructions", "summary of instructions", "summarize instructions", "instructions you just cited"])
+                or (
+                    any(w in q_lower for w in ["care", "recovery", "recover", "aftercare"])
+                    and any(w in q_lower for w in ["what", "which", "should", "need", "plan", "instruction", "do", "take"])
+                )
+                or any(w in q_lower for w in [
+                    "what should i do after going home",
+                    "how should i look after myself",
+                    "how should i care for myself",
+                    "what else should i do",
+                ])
+                or any(w in combined_query for w in ["डिस्चार्ज निर्देश", "डिस्चार्ज के बारे", "डिस्चार्ज सूचना", "डिस्चार्ज बद्दल", "ડિસ્ચાર્જ સૂચનાઓ", "ડિસ્ચાર્જ વિશે"])
+            )
         )
 
         # -------------------------------------------------------------
@@ -660,7 +676,7 @@ class CDSOrchestrator:
                     ans = (
                         "According to your authorized discharge summary:\n\n"
                         f"• **Prescribed Medication**: {disp_med}\n"
-                        f"• **Medication Timing**: Specific administration timing for {disp_med} is not documented in your discharge summary.{context_quote}\n\n"
+                        f"• **Medication Timing**: Specific medication administration timing for {disp_med} is not documented in your discharge summary.{context_quote}\n\n"
                         "*Clinical Note: Please consult your physician or dispensing pharmacist for individualized timing recommendations.*"
                     )
                 return CDSEvaluateResponse(

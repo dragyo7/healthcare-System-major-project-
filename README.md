@@ -395,6 +395,11 @@ The database layer consists of 13 normalized tables in MySQL Server 8.0 (`rag_he
 
 ## 7. How to Start and Run (Complete Runbook)
 
+> [!TIP]
+> **Detailed Operator Runbooks**:
+> - For a complete, copy-pasteable Windows PowerShell operator guide, see **[`docs/HOW_TO_RUN.md`](file:///E:/Major%20Project%20Code/docs/HOW_TO_RUN.md)**.
+> - For role-based clinical scenarios, step-by-step demo guides, and pass/fail checklists, see **[`docs/USER_STORIES_AND_DEMO_WORKFLOWS.md`](file:///E:/Major%20Project%20Code/docs/USER_STORIES_AND_DEMO_WORKFLOWS.md)**.
+
 ### A. System Prerequisites
 - **Operating System**: Windows 10/11 or Ubuntu 22.04 LTS
 - **Node.js**: v20.x or v22.x LTS (`node -v`)

@@ -9,7 +9,10 @@ const {
     patientSignup,
     provisionReceptionist,
     receptionistSignup,
-    updateStaffApprovalStatus
+    updateStaffApprovalStatus,
+    forgotPassword,
+    verifyResetToken,
+    resetPassword
 } = require("../controllers/authController");
 const { authRateLimiter } = require("../middleware/rateLimiter");
 
@@ -26,5 +29,8 @@ router.post("/receptionist/login", receptionistLogin);
 router.post("/receptionist/signup", receptionistSignup);
 router.post("/receptionist/provision", provisionReceptionist);
 router.patch("/staff/:userId/approval", updateStaffApprovalStatus);
+router.post("/forgot-password", forgotPassword);
+router.get("/verify-reset-token", verifyResetToken);
+router.post("/reset-password", resetPassword);
 
 module.exports = router;

@@ -822,5 +822,140 @@ ag_healthcare 100% UNTOUCHED (176 users, 15 doctors).
   - Visual inspection of rendered PDF bytes (`scratch/inspect_downloaded_pdf.py`): Verified exact inflated text streams in `downloaded_prescription_59.pdf` (zero ISO 9001 claims, truthful academic prototype header, dynamic clinician override DDI badge, 500mg OD 5 days alignment).
   - Primary database `rag_healthcare`: 100% UNTOUCHED (verified against `rag_healthcare_test`).
 
+---
 
+- **Change ID**: `CDSS-PRESENTATION-STABILIZATION-005` (DEC-030: Synthea FHIR R4 Presentation Cohort Ingestion, Historical Context Time Policy, and Truthful Patient Context Integration)
+- **Problem Being Solved**:
+  1. *Presentation Dataset Integration*: Needed an authorized, high-yield demonstration cohort of 4-6 synthetic patients from external Synthea FHIR R4 bundles representing distinct clinical challenges (chronic illness, documented allergies, multiple medications, completed encounters, and honest missing discharge information).
+  2. *Patient Switching & In-Flight Race Conditions*: If a doctor triggered CDS evaluation and switched patients while the RAG inference request was in-flight, the asynchronous completion could overwrite the newly selected patient's screen with the old patient's response.
+  3. *Doctor CDS Discharge Grounding*: Doctor CDS evaluation path (`evaluateDoctorCDS`) did not retrieve the patient's `discharges` table records, unlike `patientController.js`, preventing doctors from querying the patient's discharge plan in the assistant.
+  4. *Truthful Time Policy & Provenance*: Synthea records originate from 2021 and lifespan historical dates. Need an explicit demo time policy that retains original dates in provenance while clamping MySQL `TIMESTAMP` columns safely without inventing modern clinical dates.
+- **Execution Path**:
+  1. `scratch/import_synthea_cohort.py`: Standalone, idempotent FHIR R4 bundle importer.
+     - Parses 5 selected bundles: Terrilyn Murphy (Patient 149, Aspirin allergy, HTN, Diabetes, no discharge), Trinh Sanford (Patient 150, Penicillin allergy, demo care plan), Brain Wuckert (Patient 151, Sulfa allergy, Clopidogrel), Jospeh Gerhold (Patient 152, Warfarin, Digoxin, Verapamil, Lisinopril, zero allergies), Chauncey Jones (Patient 153, Metformin, Lisinopril, Amlodipine).
+     - Standardized MySQL timestamp handling (`format_safe_timestamp`).
+     - Establishes completed appointments with Doctor 1 (`Dr. Rahul Sharma`), providing legitimate server-side RBAC authorization.
+     - Preserves clean null / absent discharge records for 4 patients (guaranteeing honest abstention) and 1 labeled demo care plan for Trinh Sanford.
+     - Emits `audit_evidence/synthea_cohort_manifest.json` with source archive SHA256 (`6d3c5433bcae4791bc5c30469d1445b430fb4894d5c13bda15fee0584bbd7778`).
+  2. `scratch/cleanup_synthea_cohort.py`: Scoped cleanup script that removes only `synthea.%@demo.local` accounts and their child records.
+  3. `frontend/src/pages/Doctor/CDS.jsx`: Added `activePatientIdRef` and `activeRequestIdRef`. If active patient changes before an in-flight evaluation or dossier fetch resolves, the stale response is discarded and ignored.
+  4. `Portal Major P/Bhumi/Doctor portal/backend/src/controllers/doctorController.js`: Added `discharges` lookup in `evaluateDoctorCDS` and forwarded `discharge` context into `rawData` and `sanitizePatientContext`.
+- **Post-Change Verification**:
+  - `python scratch/import_synthea_cohort.py --live`: 5 patients transactionally inserted with exact clinical provenance.
+  - `python scratch/verify_synthea_import.py`: 5/5 patients verified in database.
+  - All 9 Bounded Acceptance Scenarios Verified:
+    * A. Doctor directory -> correct dossier -> patient-specific CDS answer.
+    * B. Switch patients while request pending -> stale response discarded cleanly.
+    * C. Same query asked for both patients -> reflects distinct individual records.
+    * D. Explain saved discharge plan for Trinh Sanford -> cites Lisinopril 10mg Once daily and emergency warning signs.
+    * E. Ask Terrilyn Murphy (no discharge record) -> honest abstention (`abstained_policy`), zero invented instructions.
+    * F. Screen supported allergy scenario -> Terrilyn Murphy + proposed Aspirin flags Critical Allergy Contraindication.
+    * G. Save clinician-reviewed prescription (Chauncey Jones Rx #66) -> patient downloads own PDF (3,050 bytes).
+    * H. Reject cross-patient unauthorized access -> Chauncey Jones downloading Trinh Sanford's PDF rejected with HTTP 403 Forbidden.
+    * I. Regional language query in Hindi -> Lisinopril dose and directives preserved in Hindi.
+  - Frontend production build (`npm run build`): 0 errors across 2,253 modules.
+  - Primary database `rag_healthcare`: 100% UNTOUCHED.
 
+---
+
+- **Change ID**: `PATIENT-CONTEXT-SYNTHEA-REPAIR-006` (DEC-043)
+- **Patient recovery execution path**:
+  1. `frontend/src/pages/Patient/Assistant.jsx` loads `/api/patient/discharge` and `/api/patient/medications` for record-derived suggestions.
+  2. The authenticated request posts to `/api/patient/cds`; Express resolves only `req.user.user_id`, enforces the patient BOLA check, loads that patient's records, and removes PII through `sanitizePatientContext`.
+  3. `cds_module/orchestrator.py::_resolve_discharge_care_query` recognizes ordinary recovery intent and paraphrases before the frozen RAG call.
+  4. If a discharge exists, only saved diagnosis, instructions, warnings, and follow-up are returned with the EHR discharge citation. If no discharge exists, the response abstains with zero citations and names the missing record.
+  5. General medical-reference RAG remains available for other questions, unchanged and fail-closed. Patient UI hides internal verifier diagnostics but does not convert withheld output into an answer.
+- **Context isolation**: Doctor patient changes increment the active request generation, reset loading, clear the prior dossier/query/response, and ignore any late result from the previous patient.
+- **Synthea path**:
+  1. `scratch/import_synthea_cohort.py` receives archive/database/manifest settings through CLI or environment.
+  2. `extract_medication_request` copies actual FHIR `dosageInstruction` fields and preserves missing fields as `null`.
+  3. The manifest labels records historical synthetic data and records source UUID/resource IDs plus destination user/patient IDs.
+  4. `scratch/repair_synthea_import.py` validates those mappings and targets only old importer markers. `scratch/cleanup_synthea_cohort.py` refuses broad pattern cleanup without exact manifest ownership.
+  5. `scratch/verify_synthea_import.py` asserts patient/account linkage and absence of legacy invented current prescriptions.
+- **Observed browser sequence**: Patient demo login → Post-Discharge Assistant → “What care should I take?” → saved-plan summary for Aarav; Terrilyn login → same route/query → honest missing-plan response.
+
+---
+
+- **Change ID**: `PATIENT-CONTEXT-RECOVERY-PRECEDENCE-007` (DEC-044)
+- **Execution Path & Intent Precedence**:
+  1. `cds_module/orchestrator.py` receives query via `POST /cds/evaluate`.
+  2. Domain-specific pattern checks (`is_wound_care_query`, `is_diet_query`, `is_nsaid_bp_query`) evaluate *before* `is_discharge_overview`.
+  3. `is_discharge_overview` requires `not is_wound_care_query and not is_diet_query and not is_nsaid_bp_query`.
+  4. Queries targeting specific absent care topics (e.g., wound care) are prevented from being hijacked by general recovery keywords, falling through to honest absence disclosures (zero citations).
+  5. Timing omission phrasing strictly outputs `"Specific medication administration timing for {disp_med} is not documented in your discharge summary."`.
+  6. Verified end-to-end across 10 clinical scenarios in `scratch/verify_e2e_10_scenarios.js` with 100% pass rate.
+
+---
+
+- **Change ID**: `SECOND-PASS-ENGINEERING-AUDIT-008` (DEC-045: Second-Pass Engineering Audit, Synthea Cohort Verification, Comprehensive Runbook Architecture, and Multi-Suite Attestation)
+- **Problem Being Solved**:
+  1. Independently verify all claims and test suites without blindly trusting previous reports.
+  2. Locate, audit, and safely test the genuine Synthea FHIR R4 dataset.
+  3. Prove that synthetic patient records display accurately and honestly in the UI.
+  4. Verify the prescription safety, allergy hard-stop, and suggestion pipeline end-to-end.
+  5. Verify CDS and post-discharge recovery routing (both grounded and honest absence).
+  6. Capture clean visual evidence and author `docs/HOW_TO_RUN.md` and `docs/USER_STORIES_AND_DEMO_WORKFLOWS.md`.
+- **Execution Path**:
+  1. **Dataset Provenance Audit**: Located supplied Synthea FHIR R4 dataset archive at `C:\Users\ABHYUDAYA\OneDrive\Desktop\synthea_sample_data_fhir_r4_nov2021.zip` with SHA256 `6d3c5433bcae4791bc5c30469d1445b430fb4894d5c13bda15fee0584bbd7778`. Ran dry-run verification proving idempotent mapping (`Status: ALREADY IMPORTED`) in `rag_healthcare_test`.
+  2. **Synthea UI Attestation**: Authenticated as Terrilyn Murphy (#149) in browser. Verified Patient Dashboard (empty active medications and discharge plan displayed honestly), Medical History (25 imported conditions, 10 documented allergies), Recovery Assistant ("What care should I take?" -> honest absence disclosure), and General CDS ("What is Metformin used for?" -> DailyMed RAG answer with citations).
+  3. **Doctor Prescription Safety Gate**: Screened Aspirin 81mg for Terrilyn Murphy -> triggered non-overridable allergy hard stop (`cannot_override: true`, HTTP 422). Proposing Atorvastatin against Clarithromycin triggered severe DDI (`RUL-INT-007`) requiring documented clinician override.
+  4. **Documentation Deliverables**: Authored `docs/HOW_TO_RUN.md` (copy-pasteable PowerShell runbook) and `docs/USER_STORIES_AND_DEMO_WORKFLOWS.md` (complete user stories, acceptance criteria, demo walkthroughs).
+- **Post-Change Verification**:
+  - `node scratch/verify_e2e_10_scenarios.js`: **10 / 10 PASSED (100%)**
+  - `python scripts/evaluate_ddi_comprehensive.py`: **29 / 29 PASSED (100%)**
+  - `python -m pytest cds_module/ -v`: **11 / 11 PASSED (100%)**
+  - `python -m unittest scratch/test_priority1_honest_discharge.py`: **6 / 6 PASSED (100%)**
+  - `node scratch/test_priority2_unified_prescription_gate.js`: **11 / 11 PASSED (100%)**
+  - `node scratch/test_adversarial_allergy_bypass.js`: **3 / 3 PASSED (100%)**
+  - `node scratch/test_prescription_ocr_pipeline.js`: **12 / 12 PASSED (100%)**
+  - `node scratch/test_patient_credential_security_audit.js`: **7 / 7 PASSED (100%)**
+  - `node scratch/test_multilingual_independent_audit.js`: **12 / 12 PASSED (100%)**
+  - `node scratch/gap_closure_master_verification.js`: **22 / 22 PASSED (100%)**
+  - 22 screenshots archived in `audit_evidence/second_pass_audit_20261025/` with structured JSON evidence manifest.
+  - Primary database `rag_healthcare`: **100% UNTOUCHED**.
+
+---
+
+- **Change ID**: `FINAL-RELEASE-GATE-009` (DEC-046: Final Release Gate Attestation: Password Reset Lifecycle, Supabase Security Reality, Doctor Directory Standardization, and Antigravity Browser Release Evidence)
+- **Problem Being Solved**:
+  1. Complete the missing frontend-to-backend password recovery and reset lifecycle.
+  2. Audit Supabase integration reality, ensure zero service-role keys exposed in frontend bundle, and test role-spoofing defense.
+  3. Clean, standardize, and verify the physician directory in database and UI, removing duplicate test records.
+  4. Capture 26 genuine browser workflow states using Antigravity browser agent and index them in a release gate evidence manifest.
+  5. Validate 100% regression test compliance across all 12 core test suites (179 automated assertions) and verify Git push readiness.
+- **Execution Path**:
+  1. **Password Reset Full Lifecycle**:
+     - Database: Applied `migrations/010_create_password_resets.sql` cleanly to `rag_healthcare_test`.
+     - Backend: Implemented `POST /api/auth/forgot-password`, `GET /api/auth/verify-reset-token`, and `POST /api/auth/reset-password` in `authController.js` and `authRoutes.js`.
+     - Frontend: Updated `ForgotPassword.jsx` to dispatch to the backend API. Refactored `ResetPassword.jsx` to verify single-use tokens on mount and submit updates to Express. Wrapped `/reset-password` in `<GuestRoute>` in `AppRoutes.jsx`.
+     - Verified: `test_password_reset_flow.js` passes 21/21 assertions.
+  2. **Supabase Security & RBAC Boundary**:
+     - Verified `frontend/.env` points to dead-DNS host; zero service-role keys in bundle.
+     - Verified `authService.js` client role sanitization and server-side RBAC in Express gateway.
+     - Verified: `test_supabase_security_and_deployment.js` passes 35/35 assertions.
+  3. **Doctor Directory Standardization**:
+     - Audited and cleaned 43 test artifact records from `rag_healthcare_test.doctors` via `scratch/clean_doctor_directory.js`.
+     - Reassigned 40 appointments to Dr. Rahul Sharma (`doctor_id = 1`) with 0 orphaned appointments and 0 orphaned prescriptions.
+     - Standardized 4 canonical approved clinicians: Dr. Rahul Sharma (Cardiology), Dr. Priya Nair (General Medicine), Dr. Elena Vance (Cardiology), and Dr. Kavita Verma (Neurology).
+     - Added `WHERE u.staff_status = 'approved'` filtering to `patientController.js` and `receptionistController.js`.
+  4. **Antigravity Browser Verification (26 States)**:
+     - Executed 26 required states across light/dark modes, logins, doctor roster, Synthea patient dossiers, allergy hard stops, severe DDI warnings, prescription PDF generation, grounded recovery assistant, honest absence disclosures, Hindi UI, and mobile viewports.
+     - Packaged screenshots and generated `audit_evidence/final_release_gate_20261025/evidence_manifest.json`.
+- **Post-Change Verification**:
+  - `node scratch/verify_e2e_10_scenarios.js`: **10 / 10 PASSED (100%)**
+  - `python scripts/evaluate_ddi_comprehensive.py`: **29 / 29 PASSED (100%)**
+  - `python -m pytest cds_module/ -v`: **11 / 11 PASSED (100%)**
+  - `python -m unittest scratch/test_priority1_honest_discharge.py`: **6 / 6 PASSED (100%)**
+  - `node scratch/test_priority2_unified_prescription_gate.js`: **11 / 11 PASSED (100%)**
+  - `node scratch/test_adversarial_allergy_bypass.js`: **3 / 3 PASSED (100%)**
+  - `node scratch/test_prescription_ocr_pipeline.js`: **12 / 12 PASSED (100%)**
+  - `node scratch/test_patient_credential_security_audit.js`: **7 / 7 PASSED (100%)**
+  - `node scratch/test_multilingual_independent_audit.js`: **12 / 12 PASSED (100%)**
+  - `node scratch/gap_closure_master_verification.js`: **22 / 22 PASSED (100%)**
+  - `node scratch/test_password_reset_flow.js`: **21 / 21 PASSED (100%)**
+  - `node scratch/test_supabase_security_and_deployment.js`: **35 / 35 PASSED (100%)**
+  - `cd frontend; npm run build`: **0 ERRORS (2,253 modules built in 851ms)**
+  - Browser Verification: **26 / 26 States Verified & Captured**.
+  - Total automated assertions: **179 / 179 PASSED (100%)**.
+  - Primary database `rag_healthcare`: **100% UNTOUCHED**.
+  - Final Release Gate Decision: **PASS — READY TO PUSH**.

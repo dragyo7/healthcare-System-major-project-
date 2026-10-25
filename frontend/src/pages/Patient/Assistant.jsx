@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { patientApi } from "../../api/patientApi";
 import {
   Bot,
@@ -36,30 +36,63 @@ export default function PatientAssistant() {
   ]);
   const [inputQuery, setInputQuery] = useState("");
   const [evaluating, setEvaluating] = useState(false);
+  const [careContext, setCareContext] = useState({ discharge: null, medications: [] });
+  const activeRequestRef = useRef(0);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    let cancelled = false;
+
+    Promise.allSettled([patientApi.getDischarge(), patientApi.getMedications()]).then((results) => {
+      if (cancelled) return;
+      setCareContext({
+        discharge: results[0].status === "fulfilled" ? results[0].value : null,
+        medications: results[1].status === "fulfilled" ? results[1].value : [],
+      });
+    });
+
+    return () => {
+      cancelled = true;
+      mountedRef.current = false;
+      activeRequestRef.current += 1;
+    };
+  }, []);
+
+  const firstMedication = careContext.medications.find(
+    (medication) => medication?.medicine_name || medication?.name,
+  );
+  const firstMedicationName = firstMedication?.medicine_name || firstMedication?.name;
+  const hasDischargePlan = Boolean(careContext.discharge);
 
   const sampleQueriesByLang = {
     en: [
-      "What time should I take my Amlodipine blood pressure medicine?",
+      hasDischargePlan
+        ? "What care should I take?"
+        : "Do I have a discharge plan on record?",
+      firstMedicationName
+        ? `What does my saved care record say about taking ${firstMedicationName}?`
+        : "Are medication instructions documented in my discharge plan?",
       "What are the warning signs where I should seek emergency care?",
-      "Can I take painkillers like Ibuprofen with my blood pressure pills?",
       "What follow-up appointments and lab tests do I need?",
     ],
     hi: [
-      "मेटफॉर्मिन के उपयोग और संकेत क्या हैं?",
-      "सीने में तेज दर्द और सांस लेने में तकलीफ हो रही है",
-      "क्या मैं एस्पिरिन और वारफारिन एक साथ ले सकता हूँ?",
       "मुझे अपने डिस्चार्ज निर्देशों के बारे में बताएं",
+      "मेरी डिस्चार्ज योजना में दवा के कौन से निर्देश दर्ज हैं?",
+      "रिकवरी के दौरान किन चेतावनी संकेतों पर ध्यान देना चाहिए?",
+      "मेरी अगली फॉलो-अप योजना क्या है?",
     ],
     mr: [
-      "उच्च रक्तदाब साठी लिसिनोप्रिल 5 mg चा वापर काय आहे?",
-      "माझ्या छातीत खूप तीव्र वेदना होत आहेत आणि मला श्वास घेता येत नाही",
-      "मेटफॉर्मिनचे दुष्परिणाम काय आहेत?",
       "माझ्या डिस्चार्ज सूचना काय आहेत?",
+      "माझ्या नोंदीत औषध घेण्याच्या कोणत्या सूचना आहेत?",
+      "रिकव्हरीदरम्यान कोणती चेतावणी चिन्हे पाहावीत?",
+      "माझी फॉलो-अप योजना काय आहे?",
     ],
     gu: [
-      "મેટફોર્મિન 500mg ની આડઅસરો શું છે?",
-      "મારી છાતીમાં ખૂબ તીવ્ર દુખાવો થઈ રહ્યો છે અને શ્વાસ લેવામાં તકલીફ છે",
-      "હાઈ બ્લડ પ્રેશર માટે એમ્લોડિપિન દવા ક્યારે લેવી?",
+      "મારી ડિસ્ચાર્જ સૂચનાઓ શું છે?",
+      "મારા રેકોર્ડમાં દવા લેવાની કઈ સૂચનાઓ છે?",
+      "રિકવરી દરમિયાન કયા ચેતવણી ચિહ્નો જોવાં જોઈએ?",
+      "મારી ફોલો-અપ યોજના શું છે?",
     ],
   };
 
@@ -77,6 +110,7 @@ export default function PatientAssistant() {
     setMessages((prev) => [...prev, userMessage]);
     setInputQuery("");
     setEvaluating(true);
+    const requestId = ++activeRequestRef.current;
     try {
       const conversationHistory = messages
         .filter((m) => m.content && (m.role === "user" || m.role === "bot") && !m.is_technical_error && !m.is_network_error && !m.status?.includes("transport") && !m.status?.includes("timeout") && m.status !== "technical_error")
@@ -92,9 +126,22 @@ export default function PatientAssistant() {
         conversationHistory,
       });
 
+      if (!mountedRef.current || requestId !== activeRequestRef.current) return;
+
+      const withheld = response.abstained || [
+        "abstained_policy",
+        "withheld_verification_failure",
+        "technical_failure",
+        "validation_error",
+      ].includes(response.verification_status);
+      const isSavedDischargeResponse = response.pipeline_mode === "discharge_care_grounding";
+      const patientFacingAnswer = withheld && !isSavedDischargeResponse
+        ? "I could not verify an answer from your saved care plan and approved evidence. I will not substitute general advice for missing personal instructions. Please ask about a specific documented medicine, warning sign, or follow-up item, or contact your treating care team."
+        : response.answer;
+
       const botMessage = {
         role: "bot",
-        content: response.answer,
+        content: patientFacingAnswer,
         status: response.verification_status,
         citations: response.citations || [],
         safety_alerts: response.safety_alerts || [],
@@ -105,6 +152,7 @@ export default function PatientAssistant() {
 
       setMessages((prev) => [...prev, botMessage]);
     } catch (err) {
+      if (!mountedRef.current || requestId !== activeRequestRef.current) return;
       const isNet = err.isNetworkError || err.status === 0 || (typeof err.message === "string" && (err.message.includes("fetch") || err.message.includes("Failed") || err.message.includes("unreachable")));
       const isTimeout = err.isTimeout || err.status === 504;
       const isAuth = err.isAuthError || err.status === 401 || err.status === 403;
@@ -137,7 +185,9 @@ export default function PatientAssistant() {
         },
       ]);
     } finally {
-      setEvaluating(false);
+      if (mountedRef.current && requestId === activeRequestRef.current) {
+        setEvaluating(false);
+      }
     }
   };
 
@@ -260,7 +310,7 @@ export default function PatientAssistant() {
                       ) : (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/20 font-semibold">
                           <ShieldAlert className="w-3.5 h-3.5" />
-                          Safety Policy Enforced: Answer Withheld ({msg.status})
+                          Unable to verify from your saved plan and approved evidence
                         </span>
                       )}
                     </div>
