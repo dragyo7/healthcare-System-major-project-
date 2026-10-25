@@ -32,7 +32,7 @@ function generatePrescriptionPdfStream({
     doc.fillColor("#ffffff").fontSize(16).font("Helvetica-Bold")
        .text("ST. MARY MULTISPECIALTY HOSPITAL", 55, 52);
     doc.fontSize(9.5).font("Helvetica")
-       .text("Clinical Intelligence & Decision Support Center • ISO 9001:2015 Certified EHR", 55, 72);
+       .text("Clinical Intelligence & Decision Support Center • Academic Clinical Decision Support Prototype", 55, 72);
     doc.fontSize(8).fillColor("#a7f3d0")
        .text("108 Healthcare Boulevard, Medical District • Emergency Hotline: 108 • contact@stmaryhealth.org", 55, 87);
 
@@ -130,15 +130,30 @@ function generatePrescriptionPdfStream({
     doc.fillColor("#1e293b").fontSize(8.5).font("Helvetica")
        .text(notes, 55, y + 21, { width: 485, height: 26, ellipsis: true });
 
-    // 7. Security & Safety Verification Badge
+    // 7. Security & Safety Verification Badge (truthful status derived from saved override data)
     y += 62;
-    doc.rect(40, y, 515, 38).fill(lightEmeraldBg);
-    doc.rect(40, y, 515, 38).stroke("#10b981");
-    doc.fillColor(darkEmerald).fontSize(8.5).font("Helvetica-Bold")
-       .text("VERIFIED CLINICAL DECISION SUPPORT & DOCTOR-IN-THE-LOOP ATTESTATION", 55, y + 8);
-    doc.fillColor(primaryEmerald).fontSize(7.5).font("Helvetica")
-       .text("Deterministic DDI Screen: PASSED (No critical contraindications detected) | SIDER Safety Profile: Verified", 55, y + 19)
-       .text("Clinician Verification Status: DIGITALLY CONFIRMED AND AUTHORIZED BY LICENSED PHYSICIAN", 55, y + 28);
+    const notesText = prescription?.notes || "";
+    const hasOverride = notesText.includes("[CLINICIAN OVERRIDE") || notesText.includes("[EMERGENCY CLINICIAN OVERRIDE") || Boolean(prescription?.safety_override_reason);
+
+    const badgeBg = hasOverride ? "#fffbeb" : lightEmeraldBg;
+    const badgeBorder = hasOverride ? "#f59e0b" : "#10b981";
+    const badgeHeaderColor = hasOverride ? "#92400e" : darkEmerald;
+
+    doc.rect(40, y, 515, 38).fill(badgeBg);
+    doc.rect(40, y, 515, 38).stroke(badgeBorder);
+    doc.fillColor(badgeHeaderColor).fontSize(8.5).font("Helvetica-Bold")
+       .text("CLINICAL DECISION SUPPORT & DOCTOR-IN-THE-LOOP SAFETY STATUS", 55, y + 8);
+
+    if (hasOverride) {
+        doc.fillColor("#b45309").fontSize(7.5).font("Helvetica-Bold")
+           .text("Deterministic DDI Screen: INTERACTION DETECTED — CLINICIAN OVERRIDE RECORDED", 55, y + 19);
+    } else {
+        doc.fillColor(primaryEmerald).fontSize(7.5).font("Helvetica")
+           .text("Deterministic DDI Screen: PASSED — NO MATCHING LOCAL INTERACTION RULES", 55, y + 19);
+    }
+
+    doc.fillColor(textMuted).fontSize(7.5).font("Helvetica")
+       .text("Clinician Authorization: Reviewed and electronically ordered by attending clinician", 55, y + 28);
 
     // 8. Footer
     doc.rect(40, 750, 515, 1).fill("#cbd5e1");

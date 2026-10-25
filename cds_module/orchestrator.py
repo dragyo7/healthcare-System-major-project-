@@ -1140,8 +1140,8 @@ class CDSOrchestrator:
             score=1.0
         )
 
-        # Check if query specifically inquires about an absent procedure/condition not in the record
-        absent_indicators = ["surgery", "procedure", "gallbladder", "appendectomy", "bypass", "fracture", "cancer", "stroke", "asthma", "cholecystectomy"]
+        # Check if query specifically inquires about an absent procedure/condition/directive not in the record
+        absent_indicators = ["surgery", "procedure", "gallbladder", "appendectomy", "bypass", "fracture", "cancer", "stroke", "asthma", "cholecystectomy", "discharge", "follow-up plan"]
         is_absent_fact_query = any(term in q_lower for term in absent_indicators)
         if is_absent_fact_query:
             all_text = " ".join(diagnoses + history + allergies + meds).lower()
@@ -1479,11 +1479,27 @@ class CDSOrchestrator:
         if detected_interactions:
             q_lower = query_text.lower()
             canon_lower = (canon_info.get("canonical_query") or "").lower()
-            is_coprescribe_query = any(k in q_lower or k in canon_lower for k in [
-                "co-prescribe", "coprescribe", "prescribe", "together", "interaction",
-                "interact", "combine", "combination", "concurrent", "with", "along with",
-                "safe to take", "can i take", "can i give", "simultaneously", "coadminister", "co-administer"
+            
+            # Check if query is explicitly an adverse effect, warning, indication, or dosage inquiry for a drug
+            is_monograph_or_adverse_query = any(k in q_lower or k in canon_lower for k in [
+                "adverse effect", "side effect", "adverse reaction", "warning", "black box",
+                "contraindication", "dosage", "dose", "indication", "mechanism", "pharmacology",
+                "how to take", "starting dose", "maintenance dose"
             ])
+
+            # Co-prescription inquiries must explicitly inquire about multi-drug combinations or interactions
+            has_interaction_terms = any(k in q_lower or k in canon_lower for k in [
+                "co-prescribe", "coprescribe", "prescribe together", "take together", "taken together",
+                "interaction", "interact", "combine", "combination", "concurrent", "coadminister",
+                "co-administer", "safe to take with", "can i take with", "can i give with", "risk between"
+            ])
+            top_pair = detected_interactions[0].drug_pair if detected_interactions else []
+            mentions_both_drugs = len(top_pair) >= 2 and (
+                top_pair[0].lower() in q_lower and top_pair[1].lower() in q_lower
+            )
+            has_multi_drugs = (len(canon_info.get("extracted_drugs", [])) >= 2) or (len(request.candidate_medications) >= 2)
+
+            is_coprescribe_query = (not is_monograph_or_adverse_query) and has_interaction_terms and (mentions_both_drugs or has_multi_drugs or "interaction" in q_lower or "interact" in q_lower)
             has_unverified_curative_claim = any(k in q_lower or k in canon_lower for k in [
                 "cure", "cures", "curing", "treats cancer", "cure cancer", "prevent alzheimer", "treat alzheimer"
             ])

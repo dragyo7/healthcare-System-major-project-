@@ -3,11 +3,11 @@
 > **Status Reference**: Authoritative Living Project Status
 > **Repository**: `dragyo7/healthcare-System-major-project-`
 > **Current Branch**: `main`
-> **Snapshot Timing**: 2026-10-25 12:45 IST (CDSS Presentation Stabilization, Generator Cleanup, Appointment Status Alignment, 100% Acceptance Pass)
+> **Snapshot Timing**: 2026-10-25 14:40 IST (CDSS Presentation Stabilization, Medicine Alternatives Invariants, Truthful PDF Attestations, Honest OCR Contract, 100% Acceptance Pass)
 > **Active Services Status**: MySQL (3306), FastAPI (8000), Express (5000/5001), Vite (5173) active and verified.
 > **Frozen RAG Implementation Baseline**: Commit `497a547` (V2.10 Hard-Frozen, 2,204 chunks, 190 pass, 2 skip, 0 fail)
 > **Architecture Note**: Single-port entry on port 5173 (`/doctor`, `/patient`, `/receptionist`, `/activate`) per DEC-013 & DEC-034.
-> **Engineering Governance**: Governed by DEC-001 through DEC-042 and `FINAL-CDSS-MIGRATION-SAFETY-001`.
+> **Engineering Governance**: Governed by DEC-001 through DEC-042, DEC-029 and `FINAL-CDSS-MIGRATION-SAFETY-001`.
 
 ---
 

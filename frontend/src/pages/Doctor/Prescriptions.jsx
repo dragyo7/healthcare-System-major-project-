@@ -221,24 +221,35 @@ export default function DoctorPrescriptions() {
 
   // Replace interacting medicine with verified candidate alternative
   const handleApplyAlternative = (originalDrug, candidateDrug) => {
+    let matchFound = false;
     const updated = medicines.map((m) => {
       const currentLower = m.medicine_name.toLowerCase().trim();
-      const origLower = originalDrug.toLowerCase().trim();
-      if (currentLower === origLower || currentLower.includes(origLower) || origLower.includes(currentLower)) {
+      const origLower = (originalDrug || "").toLowerCase().trim();
+      if (currentLower === origLower || (currentLower && origLower && (currentLower.includes(origLower) || origLower.includes(currentLower)))) {
+        matchFound = true;
         return {
           ...m,
           medicine_name: candidateDrug,
-          instructions: m.instructions ? `${m.instructions} (Replaced from ${originalDrug})` : `Alternative for ${originalDrug}`
+          dosage: "",
+          frequency: "",
+          duration: "",
+          instructions: `Alternative for ${originalDrug}. Please enter confirmed dosage, frequency and duration.`
         };
       }
       return m;
     });
 
+    if (!matchFound) {
+      setError(`Cannot replace '${originalDrug}' from this form: it is an existing medication in the patient's record, not an editable item in this new prescription.`);
+      setIsSafetyModalOpen(false);
+      return;
+    }
+
     setMedicines(updated);
     setIsSafetyModalOpen(false);
     setSafetyPassed(false);
     setStaleAnalysis(true);
-    setSuccessMessage(`Applied evidence-backed alternative '${candidateDrug}' for '${originalDrug}'. Please run safety analysis to verify updated regimen.`);
+    setSuccessMessage(`Applied candidate alternative '${candidateDrug}' for '${originalDrug}'. Previous dosage, frequency, and duration have been cleared. Please enter the new dosing regimen and re-run safety screening before saving.`);
   };
 
   // Clinician confirms and acknowledges safety findings from modal

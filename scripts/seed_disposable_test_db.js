@@ -151,7 +151,7 @@ async function main() {
                 (2, 1, 1, '2026-09-28', '11:00:00', '11:30:00', 'Follow-up consultation', 'completed'),
                 (3, 1, 1, '2026-09-27', '08:00:00', '09:00:00', 'Regular consultation', 'completed'),
                 (4, 1, 1, '2026-09-29', '11:00:00', '11:30:00', NULL, 'scheduled'),
-                (5, 1, 2, '2026-09-29', '11:00:00', '11:30:00', 'Diabetes follow-up consultation', 'cancelled'),
+                (5, 1, 2, '2026-09-29', '11:00:00', '11:30:00', 'Diabetes follow-up consultation', 'scheduled'),
                 (6, 1, 1, '2026-10-02', '14:00:00', '14:30:00', 'checkup', 'completed');
         `);
 

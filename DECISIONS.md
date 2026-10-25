@@ -1002,4 +1002,45 @@
   - All 4 frontends compile with 0 errors.
   - Primary database `rag_healthcare`: 100% UNTOUCHED.
 
+---
+
+### DEC-029 — Presentation Stabilization: Medicine Alternatives Invariants, Truthful Prescription PDF Badges, Honest OCR Contract, and Patient-Aware Context Isolation
+- **Date**: 2026-10-25
+- **Status**: **Accepted & Binding**
+- **Context**: During post-compaction stabilization testing, 5 specific architectural and safety integrity findings were resolved:
+  1. *Medicine Alternatives*: Engine previously fell back to replacing an unrelated proposed medication when the interacting target was an existing baseline EHR medication, which corrupted clinician intent. Furthermore, candidate alternatives lacked explicit therapeutic intent caveats, eligibility precautions, and evidence qualification, and applying a candidate preserved stale dosage/frequency/duration fields.
+  2. *Prescription PDF Truthfulness*: Prescription PDF service contained ungrounded ISO 9001 and digital-signature attestations, and displayed a static green checkmark badge even when prescriptions were issued under clinician DDI overrides.
+  3. *OCR Acceptance Honesty*: Acceptance test TC-19 previously had a hardcoded manual fallback array `['Lipitor 20mg', 'Biaxin 500mg']` on missing files, violating zero-fabrication testing principles.
+  4. *RAG Response Relevance*: Single-drug adverse effect queries (e.g. `What are the serious adverse effects and warnings associated with Atorvastatin?`) were being hijacked by `is_coprescribe_query` in `orchestrator.py` because of a loose substring match for `"with"`, overwriting DailyMed monograph responses with background DDI alert text.
+  5. *Patient Directory, Dossier & Context-Aware CDS*: Switching patients in the Doctor CDS view previously preserved stale response state, and questions regarding unprescribed discharge directives required strict provenance-grounded notifications rather than ambiguous generic advice.
+- **Decision**:
+  1. **Strict Medicine Alternatives Replacement Invariant (`drug_module/alternative_engine.py`)**:
+     - Excised fallback lines that replaced unrelated proposed drugs. Added `is_editable_proposed` and `target_is_existing_med` flags.
+     - Enriched alternative candidate payload with:
+       * `unsupported_intent_caveat`: Explicit notice that candidate is not universally interchangeable and requires clinical review for the specific indication.
+       * `eligibility_precautions`: Documented contraindications (e.g., QT prolongation, hepatic impairment for Azithromycin).
+       * `safety_qualification`: Strict evidence qualification stating candidate avoids the specific CYP3A4 interaction rule without guaranteeing zero interaction risk.
+     - In `frontend/src/pages/Doctor/Prescriptions.jsx` and `SafetyAnalysisModal.jsx`: Applying an alternative now atomically resets `dosage: ""`, `frequency: ""`, `duration: ""`, sets `safetyPassed: false`, `staleAnalysis: true`, and requires fresh screening before persistence. Baseline EHR medications cannot be replaced from the prescription form.
+  2. **Prescription PDF Evidence & Attestation Alignment (`prescriptionPdfService.js`)**:
+     - Excised unsupported `"ISO 9001:2015 Certified EHR"` and `"DIGITALLY CONFIRMED AND AUTHORIZED BY LICENSED PHYSICIAN"`.
+     - Replaced with truthful header `"Clinical Intelligence & Decision Support Center • Academic Clinical Decision Support Prototype"` and footer `"Clinician Authorization: Reviewed and electronically ordered by attending clinician"`.
+     - Dynamically derives safety badge from `prescription.notes`:
+       * If notes contain `[CLINICIAN OVERRIDE: ...]`, renders amber badge: `"Deterministic DDI Screen: INTERACTION DETECTED — CLINICIAN OVERRIDE RECORDED"`.
+       * If no interaction rule triggered, renders green badge: `"Deterministic DDI Screen: PASSED — NO MATCHING LOCAL INTERACTION RULES"`.
+       * Table duration and clinician directives are verified in lockstep (no duration contradictions).
+  3. **Honest OCR Testing & Parity Contract (`scratch/run_live_acceptance_suite_24.js:TC-19`)**:
+     - Excised fake manual fallback `['Lipitor 20mg', 'Biaxin 500mg']`. Missing fixture or failed extraction directly fails the test.
+     - Confirmed genuine multipart upload of `synthetic_prescription_test.png`, offline Tesseract OCR extraction (`Amlodipine 5mg`, `Atorvastatin 20mg`), mandatory clinician review invariant, and identical deterministic screening parity with direct manual entry.
+  4. **Adverse Effect / Monograph Query Protection (`cds_module/orchestrator.py`)**:
+     - Introduced `is_monograph_or_adverse_query` regex guard in `_evaluate_doctor_query`. Monograph inquiries (`adverse effect`, `side effect`, `warning`, `indication`, `dosage`) preserve DailyMed hybrid retrieval and verifier pipeline execution, while background DDI alerts remain populated in the structured `drug_interactions` array without hijacking the narrative answer.
+  5. **Context Isolation on Patient Switch (`frontend/src/pages/Doctor/CDS.jsx`)**:
+     - Added atomic reset on patient dropdown change: `setResponse(null)`, `setError("")`, `setClinicalQuery("")`, `setCandidateMeds("")`, `setPatientDossier(null)`.
+     - Updated demo fixtures so Doctor 1 has authorized relationships with Patient 1 (`Aarav Patil`, active discharge record, Penicillin allergy) and Patient 2 (`Ananya Deshmukh`, no discharge record, Sulfa allergy). Queries for absent discharge directives return honest, grounded disclosure that no discharge record exists.
+- **Verification Evidence**:
+  - Full Live Acceptance Suite (`scratch/run_live_acceptance_suite_24.js`): **25 / 25 Passed (100%)**.
+  - Synthetic Browser Journey (Doctor & Patient): Complete end-to-end journey executed with `browser_subagent` (DDI detection -> qualified alternative -> regimen reset -> new regimen -> rescreen -> persistence -> patient login -> truthful PDF download).
+  - PDF Decompressed Byte Verification (`scratch/inspect_downloaded_pdf.py`): Verified exact inflated text streams in `downloaded_prescription_59.pdf` (zero ISO 9001 claims, truthful academic prototype header, dynamic clinician override DDI badge, 500mg OD 5 days alignment).
+  - Primary database `rag_healthcare`: 100% UNTOUCHED (verified against `rag_healthcare_test`).
+
+
 

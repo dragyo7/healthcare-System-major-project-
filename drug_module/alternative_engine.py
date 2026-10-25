@@ -103,18 +103,25 @@ def find_candidate_alternatives(
                 if target_ingredient in [i.lower() for i in ingredients]:
                     matching_proposed.append(prop)
 
-            # If none of the proposed contains target ingredient (e.g. target is existing, other is proposed)
-            # check if other proposed drug can be replaced
-            if not matching_proposed:
-                pair = entry.get("interacting_pair", [])
-                other_ing = [x for x in pair if x != target_ingredient]
-                if other_ing:
-                    for prop in proposed_medications:
-                        ingredients = decompose_medication(prop)
-                        if other_ing[0] in [i.lower() for i in ingredients]:
-                            matching_proposed.append(prop)
+            is_editable_proposed = bool(matching_proposed)
 
-            original_drug_display = matching_proposed[0] if matching_proposed else target_ingredient.capitalize()
+            # If target ingredient is NOT in proposed_medications, check if it is an existing active medication
+            if not matching_proposed:
+                matching_active = []
+                for act in active_medications:
+                    ingredients = decompose_medication(act)
+                    if target_ingredient in [i.lower() for i in ingredients]:
+                        matching_active.append(act)
+                
+                if matching_active:
+                    # Target is an existing baseline EHR medication; do NOT silently replace an unrelated proposed drug!
+                    original_drug_display = matching_active[0]
+                else:
+                    # Target not present in either proposed or active regimen; skip entry
+                    continue
+            else:
+                original_drug_display = matching_proposed[0]
+
             unique_key = f"{original_drug_display.lower()}->{cand_name}"
             if unique_key in seen_candidate_keys:
                 continue
@@ -160,10 +167,14 @@ def find_candidate_alternatives(
                 "original_drug": original_drug_display,
                 "candidate_name": cand_name.capitalize(),
                 "candidate_drug": cand_name.capitalize(),
+                "is_editable_proposed": is_editable_proposed,
+                "target_is_existing_med": not is_editable_proposed,
+                "replacement_notice": None if is_editable_proposed else f"'{original_drug_display}' is an existing baseline medication in the patient's EHR profile and cannot be replaced from this prescription form.",
                 "brand_examples": candidate_info.get("brand_examples", []),
                 "therapeutic_intent": candidate_info.get("supported_therapeutic_intent", ""),
-                "unsupported_intent_caveat": candidate_info.get("unsupported_intent_caveat", ""),
+                "unsupported_intent_caveat": candidate_info.get("unsupported_intent_caveat", "Clinician must evaluate patient-specific indication and clinical appropriateness."),
                 "clinical_eligibility": candidate_info.get("clinical_eligibility", {}),
+                "eligibility_precautions": candidate_info.get("clinical_eligibility", {}).get("precautions", []),
                 "rationale": f"DailyMed guidance: {evidence.get('verbatim_passage', '')}",
                 "clinical_rationale": f"DailyMed guidance: {evidence.get('verbatim_passage', '')}",
                 "evidence_source": f"{evidence.get('source_id', 'DailyMed')} ({rule_id})",
@@ -172,7 +183,8 @@ def find_candidate_alternatives(
                 "verbatim_passage": evidence.get("verbatim_passage", ""),
                 "recommendation_type": "INVESTIGATIONAL_CANDIDATE_FOR_CLINICIAN_REVIEW",
                 "clinician_action_required": True,
-                "status": "EVIDENCE_BACKED_CANDIDATE"
+                "status": "EVIDENCE_BACKED_CANDIDATE",
+                "safety_qualification": "Candidate alternative for clinician evaluation. Not universally safe. Clinician must assess organ function, indication, and enter new dosing regimen."
             })
 
     return recommendations

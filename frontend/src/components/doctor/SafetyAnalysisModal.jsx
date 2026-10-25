@@ -343,58 +343,98 @@ export default function SafetyAnalysisModal({
               </div>
 
               <div className="grid grid-cols-1 gap-3">
-                {candidate_alternatives.map((alt, idx) => (
-                  <div
-                    key={idx}
-                    className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-indigo-100 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
-                  >
-                    <div className="space-y-1 text-xs">
-                      <div className="flex items-center gap-2">
-                        <span className="text-slate-500 line-through font-medium">{alt.original_drug}</span>
-                        <ArrowRight className="w-3.5 h-3.5 text-indigo-500" />
-                        <span className="font-bold text-sm text-indigo-700 dark:text-indigo-300 flex items-center gap-1">
-                          <Pill className="w-3.5 h-3.5" />
-                          {alt.candidate_drug}
-                        </span>
-                        {alt.brand_examples && alt.brand_examples.length > 0 && (
-                          <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                            ({alt.brand_examples.slice(0, 3).join(", ")})
+                {candidate_alternatives.map((alt, idx) => {
+                  const isExistingBaseline = alt.target_is_existing_med || alt.is_editable_proposed === false;
+                  return (
+                    <div
+                      key={idx}
+                      className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-indigo-100 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3"
+                    >
+                      <div className="space-y-1.5 text-xs flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-slate-500 line-through font-medium">{alt.original_drug}</span>
+                          <ArrowRight className="w-3.5 h-3.5 text-indigo-500" />
+                          <span className="font-bold text-sm text-indigo-700 dark:text-indigo-300 flex items-center gap-1">
+                            <Pill className="w-3.5 h-3.5" />
+                            {alt.candidate_drug}
                           </span>
+                          {alt.brand_examples && alt.brand_examples.length > 0 && (
+                            <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                              ({alt.brand_examples.slice(0, 3).join(", ")})
+                            </span>
+                          )}
+                          {isExistingBaseline && (
+                            <span className="text-[10px] font-semibold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/60 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-800">
+                              {t("Existing EHR Medication") || "Existing EHR Baseline Medication"}
+                            </span>
+                          )}
+                        </div>
+
+                        <p className="text-slate-700 dark:text-slate-300 font-medium">
+                          <span className="text-slate-500">{t("Therapeutic Goal") || "Goal"}: </span>
+                          {alt.therapeutic_intent}
+                        </p>
+
+                        {alt.unsupported_intent_caveat && (
+                          <p className="text-[11px] text-amber-700 dark:text-amber-400 font-medium">
+                            <span className="font-semibold">{t("Intent Limitation") || "Limitation"}: </span>
+                            {alt.unsupported_intent_caveat}
+                          </p>
                         )}
+
+                        {alt.eligibility_precautions && alt.eligibility_precautions.length > 0 && (
+                          <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">{t("Eligibility Precautions") || "Precautions"}: </span>
+                            {alt.eligibility_precautions.join("; ")}
+                          </p>
+                        )}
+
+                        <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
+                          {alt.clinical_rationale}
+                        </p>
+
+                        <div className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-[10.5px] text-slate-600 dark:text-slate-300">
+                          <span className="font-semibold text-indigo-700 dark:text-indigo-300">{t("Evidence Qualification") || "Qualification"}: </span>
+                          <span>{alt.safety_qualification || "Candidate for clinician review — not universally safe. Clinician must assess organ function, indication, and enter new dosing regimen."}</span>
+                        </div>
+
+                        <div className="flex items-center gap-2 pt-1 text-[10px] text-slate-400">
+                          <span>{t("Source") || "Source"}: {alt.evidence_source}</span>
+                          {alt.source_url && (
+                            <a
+                              href={alt.source_url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-0.5"
+                            >
+                              <span>DailyMed</span>
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </a>
+                          )}
+                        </div>
                       </div>
-                      <p className="text-slate-700 dark:text-slate-300 font-medium">
-                        <span className="text-slate-500">{t("Therapeutic Goal") || "Goal"}: </span>
-                        {alt.therapeutic_intent}
-                      </p>
-                      <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
-                        {alt.clinical_rationale}
-                      </p>
-                      <div className="flex items-center gap-2 pt-1 text-[10px] text-slate-400">
-                        <span>{t("Source") || "Source"}: {alt.evidence_source}</span>
-                        {alt.source_url && (
-                          <a
-                            href={alt.source_url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-0.5"
+
+                      <div className="shrink-0 pt-1">
+                        {isExistingBaseline ? (
+                          <div className="max-w-[200px] text-right">
+                            <span className="inline-block text-[11px] text-slate-500 dark:text-slate-400 italic bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">
+                              {t("Cannot replace existing EHR baseline medication from prescription form") || "Cannot substitute baseline EHR med from Rx form"}
+                            </span>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => onApplyAlternative(alt.original_drug, alt.candidate_drug)}
+                            className="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs flex items-center justify-center gap-1.5 shadow-sm transition-colors"
                           >
-                            <span>DailyMed</span>
-                            <ExternalLink className="w-2.5 h-2.5" />
-                          </a>
+                            <RefreshCw className="w-3.5 h-3.5" />
+                            <span>{t("Apply Candidate (Clears Regimen)") || "Apply Candidate"}</span>
+                          </button>
                         )}
                       </div>
                     </div>
-
-                    <button
-                      type="button"
-                      onClick={() => onApplyAlternative(alt.original_drug, alt.candidate_drug)}
-                      className="shrink-0 px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs flex items-center justify-center gap-1.5 shadow-sm transition-colors"
-                    >
-                      <RefreshCw className="w-3.5 h-3.5" />
-                      <span>{t("Apply Alternative") || "Apply Candidate"}</span>
-                    </button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

@@ -74,6 +74,14 @@ export default function DoctorCDS() {
   // Load patient dossier whenever selectedPatientId changes
   useEffect(() => {
     if (!selectedPatientId) return;
+
+    // Isolate context: switching patients clears previous chat and in-flight responses
+    setResponse(null);
+    setError("");
+    setClinicalQuery("");
+    setCandidateMeds("");
+    setPatientDossier(null);
+
     async function loadDossier() {
       try {
         const details = await doctorApi.getPatientDetails(selectedPatientId);
