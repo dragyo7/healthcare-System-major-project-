@@ -822,5 +822,40 @@ ag_healthcare 100% UNTOUCHED (176 users, 15 doctors).
   - Visual inspection of rendered PDF bytes (`scratch/inspect_downloaded_pdf.py`): Verified exact inflated text streams in `downloaded_prescription_59.pdf` (zero ISO 9001 claims, truthful academic prototype header, dynamic clinician override DDI badge, 500mg OD 5 days alignment).
   - Primary database `rag_healthcare`: 100% UNTOUCHED (verified against `rag_healthcare_test`).
 
+---
+
+- **Change ID**: `CDSS-PRESENTATION-STABILIZATION-005` (DEC-030: Synthea FHIR R4 Presentation Cohort Ingestion, Historical Context Time Policy, and Truthful Patient Context Integration)
+- **Problem Being Solved**:
+  1. *Presentation Dataset Integration*: Needed an authorized, high-yield demonstration cohort of 4-6 synthetic patients from external Synthea FHIR R4 bundles representing distinct clinical challenges (chronic illness, documented allergies, multiple medications, completed encounters, and honest missing discharge information).
+  2. *Patient Switching & In-Flight Race Conditions*: If a doctor triggered CDS evaluation and switched patients while the RAG inference request was in-flight, the asynchronous completion could overwrite the newly selected patient's screen with the old patient's response.
+  3. *Doctor CDS Discharge Grounding*: Doctor CDS evaluation path (`evaluateDoctorCDS`) did not retrieve the patient's `discharges` table records, unlike `patientController.js`, preventing doctors from querying the patient's discharge plan in the assistant.
+  4. *Truthful Time Policy & Provenance*: Synthea records originate from 2021 and lifespan historical dates. Need an explicit demo time policy that retains original dates in provenance while clamping MySQL `TIMESTAMP` columns safely without inventing modern clinical dates.
+- **Execution Path**:
+  1. `scratch/import_synthea_cohort.py`: Standalone, idempotent FHIR R4 bundle importer.
+     - Parses 5 selected bundles: Terrilyn Murphy (Patient 149, Aspirin allergy, HTN, Diabetes, no discharge), Trinh Sanford (Patient 150, Penicillin allergy, demo care plan), Brain Wuckert (Patient 151, Sulfa allergy, Clopidogrel), Jospeh Gerhold (Patient 152, Warfarin, Digoxin, Verapamil, Lisinopril, zero allergies), Chauncey Jones (Patient 153, Metformin, Lisinopril, Amlodipine).
+     - Standardized MySQL timestamp handling (`format_safe_timestamp`).
+     - Establishes completed appointments with Doctor 1 (`Dr. Rahul Sharma`), providing legitimate server-side RBAC authorization.
+     - Preserves clean null / absent discharge records for 4 patients (guaranteeing honest abstention) and 1 labeled demo care plan for Trinh Sanford.
+     - Emits `audit_evidence/synthea_cohort_manifest.json` with source archive SHA256 (`6d3c5433bcae4791bc5c30469d1445b430fb4894d5c13bda15fee0584bbd7778`).
+  2. `scratch/cleanup_synthea_cohort.py`: Scoped cleanup script that removes only `synthea.%@demo.local` accounts and their child records.
+  3. `frontend/src/pages/Doctor/CDS.jsx`: Added `activePatientIdRef` and `activeRequestIdRef`. If active patient changes before an in-flight evaluation or dossier fetch resolves, the stale response is discarded and ignored.
+  4. `Portal Major P/Bhumi/Doctor portal/backend/src/controllers/doctorController.js`: Added `discharges` lookup in `evaluateDoctorCDS` and forwarded `discharge` context into `rawData` and `sanitizePatientContext`.
+- **Post-Change Verification**:
+  - `python scratch/import_synthea_cohort.py --live`: 5 patients transactionally inserted with exact clinical provenance.
+  - `python scratch/verify_synthea_import.py`: 5/5 patients verified in database.
+  - All 9 Bounded Acceptance Scenarios Verified:
+    * A. Doctor directory -> correct dossier -> patient-specific CDS answer.
+    * B. Switch patients while request pending -> stale response discarded cleanly.
+    * C. Same query asked for both patients -> reflects distinct individual records.
+    * D. Explain saved discharge plan for Trinh Sanford -> cites Lisinopril 10mg Once daily and emergency warning signs.
+    * E. Ask Terrilyn Murphy (no discharge record) -> honest abstention (`abstained_policy`), zero invented instructions.
+    * F. Screen supported allergy scenario -> Terrilyn Murphy + proposed Aspirin flags Critical Allergy Contraindication.
+    * G. Save clinician-reviewed prescription (Chauncey Jones Rx #66) -> patient downloads own PDF (3,050 bytes).
+    * H. Reject cross-patient unauthorized access -> Chauncey Jones downloading Trinh Sanford's PDF rejected with HTTP 403 Forbidden.
+    * I. Regional language query in Hindi -> Lisinopril dose and directives preserved in Hindi.
+  - Frontend production build (`npm run build`): 0 errors across 2,253 modules.
+  - Primary database `rag_healthcare`: 100% UNTOUCHED.
+
+
 
 

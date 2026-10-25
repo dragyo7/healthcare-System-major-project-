@@ -2,12 +2,12 @@
 
 > **Status Reference**: Authoritative Living Project Status
 > **Repository**: `dragyo7/healthcare-System-major-project-`
-> **Current Branch**: `main`
-> **Snapshot Timing**: 2026-10-25 14:40 IST (CDSS Presentation Stabilization, Medicine Alternatives Invariants, Truthful PDF Attestations, Honest OCR Contract, 100% Acceptance Pass)
+> **Current Branch**: `codex/presentation-stabilization` (Baseline: `main`)
+> **Snapshot Timing**: 2026-10-25 15:30 IST (Synthea FHIR R4 Presentation Cohort Ingestion, Context Isolation Fix, Grounded Discharge Integration, DEC-030 Verified)
 > **Active Services Status**: MySQL (3306), FastAPI (8000), Express (5000/5001), Vite (5173) active and verified.
 > **Frozen RAG Implementation Baseline**: Commit `497a547` (V2.10 Hard-Frozen, 2,204 chunks, 190 pass, 2 skip, 0 fail)
 > **Architecture Note**: Single-port entry on port 5173 (`/doctor`, `/patient`, `/receptionist`, `/activate`) per DEC-013 & DEC-034.
-> **Engineering Governance**: Governed by DEC-001 through DEC-042, DEC-029 and `FINAL-CDSS-MIGRATION-SAFETY-001`.
+> **Engineering Governance**: Governed by DEC-001 through DEC-042, DEC-030, DEC-029 and `FINAL-CDSS-MIGRATION-SAFETY-001`.
 
 ---
 
@@ -74,6 +74,9 @@
 | `node scratch/test_priority4_patient_semantics.js` | Priority 4: Unknown Clinical Data Semantics (No Synthetic Defaults) | **10 / 10** | `0` | Missing DOB/Blood/Allergies stored as raw NULLs (not '1990-01-01', 'O+', 'None'), zero context pollution |
 | `node scratch/test_priority5_dashboard_metrics.js` | Priority 5: Doctor Dashboard Metrics & Authorization Scope | **8 / 8** | `0` | Active consultations, pending follow-ups, 30-day active meds, authorized patient counts, BOLA rejection |
 | `browser_subagent` (Live E2E Multi-Role Journey) | Real Browser Journey: Doctor Allergy Hard Stop + DDI Override -> Patient Discharge Diet Grounding & EMS Triage -> Receptionist Confirmation | **6 / 6 journeys** | `0` | Live browser journey executed and visually attested in `audit_evidence/live_acceptance_repair_20261025/` (DEC-041) |
+| `python scratch/import_synthea_cohort.py --live` | Synthea FHIR R4 Presentation Cohort Import (5 patients, 25 conditions, 29 meds, 5 appts, 1 demo discharge) | **5 / 5 patients** | `0` | Idempotent, dry-run verified, MySQL `rag_healthcare_test` transaction, SHA256 manifest recorded (DEC-030) |
+| `python scratch/verify_synthea_import.py` | Synthea E2E Verification Suite (Dossier, Allergy Block, DDI Screening, Post-Discharge CDS, Honest Abstention, Hindi Grounding, RBAC) | **7 / 7 verified** | `0` | 100% pass across Doctor CDS, Patient Chat, Allergy contraindication, DrugBank rules, honest absence, Indic translation |
+| `browser_subagent` (Synthea Acceptance Session) | Real Browser Acceptance Session: Doctor Dossier -> Allergy Block -> Patient Discharge Chat -> Stale In-flight Isolation | **Pass (100%)** | `0` | Visual recording attested in `synthea_presentation_acceptance_1792921923858.webp` |
 | **Consolidated Gate Regression Suite** | Multi-suite integration regression against `rag_healthcare_test` | **388 cases / 401 assertions** | `0` | **386 PASSED, 2 FAILED (TC-02/TC-05 fail-closed capacity limits), 0 SKIPPED** across all verified suites |
 
 ---

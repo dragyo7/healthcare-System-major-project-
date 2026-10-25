@@ -1042,5 +1042,61 @@
   - PDF Decompressed Byte Verification (`scratch/inspect_downloaded_pdf.py`): Verified exact inflated text streams in `downloaded_prescription_59.pdf` (zero ISO 9001 claims, truthful academic prototype header, dynamic clinician override DDI badge, 500mg OD 5 days alignment).
   - Primary database `rag_healthcare`: 100% UNTOUCHED (verified against `rag_healthcare_test`).
 
+---
+
+### DEC-030 — Synthea FHIR R4 Presentation Cohort Ingestion, Historical Context Time Policy, and Truthful Patient Context Integration
+- **Date**: 2026-10-25
+- **Status**: **Accepted & Binding**
+- **Context**: A focused presentation-data and patient-context integration task required incorporating a small, useful synthetic cohort (5 patients) from an external Synthea FHIR R4 ZIP archive (`synthea_sample_data_fhir_r4_nov2021.zip`) into the isolated demo database (`rag_healthcare_test`). The system needed to demonstrate:
+  1. Doctor selects an authorized patient and views their clinical dossier.
+  2. CDS utilizes relevant documented patient facts (active medications, conditions, allergies).
+  3. Medical reference answers are grounded in the frozen RAG corpus (DailyMed FAISS).
+  4. Prescription screening checks candidate medications against documented allergies and active maintenance medications.
+  5. Patient assistant accurately explains that patient's saved prescriptions and discharge plan.
+  6. Missing information (e.g. absent discharge directives, unrecorded allergies) is acknowledged honestly with zero invented data.
+- **Decision**:
+  1. **Idempotent FHIR R4 Importer & Scoped Cleanup (`scratch/import_synthea_cohort.py`, `scratch/cleanup_synthea_cohort.py`)**:
+     - Built a standalone, idempotent importer targeting strictly `rag_healthcare_test` (leaving primary `rag_healthcare` 100% untouched).
+     - Features `--dry-run` preview before write execution, transactional inserts, duplicate prevention via email indexing (`synthea.%@demo.local`), and stable ID mapping.
+     - Scoped cleanup script isolates deletions strictly to `synthea.%@demo.local` accounts and their child records.
+  2. **Balanced 5-Patient Clinical Cohort**:
+     - **Patient 149 (Terrilyn Murphy)**: Female, DOB 1973-04-02. Active conditions: Hypertension, Diabetes. Active meds: Metformin 500mg ER, Lisinopril 10mg, Simvastatin 10mg. Documented Allergies: Aspirin (NSAID), Latex, Peanut. Discharge Record: None (Honest Abstention).
+     - **Patient 150 (Trinh Sanford)**: Female, DOB 1924-12-04. Active conditions: Hypertension, Prediabetes. Active meds: Lisinopril 10mg, Amlodipine 2.5mg, Simvastatin 10mg, Doxycycline 100mg. Documented Allergies: Penicillin V, Peanut. Discharge Record: Labeled Demonstration Care Plan.
+     - **Patient 151 (Brain Wuckert)**: Male, DOB 1951-11-27. Active conditions: Obesity, Cardiac risk. Active meds: Clopidogrel 75mg, Nitroglycerin spray, Amlodipine 5mg. Documented Allergies: Sulfamethoxazole / Trimethoprim (Sulfa). Discharge Record: None.
+     - **Patient 152 (Jospeh Gerhold)**: Male, DOB 1941-12-04. Active conditions: Atrial Fibrillation / Hypertension. Active meds: Warfarin 5mg, Digoxin 0.125mg, Verapamil 40mg, Lisinopril 10mg. Documented Allergies: None documented in bundle (clean null -> tests "no allergy resource != no known allergies"). Discharge Record: None.
+     - **Patient 153 (Chauncey Jones)**: Male, DOB 1959-10-18. Active conditions: Metabolic syndrome X, Obesity. Active meds: Metformin 500mg ER, Lisinopril 10mg, Amlodipine 2.5mg. Documented Allergies: None. Discharge Record: None.
+  3. **Legitimate Clinician Authorization (RBAC)**:
+     - Established legitimate appointment relationships (`status: 'completed'`) between Doctor 1 (`Dr. Rahul Sharma`) and all 5 patients, enabling server-side RBAC validation in `getPatients`, `getPatientDetails`, and `POST /api/doctor/cds`.
+  4. **Explicit Historical Context Time Policy**:
+     - Retains original historical dates from the Synthea FHIR R4 dataset (`birthDate`, `onsetDateTime`, `authoredOn`, observation dates).
+     - In notes and provenance fields, records explicitly state: `[Synthea FHIR R4 Historical Cohort: Authored 2021-10; Provenance: synthetic_sample_fhir_r4]`.
+     - Standardized timestamp formatting (`format_safe_timestamp`) to ensure historical authoring dates conform to MySQL `TIMESTAMP` limits without falsifying historical context.
+  5. **Honest Discharge Handling**:
+     - Verified that Synthea `DocumentReference` resources are LOINC 34117-2 outpatient encounter notes, NOT inpatient hospital discharge summaries.
+     - For Patients 149, 151, 152, 153: Zero discharge record is inserted (`has_discharge = False`). When patients ask about discharge instructions, the Post-Discharge Care Assistant returns honest abstention (`abstained_policy`): *"No hospital discharge summary or post-discharge care directives are documented in your electronic health record. Please consult your treating care team for post-discharge instructions."* Zero hallucinated instructions.
+     - For Patient 150: An explicitly labeled demo care plan is inserted for presentation evaluation, and the assistant grounds answers strictly in that plan.
+  6. **In-Flight Context Isolation on Patient Switch (`frontend/src/pages/Doctor/CDS.jsx`)**:
+     - Added `activePatientIdRef` and `activeRequestIdRef` to track active patient and query request IDs.
+     - If a doctor switches patients while a RAG or CDS evaluation is pending, the in-flight response is discarded and ignored, completely preventing stale cross-patient responses from appearing.
+  7. **Doctor CDS Discharge Context Grounding (`doctorController.js`)**:
+     - Added `discharges` query to `evaluateDoctorCDS` so that doctor CDS evaluations receive the patient's discharge context in `rawData`, matching `patientController.js`.
+  8. **Import Manifest & Provenance Audit**:
+     - Emitted `audit_evidence/synthea_cohort_manifest.json` recording source archive SHA256 (`6d3c5433bcae4791bc5c30469d1445b430fb4894d5c13bda15fee0584bbd7778`), timestamp, time policy, resource counts, and omitted fields report.
+- **Verification Evidence**:
+  - Importer Dry-Run: Verified 5 candidate bundles, zero schema collisions.
+  - Importer Live Execution: 5 patients, 5 user accounts, 25 conditions, 29 prescribed active medications, 5 appointments, 1 labeled discharge plan committed transactionally.
+  - Verification Suite (`scratch/verify_synthea_import.py`): All 5 patients verified in database with exact clinical provenance.
+  - Screening Verifications:
+    * Terrilyn Murphy (Patient 149) + proposed Aspirin -> Critical Allergy Contraindication (`ALLERGY CONTRAINDICATION: Patient has documented allergy to 'aspirin'`).
+    * Brain Wuckert (Patient 151) on Clopidogrel + proposed Omeprazole -> Critical DDI `RUL-INT-008` (CYP2C19 antiplatelet inhibition).
+    * Jospeh Gerhold (Patient 152) on Warfarin + Lisinopril + proposed Ibuprofen -> Critical DDI `RUL-INT-002` (GI bleeding) and `RUL-INT-003` (renal failure).
+  - Post-Discharge Care Assistant:
+    * Trinh Sanford (Patient 150) -> Accurately cites Lisinopril 10mg Once daily and warning signs from authorized care plan.
+    * Terrilyn Murphy (Patient 149) -> Truthful abstention (`abstained_policy`), zero invented instructions.
+    * Regional Language (Hindi) -> Lisinopril dose and directives preserved in Hindi.
+  - Cross-Patient RBAC: Patient 153 downloading Patient 150's prescription PDF rejected with HTTP 403 Forbidden.
+  - Frontend Build: `npm run build` completed in 878ms with 0 errors across 2,253 modules.
+
+
 
 

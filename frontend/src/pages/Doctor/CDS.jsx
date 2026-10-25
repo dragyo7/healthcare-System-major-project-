@@ -71,6 +71,13 @@ export default function DoctorCDS() {
     init();
   }, [location]);
 
+  const activePatientIdRef = React.useRef(selectedPatientId);
+  const activeRequestIdRef = React.useRef(0);
+
+  useEffect(() => {
+    activePatientIdRef.current = selectedPatientId;
+  }, [selectedPatientId]);
+
   // Load patient dossier whenever selectedPatientId changes
   useEffect(() => {
     if (!selectedPatientId) return;
@@ -82,12 +89,17 @@ export default function DoctorCDS() {
     setCandidateMeds("");
     setPatientDossier(null);
 
+    const dossierTargetId = selectedPatientId;
     async function loadDossier() {
       try {
-        const details = await doctorApi.getPatientDetails(selectedPatientId);
-        setPatientDossier(details);
+        const details = await doctorApi.getPatientDetails(dossierTargetId);
+        if (activePatientIdRef.current === dossierTargetId) {
+          setPatientDossier(details);
+        }
       } catch (err) {
-        console.warn("Could not fetch dossier for CDS context:", err);
+        if (activePatientIdRef.current === dossierTargetId) {
+          console.warn("Could not fetch dossier for CDS context:", err);
+        }
       }
     }
     loadDossier();
@@ -100,6 +112,9 @@ export default function DoctorCDS() {
       return;
     }
 
+    const evalPatientId = selectedPatientId;
+    const reqId = ++activeRequestIdRef.current;
+
     setLoading(true);
     setError("");
     setResponse(null);
@@ -110,17 +125,27 @@ export default function DoctorCDS() {
         : [];
 
       const res = await doctorApi.evaluateCDS({
-        patientId: selectedPatientId,
+        patientId: evalPatientId,
         clinicalQuery: clinicalQuery.trim(),
         candidateMedications: candidateList,
         language,
       });
 
+      // Strict Invariant: Ignore stale in-flight response if patient switched or newer request fired
+      if (activePatientIdRef.current !== evalPatientId || activeRequestIdRef.current !== reqId) {
+        console.info(`[CDS Isolation] Discarded stale response for patient ${evalPatientId} (active patient is now ${activePatientIdRef.current})`);
+        return;
+      }
+
       setResponse(res);
     } catch (err) {
-      setError(err?.message || "Failed to evaluate clinical query through CDS gateway.");
+      if (activePatientIdRef.current === evalPatientId && activeRequestIdRef.current === reqId) {
+        setError(err?.message || "Failed to evaluate clinical query through CDS gateway.");
+      }
     } finally {
-      setLoading(false);
+      if (activePatientIdRef.current === evalPatientId && activeRequestIdRef.current === reqId) {
+        setLoading(false);
+      }
     }
   };
 

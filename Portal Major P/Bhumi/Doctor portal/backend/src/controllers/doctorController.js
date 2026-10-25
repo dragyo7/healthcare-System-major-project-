@@ -1849,12 +1849,23 @@ const evaluateDoctorCDS = async (req, res) => {
             [patient_id]
         );
 
+        const [discharges] = await db.execute(
+            `SELECT discharge_id, discharge_date, diagnosis, discharge_summary,
+                    discharge_instructions, follow_up_instructions, follow_up_date, warning_signs, status
+             FROM discharges
+             WHERE patient_id = ?
+             ORDER BY discharge_date DESC, discharge_id DESC
+             LIMIT 1`,
+            [patient_id]
+        );
+
         const rawData = {
             patient: patient[0],
             medical_history: medicalHistory,
             symptoms: symptoms,
             medical_reports: reports,
-            prescriptions: prescriptions
+            prescriptions: prescriptions,
+            discharge: discharges.length > 0 ? discharges[0] : null
         };
 
         // Sanitize patient context (Zero PII transmitted)
